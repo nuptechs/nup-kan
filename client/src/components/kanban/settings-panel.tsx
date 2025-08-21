@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Download, X, Columns, Users, Tags } from "lucide-react";
+import { Download, X, Columns, Users, Tags, Users2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ColumnManagementDialog } from "./column-management-dialog";
 import { UserManagementDialog } from "./user-management-dialog";
 import { TagManagementDialog } from "./tag-management-dialog";
+import { TeamManagementDialog } from "./team-management-dialog";
 import type { Column, TeamMember } from "@shared/schema";
 
 interface SettingsPanelProps {
@@ -163,6 +164,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 <Tags className="w-4 h-4 mr-2" />
                 Gerenciar Tags
               </Button>
+              <TeamManagementDialog />
             </div>
           </div>
 

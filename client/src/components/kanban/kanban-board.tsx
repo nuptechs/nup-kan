@@ -181,7 +181,7 @@ export function KanbanBoard() {
                 className="flex h-full p-6 space-x-6 min-w-max"
               >
                 {validColumns.map((column, index) => (
-                  <Draggable key={column.id} draggableId={column.id} index={index} type="COLUMN">
+                  <Draggable key={column.id} draggableId={column.id} index={index}>
                     {(columnProvided, columnSnapshot) => (
                       <div
                         ref={columnProvided.innerRef}

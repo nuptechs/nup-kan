@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertUserSchema, updateUserSchema } from "@shared/schema";
+import { insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
@@ -330,6 +330,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
+  // Team routes
+  app.get("/api/teams", async (req, res) => {
+    try {
+      const teams = await storage.getTeams();
+      res.json(teams);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch teams" });
+    }
+  });
+
+  app.get("/api/teams/:id", async (req, res) => {
+    try {
+      const team = await storage.getTeam(req.params.id);
+      if (!team) {
+        return res.status(404).json({ message: "Team not found" });
+      }
+      res.json(team);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch team" });
+    }
+  });
+
+  app.post("/api/teams", async (req, res) => {
+    try {
+      const teamData = insertTeamSchema.parse(req.body);
+      const team = await storage.createTeam(teamData);
+      res.status(201).json(team);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid team data" });
+    }
+  });
+
+  app.put("/api/teams/:id", async (req, res) => {
+    try {
+      const teamData = updateTeamSchema.parse(req.body);
+      const team = await storage.updateTeam(req.params.id, teamData);
+      res.json(team);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Team not found" });
+      }
+      res.status(400).json({ message: "Invalid team data" });
+    }
+  });
+
+  app.delete("/api/teams/:id", async (req, res) => {
+    try {
+      await storage.deleteTeam(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Team not found" });
+      }
+      res.status(500).json({ message: "Failed to delete team" });
     }
   });
 

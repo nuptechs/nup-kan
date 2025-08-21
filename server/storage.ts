@@ -1,6 +1,6 @@
-import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type User, type InsertUser, type UpdateUser } from "@shared/schema";
+import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser } from "@shared/schema";
 import { db } from "./db";
-import { tasks, columns, teamMembers, tags, users } from "@shared/schema";
+import { tasks, columns, teamMembers, tags, teams, users } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -31,6 +31,13 @@ export interface IStorage {
   createTag(tag: InsertTag): Promise<Tag>;
   updateTag(id: string, tag: Partial<Tag>): Promise<Tag>;
   deleteTag(id: string): Promise<void>;
+
+  // Teams
+  getTeams(): Promise<Team[]>;
+  getTeam(id: string): Promise<Team | undefined>;
+  createTeam(team: InsertTeam): Promise<Team>;
+  updateTeam(id: string, team: UpdateTeam): Promise<Team>;
+  deleteTeam(id: string): Promise<void>;
   
   // Users
   getUsers(): Promise<User[]>;
@@ -99,14 +106,53 @@ export class MemStorage implements IStorage {
     }
   }
 
+  // Teams methods for MemStorage
+  async getTeams(): Promise<Team[]> {
+    return [
+      { id: "team-1", name: "Desenvolvimento", description: "Equipe responsável pelo desenvolvimento", color: "#3b82f6", createdAt: new Date(), updatedAt: new Date() },
+      { id: "team-2", name: "Design", description: "Equipe de design e UX", color: "#8b5cf6", createdAt: new Date(), updatedAt: new Date() },
+      { id: "team-3", name: "Product", description: "Gestão de produto e estratégia", color: "#10b981", createdAt: new Date(), updatedAt: new Date() },
+    ];
+  }
+
+  async getTeam(id: string): Promise<Team | undefined> {
+    const teams = await this.getTeams();
+    return teams.find(team => team.id === id);
+  }
+
+  async createTeam(insertTeam: InsertTeam): Promise<Team> {
+    const team: Team = {
+      id: randomUUID(),
+      ...insertTeam,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    return team;
+  }
+
+  async updateTeam(id: string, updateData: UpdateTeam): Promise<Team> {
+    const existingTeam = await this.getTeam(id);
+    if (!existingTeam) {
+      throw new Error(`Team with id ${id} not found`);
+    }
+    return { ...existingTeam, ...updateData, updatedAt: new Date() };
+  }
+
+  async deleteTeam(id: string): Promise<void> {
+    const existingTeam = await this.getTeam(id);
+    if (!existingTeam) {
+      throw new Error(`Team with id ${id} not found`);
+    }
+  }
+
   // Users methods for MemStorage
   async getUsers(): Promise<User[]> {
     return [
-      { id: "1", name: "Ana Maria", email: "ana.maria@example.com", role: "Designer UX/UI", avatar: "AM", status: "online", createdAt: new Date(), updatedAt: new Date() },
-      { id: "2", name: "João Silva", email: "joao.silva@example.com", role: "Full Stack Developer", avatar: "JS", status: "busy", createdAt: new Date(), updatedAt: new Date() },
-      { id: "3", name: "Maria Costa", email: "maria.costa@example.com", role: "Product Manager", avatar: "MC", status: "online", createdAt: new Date(), updatedAt: new Date() },
-      { id: "4", name: "Rafael Santos", email: "rafael.santos@example.com", role: "Backend Developer", avatar: "RF", status: "offline", createdAt: new Date(), updatedAt: new Date() },
-      { id: "5", name: "Lucas Oliveira", email: "lucas.oliveira@example.com", role: "DevOps Engineer", avatar: "LC", status: "online", createdAt: new Date(), updatedAt: new Date() },
+      { id: "1", name: "Ana Maria", email: "ana.maria@example.com", role: "Designer UX/UI", avatar: "AM", status: "online", teamId: "team-2", createdAt: new Date(), updatedAt: new Date() },
+      { id: "2", name: "João Silva", email: "joao.silva@example.com", role: "Full Stack Developer", avatar: "JS", status: "busy", teamId: "team-1", createdAt: new Date(), updatedAt: new Date() },
+      { id: "3", name: "Maria Costa", email: "maria.costa@example.com", role: "Product Manager", avatar: "MC", status: "online", teamId: "team-3", createdAt: new Date(), updatedAt: new Date() },
+      { id: "4", name: "Rafael Santos", email: "rafael.santos@example.com", role: "Backend Developer", avatar: "RF", status: "offline", teamId: "team-1", createdAt: new Date(), updatedAt: new Date() },
+      { id: "5", name: "Lucas Oliveira", email: "lucas.oliveira@example.com", role: "DevOps Engineer", avatar: "LC", status: "online", teamId: "team-1", createdAt: new Date(), updatedAt: new Date() },
     ];
   }
 
