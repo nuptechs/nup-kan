@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautif
 import { KanbanColumn } from "./kanban-column";
 import { TaskDetailsDialog } from "./task-details-dialog";
 import { AddTaskDialog } from "./add-task-dialog";
+import { ColumnManagementDialog } from "./column-management-dialog";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Task, Column } from "@shared/schema";
@@ -12,6 +13,7 @@ export function KanbanBoard() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskDetailsOpen, setIsTaskDetailsOpen] = useState(false);
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+  const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -95,6 +97,10 @@ export function KanbanBoard() {
     setSelectedTask(null);
   };
 
+  const handleManageColumns = () => {
+    setIsColumnManagementOpen(true);
+  };
+
   if (tasksLoading || columnsLoading) {
     return (
       <div className="flex h-full">
@@ -121,12 +127,14 @@ export function KanbanBoard() {
     );
   }
 
+  const validColumns = columns.filter(column => column.id && column.id.trim() !== '');
+
   return (
     <div className="flex h-full" data-testid="kanban-board">
       <div className="flex-1 overflow-x-auto overflow-y-hidden">
         <DragDropContext onDragEnd={handleDragEnd}>
           <div className="flex h-full p-6 space-x-6 min-w-max">
-            {columns.map((column) => (
+            {validColumns.map((column) => (
               <Droppable key={column.id} droppableId={column.id}>
                 {(provided, snapshot) => (
                   <div
@@ -140,6 +148,7 @@ export function KanbanBoard() {
                       isDragOver={snapshot.isDraggingOver}
                       onTaskClick={handleTaskClick}
                       onAddTask={handleAddTask}
+                      onManageColumns={handleManageColumns}
                     />
                     {provided.placeholder}
                   </div>
@@ -161,6 +170,11 @@ export function KanbanBoard() {
       <AddTaskDialog
         isOpen={isAddTaskOpen}
         onClose={() => setIsAddTaskOpen(false)}
+      />
+      
+      <ColumnManagementDialog
+        isOpen={isColumnManagementOpen}
+        onClose={() => setIsColumnManagementOpen(false)}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 import { Draggable } from "react-beautiful-dnd";
 import { TaskCard } from "./task-card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Task, Column } from "@shared/schema";
 
@@ -11,6 +11,7 @@ interface KanbanColumnProps {
   isDragOver: boolean;
   onTaskClick?: (task: Task) => void;
   onAddTask?: () => void;
+  onManageColumns?: () => void;
 }
 
 const getColumnColorClasses = (color: string) => {
@@ -46,7 +47,7 @@ const getColumnCountClasses = (color: string) => {
   return colorMap[color as keyof typeof colorMap] || "bg-gray-100 text-gray-600";
 };
 
-export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask }: KanbanColumnProps) {
+export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask, onManageColumns }: KanbanColumnProps) {
   const wipProgress = column.wipLimit ? (tasks.length / column.wipLimit) * 100 : 0;
   const isWipExceeded = column.wipLimit && tasks.length >= column.wipLimit;
 
@@ -58,7 +59,18 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
       )}
       data-testid={`column-${column.id}`}
     >
-      <div className="p-4 border-b border-gray-100">
+      <div className="p-4 border-b border-gray-100 relative">
+        {/* Manage Columns Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onManageColumns}
+          className="absolute top-2 right-2 w-6 h-6 p-0 opacity-20 hover:opacity-80 transition-opacity duration-200"
+          data-testid={`button-manage-columns-${column.id}`}
+        >
+          <Plus className="w-3 h-3" />
+        </Button>
+
         <div className="flex items-center justify-between mb-2">
           <h2 className="font-semibold text-gray-900 flex items-center" data-testid={`column-title-${column.id}`}>
             <span className={cn("w-3 h-3 rounded-full mr-3", getColumnColorClasses(column.color))}></span>

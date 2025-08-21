@@ -119,6 +119,7 @@ export class MemStorage implements IStorage {
     const user: User = {
       id: randomUUID(),
       ...insertUser,
+      role: insertUser.role || null,
       avatar: insertUser.avatar || insertUser.name.split(' ').map(n => n[0]).join('').toUpperCase(),
       status: insertUser.status || "offline",
       createdAt: new Date(),
@@ -326,9 +327,11 @@ export class MemStorage implements IStorage {
   }
 
   async createColumn(insertColumn: InsertColumn): Promise<Column> {
+    const id = insertColumn.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     const column: Column = {
-      id: insertColumn.title.toLowerCase().replace(/\s+/g, '-'),
+      id: id || `column-${Date.now()}`,
       ...insertColumn,
+      wipLimit: insertColumn.wipLimit || null,
     };
     this.columns.set(column.id, column);
     return column;
@@ -466,9 +469,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createColumn(insertColumn: InsertColumn): Promise<Column> {
+    const id = insertColumn.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     const column: Column = {
-      id: insertColumn.title.toLowerCase().replace(/\s+/g, '-'),
+      id: id || `column-${Date.now()}`,
       ...insertColumn,
+      wipLimit: insertColumn.wipLimit || null,
     };
     const [newColumn] = await db
       .insert(columns)
