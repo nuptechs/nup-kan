@@ -1,0 +1,43 @@
+[vite] connecting...
+[vite] connected.
+Warning: Connect(Droppable): Support for defaultProps will be removed from memo components in a future major release. Use JavaScript default parameters instead.
+    at div
+    at Provider (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-beautiful-dnd.js?v=a9ede4c3:1738:20)
+    at App (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-beautiful-dnd.js?v=a9ede4c3:8281:25)
+    at ErrorBoundary2 (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-beautiful-dnd.js?v=a9ede4c3:2778:35)
+    at DragDropContext (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-beautiful-dnd.js?v=a9ede4c3:8401:19)
+    at div
+    at div
+    at KanbanBoard (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/src/components/kanban/kanban-board.tsx:28:43)
+    at main
+    at div
+    at KanbanPage (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/src/pages/kanban.tsx:26:47)
+    at Route (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a9ede4c3:323:16)
+    at Switch (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a9ede4c3:379:17)
+    at Router
+    at Provider (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=a9ede4c3:38:15)
+    at TooltipProvider (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=a9ede4c3:61:5)
+    at QueryClientProvider (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=a9ede4c3:2805:3)
+    at App
+at div
+at Provider (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-beautiful-dnd.js?v=a9ede4c3:1738:20)
+at App (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-beautiful-dnd.js?v=a9ede4c3:8281:25)
+at ErrorBoundary2 (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-beautiful-dnd.js?v=a9ede4c3:2778:35)
+at DragDropContext (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-beautiful-dnd.js?v=a9ede4c3:8401:19)
+at div
+at div
+at KanbanBoard (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/src/components/kanban/kanban-board.tsx:28:43)
+at main
+at div
+at KanbanPage (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/src/pages/kanban.tsx:26:47)
+at Route (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a9ede4c3:323:16)
+at Switch (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a9ede4c3:379:17)
+at Router
+at Provider (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=a9ede4c3:38:15)
+at TooltipProvider (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=a9ede4c3:61:5)
+at QueryClientProvider (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=a9ede4c3:2805:3)
+at App
+at t.value (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://b7d64729-93e4-487b-8545-5bcd4ef61f4f-00-3s14wt3llfljg.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
