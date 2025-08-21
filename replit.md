@@ -2,6 +2,13 @@
 
 This is a Kanban board application built with React and Express, featuring a modern task management interface with drag-and-drop functionality. The application allows users to organize tasks across different columns (Backlog, To Do, In Progress, Review, Done), manage team members, and track project analytics. It includes WIP (Work In Progress) limits, task assignments, progress tracking, and real-time updates. **The system now uses PostgreSQL for persistent data storage, ensuring all tasks and user data are saved permanently.**
 
+**Recent Updates (August 21, 2025):**
+- ✅ Sistema completo de gerenciamento de times implementado com CRUD total
+- ✅ API de teams totalmente funcional com PostgreSQL
+- ✅ Interface em português para criação, edição e exclusão de times
+- ✅ Correções de erros LSP e avisos de acessibilidade nos dialogs
+- ✅ Integração completa entre frontend e backend para todas as funcionalidades
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

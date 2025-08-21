@@ -57,8 +57,7 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
         ...data,
         position: Math.max(...columns.map(c => c.position), 0) + 1,
       };
-      const response = await apiRequest("POST", "/api/columns", columnData);
-      return response.json();
+      return await apiRequest("/api/columns", "POST", columnData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
@@ -79,8 +78,7 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
 
   const updateColumnMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: FormData }) => {
-      const response = await apiRequest("PUT", `/api/columns/${id}`, data);
-      return response.json();
+      return await apiRequest(`/api/columns/${id}`, "PUT", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
@@ -102,8 +100,7 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
 
   const deleteColumnMutation = useMutation({
     mutationFn: async (columnId: string) => {
-      const response = await apiRequest("DELETE", `/api/columns/${columnId}`);
-      return response;
+      return await apiRequest(`/api/columns/${columnId}`, "DELETE");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
@@ -124,8 +121,7 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
 
   const reorderColumnMutation = useMutation({
     mutationFn: async (reorderedColumns: { id: string; position: number }[]) => {
-      const response = await apiRequest("POST", "/api/columns/reorder", { columns: reorderedColumns });
-      return response.json();
+      return await apiRequest("/api/columns/reorder", "POST", { columns: reorderedColumns });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });

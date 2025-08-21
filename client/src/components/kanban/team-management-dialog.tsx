@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -178,6 +178,9 @@ export function TeamManagementDialog() {
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" data-testid="dialog-team-management">
         <DialogHeader>
           <DialogTitle>Gerenciar Times</DialogTitle>
+          <DialogDescription>
+            Crie, edite e organize times para melhor colaboração em seus projetos.
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="teams" className="w-full">
