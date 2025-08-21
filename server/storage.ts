@@ -124,6 +124,8 @@ export class MemStorage implements IStorage {
     const team: Team = {
       id: randomUUID(),
       ...insertTeam,
+      color: insertTeam.color || "#3b82f6",
+      description: insertTeam.description || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -168,6 +170,7 @@ export class MemStorage implements IStorage {
       role: insertUser.role || null,
       avatar: insertUser.avatar || insertUser.name.split(' ').map(n => n[0]).join('').toUpperCase(),
       status: insertUser.status || "offline",
+      teamId: insertUser.teamId || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -627,6 +630,48 @@ export class DatabaseStorage implements IStorage {
     const result = await db.delete(tags).where(eq(tags.id, id));
     if (result.rowCount === 0) {
       throw new Error(`Tag with id ${id} not found`);
+    }
+  }
+
+  // Teams methods
+  async getTeams(): Promise<Team[]> {
+    return await db.select().from(teams).orderBy(teams.name);
+  }
+
+  async getTeam(id: string): Promise<Team | undefined> {
+    const [team] = await db.select().from(teams).where(eq(teams.id, id));
+    return team || undefined;
+  }
+
+  async createTeam(insertTeam: InsertTeam): Promise<Team> {
+    const [team] = await db
+      .insert(teams)
+      .values(insertTeam)
+      .returning();
+    return team;
+  }
+
+  async updateTeam(id: string, updateData: UpdateTeam): Promise<Team> {
+    const [team] = await db
+      .update(teams)
+      .set({
+        ...updateData,
+        updatedAt: new Date(),
+      })
+      .where(eq(teams.id, id))
+      .returning();
+    
+    if (!team) {
+      throw new Error(`Team with id ${id} not found`);
+    }
+    
+    return team;
+  }
+
+  async deleteTeam(id: string): Promise<void> {
+    const result = await db.delete(teams).where(eq(teams.id, id));
+    if (result.rowCount === 0) {
+      throw new Error(`Team with id ${id} not found`);
     }
   }
 
