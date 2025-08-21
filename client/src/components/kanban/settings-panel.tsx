@@ -188,7 +188,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 </ProfileManagementDialog>
               </PermissionGuard>
               
-              <PermissionGuard permission="Gerenciar Membros">
+              <PermissionGuard permission="Gerenciar Times">
                 <TeamManagementDialog />
               </PermissionGuard>
             </div>

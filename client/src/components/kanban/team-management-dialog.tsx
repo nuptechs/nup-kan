@@ -170,7 +170,11 @@ export function TeamManagementDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" data-testid="button-manage-teams">
+        <Button 
+          variant="outline" 
+          className="w-full justify-start" 
+          data-testid="button-manage-teams"
+        >
           <Users2 className="w-4 h-4 mr-2" />
           Gerenciar Times
         </Button>
