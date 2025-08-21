@@ -75,9 +75,9 @@ export class MemStorage implements IStorage {
         description: "Atualizar o design da landing page com nova identidade visual e melhorar conversão",
         status: "backlog",
         priority: "high",
-        assigneeId: members[0]?.id,
-        assigneeName: members[0]?.name,
-        assigneeAvatar: members[0]?.avatar,
+        assigneeId: members[0]?.id || "",
+        assigneeName: members[0]?.name || "",
+        assigneeAvatar: members[0]?.avatar || "",
         progress: 0,
         tags: ["design", "ui"],
         createdAt: new Date(),
@@ -88,9 +88,9 @@ export class MemStorage implements IStorage {
         description: "Implementar gateway de pagamento para checkout",
         status: "backlog",
         priority: "medium",
-        assigneeId: members[1]?.id,
-        assigneeName: members[1]?.name,
-        assigneeAvatar: members[1]?.avatar,
+        assigneeId: members[1]?.id || "",
+        assigneeName: members[1]?.name || "",
+        assigneeAvatar: members[1]?.avatar || "",
         progress: 0,
         tags: ["backend", "api"],
         createdAt: new Date(),
@@ -101,9 +101,9 @@ export class MemStorage implements IStorage {
         description: "Melhorar tempo de carregamento das páginas principais",
         status: "todo",
         priority: "high",
-        assigneeId: members[3]?.id,
-        assigneeName: members[3]?.name,
-        assigneeAvatar: members[3]?.avatar,
+        assigneeId: members[3]?.id || "",
+        assigneeName: members[3]?.name || "",
+        assigneeAvatar: members[3]?.avatar || "",
         progress: 0,
         tags: ["performance", "optimization"],
         createdAt: new Date(),
@@ -114,9 +114,9 @@ export class MemStorage implements IStorage {
         description: "Implementar gráficos e métricas no painel administrativo",
         status: "inprogress",
         priority: "high",
-        assigneeId: members[0]?.id,
-        assigneeName: members[0]?.name,
-        assigneeAvatar: members[0]?.avatar,
+        assigneeId: members[0]?.id || "",
+        assigneeName: members[0]?.name || "",
+        assigneeAvatar: members[0]?.avatar || "",
         progress: 65,
         tags: ["analytics", "dashboard"],
         createdAt: new Date(),
@@ -127,9 +127,9 @@ export class MemStorage implements IStorage {
         description: "Implementação de notificações push e email",
         status: "review",
         priority: "medium",
-        assigneeId: members[2]?.id,
-        assigneeName: members[2]?.name,
-        assigneeAvatar: members[2]?.avatar,
+        assigneeId: members[2]?.id || "",
+        assigneeName: members[2]?.name || "",
+        assigneeAvatar: members[2]?.avatar || "",
         progress: 100,
         tags: ["notifications", "backend"],
         createdAt: new Date(),
@@ -140,9 +140,9 @@ export class MemStorage implements IStorage {
         description: "Integração com Google, Facebook e GitHub",
         status: "done",
         priority: "high",
-        assigneeId: members[3]?.id,
-        assigneeName: members[3]?.name,
-        assigneeAvatar: members[3]?.avatar,
+        assigneeId: members[3]?.id || "",
+        assigneeName: members[3]?.name || "",
+        assigneeAvatar: members[3]?.avatar || "",
         progress: 100,
         tags: ["auth", "oauth"],
         createdAt: new Date(),
@@ -173,6 +173,7 @@ export class MemStorage implements IStorage {
     const task: Task = {
       ...insertTask,
       id,
+      progress: insertTask.progress || 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -213,8 +214,12 @@ export class MemStorage implements IStorage {
   }
 
   async createColumn(column: InsertColumn): Promise<Column> {
-    this.columns.set(column.id, column);
-    return column;
+    const newColumn: Column = {
+      ...column,
+      wipLimit: column.wipLimit || null,
+    };
+    this.columns.set(column.id, newColumn);
+    return newColumn;
   }
 
   async updateColumn(id: string, updateData: Partial<Column>): Promise<Column> {
@@ -242,6 +247,9 @@ export class MemStorage implements IStorage {
     const teamMember: TeamMember = {
       ...member,
       id,
+      role: member.role || "",
+      avatar: member.avatar || "",
+      status: member.status || "offline",
     };
     this.teamMembers.set(id, teamMember);
     return teamMember;

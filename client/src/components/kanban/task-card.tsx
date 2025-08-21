@@ -7,6 +7,7 @@ import type { Task } from "@shared/schema";
 interface TaskCardProps {
   task: Task;
   columnColor: string;
+  onTaskClick?: (task: Task) => void;
 }
 
 const getPriorityClasses = (priority: string) => {
@@ -41,24 +42,30 @@ const getRandomIcon = () => {
   return icons[Math.floor(Math.random() * icons.length)];
 };
 
-export function TaskCard({ task, columnColor }: TaskCardProps) {
+export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
   const isInProgress = task.status === "inprogress";
   const isReview = task.status === "review";
   const isDone = task.status === "done";
   const Icon = getRandomIcon();
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onTaskClick?.(task);
+  };
+
   return (
     <div
       className={cn(
-        "bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all duration-200 cursor-move",
+        "bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all duration-200 cursor-move group",
         (isInProgress || isReview) && `border-l-4 ${getColumnBorderClasses(columnColor)}`,
         isDone && "opacity-75"
       )}
       data-testid={`card-${task.id}`}
+      onClick={handleClick}
     >
       <div className="flex items-start justify-between mb-3">
         <h3 className={cn(
-          "font-medium text-gray-900 text-sm leading-5",
+          "font-medium text-gray-900 text-sm leading-5 group-hover:text-indigo-600 transition-colors cursor-pointer",
           isDone && "line-through decoration-green-500"
         )}>
           {task.title}

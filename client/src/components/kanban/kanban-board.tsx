@@ -1,11 +1,17 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 import { KanbanColumn } from "./kanban-column";
+import { TaskDetailsDialog } from "./task-details-dialog";
+import { AddTaskDialog } from "./add-task-dialog";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Task, Column } from "@shared/schema";
 
 export function KanbanBoard() {
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isTaskDetailsOpen, setIsTaskDetailsOpen] = useState(false);
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -75,6 +81,20 @@ export function KanbanBoard() {
     return tasks.filter((task) => task.status === columnId);
   };
 
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setIsTaskDetailsOpen(true);
+  };
+
+  const handleAddTask = () => {
+    setIsAddTaskOpen(true);
+  };
+
+  const handleCloseTaskDetails = () => {
+    setIsTaskDetailsOpen(false);
+    setSelectedTask(null);
+  };
+
   if (tasksLoading || columnsLoading) {
     return (
       <div className="flex h-full">
@@ -118,6 +138,8 @@ export function KanbanBoard() {
                       column={column}
                       tasks={getTasksByColumn(column.id)}
                       isDragOver={snapshot.isDraggingOver}
+                      onTaskClick={handleTaskClick}
+                      onAddTask={handleAddTask}
                     />
                     {provided.placeholder}
                   </div>
@@ -127,6 +149,19 @@ export function KanbanBoard() {
           </div>
         </DragDropContext>
       </div>
+
+      {/* Task Details Dialog */}
+      <TaskDetailsDialog
+        task={selectedTask}
+        isOpen={isTaskDetailsOpen}
+        onClose={handleCloseTaskDetails}
+      />
+
+      {/* Add Task Dialog */}
+      <AddTaskDialog
+        isOpen={isAddTaskOpen}
+        onClose={() => setIsAddTaskOpen(false)}
+      />
     </div>
   );
 }

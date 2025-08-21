@@ -119,6 +119,7 @@ export function AddTaskDialog({ isOpen, onClose }: AddTaskDialogProps) {
                     <Textarea
                       placeholder="Descreva a tarefa em detalhes"
                       {...field}
+                      value={field.value || ""}
                       data-testid="input-description"
                     />
                   </FormControl>

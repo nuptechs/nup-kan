@@ -219,25 +219,25 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="p-3 bg-gray-50 rounded-lg text-center">
                 <p className="text-2xl font-bold text-gray-900" data-testid="analytics-cycle-time">
-                  {analytics?.averageCycleTime || 0}
+                  {(analytics as any)?.averageCycleTime || 0}
                 </p>
                 <p className="text-xs text-gray-500">Tempo Médio (dias)</p>
               </div>
               <div className="p-3 bg-gray-50 rounded-lg text-center">
                 <p className="text-2xl font-bold text-gray-900" data-testid="analytics-throughput">
-                  {analytics?.throughput || 0}
+                  {(analytics as any)?.throughput || 0}
                 </p>
                 <p className="text-xs text-gray-500">Cards/Semana</p>
               </div>
               <div className="p-3 bg-gray-50 rounded-lg text-center">
                 <p className="text-2xl font-bold text-gray-900" data-testid="analytics-efficiency">
-                  {analytics?.efficiency || 0}%
+                  {(analytics as any)?.efficiency || 0}%
                 </p>
                 <p className="text-xs text-gray-500">Eficiência</p>
               </div>
               <div className="p-3 bg-gray-50 rounded-lg text-center">
                 <p className="text-2xl font-bold text-gray-900" data-testid="analytics-blockers">
-                  {analytics?.blockers || 0}
+                  {(analytics as any)?.blockers || 0}
                 </p>
                 <p className="text-xs text-gray-500">Bloqueios</p>
               </div>

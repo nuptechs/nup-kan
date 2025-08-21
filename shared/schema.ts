@@ -1,19 +1,19 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const tasks = pgTable("tasks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
-  description: text("description"),
+  description: text("description").default(""),
   status: text("status").notNull().default("backlog"),
   priority: text("priority").notNull().default("medium"),
-  assigneeId: varchar("assignee_id"),
-  assigneeName: text("assignee_name"),
-  assigneeAvatar: text("assignee_avatar"),
-  progress: integer("progress").default(0),
-  tags: jsonb("tags").$type<string[]>().default([]),
+  assigneeId: varchar("assignee_id").default(""),
+  assigneeName: text("assignee_name").default(""),
+  assigneeAvatar: text("assignee_avatar").default(""),
+  progress: integer("progress").notNull().default(0),
+  tags: text("tags").array().default([]),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -22,15 +22,15 @@ export const columns = pgTable("columns", {
   id: varchar("id").primaryKey(),
   title: text("title").notNull(),
   position: integer("position").notNull(),
-  wipLimit: integer("wip_limit"),
+  wipLimit: integer("wip_limit").default(null),
   color: text("color").notNull(),
 });
 
 export const teamMembers = pgTable("team_members", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
-  role: text("role"),
-  avatar: text("avatar"),
+  role: text("role").default(""),
+  avatar: text("avatar").default(""),
   status: text("status").default("offline"),
 });
 

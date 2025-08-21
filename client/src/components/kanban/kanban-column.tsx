@@ -9,6 +9,8 @@ interface KanbanColumnProps {
   column: Column;
   tasks: Task[];
   isDragOver: boolean;
+  onTaskClick?: (task: Task) => void;
+  onAddTask?: () => void;
 }
 
 const getColumnColorClasses = (color: string) => {
@@ -44,7 +46,7 @@ const getColumnCountClasses = (color: string) => {
   return colorMap[color as keyof typeof colorMap] || "bg-gray-100 text-gray-600";
 };
 
-export function KanbanColumn({ column, tasks, isDragOver }: KanbanColumnProps) {
+export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask }: KanbanColumnProps) {
   const wipProgress = column.wipLimit ? (tasks.length / column.wipLimit) * 100 : 0;
   const isWipExceeded = column.wipLimit && tasks.length >= column.wipLimit;
 
@@ -92,6 +94,7 @@ export function KanbanColumn({ column, tasks, isDragOver }: KanbanColumnProps) {
           <Button
             variant="ghost"
             size="sm"
+            onClick={onAddTask}
             className="w-full mt-2 text-left text-sm text-gray-500 hover:text-gray-700 transition-colors justify-start"
             data-testid={`button-add-task-${column.id}`}
           >
@@ -118,7 +121,7 @@ export function KanbanColumn({ column, tasks, isDragOver }: KanbanColumnProps) {
                 className={cn(snapshot.isDragging && "dragging")}
                 data-testid={`task-${task.id}`}
               >
-                <TaskCard task={task} columnColor={column.color} />
+                <TaskCard task={task} columnColor={column.color} onTaskClick={onTaskClick} />
               </div>
             )}
           </Draggable>
