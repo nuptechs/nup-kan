@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -91,6 +91,9 @@ export function AddTaskDialog({ isOpen, onClose }: AddTaskDialogProps) {
       <DialogContent className="sm:max-w-[425px]" data-testid="add-task-dialog">
         <DialogHeader>
           <DialogTitle data-testid="dialog-title">Adicionar Nova Tarefa</DialogTitle>
+          <DialogDescription>
+            Preencha as informações abaixo para criar uma nova tarefa no sistema.
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>

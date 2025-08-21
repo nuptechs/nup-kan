@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -52,6 +52,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
       priority: task?.priority || "medium",
       assigneeId: task?.assigneeId || "",
       progress: task?.progress || 0,
+      tags: task?.tags || [],
     },
   });
 
@@ -194,19 +195,20 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent data-testid="dialog-delete-confirmation">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Excluir Tarefa</AlertDialogTitle>
+                    <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.
+                      Esta ação não pode ser desfeita. A tarefa será permanentemente excluída.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogCancel data-testid="button-cancel-delete">Cancelar</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() => deleteTaskMutation.mutate()}
-                      className="bg-red-600 hover:bg-red-700"
                       disabled={deleteTaskMutation.isPending}
+                      className="bg-red-600 hover:bg-red-700"
+                      data-testid="button-confirm-delete"
                     >
                       {deleteTaskMutation.isPending ? "Excluindo..." : "Excluir"}
                     </AlertDialogAction>
@@ -224,6 +226,9 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
               </Button>
             </div>
           </div>
+          <DialogDescription>
+            {isEditing ? "Modifique as informações da tarefa conforme necessário." : "Visualize os detalhes completos desta tarefa."}
+          </DialogDescription>
         </DialogHeader>
 
         {isEditing ? (
@@ -255,10 +260,10 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
                     <FormLabel>Descrição</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Descreva a tarefa em detalhes"
-                        rows={4}
+                        placeholder="Digite a descrição da tarefa"
                         {...field}
                         value={field.value || ""}
+                        rows={3}
                         data-testid="input-edit-description"
                       />
                     </FormControl>
@@ -267,30 +272,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="priority"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prioridade</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger data-testid="select-edit-priority">
-                            <SelectValue placeholder="Selecione a prioridade" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="low">Baixa</SelectItem>
-                          <SelectItem value="medium">Média</SelectItem>
-                          <SelectItem value="high">Alta</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="status"
@@ -300,7 +282,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-edit-status">
-                            <SelectValue placeholder="Selecione o status" />
+                            <SelectValue placeholder="Selecione um status" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -316,6 +298,31 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Prioridade</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-edit-priority">
+                            <SelectValue placeholder="Selecione uma prioridade" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="low">Baixa</SelectItem>
+                          <SelectItem value="medium">Média</SelectItem>
+                          <SelectItem value="high">Alta</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="progress"
