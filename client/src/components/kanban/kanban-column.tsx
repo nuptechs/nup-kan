@@ -66,7 +66,7 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
 
       <div
         className={cn(
-          "bg-white rounded-xl shadow-sm border border-gray-200 h-full flex flex-col transition-all duration-200",
+          "bg-white rounded-xl shadow-sm border border-gray-200 h-full flex flex-col transition-all duration-200 cursor-grab active:cursor-grabbing",
           isDragOver && "drag-over"
         )}
         data-testid={`column-${column.id}`}

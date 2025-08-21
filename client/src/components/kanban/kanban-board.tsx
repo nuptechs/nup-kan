@@ -43,8 +43,28 @@ export function KanbanBoard() {
     },
   });
 
+  const reorderColumnsMutation = useMutation({
+    mutationFn: async (reorderedColumns: Column[]) => {
+      const updatePromises = reorderedColumns.map((column, index) =>
+        apiRequest("PATCH", `/api/columns/${column.id}`, { position: index })
+      );
+      await Promise.all(updatePromises);
+      return reorderedColumns;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Falha ao reordenar colunas. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleDragEnd = (result: DropResult) => {
-    const { destination, source, draggableId } = result;
+    const { destination, source, draggableId, type } = result;
 
     if (!destination) return;
 
@@ -55,6 +75,24 @@ export function KanbanBoard() {
       return;
     }
 
+    // Handle column reordering
+    if (type === 'COLUMN') {
+      const sortedColumns = [...validColumns].sort((a, b) => a.position - b.position);
+      const reorderedColumns = Array.from(sortedColumns);
+      const [reorderedColumn] = reorderedColumns.splice(source.index, 1);
+      reorderedColumns.splice(destination.index, 0, reorderedColumn);
+      
+      // Update positions
+      const columnsWithNewPositions = reorderedColumns.map((column, index) => ({
+        ...column,
+        position: index,
+      }));
+      
+      reorderColumnsMutation.mutate(columnsWithNewPositions);
+      return;
+    }
+
+    // Handle task movement
     const task = tasks.find((t) => t.id === draggableId);
     if (!task) return;
 
@@ -127,35 +165,60 @@ export function KanbanBoard() {
     );
   }
 
-  const validColumns = columns.filter(column => column.id && column.id.trim() !== '');
+  const validColumns = columns
+    .filter(column => column.id && column.id.trim() !== '')
+    .sort((a, b) => a.position - b.position);
 
   return (
     <div className="flex h-full" data-testid="kanban-board">
       <div className="flex-1 overflow-x-auto overflow-y-hidden">
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="flex h-full p-6 space-x-6 min-w-max">
-            {validColumns.map((column) => (
-              <Droppable key={column.id} droppableId={column.id}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className="flex-shrink-0 w-80"
-                  >
-                    <KanbanColumn
-                      column={column}
-                      tasks={getTasksByColumn(column.id)}
-                      isDragOver={snapshot.isDraggingOver}
-                      onTaskClick={handleTaskClick}
-                      onAddTask={handleAddTask}
-                      onManageColumns={handleManageColumns}
-                    />
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            ))}
-          </div>
+          <Droppable droppableId="columns" direction="horizontal" type="COLUMN">
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="flex h-full p-6 space-x-6 min-w-max"
+              >
+                {validColumns.map((column, index) => (
+                  <Draggable key={column.id} draggableId={column.id} index={index} type="COLUMN">
+                    {(columnProvided, columnSnapshot) => (
+                      <div
+                        ref={columnProvided.innerRef}
+                        {...columnProvided.draggableProps}
+                        className={`flex-shrink-0 w-80 transition-transform duration-200 ${
+                          columnSnapshot.isDragging ? 'rotate-2 scale-105' : ''
+                        }`}
+                      >
+                        <div {...columnProvided.dragHandleProps}>
+                          <Droppable droppableId={column.id} type="TASK">
+                            {(taskProvided, taskSnapshot) => (
+                              <div
+                                ref={taskProvided.innerRef}
+                                {...taskProvided.droppableProps}
+                                className="h-full"
+                              >
+                                <KanbanColumn
+                                  column={column}
+                                  tasks={getTasksByColumn(column.id)}
+                                  isDragOver={taskSnapshot.isDraggingOver}
+                                  onTaskClick={handleTaskClick}
+                                  onAddTask={handleAddTask}
+                                  onManageColumns={handleManageColumns}
+                                />
+                                {taskProvided.placeholder}
+                              </div>
+                            )}
+                          </Droppable>
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
         </DragDropContext>
       </div>
 
