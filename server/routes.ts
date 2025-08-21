@@ -321,6 +321,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/users/:id", async (req, res) => {
+    try {
+      const userData = req.body;
+      const user = await storage.updateUser(req.params.id, userData);
+      res.json(user);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.status(400).json({ message: "Invalid user data" });
+    }
+  });
+
   app.delete("/api/users/:id", async (req, res) => {
     try {
       await storage.deleteUser(req.params.id);
