@@ -676,6 +676,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Task Events endpoints
+  app.get("/api/tasks/:taskId/events", async (req, res) => {
+    try {
+      const { taskId } = req.params;
+      const events = await storage.getTaskEvents(taskId);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching task events:", error);
+      res.status(500).json({ message: "Failed to fetch task events" });
+    }
+  });
+
+  app.post("/api/tasks/:taskId/events", async (req, res) => {
+    try {
+      const { taskId } = req.params;
+      const eventData = req.body;
+      
+      const event = await storage.createTaskEvent({
+        ...eventData,
+        taskId
+      });
+      
+      res.status(201).json(event);
+    } catch (error) {
+      console.error("Error creating task event:", error);
+      res.status(500).json({ message: "Failed to create task event" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

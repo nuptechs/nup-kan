@@ -3,6 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { MessageCircle, Paperclip, Clock, Flag, Eye, FileText, Code, Server, Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Task } from "@shared/schema";
+import { TaskTimeline } from "./task-timeline";
 
 interface TaskCardProps {
   task: Task;
@@ -145,6 +146,9 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
           </span>
         </div>
       </div>
+      
+      {/* Timeline minimalista */}
+      <TaskTimeline taskId={task.id} className="mt-4 pt-4 border-t border-gray-100" />
     </div>
   );
 }

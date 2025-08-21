@@ -1,6 +1,6 @@
-import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam } from "@shared/schema";
+import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type TaskEvent, type InsertTaskEvent } from "@shared/schema";
 import { db } from "./db";
-import { tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams } from "@shared/schema";
+import { tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, taskEvents } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -79,6 +79,10 @@ export interface IStorage {
 
   // User Permissions
   getUserPermissions(userId: string): Promise<Permission[]>;
+
+  // Task Events  
+  getTaskEvents(taskId: string): Promise<TaskEvent[]>;
+  createTaskEvent(event: InsertTaskEvent): Promise<TaskEvent>;
 }
 
 export class MemStorage implements IStorage {
@@ -755,10 +759,23 @@ export class DatabaseStorage implements IStorage {
         tags: insertTask.tags || [],
       })
       .returning();
+    
+    // Create initial event for task creation
+    await this.createTaskEvent({
+      taskId: task.id,
+      eventType: "created",
+      description: "Task criada",
+      userName: "Sistema",
+      userAvatar: "S",
+      metadata: ""
+    });
+    
     return task;
   }
 
   async updateTask(id: string, updateData: UpdateTask): Promise<Task> {
+    const oldTask = await this.getTask(id);
+    
     const [task] = await db
       .update(tasks)
       .set({
@@ -770,6 +787,27 @@ export class DatabaseStorage implements IStorage {
     
     if (!task) {
       throw new Error(`Task with id ${id} not found`);
+    }
+    
+    // Create event for task update
+    if (oldTask && task.status !== oldTask.status) {
+      await this.createTaskEvent({
+        taskId: task.id,
+        eventType: "moved",
+        description: `Task movida para ${task.status}`,
+        userName: "Sistema",
+        userAvatar: "S",
+        metadata: `De ${oldTask.status} para ${task.status}`
+      });
+    } else {
+      await this.createTaskEvent({
+        taskId: task.id,
+        eventType: "updated",
+        description: "Task atualizada",
+        userName: "Sistema", 
+        userAvatar: "S",
+        metadata: ""
+      });
     }
     
     return task;
@@ -1187,6 +1225,20 @@ export class DatabaseStorage implements IStorage {
       console.error("Error in getUserPermissions:", error);
       throw error;
     }
+    return userPermissions.map(p => p.permission);
+  }
+
+  // Task Events methods
+  async getTaskEvents(taskId: string): Promise<TaskEvent[]> {
+    return await db.select().from(taskEvents).where(eq(taskEvents.taskId, taskId)).orderBy(desc(taskEvents.createdAt));
+  }
+
+  async createTaskEvent(event: InsertTaskEvent): Promise<TaskEvent> {
+    const [newEvent] = await db
+      .insert(taskEvents)
+      .values(event)
+      .returning();
+    return newEvent;
   }
 }
 
