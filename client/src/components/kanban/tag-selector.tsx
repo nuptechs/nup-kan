@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { Plus, X, Tag as TagIcon } from "lucide-react";
+import { Plus, X, Tag as TagIcon, Settings } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { TagManagementDialog } from "./tag-management-dialog";
 import type { Tag } from "@shared/schema";
 
 interface TagSelectorProps {
@@ -19,6 +20,7 @@ interface TagSelectorProps {
 export function TagSelector({ selectedTags, onTagsChange }: TagSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isManagementOpen, setIsManagementOpen] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState("#3b82f6");
   const queryClient = useQueryClient();
@@ -203,10 +205,43 @@ export function TagSelector({ selectedTags, onTagsChange }: TagSelectorProps) {
                   )}
                 </CommandItem>
               ))}
+              {!isCreating && (
+                <div className="p-2 border-t space-y-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => setIsCreating(true)}
+                    data-testid="button-start-create-tag"
+                  >
+                    <Plus size={16} className="mr-2" />
+                    Criar nova tag
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setIsOpen(false);
+                      setIsManagementOpen(true);
+                    }}
+                    data-testid="button-manage-tags"
+                  >
+                    <Settings size={16} className="mr-2" />
+                    Gerenciar tags
+                  </Button>
+                </div>
+              )}
             </CommandGroup>
           </Command>
         </PopoverContent>
       </Popover>
+      
+      <TagManagementDialog
+        isOpen={isManagementOpen}
+        onClose={() => setIsManagementOpen(false)}
+      />
     </div>
   );
 }

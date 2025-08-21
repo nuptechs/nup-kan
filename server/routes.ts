@@ -193,6 +193,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/tags/:id", async (req, res) => {
+    try {
+      const tagData = insertTagSchema.parse(req.body);
+      const tag = await storage.updateTag(req.params.id, tagData);
+      res.json(tag);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      res.status(400).json({ message: "Invalid tag data" });
+    }
+  });
+
+  app.delete("/api/tags/:id", async (req, res) => {
+    try {
+      await storage.deleteTag(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      res.status(500).json({ message: "Failed to delete tag" });
+    }
+  });
+
   app.patch("/api/tags/:id", async (req, res) => {
     try {
       const updateData = insertTagSchema.partial().parse(req.body);
