@@ -1,6 +1,6 @@
-import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type TeamMember, type InsertTeamMember } from "@shared/schema";
+import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag } from "@shared/schema";
 import { db } from "./db";
-import { tasks, columns, teamMembers } from "@shared/schema";
+import { tasks, columns, teamMembers, tags } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -22,6 +22,13 @@ export interface IStorage {
   getTeamMembers(): Promise<TeamMember[]>;
   createTeamMember(member: InsertTeamMember): Promise<TeamMember>;
   updateTeamMemberStatus(id: string, status: string): Promise<TeamMember>;
+  
+  // Tags
+  getTags(): Promise<Tag[]>;
+  getTag(id: string): Promise<Tag | undefined>;
+  createTag(tag: InsertTag): Promise<Tag>;
+  updateTag(id: string, tag: Partial<Tag>): Promise<Tag>;
+  deleteTag(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -38,6 +45,49 @@ export class MemStorage implements IStorage {
     this.initializeDefaultColumns();
     this.initializeDefaultTeamMembers();
     this.initializeDefaultTasks();
+  }
+
+  // Tags methods for MemStorage
+  async getTags(): Promise<Tag[]> {
+    // Return default tags for memory storage
+    return [
+      { id: "1", name: "design", color: "#8b5cf6", createdAt: new Date() },
+      { id: "2", name: "ui", color: "#06b6d4", createdAt: new Date() },
+      { id: "3", name: "backend", color: "#f59e0b", createdAt: new Date() },
+      { id: "4", name: "api", color: "#ef4444", createdAt: new Date() },
+      { id: "5", name: "performance", color: "#10b981", createdAt: new Date() },
+      { id: "6", name: "optimization", color: "#3b82f6", createdAt: new Date() },
+    ];
+  }
+
+  async getTag(id: string): Promise<Tag | undefined> {
+    const tags = await this.getTags();
+    return tags.find(tag => tag.id === id);
+  }
+
+  async createTag(insertTag: InsertTag): Promise<Tag> {
+    const tag: Tag = {
+      id: randomUUID(),
+      ...insertTag,
+      color: insertTag.color || "#3b82f6",
+      createdAt: new Date(),
+    };
+    return tag;
+  }
+
+  async updateTag(id: string, updateData: Partial<Tag>): Promise<Tag> {
+    const existingTag = await this.getTag(id);
+    if (!existingTag) {
+      throw new Error(`Tag with id ${id} not found`);
+    }
+    return { ...existingTag, ...updateData };
+  }
+
+  async deleteTag(id: string): Promise<void> {
+    const existingTag = await this.getTag(id);
+    if (!existingTag) {
+      throw new Error(`Tag with id ${id} not found`);
+    }
   }
 
   private initializeDefaultColumns() {
@@ -388,6 +438,45 @@ export class DatabaseStorage implements IStorage {
     }
     
     return member;
+  }
+
+  // Tags methods
+  async getTags(): Promise<Tag[]> {
+    return await db.select().from(tags).orderBy(tags.name);
+  }
+
+  async getTag(id: string): Promise<Tag | undefined> {
+    const [tag] = await db.select().from(tags).where(eq(tags.id, id));
+    return tag || undefined;
+  }
+
+  async createTag(insertTag: InsertTag): Promise<Tag> {
+    const [tag] = await db
+      .insert(tags)
+      .values(insertTag)
+      .returning();
+    return tag;
+  }
+
+  async updateTag(id: string, updateData: Partial<Tag>): Promise<Tag> {
+    const [tag] = await db
+      .update(tags)
+      .set(updateData)
+      .where(eq(tags.id, id))
+      .returning();
+    
+    if (!tag) {
+      throw new Error(`Tag with id ${id} not found`);
+    }
+    
+    return tag;
+  }
+
+  async deleteTag(id: string): Promise<void> {
+    const result = await db.delete(tags).where(eq(tags.id, id));
+    if (result.rowCount === 0) {
+      throw new Error(`Tag with id ${id} not found`);
+    }
   }
 }
 

@@ -34,6 +34,13 @@ export const teamMembers = pgTable("team_members", {
   status: text("status").default("offline"),
 });
 
+export const tags = pgTable("tags", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  color: text("color").notNull().default("#3b82f6"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertTaskSchema = createInsertSchema(tasks).omit({
   id: true,
   createdAt: true,
@@ -48,6 +55,11 @@ export const insertTeamMemberSchema = createInsertSchema(teamMembers).omit({
   id: true,
 });
 
+export const insertTagSchema = createInsertSchema(tags).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type UpdateTask = z.infer<typeof updateTaskSchema>;
@@ -55,3 +67,5 @@ export type Column = typeof columns.$inferSelect;
 export type InsertColumn = z.infer<typeof insertColumnSchema>;
 export type TeamMember = typeof teamMembers.$inferSelect;
 export type InsertTeamMember = z.infer<typeof insertTeamMemberSchema>;
+export type Tag = typeof tags.$inferSelect;
+export type InsertTag = z.infer<typeof insertTagSchema>;

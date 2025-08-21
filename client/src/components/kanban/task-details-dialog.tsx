@@ -17,6 +17,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { updateTaskSchema } from "@shared/schema";
 import type { Task, TeamMember } from "@shared/schema";
+import { TagSelector } from "./tag-selector";
 import { z } from "zod";
 import { Edit, Trash2, User, Calendar, Clock, Flag, X } from "lucide-react";
 
@@ -28,6 +29,7 @@ interface TaskDetailsDialogProps {
 
 const formSchema = updateTaskSchema.extend({
   assigneeId: z.string().optional(),
+  tags: z.array(z.string()).default([]),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -63,6 +65,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
         priority: task.priority,
         assigneeId: task.assigneeId || "",
         progress: task.progress || 0,
+        tags: task.tags || [],
       });
     }
   }, [task, form]);
@@ -367,6 +370,11 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
                     <FormMessage />
                   </FormItem>
                 )}
+              />
+
+              <TagSelector
+                selectedTags={form.watch("tags")}
+                onTagsChange={(tags) => form.setValue("tags", tags)}
               />
 
               <div className="flex justify-end space-x-2 pt-4">

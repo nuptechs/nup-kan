@@ -13,6 +13,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertTaskSchema } from "@shared/schema";
 import type { TeamMember } from "@shared/schema";
+import { TagSelector } from "./tag-selector";
 import { z } from "zod";
 
 interface AddTaskDialogProps {
@@ -22,6 +23,7 @@ interface AddTaskDialogProps {
 
 const formSchema = insertTaskSchema.extend({
   assigneeId: z.string().optional(),
+  tags: z.array(z.string()).default([]),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -211,6 +213,11 @@ export function AddTaskDialog({ isOpen, onClose }: AddTaskDialogProps) {
                   <FormMessage />
                 </FormItem>
               )}
+            />
+
+            <TagSelector
+              selectedTags={form.watch("tags")}
+              onTagsChange={(tags) => form.setValue("tags", tags)}
             />
 
             <div className="flex justify-end space-x-2 pt-4">

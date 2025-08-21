@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTaskSchema, updateTaskSchema, insertColumnSchema, insertTeamMemberSchema } from "@shared/schema";
+import { insertTaskSchema, updateTaskSchema, insertColumnSchema, insertTeamMemberSchema, insertTagSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
@@ -158,6 +158,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Tag routes
+  app.get("/api/tags", async (req, res) => {
+    try {
+      const tags = await storage.getTags();
+      res.json(tags);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch tags" });
+    }
+  });
+
+  app.get("/api/tags/:id", async (req, res) => {
+    try {
+      const tag = await storage.getTag(req.params.id);
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      res.json(tag);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch tag" });
+    }
+  });
+
+  app.post("/api/tags", async (req, res) => {
+    try {
+      const tagData = insertTagSchema.parse(req.body);
+      const tag = await storage.createTag(tagData);
+      res.status(201).json(tag);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid tag data" });
+    }
+  });
+
+  app.patch("/api/tags/:id", async (req, res) => {
+    try {
+      const updateData = insertTagSchema.partial().parse(req.body);
+      const tag = await storage.updateTag(req.params.id, updateData);
+      res.json(tag);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid tag data or tag not found" });
+    }
+  });
+
+  app.delete("/api/tags/:id", async (req, res) => {
+    try {
+      await storage.deleteTag(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(404).json({ message: "Tag not found" });
     }
   });
 
