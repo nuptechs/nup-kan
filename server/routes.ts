@@ -536,6 +536,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User permissions route
+  app.get("/api/users/:userId/permissions", async (req, res) => {
+    try {
+      const permissions = await storage.getUserPermissions(req.params.userId);
+      res.json(permissions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user permissions" });
+    }
+  });
+
+  // Current user route (simulando usuário logado)
+  app.get("/api/auth/current-user", async (req, res) => {
+    try {
+      // Por enquanto, vamos retornar o primeiro usuário como usuário "logado"
+      const users = await storage.getUsers();
+      const currentUser = users[0];
+      if (!currentUser) {
+        return res.status(404).json({ message: "No user found" });
+      }
+      res.json(currentUser);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch current user" });
+    }
+  });
+
   // Team Profiles routes
   app.get("/api/teams/:id/profiles", async (req, res) => {
     try {

@@ -7,6 +7,8 @@ import { AddTaskDialog } from "./add-task-dialog";
 import { ColumnManagementDialog } from "./column-management-dialog";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { PermissionGuard } from "@/components/PermissionGuard";
+import { usePermissions } from "@/hooks/usePermissions";
 import type { Task, Column } from "@shared/schema";
 
 export function KanbanBoard() {
@@ -16,6 +18,7 @@ export function KanbanBoard() {
   const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { canCreateTasks, canEditTasks, canManageColumns } = usePermissions();
 
   const { data: tasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],

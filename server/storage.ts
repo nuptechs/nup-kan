@@ -1,7 +1,7 @@
 import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile } from "@shared/schema";
 import { db } from "./db";
 import { tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -69,6 +69,9 @@ export interface IStorage {
   getTeamProfiles(teamId: string): Promise<TeamProfile[]>;
   assignProfileToTeam(teamId: string, profileId: string): Promise<TeamProfile>;
   removeProfileFromTeam(teamId: string, profileId: string): Promise<void>;
+
+  // User Permissions
+  getUserPermissions(userId: string): Promise<Permission[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -387,6 +390,29 @@ export class MemStorage implements IStorage {
 
   async removeProfileFromTeam(teamId: string, profileId: string): Promise<void> {
     // Simulação de remoção
+  }
+
+  // User Permissions methods for MemStorage
+  async getUserPermissions(userId: string): Promise<Permission[]> {
+    try {
+      const user = await this.getUser(userId);
+      console.log("MemStorage User found:", user);
+      
+      if (!user || !user.profileId) {
+        console.log("MemStorage No user or profileId found");
+        return [];
+      }
+
+      // Por enquanto, vamos retornar um conjunto padrão de permissões baseado no perfil
+      const allPermissions = await this.getPermissions();
+      console.log("MemStorage All permissions:", allPermissions.length);
+      
+      // Por enquanto, vamos dar todas as permissões para qualquer usuário logado
+      return allPermissions;
+    } catch (error) {
+      console.error("MemStorage Error in getUserPermissions:", error);
+      throw error;
+    }
   }
 
   private initializeDefaultColumns() {
@@ -1014,7 +1040,7 @@ export class DatabaseStorage implements IStorage {
   async removePermissionFromProfile(profileId: string, permissionId: string): Promise<void> {
     const result = await db
       .delete(profilePermissions)
-      .where(eq(profilePermissions.profileId, profileId).and(eq(profilePermissions.permissionId, permissionId)));
+      .where(and(eq(profilePermissions.profileId, profileId), eq(profilePermissions.permissionId, permissionId)));
     if (result.rowCount === 0) {
       throw new Error(`Profile permission not found`);
     }
@@ -1036,9 +1062,37 @@ export class DatabaseStorage implements IStorage {
   async removeProfileFromTeam(teamId: string, profileId: string): Promise<void> {
     const result = await db
       .delete(teamProfiles)
-      .where(eq(teamProfiles.teamId, teamId).and(eq(teamProfiles.profileId, profileId)));
+      .where(and(eq(teamProfiles.teamId, teamId), eq(teamProfiles.profileId, profileId)));
     if (result.rowCount === 0) {
       throw new Error(`Team profile not found`);
+    }
+  }
+
+  // User Permissions methods for DatabaseStorage
+  async getUserPermissions(userId: string): Promise<Permission[]> {
+    try {
+      const user = await this.getUser(userId);
+      console.log("User found:", user);
+      
+      if (!user || !user.profileId) {
+        console.log("No user or profileId found");
+        return [];
+      }
+
+      // Por enquanto, vamos retornar um conjunto padrão de permissões baseado no perfil
+      // Isso será substituído quando as tabelas de permissões estiverem configuradas
+      const allPermissions = await this.getPermissions();
+      console.log("All permissions:", allPermissions.length);
+      
+      // Simular permissões baseadas no perfil do usuário
+      console.log("User profile ID:", user.profileId);
+      
+      // Por enquanto, vamos dar todas as permissões para qualquer usuário logado
+      // para não bloquear a funcionalidade durante o desenvolvimento
+      return allPermissions;
+    } catch (error) {
+      console.error("Error in getUserPermissions:", error);
+      throw error;
     }
   }
 }

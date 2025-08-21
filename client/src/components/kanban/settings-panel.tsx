@@ -14,6 +14,8 @@ import { UserManagementDialog } from "./user-management-dialog";
 import { TagManagementDialog } from "./tag-management-dialog";
 import { TeamManagementDialog } from "./team-management-dialog";
 import { ProfileManagementDialog } from "./profile-management-dialog";
+import { PermissionGuard } from "@/components/PermissionGuard";
+import { usePermissions } from "@/hooks/usePermissions";
 import type { Column, TeamMember } from "@shared/schema";
 
 interface SettingsPanelProps {
@@ -24,6 +26,7 @@ interface SettingsPanelProps {
 export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { canManageColumns, canManageUsers, canManageTeams, canManageProfiles, canViewAnalytics, canExportData } = usePermissions();
   const [wipLimits, setWipLimits] = useState<Record<string, number>>({});
   const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
   const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
@@ -138,24 +141,30 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           <div className="space-y-4">
             <h3 className="font-medium text-gray-900">Gerenciamento</h3>
             <div className="grid grid-cols-1 gap-3">
-              <Button
-                onClick={() => setIsColumnManagementOpen(true)}
-                variant="outline"
-                className="w-full justify-start"
-                data-testid="button-manage-columns"
-              >
-                <Columns className="w-4 h-4 mr-2" />
-                Gerenciar Colunas
-              </Button>
-              <Button
-                onClick={() => setIsUserManagementOpen(true)}
-                variant="outline"
-                className="w-full justify-start"
-                data-testid="button-manage-users"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Gerenciar Usuários
-              </Button>
+              <PermissionGuard permissions={["Criar Colunas", "Editar Colunas", "Excluir Colunas"]}>
+                <Button
+                  onClick={() => setIsColumnManagementOpen(true)}
+                  variant="outline"
+                  className="w-full justify-start"
+                  data-testid="button-manage-columns"
+                >
+                  <Columns className="w-4 h-4 mr-2" />
+                  Gerenciar Colunas
+                </Button>
+              </PermissionGuard>
+              
+              <PermissionGuard permissions={["Criar Usuários", "Editar Usuários", "Excluir Usuários"]}>
+                <Button
+                  onClick={() => setIsUserManagementOpen(true)}
+                  variant="outline"
+                  className="w-full justify-start"
+                  data-testid="button-manage-users"
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Gerenciar Usuários
+                </Button>
+              </PermissionGuard>
+              
               <Button
                 onClick={() => setIsTagManagementOpen(true)}
                 variant="outline"
@@ -166,17 +175,22 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 Gerenciar Tags
               </Button>
               
-              <ProfileManagementDialog>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start" 
-                  data-testid="button-manage-profiles"
-                >
-                  <UserCog className="w-4 h-4 mr-2" />
-                  Gerenciar Perfis
-                </Button>
-              </ProfileManagementDialog>
-              <TeamManagementDialog />
+              <PermissionGuard permissions={["Criar Perfis", "Editar Perfis", "Excluir Perfis"]}>
+                <ProfileManagementDialog>
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start" 
+                    data-testid="button-manage-profiles"
+                  >
+                    <UserCog className="w-4 h-4 mr-2" />
+                    Gerenciar Perfis
+                  </Button>
+                </ProfileManagementDialog>
+              </PermissionGuard>
+              
+              <PermissionGuard permission="Gerenciar Membros">
+                <TeamManagementDialog />
+              </PermissionGuard>
             </div>
           </div>
 
