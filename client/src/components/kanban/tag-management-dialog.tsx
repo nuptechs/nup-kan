@@ -95,7 +95,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
   const deleteTagMutation = useMutation({
     mutationFn: async (tagId: string) => {
       const response = await apiRequest("DELETE", `/api/tags/${tagId}`);
-      return response;
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tags"] });

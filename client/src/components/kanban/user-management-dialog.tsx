@@ -85,7 +85,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
 
   const updateUserMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: FormData }) => {
-      const response = await apiRequest("PUT", `/api/users/${id}`, data);
+      const response = await apiRequest("PATCH", `/api/users/${id}`, data);
       return response.json();
     },
     onSuccess: () => {
@@ -109,7 +109,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
       const response = await apiRequest("DELETE", `/api/users/${userId}`);
-      return response;
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
@@ -234,6 +234,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                           <Input
                             placeholder="ex: Desenvolvedor, Designer, etc."
                             {...field}
+                            value={field.value || ""}
                             data-testid="input-user-role"
                           />
                         </FormControl>
@@ -248,7 +249,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Status</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
                           <FormControl>
                             <SelectTrigger data-testid="select-user-status">
                               <SelectValue placeholder="Selecione o status" />
@@ -354,6 +355,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                                 <FormControl>
                                   <Input
                                     {...field}
+                                    value={field.value || ""}
                                     className="h-8"
                                     placeholder="Cargo"
                                     data-testid={`input-edit-user-role-${user.id}`}
@@ -368,7 +370,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                             name="status"
                             render={({ field }) => (
                               <FormItem className="w-32">
-                                <Select onValueChange={field.onChange} value={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value || ""}>
                                   <FormControl>
                                     <SelectTrigger className="h-8" data-testid={`select-edit-user-status-${user.id}`}>
                                       <SelectValue />

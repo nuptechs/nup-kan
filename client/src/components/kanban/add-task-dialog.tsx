@@ -177,9 +177,9 @@ export function AddTaskDialog({ isOpen, onClose }: AddTaskDialogProps) {
             </div>
 
             <UserSelector
-              selectedUserId={form.watch("assigneeId")}
+              selectedUserId={form.watch("assigneeId") || ""}
               onUserChange={(userId, userName, userAvatar) => {
-                form.setValue("assigneeId", userId);
+                form.setValue("assigneeId", userId || undefined);
                 form.setValue("assigneeName", userName);
                 form.setValue("assigneeAvatar", userAvatar);
               }}

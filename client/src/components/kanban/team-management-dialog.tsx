@@ -54,7 +54,8 @@ export function TeamManagementDialog() {
 
   const createTeamMutation = useMutation({
     mutationFn: async (teamData: InsertTeam) => {
-      return await apiRequest("/api/teams", "POST", teamData);
+      const response = await apiRequest("POST", "/api/teams", teamData);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
@@ -76,7 +77,8 @@ export function TeamManagementDialog() {
 
   const updateTeamMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: InsertTeam }) => {
-      return await apiRequest(`/api/teams/${id}`, "PUT", data);
+      const response = await apiRequest("PATCH", `/api/teams/${id}`, data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
@@ -98,7 +100,8 @@ export function TeamManagementDialog() {
 
   const deleteTeamMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/teams/${id}`, "DELETE");
+      const response = await apiRequest("DELETE", `/api/teams/${id}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
@@ -118,7 +121,8 @@ export function TeamManagementDialog() {
 
   const assignUserToTeamMutation = useMutation({
     mutationFn: async ({ userId, teamId }: { userId: string; teamId: string | null }) => {
-      return await apiRequest(`/api/users/${userId}`, "PUT", { teamId });
+      const response = await apiRequest("PATCH", `/api/users/${userId}`, { teamId });
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });

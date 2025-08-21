@@ -100,7 +100,8 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
 
   const deleteColumnMutation = useMutation({
     mutationFn: async (columnId: string) => {
-      return await apiRequest(`/api/columns/${columnId}`, "DELETE");
+      const response = await apiRequest("DELETE", `/api/columns/${columnId}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });

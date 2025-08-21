@@ -110,7 +110,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
     mutationFn: async () => {
       if (!task) return;
       const response = await apiRequest("DELETE", `/api/tasks/${task.id}`);
-      return response;
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });

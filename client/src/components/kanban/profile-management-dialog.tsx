@@ -76,7 +76,8 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
   // Mutations
   const createProfileMutation = useMutation({
     mutationFn: async (data: InsertProfile) => {
-      return await apiRequest("POST", "/api/profiles", data);
+      const response = await apiRequest("POST", "/api/profiles", data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
@@ -98,7 +99,8 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
 
   const updateProfileMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<InsertProfile> }) => {
-      return await apiRequest("PATCH", `/api/profiles/${id}`, data);
+      const response = await apiRequest("PATCH", `/api/profiles/${id}`, data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
@@ -119,7 +121,8 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
 
   const deleteProfileMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest("DELETE", `/api/profiles/${id}`);
+      const response = await apiRequest("DELETE", `/api/profiles/${id}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
@@ -140,7 +143,8 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
 
   const addPermissionMutation = useMutation({
     mutationFn: async ({ profileId, permissionId }: { profileId: string; permissionId: string }) => {
-      return await apiRequest("POST", `/api/profiles/${profileId}/permissions/${permissionId}`);
+      const response = await apiRequest("POST", `/api/profiles/${profileId}/permissions/${permissionId}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles", selectedProfile?.id, "permissions"] });
@@ -160,7 +164,8 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
 
   const removePermissionMutation = useMutation({
     mutationFn: async ({ profileId, permissionId }: { profileId: string; permissionId: string }) => {
-      return await apiRequest("DELETE", `/api/profiles/${profileId}/permissions/${permissionId}`);
+      const response = await apiRequest("DELETE", `/api/profiles/${profileId}/permissions/${permissionId}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles", selectedProfile?.id, "permissions"] });
