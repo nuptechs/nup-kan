@@ -57,10 +57,17 @@ export const users = pgTable("users", {
   role: text("role").default(""),
   avatar: text("avatar").default(""),
   status: text("status").default("offline"),
-  teamId: varchar("team_id").references(() => teams.id),
   profileId: varchar("profile_id").references(() => profiles.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const userTeams = pgTable("user_teams", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  teamId: varchar("team_id").notNull().references(() => teams.id, { onDelete: "cascade" }),
+  role: text("role").default("member"), // member, lead, admin
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const profiles = pgTable("profiles", {
@@ -165,6 +172,11 @@ export const insertTeamProfileSchema = createInsertSchema(teamProfiles).omit({
   createdAt: true,
 });
 
+export const insertUserTeamSchema = createInsertSchema(userTeams).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type UpdateTask = z.infer<typeof updateTaskSchema>;
@@ -190,3 +202,5 @@ export type ProfilePermission = typeof profilePermissions.$inferSelect;
 export type InsertProfilePermission = z.infer<typeof insertProfilePermissionSchema>;
 export type TeamProfile = typeof teamProfiles.$inferSelect;
 export type InsertTeamProfile = z.infer<typeof insertTeamProfileSchema>;
+export type UserTeam = typeof userTeams.$inferSelect;
+export type InsertUserTeam = z.infer<typeof insertUserTeamSchema>;

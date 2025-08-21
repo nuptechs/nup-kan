@@ -1,6 +1,6 @@
-import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile } from "@shared/schema";
+import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam } from "@shared/schema";
 import { db } from "./db";
-import { tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles } from "@shared/schema";
+import { tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -45,6 +45,13 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, user: UpdateUser): Promise<User>;
   deleteUser(id: string): Promise<void>;
+  
+  // User Teams (many-to-many relationship)
+  getUserTeams(userId: string): Promise<UserTeam[]>;
+  getTeamUsers(teamId: string): Promise<UserTeam[]>;
+  addUserToTeam(userTeam: InsertUserTeam): Promise<UserTeam>;
+  removeUserFromTeam(userId: string, teamId: string): Promise<void>;
+  updateUserTeamRole(userId: string, teamId: string, role: string): Promise<UserTeam>;
 
   // Profiles
   getProfiles(): Promise<Profile[]>;
@@ -177,11 +184,11 @@ export class MemStorage implements IStorage {
   // Users methods for MemStorage
   async getUsers(): Promise<User[]> {
     return [
-      { id: "1", name: "Ana Maria", email: "ana.maria@example.com", role: "Designer UX/UI", avatar: "AM", status: "online", teamId: "team-2", profileId: "profile-designer", createdAt: new Date(), updatedAt: new Date() },
-      { id: "2", name: "João Silva", email: "joao.silva@example.com", role: "Full Stack Developer", avatar: "JS", status: "busy", teamId: "team-1", profileId: "profile-developer", createdAt: new Date(), updatedAt: new Date() },
-      { id: "3", name: "Maria Costa", email: "maria.costa@example.com", role: "Product Manager", avatar: "MC", status: "online", teamId: "team-3", profileId: "profile-manager", createdAt: new Date(), updatedAt: new Date() },
-      { id: "4", name: "Rafael Santos", email: "rafael.santos@example.com", role: "Backend Developer", avatar: "RF", status: "offline", teamId: "team-1", profileId: "profile-developer", createdAt: new Date(), updatedAt: new Date() },
-      { id: "5", name: "Lucas Oliveira", email: "lucas.oliveira@example.com", role: "DevOps Engineer", avatar: "LC", status: "online", teamId: "team-1", profileId: "profile-devops", createdAt: new Date(), updatedAt: new Date() },
+      { id: "1", name: "Ana Maria", email: "ana.maria@example.com", role: "Designer UX/UI", avatar: "AM", status: "online", profileId: "profile-designer", createdAt: new Date(), updatedAt: new Date() },
+      { id: "2", name: "João Silva", email: "joao.silva@example.com", role: "Full Stack Developer", avatar: "JS", status: "busy", profileId: "profile-developer", createdAt: new Date(), updatedAt: new Date() },
+      { id: "3", name: "Maria Costa", email: "maria.costa@example.com", role: "Product Manager", avatar: "MC", status: "online", profileId: "profile-manager", createdAt: new Date(), updatedAt: new Date() },
+      { id: "4", name: "Rafael Santos", email: "rafael.santos@example.com", role: "Backend Developer", avatar: "RF", status: "offline", profileId: "profile-developer", createdAt: new Date(), updatedAt: new Date() },
+      { id: "5", name: "Lucas Oliveira", email: "lucas.oliveira@example.com", role: "DevOps Engineer", avatar: "LC", status: "online", profileId: "profile-devops", createdAt: new Date(), updatedAt: new Date() },
     ];
   }
 
@@ -197,7 +204,6 @@ export class MemStorage implements IStorage {
       role: insertUser.role || null,
       avatar: insertUser.avatar || insertUser.name.split(' ').map(n => n[0]).join('').toUpperCase(),
       status: insertUser.status || "offline",
-      teamId: insertUser.teamId || null,
       profileId: insertUser.profileId || null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -218,6 +224,52 @@ export class MemStorage implements IStorage {
     if (!existingUser) {
       throw new Error(`User with id ${id} not found`);
     }
+  }
+
+  // User Teams methods for MemStorage
+  async getUserTeams(userId: string): Promise<UserTeam[]> {
+    const userTeamsMock = [
+      { id: "ut-1", userId: "1", teamId: "team-2", role: "member", createdAt: new Date() },
+      { id: "ut-2", userId: "2", teamId: "team-1", role: "lead", createdAt: new Date() },
+      { id: "ut-3", userId: "3", teamId: "team-3", role: "admin", createdAt: new Date() },
+      { id: "ut-4", userId: "4", teamId: "team-1", role: "member", createdAt: new Date() },
+      { id: "ut-5", userId: "5", teamId: "team-1", role: "member", createdAt: new Date() },
+    ];
+    return userTeamsMock.filter(ut => ut.userId === userId);
+  }
+
+  async getTeamUsers(teamId: string): Promise<UserTeam[]> {
+    const userTeamsMock = [
+      { id: "ut-1", userId: "1", teamId: "team-2", role: "member", createdAt: new Date() },
+      { id: "ut-2", userId: "2", teamId: "team-1", role: "lead", createdAt: new Date() },
+      { id: "ut-3", userId: "3", teamId: "team-3", role: "admin", createdAt: new Date() },
+      { id: "ut-4", userId: "4", teamId: "team-1", role: "member", createdAt: new Date() },
+      { id: "ut-5", userId: "5", teamId: "team-1", role: "member", createdAt: new Date() },
+    ];
+    return userTeamsMock.filter(ut => ut.teamId === teamId);
+  }
+
+  async addUserToTeam(insertUserTeam: InsertUserTeam): Promise<UserTeam> {
+    const userTeam: UserTeam = {
+      id: randomUUID(),
+      ...insertUserTeam,
+      role: insertUserTeam.role || "member",
+      createdAt: new Date(),
+    };
+    return userTeam;
+  }
+
+  async removeUserFromTeam(userId: string, teamId: string): Promise<void> {
+    // In memory storage simulation - no actual removal needed
+  }
+
+  async updateUserTeamRole(userId: string, teamId: string, role: string): Promise<UserTeam> {
+    const userTeamsMock = await this.getUserTeams(userId);
+    const userTeam = userTeamsMock.find(ut => ut.teamId === teamId);
+    if (!userTeam) {
+      throw new Error(`User ${userId} not found in team ${teamId}`);
+    }
+    return { ...userTeam, role };
   }
 
   // Profiles methods for MemStorage
@@ -941,6 +993,47 @@ export class DatabaseStorage implements IStorage {
     if (result.rowCount === 0) {
       throw new Error(`User with id ${id} not found`);
     }
+  }
+
+  // User Teams methods for DatabaseStorage
+  async getUserTeams(userId: string): Promise<UserTeam[]> {
+    return await db.select().from(userTeams).where(eq(userTeams.userId, userId));
+  }
+
+  async getTeamUsers(teamId: string): Promise<UserTeam[]> {
+    return await db.select().from(userTeams).where(eq(userTeams.teamId, teamId));
+  }
+
+  async addUserToTeam(insertUserTeam: InsertUserTeam): Promise<UserTeam> {
+    const [userTeam] = await db
+      .insert(userTeams)
+      .values(insertUserTeam)
+      .returning();
+    return userTeam;
+  }
+
+  async removeUserFromTeam(userId: string, teamId: string): Promise<void> {
+    const result = await db
+      .delete(userTeams)
+      .where(and(eq(userTeams.userId, userId), eq(userTeams.teamId, teamId)));
+    
+    if (result.rowCount === 0) {
+      throw new Error(`User ${userId} not found in team ${teamId}`);
+    }
+  }
+
+  async updateUserTeamRole(userId: string, teamId: string, role: string): Promise<UserTeam> {
+    const [userTeam] = await db
+      .update(userTeams)
+      .set({ role })
+      .where(and(eq(userTeams.userId, userId), eq(userTeams.teamId, teamId)))
+      .returning();
+    
+    if (!userTeam) {
+      throw new Error(`User ${userId} not found in team ${teamId}`);
+    }
+    
+    return userTeam;
   }
 
   // Profiles methods for DatabaseStorage

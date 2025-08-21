@@ -346,6 +346,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User Teams routes
+  app.get("/api/users/:userId/teams", async (req, res) => {
+    try {
+      const userTeams = await storage.getUserTeams(req.params.userId);
+      res.json(userTeams);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get user teams" });
+    }
+  });
+
+  app.get("/api/teams/:teamId/users", async (req, res) => {
+    try {
+      const teamUsers = await storage.getTeamUsers(req.params.teamId);
+      res.json(teamUsers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get team users" });
+    }
+  });
+
+  app.post("/api/users/:userId/teams/:teamId", async (req, res) => {
+    try {
+      const { role = "member" } = req.body;
+      const userTeam = await storage.addUserToTeam({
+        userId: req.params.userId,
+        teamId: req.params.teamId,
+        role,
+      });
+      res.status(201).json(userTeam);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to add user to team" });
+    }
+  });
+
+  app.delete("/api/users/:userId/teams/:teamId", async (req, res) => {
+    try {
+      await storage.removeUserFromTeam(req.params.userId, req.params.teamId);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "User not found in team" });
+      }
+      res.status(500).json({ message: "Failed to remove user from team" });
+    }
+  });
+
+  app.patch("/api/users/:userId/teams/:teamId", async (req, res) => {
+    try {
+      const { role } = req.body;
+      const userTeam = await storage.updateUserTeamRole(req.params.userId, req.params.teamId, role);
+      res.json(userTeam);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "User not found in team" });
+      }
+      res.status(400).json({ message: "Failed to update user role in team" });
+    }
+  });
+
   // Team routes
   app.get("/api/teams", async (req, res) => {
     try {

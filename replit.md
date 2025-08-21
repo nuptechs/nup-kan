@@ -1,13 +1,16 @@
 # Overview
 
-This is a Kanban board application built with React and Express, featuring a modern task management interface with drag-and-drop functionality. The application allows users to organize tasks across different columns (Backlog, To Do, In Progress, Review, Done), manage team members, and track project analytics. It includes WIP (Work In Progress) limits, task assignments, progress tracking, and real-time updates. **The system now uses PostgreSQL for persistent data storage, ensuring all tasks and user data are saved permanently.**
+This is a Kanban board application built with React and Express, featuring a modern task management interface with drag-and-drop functionality. The application allows users to organize tasks across different columns (Backlog, To Do, In Progress, Review, Done), manage team members, and track project analytics. It includes WIP (Work In Progress) limits, task assignments, progress tracking, and real-time updates. **The system uses PostgreSQL for persistent data storage with a many-to-many relationship between users and teams.**
 
 **Recent Updates (August 21, 2025):**
 - ✅ Sistema completo de gerenciamento de times implementado com CRUD total
 - ✅ API de teams totalmente funcional com PostgreSQL
 - ✅ Interface em português para criação, edição e exclusão de times
 - ✅ Correções de erros LSP e avisos de acessibilidade nos dialogs
-- ✅ Integração completa entre frontend e backend para todas as funcionalidades
+- ✅ **MAJOR UPDATE**: Implementado relacionamento N:N entre usuários e times
+- ✅ Criada tabela `user_teams` para permitir usuários em múltiplos times
+- ✅ Migração completa do campo `teamId` para nova estrutura relacional
+- ✅ APIs novas para gerenciar membros de times: GET, POST, PATCH, DELETE
 
 # User Preferences
 
@@ -39,9 +42,19 @@ Preferred communication style: Simple, everyday language.
   - Tasks table with title, description, status, priority, assignee, and progress tracking
   - Columns table for kanban board configuration with WIP limits
   - Team members table for user management
+  - Users table (without teamId field - replaced by many-to-many)
+  - Teams table for team information
+  - **UserTeams table**: Junction table implementing N:N relationship between users and teams with role field
+  - Profiles and permissions tables for access control system
 - **Storage**: DatabaseStorage class implementing full CRUD operations with PostgreSQL
 - **Migrations**: Drizzle Kit for database schema migrations (`npm run db:push`)
-- **Data Persistence**: All tasks, columns, and team members are stored in PostgreSQL
+- **Data Persistence**: All tasks, columns, team members, and user-team relationships stored in PostgreSQL
+- **User-Team Management**: Complete API for many-to-many relationships with role-based access
+  - GET `/api/users/:userId/teams` - Get all teams for a user
+  - GET `/api/teams/:teamId/users` - Get all users in a team  
+  - POST `/api/users/:userId/teams/:teamId` - Add user to team with role
+  - DELETE `/api/users/:userId/teams/:teamId` - Remove user from team
+  - PATCH `/api/users/:userId/teams/:teamId` - Update user role in team
 
 ## Key Features Architecture
 - **Kanban Board**: Column-based task organization with drag-and-drop reordering
