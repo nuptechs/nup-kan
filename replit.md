@@ -1,6 +1,6 @@
 # Overview
 
-This is a Kanban board application built with React and Express, featuring a modern task management interface with drag-and-drop functionality. The application allows users to organize tasks across different columns (Backlog, To Do, In Progress, Review, Done), manage team members, and track project analytics. It includes WIP (Work In Progress) limits, task assignments, progress tracking, and real-time updates.
+This is a Kanban board application built with React and Express, featuring a modern task management interface with drag-and-drop functionality. The application allows users to organize tasks across different columns (Backlog, To Do, In Progress, Review, Done), manage team members, and track project analytics. It includes WIP (Work In Progress) limits, task assignments, progress tracking, and real-time updates. **The system now uses PostgreSQL for persistent data storage, ensuring all tasks and user data are saved permanently.**
 
 # User Preferences
 
@@ -26,12 +26,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Data Layer
 - **ORM**: Drizzle ORM with PostgreSQL dialect
+- **Database**: PostgreSQL database with persistent storage
 - **Schema**: Shared schema definitions between client and server using Drizzle-Zod
 - **Database Structure**: 
   - Tasks table with title, description, status, priority, assignee, and progress tracking
   - Columns table for kanban board configuration with WIP limits
   - Team members table for user management
-- **Migrations**: Drizzle Kit for database schema migrations
+- **Storage**: DatabaseStorage class implementing full CRUD operations with PostgreSQL
+- **Migrations**: Drizzle Kit for database schema migrations (`npm run db:push`)
+- **Data Persistence**: All tasks, columns, and team members are stored in PostgreSQL
 
 ## Key Features Architecture
 - **Kanban Board**: Column-based task organization with drag-and-drop reordering

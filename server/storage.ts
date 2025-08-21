@@ -1,4 +1,7 @@
 import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type TeamMember, type InsertTeamMember } from "@shared/schema";
+import { db } from "./db";
+import { tasks, columns, teamMembers } from "@shared/schema";
+import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -173,6 +176,13 @@ export class MemStorage implements IStorage {
     const task: Task = {
       ...insertTask,
       id,
+      description: insertTask.description || "",
+      status: insertTask.status || "backlog",
+      priority: insertTask.priority || "medium",
+      assigneeId: insertTask.assigneeId || "",
+      assigneeName: insertTask.assigneeName || "",
+      assigneeAvatar: insertTask.assigneeAvatar || "",
+      tags: insertTask.tags || [],
       progress: insertTask.progress || 0,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -271,4 +281,114 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // Task methods
+  async getTasks(): Promise<Task[]> {
+    return await db.select().from(tasks).orderBy(desc(tasks.createdAt));
+  }
+
+  async getTask(id: string): Promise<Task | undefined> {
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
+    return task || undefined;
+  }
+
+  async createTask(insertTask: InsertTask): Promise<Task> {
+    const [task] = await db
+      .insert(tasks)
+      .values({
+        ...insertTask,
+        description: insertTask.description || "",
+        assigneeId: insertTask.assigneeId || "",
+        assigneeName: insertTask.assigneeName || "",
+        assigneeAvatar: insertTask.assigneeAvatar || "",
+        tags: insertTask.tags || [],
+      })
+      .returning();
+    return task;
+  }
+
+  async updateTask(id: string, updateData: UpdateTask): Promise<Task> {
+    const [task] = await db
+      .update(tasks)
+      .set({
+        ...updateData,
+        updatedAt: new Date(),
+      })
+      .where(eq(tasks.id, id))
+      .returning();
+    
+    if (!task) {
+      throw new Error(`Task with id ${id} not found`);
+    }
+    
+    return task;
+  }
+
+  async deleteTask(id: string): Promise<void> {
+    const result = await db.delete(tasks).where(eq(tasks.id, id));
+    if (result.rowCount === 0) {
+      throw new Error(`Task with id ${id} not found`);
+    }
+  }
+
+  // Column methods
+  async getColumns(): Promise<Column[]> {
+    return await db.select().from(columns).orderBy(columns.position);
+  }
+
+  async getColumn(id: string): Promise<Column | undefined> {
+    const [column] = await db.select().from(columns).where(eq(columns.id, id));
+    return column || undefined;
+  }
+
+  async createColumn(column: InsertColumn): Promise<Column> {
+    const [newColumn] = await db
+      .insert(columns)
+      .values(column)
+      .returning();
+    return newColumn;
+  }
+
+  async updateColumn(id: string, updateData: Partial<Column>): Promise<Column> {
+    const [column] = await db
+      .update(columns)
+      .set(updateData)
+      .where(eq(columns.id, id))
+      .returning();
+    
+    if (!column) {
+      throw new Error(`Column with id ${id} not found`);
+    }
+    
+    return column;
+  }
+
+  // Team Members methods
+  async getTeamMembers(): Promise<TeamMember[]> {
+    return await db.select().from(teamMembers);
+  }
+
+  async createTeamMember(member: InsertTeamMember): Promise<TeamMember> {
+    const [newMember] = await db
+      .insert(teamMembers)
+      .values(member)
+      .returning();
+    return newMember;
+  }
+
+  async updateTeamMemberStatus(id: string, status: string): Promise<TeamMember> {
+    const [member] = await db
+      .update(teamMembers)
+      .set({ status })
+      .where(eq(teamMembers.id, id))
+      .returning();
+    
+    if (!member) {
+      throw new Error(`Team member with id ${id} not found`);
+    }
+    
+    return member;
+  }
+}
+
+export const storage = new DatabaseStorage();

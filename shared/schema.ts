@@ -22,7 +22,7 @@ export const columns = pgTable("columns", {
   id: varchar("id").primaryKey(),
   title: text("title").notNull(),
   position: integer("position").notNull(),
-  wipLimit: integer("wip_limit").default(null),
+  wipLimit: integer("wip_limit"),
   color: text("color").notNull(),
 });
 
