@@ -127,7 +127,7 @@ export function TeamManagementDialog() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       queryClient.invalidateQueries({ queryKey: ["/api/teams", selectedTeamId, "users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/all-team-users", selectedTeamId] });
       toast({
         title: "Usuário adicionado ao time",
         description: "O usuário foi adicionado ao time com sucesso.",
@@ -150,7 +150,7 @@ export function TeamManagementDialog() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       queryClient.invalidateQueries({ queryKey: ["/api/teams", selectedTeamId, "users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/all-team-users", selectedTeamId] });
       toast({
         title: "Usuário removido do time",
         description: "O usuário foi removido do time com sucesso.",
@@ -196,34 +196,32 @@ export function TeamManagementDialog() {
     enabled: !!selectedTeamId,
   });
 
-  // Query para buscar todos os user-teams
-  const { data: allUserTeams = [] } = useQuery({
-    queryKey: ["/api/user-teams"],
+  // Query para buscar todos os user-teams para o time selecionado
+  const { data: allTeamUsers = [] } = useQuery({
+    queryKey: ["/api/all-team-users", selectedTeamId],
     queryFn: async () => {
-      const response = await apiRequest("GET", "/api/users");
-      const users = await response.json();
-      const allUserTeams = [];
-      for (const user of users) {
-        const userTeamsResponse = await apiRequest("GET", `/api/users/${user.id}/teams`);
-        const userTeams = await userTeamsResponse.json();
-        allUserTeams.push(...userTeams.map(ut => ({ ...ut, userName: user.name })));
-      }
-      return allUserTeams;
+      if (!selectedTeamId) return [];
+      const response = await apiRequest("GET", `/api/teams/${selectedTeamId}/users`);
+      return response.json();
     },
+    enabled: !!selectedTeamId,
   });
 
   const getTeamMembers = (teamId: string) => {
-    const teamUserIds = teamUsers.map(ut => ut.userId);
+    if (!selectedTeamId || selectedTeamId !== teamId) return [];
+    const teamUserIds = allTeamUsers.map(ut => ut.userId);
     return users.filter(user => teamUserIds.includes(user.id));
   };
 
   const getUnassignedUsers = () => {
-    const assignedUserIds = allUserTeams.map(ut => ut.userId);
+    if (!selectedTeamId) return users;
+    const assignedUserIds = allTeamUsers.map(ut => ut.userId);
     return users.filter(user => !assignedUserIds.includes(user.id));
   };
 
   const isUserInTeam = (userId: string, teamId: string) => {
-    return allUserTeams.some(ut => ut.userId === userId && ut.teamId === teamId);
+    if (!selectedTeamId || selectedTeamId !== teamId) return false;
+    return allTeamUsers.some(ut => ut.userId === userId);
   };
 
   const selectedTeam = selectedTeamId ? teams.find(t => t.id === selectedTeamId) : null;
