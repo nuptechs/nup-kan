@@ -52,26 +52,27 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
   const isWipExceeded = column.wipLimit && tasks.length >= column.wipLimit;
 
   return (
-    <div
-      className={cn(
-        "bg-white rounded-xl shadow-sm border border-gray-200 h-full flex flex-col transition-all duration-200",
-        isDragOver && "drag-over"
-      )}
-      data-testid={`column-${column.id}`}
-    >
-      <div className="p-4 border-b border-gray-100 relative">
-        {/* Manage Columns Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onManageColumns}
-          className="absolute top-2 right-2 w-6 h-6 p-0 opacity-20 hover:opacity-80 transition-opacity duration-200"
-          data-testid={`button-manage-columns-${column.id}`}
-        >
-          <Plus className="w-3 h-3" />
-        </Button>
+    <div className="relative">
+      {/* Manage Columns Button - Outside column as a handle */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onManageColumns}
+        className="absolute -top-2 -right-2 w-6 h-6 p-0 z-10 opacity-20 hover:opacity-80 transition-opacity duration-200 bg-white border border-gray-200 rounded-full shadow-sm hover:shadow-md"
+        data-testid={`button-manage-columns-${column.id}`}
+      >
+        <Plus className="w-3 h-3" />
+      </Button>
 
-        <div className="flex items-center justify-between mb-2">
+      <div
+        className={cn(
+          "bg-white rounded-xl shadow-sm border border-gray-200 h-full flex flex-col transition-all duration-200",
+          isDragOver && "drag-over"
+        )}
+        data-testid={`column-${column.id}`}
+      >
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex items-center justify-between mb-2">
           <h2 className="font-semibold text-gray-900 flex items-center" data-testid={`column-title-${column.id}`}>
             <span className={cn("w-3 h-3 rounded-full mr-3", getColumnColorClasses(column.color))}></span>
             {column.title}
@@ -138,6 +139,7 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
             )}
           </Draggable>
         ))}
+      </div>
       </div>
     </div>
   );
