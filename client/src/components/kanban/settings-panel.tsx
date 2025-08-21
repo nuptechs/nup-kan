@@ -6,9 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Download, X } from "lucide-react";
+import { Download, X, Columns, Users, Tags } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { ColumnManagementDialog } from "./column-management-dialog";
+import { UserManagementDialog } from "./user-management-dialog";
+import { TagManagementDialog } from "./tag-management-dialog";
 import type { Column, TeamMember } from "@shared/schema";
 
 interface SettingsPanelProps {
@@ -20,6 +23,9 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [wipLimits, setWipLimits] = useState<Record<string, number>>({});
+  const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
+  const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
+  const [isTagManagementOpen, setIsTagManagementOpen] = useState(false);
 
   const { data: columns = [] } = useQuery<Column[]>({
     queryKey: ["/api/columns"],
@@ -126,6 +132,42 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto py-6 space-y-6">
+          {/* Management Buttons */}
+          <div className="space-y-4">
+            <h3 className="font-medium text-gray-900">Gerenciamento</h3>
+            <div className="grid grid-cols-1 gap-3">
+              <Button
+                onClick={() => setIsColumnManagementOpen(true)}
+                variant="outline"
+                className="w-full justify-start"
+                data-testid="button-manage-columns"
+              >
+                <Columns className="w-4 h-4 mr-2" />
+                Gerenciar Colunas
+              </Button>
+              <Button
+                onClick={() => setIsUserManagementOpen(true)}
+                variant="outline"
+                className="w-full justify-start"
+                data-testid="button-manage-users"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Gerenciar Usuários
+              </Button>
+              <Button
+                onClick={() => setIsTagManagementOpen(true)}
+                variant="outline"
+                className="w-full justify-start"
+                data-testid="button-manage-tags"
+              >
+                <Tags className="w-4 h-4 mr-2" />
+                Gerenciar Tags
+              </Button>
+            </div>
+          </div>
+
+          <Separator />
+
           {/* WIP Limits */}
           <div className="space-y-4">
             <h3 className="font-medium text-gray-900" data-testid="wip-limits-heading">Limites WIP</h3>
@@ -256,6 +298,20 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           </Button>
         </div>
       </SheetContent>
+
+      {/* Management Dialogs */}
+      <ColumnManagementDialog
+        isOpen={isColumnManagementOpen}
+        onClose={() => setIsColumnManagementOpen(false)}
+      />
+      <UserManagementDialog
+        isOpen={isUserManagementOpen}
+        onClose={() => setIsUserManagementOpen(false)}
+      />
+      <TagManagementDialog
+        isOpen={isTagManagementOpen}
+        onClose={() => setIsTagManagementOpen(false)}
+      />
     </Sheet>
   );
 }

@@ -1,4 +1,4 @@
-import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type User, type InsertUser, type UpdateUser } from "@shared/schema";
+import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type User, type InsertUser, type UpdateUser } from "@shared/schema";
 import { db } from "./db";
 import { tasks, columns, teamMembers, tags, users } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
@@ -16,7 +16,9 @@ export interface IStorage {
   getColumns(): Promise<Column[]>;
   getColumn(id: string): Promise<Column | undefined>;
   createColumn(column: InsertColumn): Promise<Column>;
-  updateColumn(id: string, column: Partial<Column>): Promise<Column>;
+  updateColumn(id: string, data: UpdateColumn): Promise<Column>;
+  deleteColumn(id: string): Promise<void>;
+  reorderColumns(reorderedColumns: { id: string; position: number }[]): Promise<void>;
   
   // Team Members
   getTeamMembers(): Promise<TeamMember[]>;
@@ -323,28 +325,50 @@ export class MemStorage implements IStorage {
     return this.columns.get(id);
   }
 
-  async createColumn(column: InsertColumn): Promise<Column> {
-    const newColumn: Column = {
-      ...column,
-      wipLimit: column.wipLimit || null,
+  async createColumn(insertColumn: InsertColumn): Promise<Column> {
+    const column: Column = {
+      id: insertColumn.title.toLowerCase().replace(/\s+/g, '-'),
+      ...insertColumn,
     };
-    this.columns.set(column.id, newColumn);
-    return newColumn;
+    this.columns.set(column.id, column);
+    return column;
   }
 
-  async updateColumn(id: string, updateData: Partial<Column>): Promise<Column> {
+  async updateColumn(id: string, data: UpdateColumn): Promise<Column> {
     const existingColumn = this.columns.get(id);
     if (!existingColumn) {
       throw new Error(`Column with id ${id} not found`);
     }
     
-    const updatedColumn: Column = {
-      ...existingColumn,
-      ...updateData,
-    };
-    
+    const updatedColumn = { ...existingColumn, ...data };
     this.columns.set(id, updatedColumn);
     return updatedColumn;
+  }
+
+  async deleteColumn(id: string): Promise<void> {
+    const existingColumn = this.columns.get(id);
+    if (!existingColumn) {
+      throw new Error(`Column with id ${id} not found`);
+    }
+    
+    // Move tasks from deleted column to backlog
+    const tasks = Array.from(this.tasks.values());
+    tasks.forEach(task => {
+      if (task.status === id) {
+        this.tasks.set(task.id, { ...task, status: "backlog" });
+      }
+    });
+    
+    this.columns.delete(id);
+  }
+
+  async reorderColumns(reorderedColumns: { id: string; position: number }[]): Promise<void> {
+    reorderedColumns.forEach(({ id, position }) => {
+      const column = this.columns.get(id);
+      if (column) {
+        this.columns.set(id, { ...column, position });
+      }
+    });
   }
 
   // Team member methods
@@ -441,7 +465,11 @@ export class DatabaseStorage implements IStorage {
     return column || undefined;
   }
 
-  async createColumn(column: InsertColumn): Promise<Column> {
+  async createColumn(insertColumn: InsertColumn): Promise<Column> {
+    const column: Column = {
+      id: insertColumn.title.toLowerCase().replace(/\s+/g, '-'),
+      ...insertColumn,
+    };
     const [newColumn] = await db
       .insert(columns)
       .values(column)
@@ -449,10 +477,10 @@ export class DatabaseStorage implements IStorage {
     return newColumn;
   }
 
-  async updateColumn(id: string, updateData: Partial<Column>): Promise<Column> {
+  async updateColumn(id: string, data: UpdateColumn): Promise<Column> {
     const [column] = await db
       .update(columns)
-      .set(updateData)
+      .set(data)
       .where(eq(columns.id, id))
       .returning();
     
@@ -461,6 +489,28 @@ export class DatabaseStorage implements IStorage {
     }
     
     return column;
+  }
+
+  async deleteColumn(id: string): Promise<void> {
+    // Move tasks from deleted column to backlog
+    await db
+      .update(tasks)
+      .set({ status: "backlog" })
+      .where(eq(tasks.status, id));
+    
+    const result = await db.delete(columns).where(eq(columns.id, id));
+    if (result.rowCount === 0) {
+      throw new Error(`Column with id ${id} not found`);
+    }
+  }
+
+  async reorderColumns(reorderedColumns: { id: string; position: number }[]): Promise<void> {
+    for (const { id, position } of reorderedColumns) {
+      await db
+        .update(columns)
+        .set({ position })
+        .where(eq(columns.id, id));
+    }
   }
 
   // Team Members methods

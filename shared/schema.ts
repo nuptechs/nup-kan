@@ -60,7 +60,10 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
 
 export const updateTaskSchema = insertTaskSchema.partial();
 
-export const insertColumnSchema = createInsertSchema(columns);
+export const insertColumnSchema = createInsertSchema(columns).omit({
+  id: true,
+});
+export const updateColumnSchema = insertColumnSchema.partial();
 
 export const insertTeamMemberSchema = createInsertSchema(teamMembers).omit({
   id: true,
@@ -84,6 +87,7 @@ export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type UpdateTask = z.infer<typeof updateTaskSchema>;
 export type Column = typeof columns.$inferSelect;
 export type InsertColumn = z.infer<typeof insertColumnSchema>;
+export type UpdateColumn = z.infer<typeof updateColumnSchema>;
 export type TeamMember = typeof teamMembers.$inferSelect;
 export type InsertTeamMember = z.infer<typeof insertTeamMemberSchema>;
 export type Tag = typeof tags.$inferSelect;

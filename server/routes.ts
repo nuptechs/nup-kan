@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTaskSchema, updateTaskSchema, insertColumnSchema, insertTeamMemberSchema, insertTagSchema, insertUserSchema, updateUserSchema } from "@shared/schema";
+import { insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertUserSchema, updateUserSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
@@ -71,15 +71,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/columns/:id", async (req, res) => {
+  app.get("/api/columns/:id", async (req, res) => {
     try {
-      const column = await storage.updateColumn(req.params.id, req.body);
+      const column = await storage.getColumn(req.params.id);
+      if (!column) {
+        return res.status(404).json({ message: "Column not found" });
+      }
+      res.json(column);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch column" });
+    }
+  });
+
+  app.post("/api/columns", async (req, res) => {
+    try {
+      const columnData = insertColumnSchema.parse(req.body);
+      const column = await storage.createColumn(columnData);
+      res.status(201).json(column);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid column data" });
+    }
+  });
+
+  app.put("/api/columns/:id", async (req, res) => {
+    try {
+      const columnData = updateColumnSchema.parse(req.body);
+      const column = await storage.updateColumn(req.params.id, columnData);
       res.json(column);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "Column not found" });
       }
       res.status(400).json({ message: "Invalid column data" });
+    }
+  });
+
+  app.patch("/api/columns/:id", async (req, res) => {
+    try {
+      const columnData = updateColumnSchema.parse(req.body);
+      const column = await storage.updateColumn(req.params.id, columnData);
+      res.json(column);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Column not found" });
+      }
+      res.status(400).json({ message: "Invalid column data" });
+    }
+  });
+
+  app.delete("/api/columns/:id", async (req, res) => {
+    try {
+      await storage.deleteColumn(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Column not found" });
+      }
+      res.status(500).json({ message: "Failed to delete column" });
+    }
+  });
+
+  app.post("/api/columns/reorder", async (req, res) => {
+    try {
+      const reorderedColumns = req.body.columns;
+      await storage.reorderColumns(reorderedColumns);
+      res.status(200).json({ message: "Columns reordered successfully" });
+    } catch (error) {
+      res.status(400).json({ message: "Failed to reorder columns" });
     }
   });
 
