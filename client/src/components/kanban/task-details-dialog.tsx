@@ -71,9 +71,11 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
     mutationFn: async (data: FormData) => {
       if (!task) return;
       
-      const assignee = teamMembers.find(member => member.id === data.assigneeId);
+      const isAssigneeNone = data.assigneeId === "none" || data.assigneeId === "";
+      const assignee = isAssigneeNone ? null : teamMembers.find(member => member.id === data.assigneeId);
       const taskData = {
         ...data,
+        assigneeId: isAssigneeNone ? "" : data.assigneeId,
         assigneeName: assignee?.name || "",
         assigneeAvatar: assignee?.avatar || "",
       };
@@ -347,7 +349,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Sem responsável</SelectItem>
+                        <SelectItem value="none">Sem responsável</SelectItem>
                         {teamMembers.map((member) => (
                           <SelectItem key={member.id} value={member.id}>
                             <div className="flex items-center space-x-2">

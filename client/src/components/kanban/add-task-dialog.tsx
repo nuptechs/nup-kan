@@ -49,11 +49,13 @@ export function AddTaskDialog({ isOpen, onClose }: AddTaskDialogProps) {
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const assignee = teamMembers.find(member => member.id === data.assigneeId);
+      const isAssigneeNone = data.assigneeId === "none" || data.assigneeId === "";
+      const assignee = isAssigneeNone ? null : teamMembers.find(member => member.id === data.assigneeId);
       const taskData = {
         ...data,
-        assigneeName: assignee?.name,
-        assigneeAvatar: assignee?.avatar,
+        assigneeId: isAssigneeNone ? "" : data.assigneeId,
+        assigneeName: assignee?.name || "",
+        assigneeAvatar: assignee?.avatar || "",
       };
       
       const response = await apiRequest("POST", "/api/tasks", taskData);
@@ -191,7 +193,7 @@ export function AddTaskDialog({ isOpen, onClose }: AddTaskDialogProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Sem responsável</SelectItem>
+                      <SelectItem value="none">Sem responsável</SelectItem>
                       {teamMembers.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           <div className="flex items-center space-x-2">
