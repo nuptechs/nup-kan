@@ -120,21 +120,46 @@ export function TeamManagementDialog() {
   });
 
   const assignUserToTeamMutation = useMutation({
-    mutationFn: async ({ userId, teamId }: { userId: string; teamId: string | null }) => {
-      const response = await apiRequest("PATCH", `/api/users/${userId}`, { teamId });
+    mutationFn: async ({ userId, teamId, role = "member" }: { userId: string; teamId: string; role?: string }) => {
+      const response = await apiRequest("POST", `/api/users/${userId}/teams/${teamId}`, { role });
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/teams", selectedTeamId, "users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
       toast({
-        title: "Usuário atribuído",
-        description: "O usuário foi atribuído ao time com sucesso.",
+        title: "Usuário adicionado ao time",
+        description: "O usuário foi adicionado ao time com sucesso.",
       });
     },
     onError: () => {
       toast({
         title: "Erro",
-        description: "Não foi possível atribuir o usuário ao time.",
+        description: "Não foi possível adicionar o usuário ao time.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const removeUserFromTeamMutation = useMutation({
+    mutationFn: async ({ userId, teamId }: { userId: string; teamId: string }) => {
+      const response = await apiRequest("DELETE", `/api/users/${userId}/teams/${teamId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/teams", selectedTeamId, "users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
+      toast({
+        title: "Usuário removido do time",
+        description: "O usuário foi removido do time com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover o usuário do time.",
         variant: "destructive",
       });
     },
@@ -160,12 +185,45 @@ export function TeamManagementDialog() {
     form.reset();
   };
 
+  // Query para buscar membros de um team específico
+  const { data: teamUsers = [] } = useQuery({
+    queryKey: ["/api/teams", selectedTeamId, "users"],
+    queryFn: async () => {
+      if (!selectedTeamId) return [];
+      const response = await apiRequest("GET", `/api/teams/${selectedTeamId}/users`);
+      return response.json();
+    },
+    enabled: !!selectedTeamId,
+  });
+
+  // Query para buscar todos os user-teams
+  const { data: allUserTeams = [] } = useQuery({
+    queryKey: ["/api/user-teams"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/users");
+      const users = await response.json();
+      const allUserTeams = [];
+      for (const user of users) {
+        const userTeamsResponse = await apiRequest("GET", `/api/users/${user.id}/teams`);
+        const userTeams = await userTeamsResponse.json();
+        allUserTeams.push(...userTeams.map(ut => ({ ...ut, userName: user.name })));
+      }
+      return allUserTeams;
+    },
+  });
+
   const getTeamMembers = (teamId: string) => {
-    return users.filter(user => user.teamId === teamId);
+    const teamUserIds = teamUsers.map(ut => ut.userId);
+    return users.filter(user => teamUserIds.includes(user.id));
   };
 
   const getUnassignedUsers = () => {
-    return users.filter(user => !user.teamId);
+    const assignedUserIds = allUserTeams.map(ut => ut.userId);
+    return users.filter(user => !assignedUserIds.includes(user.id));
+  };
+
+  const isUserInTeam = (userId: string, teamId: string) => {
+    return allUserTeams.some(ut => ut.userId === userId && ut.teamId === teamId);
   };
 
   const selectedTeam = selectedTeamId ? teams.find(t => t.id === selectedTeamId) : null;
@@ -411,7 +469,7 @@ export function TeamManagementDialog() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => assignUserToTeamMutation.mutate({ userId: member.id, teamId: null })}
+                                onClick={() => selectedTeamId && removeUserFromTeamMutation.mutate({ userId: member.id, teamId: selectedTeamId })}
                                 data-testid={`button-remove-member-${member.id}`}
                               >
                                 <Trash2 className="w-3 h-3" />
@@ -449,9 +507,10 @@ export function TeamManagementDialog() {
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={!selectedTeamId || assignUserToTeamMutation.isPending}
+                            disabled={!selectedTeamId || assignUserToTeamMutation.isPending || (selectedTeamId ? isUserInTeam(user.id, selectedTeamId) : true)}
                             onClick={() => 
                               selectedTeamId && 
+                              !isUserInTeam(user.id, selectedTeamId) &&
                               assignUserToTeamMutation.mutate({ userId: user.id, teamId: selectedTeamId })
                             }
                             data-testid={`button-assign-user-${user.id}`}
