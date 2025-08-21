@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema } from "@shared/schema";
+import { insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
@@ -388,6 +388,182 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Team not found" });
       }
       res.status(500).json({ message: "Failed to delete team" });
+    }
+  });
+
+  // Profile routes
+  app.get("/api/profiles", async (req, res) => {
+    try {
+      const profiles = await storage.getProfiles();
+      res.json(profiles);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch profiles" });
+    }
+  });
+
+  app.get("/api/profiles/:id", async (req, res) => {
+    try {
+      const profile = await storage.getProfile(req.params.id);
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
+  app.post("/api/profiles", async (req, res) => {
+    try {
+      const profileData = insertProfileSchema.parse(req.body);
+      const profile = await storage.createProfile(profileData);
+      res.status(201).json(profile);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid profile data" });
+    }
+  });
+
+  app.patch("/api/profiles/:id", async (req, res) => {
+    try {
+      const profileData = updateProfileSchema.parse(req.body);
+      const profile = await storage.updateProfile(req.params.id, profileData);
+      res.json(profile);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      res.status(400).json({ message: "Invalid profile data" });
+    }
+  });
+
+  app.delete("/api/profiles/:id", async (req, res) => {
+    try {
+      await storage.deleteProfile(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      res.status(500).json({ message: "Failed to delete profile" });
+    }
+  });
+
+  // Permission routes
+  app.get("/api/permissions", async (req, res) => {
+    try {
+      const permissions = await storage.getPermissions();
+      res.json(permissions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch permissions" });
+    }
+  });
+
+  app.get("/api/permissions/:id", async (req, res) => {
+    try {
+      const permission = await storage.getPermission(req.params.id);
+      if (!permission) {
+        return res.status(404).json({ message: "Permission not found" });
+      }
+      res.json(permission);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch permission" });
+    }
+  });
+
+  app.post("/api/permissions", async (req, res) => {
+    try {
+      const permissionData = insertPermissionSchema.parse(req.body);
+      const permission = await storage.createPermission(permissionData);
+      res.status(201).json(permission);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid permission data" });
+    }
+  });
+
+  app.patch("/api/permissions/:id", async (req, res) => {
+    try {
+      const permissionData = req.body;
+      const permission = await storage.updatePermission(req.params.id, permissionData);
+      res.json(permission);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Permission not found" });
+      }
+      res.status(400).json({ message: "Invalid permission data" });
+    }
+  });
+
+  app.delete("/api/permissions/:id", async (req, res) => {
+    try {
+      await storage.deletePermission(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Permission not found" });
+      }
+      res.status(500).json({ message: "Failed to delete permission" });
+    }
+  });
+
+  // Profile Permissions routes
+  app.get("/api/profiles/:id/permissions", async (req, res) => {
+    try {
+      const profilePermissions = await storage.getProfilePermissions(req.params.id);
+      res.json(profilePermissions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch profile permissions" });
+    }
+  });
+
+  app.post("/api/profiles/:profileId/permissions/:permissionId", async (req, res) => {
+    try {
+      const profilePermission = await storage.addPermissionToProfile(req.params.profileId, req.params.permissionId);
+      res.status(201).json(profilePermission);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to add permission to profile" });
+    }
+  });
+
+  app.delete("/api/profiles/:profileId/permissions/:permissionId", async (req, res) => {
+    try {
+      await storage.removePermissionFromProfile(req.params.profileId, req.params.permissionId);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Profile permission not found" });
+      }
+      res.status(500).json({ message: "Failed to remove permission from profile" });
+    }
+  });
+
+  // Team Profiles routes
+  app.get("/api/teams/:id/profiles", async (req, res) => {
+    try {
+      const teamProfiles = await storage.getTeamProfiles(req.params.id);
+      res.json(teamProfiles);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch team profiles" });
+    }
+  });
+
+  app.post("/api/teams/:teamId/profiles/:profileId", async (req, res) => {
+    try {
+      const teamProfile = await storage.assignProfileToTeam(req.params.teamId, req.params.profileId);
+      res.status(201).json(teamProfile);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to assign profile to team" });
+    }
+  });
+
+  app.delete("/api/teams/:teamId/profiles/:profileId", async (req, res) => {
+    try {
+      await storage.removeProfileFromTeam(req.params.teamId, req.params.profileId);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Team profile not found" });
+      }
+      res.status(500).json({ message: "Failed to remove profile from team" });
     }
   });
 

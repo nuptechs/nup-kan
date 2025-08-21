@@ -58,8 +58,41 @@ export const users = pgTable("users", {
   avatar: text("avatar").default(""),
   status: text("status").default("offline"),
   teamId: varchar("team_id").references(() => teams.id),
+  profileId: varchar("profile_id").references(() => profiles.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const profiles = pgTable("profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  description: text("description").default(""),
+  color: text("color").notNull().default("#3b82f6"),
+  isDefault: text("is_default").default("false"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const permissions = pgTable("permissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  description: text("description").default(""),
+  category: text("category").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const profilePermissions = pgTable("profile_permissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  profileId: varchar("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  permissionId: varchar("permission_id").notNull().references(() => permissions.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const teamProfiles = pgTable("team_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamId: varchar("team_id").notNull().references(() => teams.id, { onDelete: "cascade" }),
+  profileId: varchar("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({
@@ -107,6 +140,31 @@ export const insertUserSchema = createInsertSchema(users).omit({
 
 export const updateUserSchema = insertUserSchema.partial();
 
+export const insertProfileSchema = createInsertSchema(profiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  name: z.string().min(3, "O nome do perfil deve conter pelo menos 3 caracteres").trim(),
+});
+
+export const updateProfileSchema = insertProfileSchema.partial();
+
+export const insertPermissionSchema = createInsertSchema(permissions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertProfilePermissionSchema = createInsertSchema(profilePermissions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTeamProfileSchema = createInsertSchema(teamProfiles).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type UpdateTask = z.infer<typeof updateTaskSchema>;
@@ -123,3 +181,12 @@ export type UpdateTeam = z.infer<typeof updateTeamSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpdateUser = z.infer<typeof updateUserSchema>;
+export type Profile = typeof profiles.$inferSelect;
+export type InsertProfile = z.infer<typeof insertProfileSchema>;
+export type UpdateProfile = z.infer<typeof updateProfileSchema>;
+export type Permission = typeof permissions.$inferSelect;
+export type InsertPermission = z.infer<typeof insertPermissionSchema>;
+export type ProfilePermission = typeof profilePermissions.$inferSelect;
+export type InsertProfilePermission = z.infer<typeof insertProfilePermissionSchema>;
+export type TeamProfile = typeof teamProfiles.$inferSelect;
+export type InsertTeamProfile = z.infer<typeof insertTeamProfileSchema>;

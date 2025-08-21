@@ -1,6 +1,6 @@
-import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser } from "@shared/schema";
+import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile } from "@shared/schema";
 import { db } from "./db";
-import { tasks, columns, teamMembers, tags, teams, users } from "@shared/schema";
+import { tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -45,6 +45,30 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, user: UpdateUser): Promise<User>;
   deleteUser(id: string): Promise<void>;
+
+  // Profiles
+  getProfiles(): Promise<Profile[]>;
+  getProfile(id: string): Promise<Profile | undefined>;
+  createProfile(profile: InsertProfile): Promise<Profile>;
+  updateProfile(id: string, profile: UpdateProfile): Promise<Profile>;
+  deleteProfile(id: string): Promise<void>;
+
+  // Permissions
+  getPermissions(): Promise<Permission[]>;
+  getPermission(id: string): Promise<Permission | undefined>;
+  createPermission(permission: InsertPermission): Promise<Permission>;
+  updatePermission(id: string, permission: Partial<Permission>): Promise<Permission>;
+  deletePermission(id: string): Promise<void>;
+
+  // Profile Permissions
+  getProfilePermissions(profileId: string): Promise<ProfilePermission[]>;
+  addPermissionToProfile(profileId: string, permissionId: string): Promise<ProfilePermission>;
+  removePermissionFromProfile(profileId: string, permissionId: string): Promise<void>;
+
+  // Team Profiles
+  getTeamProfiles(teamId: string): Promise<TeamProfile[]>;
+  assignProfileToTeam(teamId: string, profileId: string): Promise<TeamProfile>;
+  removeProfileFromTeam(teamId: string, profileId: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -150,11 +174,11 @@ export class MemStorage implements IStorage {
   // Users methods for MemStorage
   async getUsers(): Promise<User[]> {
     return [
-      { id: "1", name: "Ana Maria", email: "ana.maria@example.com", role: "Designer UX/UI", avatar: "AM", status: "online", teamId: "team-2", createdAt: new Date(), updatedAt: new Date() },
-      { id: "2", name: "João Silva", email: "joao.silva@example.com", role: "Full Stack Developer", avatar: "JS", status: "busy", teamId: "team-1", createdAt: new Date(), updatedAt: new Date() },
-      { id: "3", name: "Maria Costa", email: "maria.costa@example.com", role: "Product Manager", avatar: "MC", status: "online", teamId: "team-3", createdAt: new Date(), updatedAt: new Date() },
-      { id: "4", name: "Rafael Santos", email: "rafael.santos@example.com", role: "Backend Developer", avatar: "RF", status: "offline", teamId: "team-1", createdAt: new Date(), updatedAt: new Date() },
-      { id: "5", name: "Lucas Oliveira", email: "lucas.oliveira@example.com", role: "DevOps Engineer", avatar: "LC", status: "online", teamId: "team-1", createdAt: new Date(), updatedAt: new Date() },
+      { id: "1", name: "Ana Maria", email: "ana.maria@example.com", role: "Designer UX/UI", avatar: "AM", status: "online", teamId: "team-2", profileId: "profile-designer", createdAt: new Date(), updatedAt: new Date() },
+      { id: "2", name: "João Silva", email: "joao.silva@example.com", role: "Full Stack Developer", avatar: "JS", status: "busy", teamId: "team-1", profileId: "profile-developer", createdAt: new Date(), updatedAt: new Date() },
+      { id: "3", name: "Maria Costa", email: "maria.costa@example.com", role: "Product Manager", avatar: "MC", status: "online", teamId: "team-3", profileId: "profile-manager", createdAt: new Date(), updatedAt: new Date() },
+      { id: "4", name: "Rafael Santos", email: "rafael.santos@example.com", role: "Backend Developer", avatar: "RF", status: "offline", teamId: "team-1", profileId: "profile-developer", createdAt: new Date(), updatedAt: new Date() },
+      { id: "5", name: "Lucas Oliveira", email: "lucas.oliveira@example.com", role: "DevOps Engineer", avatar: "LC", status: "online", teamId: "team-1", profileId: "profile-devops", createdAt: new Date(), updatedAt: new Date() },
     ];
   }
 
@@ -171,6 +195,7 @@ export class MemStorage implements IStorage {
       avatar: insertUser.avatar || insertUser.name.split(' ').map(n => n[0]).join('').toUpperCase(),
       status: insertUser.status || "offline",
       teamId: insertUser.teamId || null,
+      profileId: insertUser.profileId || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -190,6 +215,178 @@ export class MemStorage implements IStorage {
     if (!existingUser) {
       throw new Error(`User with id ${id} not found`);
     }
+  }
+
+  // Profiles methods for MemStorage
+  async getProfiles(): Promise<Profile[]> {
+    return [
+      { id: "profile-admin", name: "Administrador", description: "Acesso total ao sistema", color: "#ef4444", isDefault: "false", createdAt: new Date(), updatedAt: new Date() },
+      { id: "profile-manager", name: "Gerente", description: "Gerenciamento de projetos e equipes", color: "#8b5cf6", isDefault: "false", createdAt: new Date(), updatedAt: new Date() },
+      { id: "profile-developer", name: "Desenvolvedor", description: "Desenvolvimento e edição de tarefas", color: "#3b82f6", isDefault: "true", createdAt: new Date(), updatedAt: new Date() },
+      { id: "profile-designer", name: "Designer", description: "Design e prototipação", color: "#06b6d4", isDefault: "false", createdAt: new Date(), updatedAt: new Date() },
+      { id: "profile-devops", name: "DevOps", description: "Infraestrutura e deploy", color: "#10b981", isDefault: "false", createdAt: new Date(), updatedAt: new Date() },
+    ];
+  }
+
+  async getProfile(id: string): Promise<Profile | undefined> {
+    const profiles = await this.getProfiles();
+    return profiles.find(profile => profile.id === id);
+  }
+
+  async createProfile(insertProfile: InsertProfile): Promise<Profile> {
+    const profile: Profile = {
+      id: randomUUID(),
+      ...insertProfile,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    return profile;
+  }
+
+  async updateProfile(id: string, updateData: UpdateProfile): Promise<Profile> {
+    const existingProfile = await this.getProfile(id);
+    if (!existingProfile) {
+      throw new Error(`Profile with id ${id} not found`);
+    }
+    return { ...existingProfile, ...updateData, updatedAt: new Date() };
+  }
+
+  async deleteProfile(id: string): Promise<void> {
+    const existingProfile = await this.getProfile(id);
+    if (!existingProfile) {
+      throw new Error(`Profile with id ${id} not found`);
+    }
+  }
+
+  // Permissions methods for MemStorage
+  async getPermissions(): Promise<Permission[]> {
+    return [
+      // Tarefas
+      { id: "perm-task-create", name: "Criar Tarefas", description: "Permitir criação de novas tarefas", category: "tasks", createdAt: new Date() },
+      { id: "perm-task-edit", name: "Editar Tarefas", description: "Permitir edição de tarefas existentes", category: "tasks", createdAt: new Date() },
+      { id: "perm-task-delete", name: "Excluir Tarefas", description: "Permitir exclusão de tarefas", category: "tasks", createdAt: new Date() },
+      { id: "perm-task-assign", name: "Atribuir Tarefas", description: "Permitir atribuição de tarefas a usuários", category: "tasks", createdAt: new Date() },
+      
+      // Colunas
+      { id: "perm-column-create", name: "Criar Colunas", description: "Permitir criação de novas colunas", category: "columns", createdAt: new Date() },
+      { id: "perm-column-edit", name: "Editar Colunas", description: "Permitir edição de colunas existentes", category: "columns", createdAt: new Date() },
+      { id: "perm-column-delete", name: "Excluir Colunas", description: "Permitir exclusão de colunas", category: "columns", createdAt: new Date() },
+      { id: "perm-column-reorder", name: "Reordenar Colunas", description: "Permitir reordenação de colunas", category: "columns", createdAt: new Date() },
+      
+      // Times
+      { id: "perm-team-create", name: "Criar Times", description: "Permitir criação de novos times", category: "teams", createdAt: new Date() },
+      { id: "perm-team-edit", name: "Editar Times", description: "Permitir edição de times existentes", category: "teams", createdAt: new Date() },
+      { id: "perm-team-delete", name: "Excluir Times", description: "Permitir exclusão de times", category: "teams", createdAt: new Date() },
+      { id: "perm-team-manage", name: "Gerenciar Membros", description: "Permitir gerenciamento de membros do time", category: "teams", createdAt: new Date() },
+      
+      // Usuários
+      { id: "perm-user-create", name: "Criar Usuários", description: "Permitir criação de novos usuários", category: "users", createdAt: new Date() },
+      { id: "perm-user-edit", name: "Editar Usuários", description: "Permitir edição de usuários existentes", category: "users", createdAt: new Date() },
+      { id: "perm-user-delete", name: "Excluir Usuários", description: "Permitir exclusão de usuários", category: "users", createdAt: new Date() },
+      
+      // Perfis
+      { id: "perm-profile-create", name: "Criar Perfis", description: "Permitir criação de novos perfis", category: "profiles", createdAt: new Date() },
+      { id: "perm-profile-edit", name: "Editar Perfis", description: "Permitir edição de perfis existentes", category: "profiles", createdAt: new Date() },
+      { id: "perm-profile-delete", name: "Excluir Perfis", description: "Permitir exclusão de perfis", category: "profiles", createdAt: new Date() },
+      
+      // Analytics
+      { id: "perm-analytics-view", name: "Ver Analytics", description: "Permitir visualização de métricas e relatórios", category: "analytics", createdAt: new Date() },
+    ];
+  }
+
+  async getPermission(id: string): Promise<Permission | undefined> {
+    const permissions = await this.getPermissions();
+    return permissions.find(permission => permission.id === id);
+  }
+
+  async createPermission(insertPermission: InsertPermission): Promise<Permission> {
+    const permission: Permission = {
+      id: randomUUID(),
+      ...insertPermission,
+      createdAt: new Date(),
+    };
+    return permission;
+  }
+
+  async updatePermission(id: string, updateData: Partial<Permission>): Promise<Permission> {
+    const existingPermission = await this.getPermission(id);
+    if (!existingPermission) {
+      throw new Error(`Permission with id ${id} not found`);
+    }
+    return { ...existingPermission, ...updateData };
+  }
+
+  async deletePermission(id: string): Promise<void> {
+    const existingPermission = await this.getPermission(id);
+    if (!existingPermission) {
+      throw new Error(`Permission with id ${id} not found`);
+    }
+  }
+
+  // Profile Permissions methods for MemStorage
+  async getProfilePermissions(profileId: string): Promise<ProfilePermission[]> {
+    // Retorna permissões baseadas no perfil
+    const defaultPermissions: { [key: string]: string[] } = {
+      "profile-admin": ["perm-task-create", "perm-task-edit", "perm-task-delete", "perm-task-assign", "perm-column-create", "perm-column-edit", "perm-column-delete", "perm-column-reorder", "perm-team-create", "perm-team-edit", "perm-team-delete", "perm-team-manage", "perm-user-create", "perm-user-edit", "perm-user-delete", "perm-profile-create", "perm-profile-edit", "perm-profile-delete", "perm-analytics-view"],
+      "profile-manager": ["perm-task-create", "perm-task-edit", "perm-task-assign", "perm-column-edit", "perm-team-edit", "perm-team-manage", "perm-user-edit", "perm-analytics-view"],
+      "profile-developer": ["perm-task-create", "perm-task-edit", "perm-task-assign"],
+      "profile-designer": ["perm-task-create", "perm-task-edit"],
+      "profile-devops": ["perm-task-create", "perm-task-edit", "perm-column-edit", "perm-analytics-view"],
+    };
+
+    const permissionIds = defaultPermissions[profileId] || [];
+    return permissionIds.map(permissionId => ({
+      id: randomUUID(),
+      profileId,
+      permissionId,
+      createdAt: new Date(),
+    }));
+  }
+
+  async addPermissionToProfile(profileId: string, permissionId: string): Promise<ProfilePermission> {
+    const profilePermission: ProfilePermission = {
+      id: randomUUID(),
+      profileId,
+      permissionId,
+      createdAt: new Date(),
+    };
+    return profilePermission;
+  }
+
+  async removePermissionFromProfile(profileId: string, permissionId: string): Promise<void> {
+    // Simulação de remoção
+  }
+
+  // Team Profiles methods for MemStorage
+  async getTeamProfiles(teamId: string): Promise<TeamProfile[]> {
+    // Associações padrão de perfis por time
+    const defaultTeamProfiles: { [key: string]: string[] } = {
+      "team-1": ["profile-developer", "profile-devops"], // Desenvolvimento
+      "team-2": ["profile-designer"], // Design
+      "team-3": ["profile-manager"], // Product
+    };
+
+    const profileIds = defaultTeamProfiles[teamId] || [];
+    return profileIds.map(profileId => ({
+      id: randomUUID(),
+      teamId,
+      profileId,
+      createdAt: new Date(),
+    }));
+  }
+
+  async assignProfileToTeam(teamId: string, profileId: string): Promise<TeamProfile> {
+    const teamProfile: TeamProfile = {
+      id: randomUUID(),
+      teamId,
+      profileId,
+      createdAt: new Date(),
+    };
+    return teamProfile;
+  }
+
+  async removeProfileFromTeam(teamId: string, profileId: string): Promise<void> {
+    // Simulação de remoção
   }
 
   private initializeDefaultColumns() {
@@ -717,6 +914,131 @@ export class DatabaseStorage implements IStorage {
     const result = await db.delete(users).where(eq(users.id, id));
     if (result.rowCount === 0) {
       throw new Error(`User with id ${id} not found`);
+    }
+  }
+
+  // Profiles methods for DatabaseStorage
+  async getProfiles(): Promise<Profile[]> {
+    return await db.select().from(profiles).orderBy(profiles.name);
+  }
+
+  async getProfile(id: string): Promise<Profile | undefined> {
+    const [profile] = await db.select().from(profiles).where(eq(profiles.id, id));
+    return profile || undefined;
+  }
+
+  async createProfile(insertProfile: InsertProfile): Promise<Profile> {
+    const [profile] = await db
+      .insert(profiles)
+      .values(insertProfile)
+      .returning();
+    return profile;
+  }
+
+  async updateProfile(id: string, updateData: UpdateProfile): Promise<Profile> {
+    const [profile] = await db
+      .update(profiles)
+      .set({
+        ...updateData,
+        updatedAt: new Date(),
+      })
+      .where(eq(profiles.id, id))
+      .returning();
+    
+    if (!profile) {
+      throw new Error(`Profile with id ${id} not found`);
+    }
+    
+    return profile;
+  }
+
+  async deleteProfile(id: string): Promise<void> {
+    const result = await db.delete(profiles).where(eq(profiles.id, id));
+    if (result.rowCount === 0) {
+      throw new Error(`Profile with id ${id} not found`);
+    }
+  }
+
+  // Permissions methods for DatabaseStorage
+  async getPermissions(): Promise<Permission[]> {
+    return await db.select().from(permissions).orderBy(permissions.category, permissions.name);
+  }
+
+  async getPermission(id: string): Promise<Permission | undefined> {
+    const [permission] = await db.select().from(permissions).where(eq(permissions.id, id));
+    return permission || undefined;
+  }
+
+  async createPermission(insertPermission: InsertPermission): Promise<Permission> {
+    const [permission] = await db
+      .insert(permissions)
+      .values(insertPermission)
+      .returning();
+    return permission;
+  }
+
+  async updatePermission(id: string, updateData: Partial<Permission>): Promise<Permission> {
+    const [permission] = await db
+      .update(permissions)
+      .set(updateData)
+      .where(eq(permissions.id, id))
+      .returning();
+    
+    if (!permission) {
+      throw new Error(`Permission with id ${id} not found`);
+    }
+    
+    return permission;
+  }
+
+  async deletePermission(id: string): Promise<void> {
+    const result = await db.delete(permissions).where(eq(permissions.id, id));
+    if (result.rowCount === 0) {
+      throw new Error(`Permission with id ${id} not found`);
+    }
+  }
+
+  // Profile Permissions methods for DatabaseStorage
+  async getProfilePermissions(profileId: string): Promise<ProfilePermission[]> {
+    return await db.select().from(profilePermissions).where(eq(profilePermissions.profileId, profileId));
+  }
+
+  async addPermissionToProfile(profileId: string, permissionId: string): Promise<ProfilePermission> {
+    const [profilePermission] = await db
+      .insert(profilePermissions)
+      .values({ profileId, permissionId })
+      .returning();
+    return profilePermission;
+  }
+
+  async removePermissionFromProfile(profileId: string, permissionId: string): Promise<void> {
+    const result = await db
+      .delete(profilePermissions)
+      .where(eq(profilePermissions.profileId, profileId).and(eq(profilePermissions.permissionId, permissionId)));
+    if (result.rowCount === 0) {
+      throw new Error(`Profile permission not found`);
+    }
+  }
+
+  // Team Profiles methods for DatabaseStorage
+  async getTeamProfiles(teamId: string): Promise<TeamProfile[]> {
+    return await db.select().from(teamProfiles).where(eq(teamProfiles.teamId, teamId));
+  }
+
+  async assignProfileToTeam(teamId: string, profileId: string): Promise<TeamProfile> {
+    const [teamProfile] = await db
+      .insert(teamProfiles)
+      .values({ teamId, profileId })
+      .returning();
+    return teamProfile;
+  }
+
+  async removeProfileFromTeam(teamId: string, profileId: string): Promise<void> {
+    const result = await db
+      .delete(teamProfiles)
+      .where(eq(teamProfiles.teamId, teamId).and(eq(teamProfiles.profileId, profileId)));
+    if (result.rowCount === 0) {
+      throw new Error(`Team profile not found`);
     }
   }
 }
