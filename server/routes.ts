@@ -392,6 +392,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/teams/:id", async (req, res) => {
+    try {
+      const teamData = req.body;
+      const team = await storage.updateTeam(req.params.id, teamData);
+      res.json(team);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Team not found" });
+      }
+      res.status(400).json({ message: "Invalid team data" });
+    }
+  });
+
   app.delete("/api/teams/:id", async (req, res) => {
     try {
       await storage.deleteTeam(req.params.id);
