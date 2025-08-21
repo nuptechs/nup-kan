@@ -56,13 +56,18 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  title: z.string().min(3, "O título deve conter pelo menos 3 caracteres").trim(),
 });
 
 export const updateTaskSchema = insertTaskSchema.partial();
 
 export const insertColumnSchema = createInsertSchema(columns).omit({
   id: true,
+}).extend({
+  title: z.string().min(3, "O título deve conter pelo menos 3 caracteres").trim(),
 });
+
 export const updateColumnSchema = insertColumnSchema.partial();
 
 export const insertTeamMemberSchema = createInsertSchema(teamMembers).omit({
