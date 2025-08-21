@@ -1,6 +1,6 @@
-import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag } from "@shared/schema";
+import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type User, type InsertUser, type UpdateUser } from "@shared/schema";
 import { db } from "./db";
-import { tasks, columns, teamMembers, tags } from "@shared/schema";
+import { tasks, columns, teamMembers, tags, users } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -29,6 +29,13 @@ export interface IStorage {
   createTag(tag: InsertTag): Promise<Tag>;
   updateTag(id: string, tag: Partial<Tag>): Promise<Tag>;
   deleteTag(id: string): Promise<void>;
+  
+  // Users
+  getUsers(): Promise<User[]>;
+  getUser(id: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, user: UpdateUser): Promise<User>;
+  deleteUser(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -87,6 +94,49 @@ export class MemStorage implements IStorage {
     const existingTag = await this.getTag(id);
     if (!existingTag) {
       throw new Error(`Tag with id ${id} not found`);
+    }
+  }
+
+  // Users methods for MemStorage
+  async getUsers(): Promise<User[]> {
+    return [
+      { id: "1", name: "Ana Maria", email: "ana.maria@example.com", role: "Designer UX/UI", avatar: "AM", status: "online", createdAt: new Date(), updatedAt: new Date() },
+      { id: "2", name: "João Silva", email: "joao.silva@example.com", role: "Full Stack Developer", avatar: "JS", status: "busy", createdAt: new Date(), updatedAt: new Date() },
+      { id: "3", name: "Maria Costa", email: "maria.costa@example.com", role: "Product Manager", avatar: "MC", status: "online", createdAt: new Date(), updatedAt: new Date() },
+      { id: "4", name: "Rafael Santos", email: "rafael.santos@example.com", role: "Backend Developer", avatar: "RF", status: "offline", createdAt: new Date(), updatedAt: new Date() },
+      { id: "5", name: "Lucas Oliveira", email: "lucas.oliveira@example.com", role: "DevOps Engineer", avatar: "LC", status: "online", createdAt: new Date(), updatedAt: new Date() },
+    ];
+  }
+
+  async getUser(id: string): Promise<User | undefined> {
+    const users = await this.getUsers();
+    return users.find(user => user.id === id);
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const user: User = {
+      id: randomUUID(),
+      ...insertUser,
+      avatar: insertUser.avatar || insertUser.name.split(' ').map(n => n[0]).join('').toUpperCase(),
+      status: insertUser.status || "offline",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    return user;
+  }
+
+  async updateUser(id: string, updateData: UpdateUser): Promise<User> {
+    const existingUser = await this.getUser(id);
+    if (!existingUser) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    return { ...existingUser, ...updateData, updatedAt: new Date() };
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    const existingUser = await this.getUser(id);
+    if (!existingUser) {
+      throw new Error(`User with id ${id} not found`);
     }
   }
 
@@ -476,6 +526,51 @@ export class DatabaseStorage implements IStorage {
     const result = await db.delete(tags).where(eq(tags.id, id));
     if (result.rowCount === 0) {
       throw new Error(`Tag with id ${id} not found`);
+    }
+  }
+
+  // Users methods
+  async getUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(users.name);
+  }
+
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        avatar: insertUser.avatar || insertUser.name.split(' ').map(n => n[0]).join('').toUpperCase()
+      })
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: string, updateData: UpdateUser): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        ...updateData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id))
+      .returning();
+    
+    if (!user) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    
+    return user;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    const result = await db.delete(users).where(eq(users.id, id));
+    if (result.rowCount === 0) {
+      throw new Error(`User with id ${id} not found`);
     }
   }
 }

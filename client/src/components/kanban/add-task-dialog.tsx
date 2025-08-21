@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { insertTaskSchema } from "@shared/schema";
 import type { TeamMember } from "@shared/schema";
 import { TagSelector } from "./tag-selector";
+import { UserSelector } from "./user-selector";
 import { z } from "zod";
 
 interface AddTaskDialogProps {
@@ -22,7 +23,6 @@ interface AddTaskDialogProps {
 }
 
 const formSchema = insertTaskSchema.extend({
-  assigneeId: z.string().optional(),
   tags: z.array(z.string()).default([]),
 });
 
@@ -51,16 +51,7 @@ export function AddTaskDialog({ isOpen, onClose }: AddTaskDialogProps) {
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const isAssigneeNone = data.assigneeId === "none" || data.assigneeId === "";
-      const assignee = isAssigneeNone ? null : teamMembers.find(member => member.id === data.assigneeId);
-      const taskData = {
-        ...data,
-        assigneeId: isAssigneeNone ? "" : data.assigneeId,
-        assigneeName: assignee?.name || "",
-        assigneeAvatar: assignee?.avatar || "",
-      };
-      
-      const response = await apiRequest("POST", "/api/tasks", taskData);
+      const response = await apiRequest("POST", "/api/tasks", data);
       return response.json();
     },
     onSuccess: () => {
@@ -185,37 +176,13 @@ export function AddTaskDialog({ isOpen, onClose }: AddTaskDialogProps) {
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="assigneeId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Responsável</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger data-testid="select-assignee">
-                        <SelectValue placeholder="Selecione um responsável" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">Sem responsável</SelectItem>
-                      {teamMembers.map((member) => (
-                        <SelectItem key={member.id} value={member.id}>
-                          <div className="flex items-center space-x-2">
-                            <div className="w-4 h-4 bg-indigo-500 rounded-full flex items-center justify-center">
-                              <span className="text-white text-xs font-medium">
-                                {member.avatar}
-                              </span>
-                            </div>
-                            <span>{member.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <UserSelector
+              selectedUserId={form.watch("assigneeId")}
+              onUserChange={(userId, userName, userAvatar) => {
+                form.setValue("assigneeId", userId);
+                form.setValue("assigneeName", userName);
+                form.setValue("assigneeAvatar", userAvatar);
+              }}
             />
 
             <TagSelector

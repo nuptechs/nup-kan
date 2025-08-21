@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTaskSchema, updateTaskSchema, insertColumnSchema, insertTeamMemberSchema, insertTagSchema } from "@shared/schema";
+import { insertTaskSchema, updateTaskSchema, insertColumnSchema, insertTeamMemberSchema, insertTagSchema, insertUserSchema, updateUserSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
@@ -218,34 +218,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/tags/:id", async (req, res) => {
+  // User routes
+  app.get("/api/users", async (req, res) => {
     try {
-      const updateData = insertTagSchema.partial().parse(req.body);
-      const tag = await storage.updateTag(req.params.id, updateData);
-      res.json(tag);
+      const users = await storage.getUsers();
+      res.json(users);
     } catch (error) {
-      res.status(400).json({ message: "Invalid tag data or tag not found" });
+      res.status(500).json({ message: "Failed to fetch users" });
     }
   });
 
-  app.delete("/api/tags/:id", async (req, res) => {
+  app.get("/api/users/:id", async (req, res) => {
     try {
-      await storage.deleteTag(req.params.id);
-      res.status(204).send();
+      const user = await storage.getUser(req.params.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
     } catch (error) {
-      res.status(404).json({ message: "Tag not found" });
+      res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 
-  // DELETE /api/tasks/:id - Delete a task
-  app.delete("/api/tasks/:id", async (req, res) => {
+  app.post("/api/users", async (req, res) => {
     try {
-      const { id } = req.params;
-      await storage.deleteTask(id);
+      const userData = insertUserSchema.parse(req.body);
+      const user = await storage.createUser(userData);
+      res.status(201).json(user);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid user data" });
+    }
+  });
+
+  app.put("/api/users/:id", async (req, res) => {
+    try {
+      const userData = updateUserSchema.parse(req.body);
+      const user = await storage.updateUser(req.params.id, userData);
+      res.json(user);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.status(400).json({ message: "Invalid user data" });
+    }
+  });
+
+  app.delete("/api/users/:id", async (req, res) => {
+    try {
+      await storage.deleteUser(req.params.id);
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting task:", error);
-      res.status(500).json({ error: "Failed to delete task" });
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.status(500).json({ message: "Failed to delete user" });
     }
   });
 

@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { updateTaskSchema } from "@shared/schema";
 import type { Task, TeamMember } from "@shared/schema";
 import { TagSelector } from "./tag-selector";
+import { UserSelector } from "./user-selector";
 import { z } from "zod";
 import { Edit, Trash2, User, Calendar, Clock, Flag, X } from "lucide-react";
 
@@ -346,37 +347,13 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="assigneeId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Responsável</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger data-testid="select-edit-assignee">
-                          <SelectValue placeholder="Selecione um responsável" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">Sem responsável</SelectItem>
-                        {teamMembers.map((member) => (
-                          <SelectItem key={member.id} value={member.id}>
-                            <div className="flex items-center space-x-2">
-                              <div className="w-4 h-4 bg-indigo-500 rounded-full flex items-center justify-center">
-                                <span className="text-white text-xs font-medium">
-                                  {member.avatar}
-                                </span>
-                              </div>
-                              <span>{member.name}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <UserSelector
+                selectedUserId={form.watch("assigneeId")}
+                onUserChange={(userId, userName, userAvatar) => {
+                  form.setValue("assigneeId", userId);
+                  form.setValue("assigneeName", userName);
+                  form.setValue("assigneeAvatar", userAvatar);
+                }}
               />
 
               <TagSelector
