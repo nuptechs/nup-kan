@@ -9,10 +9,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, User, Users, Shield, Mail } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Plus, User, Users, Shield, Mail, Edit, Trash2, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import type { Profile, Permission, Team } from "@shared/schema";
+import type { Profile, Permission, Team, User as UserType } from "@shared/schema";
 
 interface QuickCreatePanelProps {
   isOpen: boolean;
@@ -21,6 +23,7 @@ interface QuickCreatePanelProps {
 
 export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
   const [activeTab, setActiveTab] = useState("user");
+  const [viewMode, setViewMode] = useState<"create" | "list">("create");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -55,6 +58,10 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
 
   const { data: teams = [] } = useQuery<Team[]>({
     queryKey: ["/api/teams"],
+  });
+
+  const { data: users = [] } = useQuery<UserType[]>({
+    queryKey: ["/api/users"],
   });
 
   // Mutations
@@ -210,7 +217,8 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          {viewMode === "create" ? (
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="user" className="flex items-center gap-2">
                 <User className="w-4 h-4" />
@@ -309,8 +317,9 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                         type="button" 
                         variant="outline"
                         className="flex-1"
-                        onClick={() => {/* TODO: Open user list/management */}}
+                        onClick={() => setViewMode("list")}
                       >
+                        <Eye className="w-4 h-4 mr-2" />
                         Ver Usuários
                       </Button>
                     </div>
@@ -376,8 +385,9 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                         type="button" 
                         variant="outline"
                         className="flex-1"
-                        onClick={() => {/* TODO: Open team list/management */}}
+                        onClick={() => setViewMode("list")}
                       >
+                        <Eye className="w-4 h-4 mr-2" />
                         Ver Times
                       </Button>
                     </div>
@@ -494,8 +504,9 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                         type="button" 
                         variant="outline"
                         className="flex-1"
-                        onClick={() => {/* TODO: Open profile list/management */}}
+                        onClick={() => setViewMode("list")}
                       >
+                        <Eye className="w-4 h-4 mr-2" />
                         Ver Perfis
                       </Button>
                     </div>
@@ -504,6 +515,229 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
               </Card>
             </TabsContent>
           </Tabs>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  onClick={() => setViewMode("create")}
+                  className="text-blue-600 hover:text-blue-700"
+                >
+                  ← Voltar para Criação
+                </Button>
+                <h3 className="text-lg font-semibold">
+                  {activeTab === "user" && "Lista de Usuários"}
+                  {activeTab === "team" && "Lista de Times"}
+                  {activeTab === "profile" && "Lista de Perfis"}
+                </h3>
+              </div>
+
+              {/* User List */}
+              {activeTab === "user" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Usuários Cadastrados</CardTitle>
+                    <CardDescription>
+                      {users.length} usuário{users.length !== 1 ? 's' : ''} no sistema
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Usuário</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Função</TableHead>
+                          <TableHead>Perfil</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="w-24">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {users.map((user) => {
+                          const userProfile = profiles.find(p => p.id === user.profileId);
+                          return (
+                            <TableRow key={user.id}>
+                              <TableCell>
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="w-8 h-8">
+                                    <AvatarFallback className="bg-indigo-500 text-white text-sm">
+                                      {user.avatar}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span className="font-medium">{user.name}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-gray-600">{user.email}</TableCell>
+                              <TableCell>{user.role || "—"}</TableCell>
+                              <TableCell>
+                                {userProfile ? (
+                                  <Badge 
+                                    variant="outline"
+                                    style={{ borderColor: userProfile.color, color: userProfile.color }}
+                                  >
+                                    {userProfile.name}
+                                  </Badge>
+                                ) : "—"}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <div 
+                                    className={`w-2 h-2 rounded-full ${
+                                      user.status === 'online' ? 'bg-green-500' :
+                                      user.status === 'busy' ? 'bg-yellow-500' : 'bg-gray-400'
+                                    }`}
+                                  />
+                                  <span className="text-sm capitalize">
+                                    {user.status === 'online' ? 'Online' :
+                                     user.status === 'busy' ? 'Ocupado' : 'Offline'}
+                                  </span>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-1">
+                                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600">
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Team List */}
+              {activeTab === "team" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Times Cadastrados</CardTitle>
+                    <CardDescription>
+                      {teams.length} time{teams.length !== 1 ? 's' : ''} no sistema
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Nome do Time</TableHead>
+                          <TableHead>Descrição</TableHead>
+                          <TableHead>Criado em</TableHead>
+                          <TableHead className="w-24">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {teams.map((team) => (
+                          <TableRow key={team.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <div 
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-medium"
+                                  style={{ backgroundColor: team.color || '#3b82f6' }}
+                                >
+                                  {team.name.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="font-medium">{team.name}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-gray-600">{team.description || "—"}</TableCell>
+                            <TableCell className="text-gray-600">
+                              {team.createdAt ? new Date(team.createdAt).toLocaleDateString() : "—"}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600">
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Profile List */}
+              {activeTab === "profile" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Perfis Cadastrados</CardTitle>
+                    <CardDescription>
+                      {profiles.length} perfil{profiles.length !== 1 ? 'is' : ''} no sistema
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Nome do Perfil</TableHead>
+                          <TableHead>Descrição</TableHead>
+                          <TableHead>Permissões</TableHead>
+                          <TableHead>Criado em</TableHead>
+                          <TableHead className="w-24">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {profiles.map((profile) => (
+                          <TableRow key={profile.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <div 
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-medium"
+                                  style={{ backgroundColor: profile.color }}
+                                >
+                                  {profile.name.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="font-medium">{profile.name}</span>
+                                {profile.isDefault === "true" && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    Padrão
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-gray-600">{profile.description || "—"}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Shield className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm text-gray-600">
+                                  Ver permissões
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-gray-600">
+                              {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : "—"}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600">
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
