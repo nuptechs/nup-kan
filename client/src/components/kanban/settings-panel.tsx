@@ -13,7 +13,7 @@ import { ColumnManagementDialog } from "./column-management-dialog";
 import { TagManagementDialog } from "./tag-management-dialog";
 import { EmailSettingsDialog } from "./email-settings-dialog";
 import { QuickCreatePanel } from "./quick-create-panel";
-import { ExportProgressDialog } from "@/components/export/ExportProgressDialog";
+import { AdvancedExportDialog } from "@/components/export/AdvancedExportDialog";
 import { ExportHistoryDialog } from "@/components/export/ExportHistoryDialog";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -35,7 +35,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const [isTagManagementOpen, setIsTagManagementOpen] = useState(false);
   const [isEmailSettingsOpen, setIsEmailSettingsOpen] = useState(false);
   const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false);
-  const [isExportProgressOpen, setIsExportProgressOpen] = useState(false);
+  const [isAdvancedExportOpen, setIsAdvancedExportOpen] = useState(false);
   const [isExportHistoryOpen, setIsExportHistoryOpen] = useState(false);
 
   const { data: columns = [] } = useQuery<Column[]>({
@@ -83,7 +83,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   };
 
   const handleExportData = () => {
-    setIsExportProgressOpen(true);
+    setIsAdvancedExportOpen(true);
   };
 
   const handleExportComplete = () => {
@@ -332,9 +332,9 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
       />
 
       {/* Export Dialogs */}
-      <ExportProgressDialog
-        open={isExportProgressOpen}
-        onOpenChange={setIsExportProgressOpen}
+      <AdvancedExportDialog
+        open={isAdvancedExportOpen}
+        onOpenChange={setIsAdvancedExportOpen}
         onExportComplete={handleExportComplete}
       />
       
