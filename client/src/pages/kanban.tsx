@@ -4,6 +4,7 @@ import { SettingsPanel } from "@/components/kanban/settings-panel";
 import { useQuery } from "@tanstack/react-query";
 import { Settings, Plus, Users, Clock, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logoImage from "@assets/Slogan N_1755824338969.png";
 
 export default function KanbanPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -22,7 +23,14 @@ export default function KanbanPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between" data-testid="header">
         <div className="flex items-center space-x-4">
-          <h1 className="text-2xl font-semibold text-gray-900" data-testid="page-title">Kanban Flow</h1>
+          <div className="flex items-center space-x-2">
+            <img 
+              src={logoImage} 
+              alt="Logo uP"
+              className="w-8 h-8 object-contain"
+            />
+            <h1 className="text-2xl font-semibold text-gray-900" data-testid="page-title">uP - Kan</h1>
+          </div>
           <div className="flex items-center space-x-2 text-sm text-gray-500">
             <Users className="w-4 h-4" />
             <span data-testid="team-count">{(teamMembers as any)?.length || 0} membros</span>
