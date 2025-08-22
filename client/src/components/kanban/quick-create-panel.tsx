@@ -206,6 +206,85 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
     return grouped;
   };
 
+  // Delete mutations
+  const deleteUserMutation = useMutation({
+    mutationFn: (userId: string) => apiRequest(`/api/users/${userId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      toast({
+        title: "Usuário excluído",
+        description: "O usuário foi removido do sistema.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao excluir usuário",
+        description: "Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteTeamMutation = useMutation({
+    mutationFn: (teamId: string) => apiRequest(`/api/teams/${teamId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      toast({
+        title: "Time excluído",
+        description: "O time foi removido do sistema.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao excluir time",
+        description: "Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteProfileMutation = useMutation({
+    mutationFn: (profileId: string) => apiRequest(`/api/profiles/${profileId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      toast({
+        title: "Perfil excluído",
+        description: "O perfil foi removido do sistema.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao excluir perfil",
+        description: "Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // State for editing
+  const [editingUser, setEditingUser] = useState<UserType | null>(null);
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
+
+  // Handle delete confirmations
+  const handleDeleteUser = (userId: string) => {
+    if (confirm("Tem certeza que deseja excluir este usuário?")) {
+      deleteUserMutation.mutate(userId);
+    }
+  };
+
+  const handleDeleteTeam = (teamId: string) => {
+    if (confirm("Tem certeza que deseja excluir este time?")) {
+      deleteTeamMutation.mutate(teamId);
+    }
+  };
+
+  const handleDeleteProfile = (profileId: string) => {
+    if (confirm("Tem certeza que deseja excluir este perfil?")) {
+      deleteProfileMutation.mutate(profileId);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -596,10 +675,22 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                               </TableCell>
                               <TableCell>
                                 <div className="flex gap-1">
-                                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => setEditingUser(user)}
+                                    data-testid={`edit-user-${user.id}`}
+                                  >
                                     <Edit className="w-4 h-4" />
                                   </Button>
-                                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600">
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    className="h-8 w-8 p-0 text-red-600"
+                                    onClick={() => handleDeleteUser(user.id)}
+                                    data-testid={`delete-user-${user.id}`}
+                                  >
                                     <Trash2 className="w-4 h-4" />
                                   </Button>
                                 </div>
@@ -652,10 +743,22 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-1">
-                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => setEditingTeam(team)}
+                                  data-testid={`edit-team-${team.id}`}
+                                >
                                   <Edit className="w-4 h-4" />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600">
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  className="h-8 w-8 p-0 text-red-600"
+                                  onClick={() => handleDeleteTeam(team.id)}
+                                  data-testid={`delete-team-${team.id}`}
+                                >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
@@ -721,10 +824,22 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-1">
-                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => setEditingProfile(profile)}
+                                  data-testid={`edit-profile-${profile.id}`}
+                                >
                                   <Edit className="w-4 h-4" />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600">
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  className="h-8 w-8 p-0 text-red-600"
+                                  onClick={() => handleDeleteProfile(profile.id)}
+                                  data-testid={`delete-profile-${profile.id}`}
+                                >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
