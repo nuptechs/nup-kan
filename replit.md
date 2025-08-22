@@ -10,6 +10,9 @@ This is a Kanban board application called **"uP - Kan"** built with React and Ex
 - ✅ Diferenciação visual entre eventos automáticos e comentários de usuários
 - ✅ Timeline removida do kanban board e movida para modal de detalhes
 - ✅ Interface minimalista e moderna para timeline com scroll automático
+- ✅ **CRITICAL FIX**: Corrigidos erros de apiRequest com parâmetros invertidos
+- ✅ Sistema de reordenação de colunas totalmente funcional
+- ✅ Limites WIP aprimorados com verificação correta
 
 **Previous Updates (August 21, 2025):**
 - ✅ Sistema completo de gerenciamento de times implementado com CRUD total

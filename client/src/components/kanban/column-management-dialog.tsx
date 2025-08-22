@@ -8,7 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertColumnSchema, type Column } from "@shared/schema";
 import { Plus, Edit2, Trash2, Check, X, Columns, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
@@ -57,7 +57,7 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
         ...data,
         position: columns.length > 0 ? Math.max(...columns.map(c => c.position)) + 1 : 0,
       };
-      return await apiRequest("/api/columns", "POST", columnData);
+      return await apiRequest("POST", "/api/columns", columnData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
@@ -78,7 +78,7 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
 
   const updateColumnMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: FormData }) => {
-      return await apiRequest(`/api/columns/${id}`, "PUT", data);
+      return await apiRequest("PATCH", `/api/columns/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
@@ -122,7 +122,7 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
 
   const reorderColumnMutation = useMutation({
     mutationFn: async (reorderedColumns: { id: string; position: number }[]) => {
-      return await apiRequest("/api/columns/reorder", "POST", { columns: reorderedColumns });
+      return await apiRequest("POST", "/api/columns/reorder", { columns: reorderedColumns });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
