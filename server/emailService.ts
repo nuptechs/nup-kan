@@ -1,11 +1,19 @@
 import { MailService } from '@sendgrid/mail';
 
 if (!process.env.SENDGRID_API_KEY) {
-  throw new Error("SENDGRID_API_KEY environment variable must be set");
+  console.warn("SENDGRID_API_KEY environment variable is not set. Email functionality will be disabled.");
+}
+
+// Validate SendGrid API key format
+if (process.env.SENDGRID_API_KEY && !process.env.SENDGRID_API_KEY.startsWith('SG.')) {
+  console.error("Invalid SendGrid API key format. API key must start with 'SG.'");
+  console.error("Please configure a valid SendGrid API key to enable email functionality.");
 }
 
 const mailService = new MailService();
-mailService.setApiKey(process.env.SENDGRID_API_KEY);
+if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY.startsWith('SG.')) {
+  mailService.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 interface WelcomeEmailParams {
   to: string;
@@ -14,6 +22,12 @@ interface WelcomeEmailParams {
 }
 
 export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<boolean> {
+  // Check if SendGrid is properly configured
+  if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_API_KEY.startsWith('SG.')) {
+    console.warn("SendGrid not configured. Skipping welcome email.");
+    return false;
+  }
+
   try {
     const htmlContent = `
       <!DOCTYPE html>
@@ -118,6 +132,12 @@ interface NotificationEmailParams {
 }
 
 export async function sendNotificationEmail(params: NotificationEmailParams): Promise<boolean> {
+  // Check if SendGrid is properly configured
+  if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_API_KEY.startsWith('SG.')) {
+    console.warn("SendGrid not configured. Skipping notification email.");
+    return false;
+  }
+
   try {
     const typeColors = {
       info: '#3b82f6',
