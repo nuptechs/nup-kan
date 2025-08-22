@@ -296,6 +296,9 @@ export class MemStorage implements IStorage {
     const profile: Profile = {
       id: randomUUID(),
       ...insertProfile,
+      description: insertProfile.description || null,
+      color: insertProfile.color || "#3b82f6",
+      isDefault: insertProfile.isDefault || "false",
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -362,6 +365,7 @@ export class MemStorage implements IStorage {
     const permission: Permission = {
       id: randomUUID(),
       ...insertPermission,
+      description: insertPermission.description || null,
       createdAt: new Date(),
     };
     return permission;
@@ -469,6 +473,22 @@ export class MemStorage implements IStorage {
       console.error("MemStorage Error in getUserPermissions:", error);
       throw error;
     }
+  }
+
+  // Task Events methods for MemStorage
+  async getTaskEvents(taskId: string): Promise<TaskEvent[]> {
+    return [];
+  }
+
+  async createTaskEvent(event: InsertTaskEvent): Promise<TaskEvent> {
+    const taskEvent: TaskEvent = {
+      id: randomUUID(),
+      ...event,
+      userId: event.userId || null,
+      userName: event.userName || null,
+      createdAt: new Date(),
+    };
+    return taskEvent;
   }
 
   private initializeDefaultColumns() {
@@ -1223,9 +1243,8 @@ export class DatabaseStorage implements IStorage {
       return allPermissions;
     } catch (error) {
       console.error("Error in getUserPermissions:", error);
-      throw error;
+      return [];
     }
-    return userPermissions.map(p => p.permission);
   }
 
   // Task Events methods
