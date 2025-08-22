@@ -4,12 +4,14 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import KanbanPage from "@/pages/kanban";
+import UserSettingsPage from "@/pages/user-settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={KanbanPage} />
+      <Route path="/settings" component={UserSettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );

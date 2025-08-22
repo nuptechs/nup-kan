@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { LogOut, Settings } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
 
 export function UserProfileIndicator() {
+  const [, setLocation] = useLocation();
   const { data: currentUser, isLoading } = useQuery<UserType>({
     queryKey: ["/api/auth/current-user"],
     retry: false,
@@ -115,8 +117,7 @@ export function UserProfileIndicator() {
             variant="ghost" 
             className="w-full justify-start text-sm"
             onClick={() => {
-              // Implementar navegação para configurações da conta
-              console.log("Abrir configurações da conta");
+              setLocation("/settings");
             }}
             data-testid="button-user-settings"
           >
