@@ -100,7 +100,7 @@ export function ExportHistoryDialog({ open, onOpenChange, userId }: ExportHistor
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl" aria-describedby="history-dialog-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
@@ -115,6 +115,9 @@ export function ExportHistoryDialog({ open, onOpenChange, userId }: ExportHistor
               <RefreshCw className="w-4 h-4" />
             </Button>
           </DialogTitle>
+          <p id="history-dialog-description" className="text-sm text-muted-foreground">
+            Visualize o histórico completo de todas as suas exportações, incluindo status e detalhes dos arquivos gerados.
+          </p>
         </DialogHeader>
 
         <ScrollArea className="max-h-[60vh]">

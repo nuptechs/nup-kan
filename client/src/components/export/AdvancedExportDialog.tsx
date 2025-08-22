@@ -567,11 +567,9 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
             errorMessage: null
           };
           
-          const historyResponse = await apiRequest('/api/exports', {
-            method: 'POST',
-            body: exportHistoryData
-          });
-          exportHistoryId = historyResponse.id;
+          const historyResponse = await apiRequest('POST', '/api/exports', exportHistoryData);
+          const result = await historyResponse.json();
+          exportHistoryId = result.id;
         } catch (historyError) {
           console.warn('Failed to create export history:', historyError);
           // Continue with export even if history creation fails
@@ -635,15 +633,12 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
       // Update export history record with success
       if (exportHistoryId) {
         try {
-          await apiRequest(`/api/exports/${exportHistoryId}`, {
-            method: 'PATCH',
-            body: {
-              status: 'completed',
-              fileName: fileName,
-              fileSize: JSON.stringify(exportData).length, // Approximate size
-              recordsCount: exportData.metadata.totalRecords,
-              completedAt: new Date().toISOString()
-            }
+          await apiRequest('PATCH', `/api/exports/${exportHistoryId}`, {
+            status: 'completed',
+            fileName: fileName,
+            fileSize: JSON.stringify(exportData).length, // Approximate size
+            recordsCount: exportData.metadata.totalRecords,
+            completedAt: new Date().toISOString()
           });
         } catch (updateError) {
           console.warn('Failed to update export history:', updateError);
@@ -668,13 +663,10 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
       // Update export history record with failure
       if (exportHistoryId) {
         try {
-          await apiRequest(`/api/exports/${exportHistoryId}`, {
-            method: 'PATCH',
-            body: {
-              status: 'failed',
-              errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
-              completedAt: new Date().toISOString()
-            }
+          await apiRequest('PATCH', `/api/exports/${exportHistoryId}`, {
+            status: 'failed',
+            errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
+            completedAt: new Date().toISOString()
           });
         } catch (updateError) {
           console.warn('Failed to update export history:', updateError);
@@ -714,12 +706,15 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto" aria-describedby="export-dialog-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Download className="w-5 h-5" />
             Exportação Avançada de Dados
           </DialogTitle>
+          <p id="export-dialog-description" className="text-sm text-muted-foreground">
+            Configure e exporte seus dados do kanban em diferentes formatos com opções avançadas de personalização.
+          </p>
         </DialogHeader>
 
         <div className="space-y-6">
