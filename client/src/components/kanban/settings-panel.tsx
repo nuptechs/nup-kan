@@ -10,10 +10,7 @@ import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Plus } from "
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ColumnManagementDialog } from "./column-management-dialog";
-import { UserManagementDialog } from "./user-management-dialog";
 import { TagManagementDialog } from "./tag-management-dialog";
-import { TeamManagementDialog } from "./team-management-dialog";
-import { ProfileManagementDialog } from "./profile-management-dialog";
 import { EmailSettingsDialog } from "./email-settings-dialog";
 import { QuickCreatePanel } from "./quick-create-panel";
 import { PermissionGuard } from "@/components/PermissionGuard";
@@ -31,7 +28,6 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const { canManageColumns, canManageUsers, canManageTeams, canManageProfiles, canViewAnalytics, canExportData } = usePermissions();
   const [wipLimits, setWipLimits] = useState<Record<string, number>>({});
   const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
-  const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
   const [isTagManagementOpen, setIsTagManagementOpen] = useState(false);
   const [isEmailSettingsOpen, setIsEmailSettingsOpen] = useState(false);
   const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false);
@@ -141,25 +137,20 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto py-6 space-y-6">
-          {/* Quick Create Section */}
-          <div className="space-y-4">
-            <h3 className="font-medium text-gray-900">Criação Rápida</h3>
-            <Button
-              onClick={() => setIsQuickCreateOpen(true)}
-              className="w-full justify-start bg-blue-600 hover:bg-blue-700"
-              data-testid="button-quick-create"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Criar Usuário, Time ou Perfil
-            </Button>
-          </div>
-
-          <Separator />
-
-          {/* Management Buttons */}
+          {/* Unified Management Section */}
           <div className="space-y-4">
             <h3 className="font-medium text-gray-900">Gerenciamento</h3>
             <div className="grid grid-cols-1 gap-3">
+              {/* Consolidated Management Button */}
+              <Button
+                onClick={() => setIsQuickCreateOpen(true)}
+                className="w-full justify-start bg-blue-600 hover:bg-blue-700"
+                data-testid="button-manage-all"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Gerenciar Usuários, Times e Perfis
+              </Button>
+              
               <PermissionGuard permissions={["Criar Colunas", "Editar Colunas", "Excluir Colunas"]}>
                 <Button
                   onClick={() => setIsColumnManagementOpen(true)}
@@ -172,18 +163,6 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 </Button>
               </PermissionGuard>
               
-              <PermissionGuard permissions={["Criar Usuários", "Editar Usuários", "Excluir Usuários"]}>
-                <Button
-                  onClick={() => setIsUserManagementOpen(true)}
-                  variant="outline"
-                  className="w-full justify-start"
-                  data-testid="button-manage-users"
-                >
-                  <Users className="w-4 h-4 mr-2" />
-                  Gerenciar Usuários
-                </Button>
-              </PermissionGuard>
-              
               <Button
                 onClick={() => setIsTagManagementOpen(true)}
                 variant="outline"
@@ -193,23 +172,6 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 <Tags className="w-4 h-4 mr-2" />
                 Gerenciar Tags
               </Button>
-              
-              <PermissionGuard permissions={["Criar Perfis", "Editar Perfis", "Excluir Perfis"]}>
-                <ProfileManagementDialog>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start" 
-                    data-testid="button-manage-profiles"
-                  >
-                    <UserCog className="w-4 h-4 mr-2" />
-                    Gerenciar Perfis
-                  </Button>
-                </ProfileManagementDialog>
-              </PermissionGuard>
-              
-              <PermissionGuard permission="Gerenciar Times">
-                <TeamManagementDialog />
-              </PermissionGuard>
               
               <Button
                 onClick={() => setIsEmailSettingsOpen(true)}
@@ -360,10 +322,6 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
       <ColumnManagementDialog
         isOpen={isColumnManagementOpen}
         onClose={() => setIsColumnManagementOpen(false)}
-      />
-      <UserManagementDialog
-        isOpen={isUserManagementOpen}
-        onClose={() => setIsUserManagementOpen(false)}
       />
       <TagManagementDialog
         isOpen={isTagManagementOpen}

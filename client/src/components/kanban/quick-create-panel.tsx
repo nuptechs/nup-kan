@@ -205,7 +205,7 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         <div className="p-6 border-b flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Criação Rápida</h2>
+          <h2 className="text-xl font-semibold">Gerenciamento Completo</h2>
           <Button variant="ghost" onClick={onClose}>×</Button>
         </div>
 
@@ -214,15 +214,15 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="user" className="flex items-center gap-2">
                 <User className="w-4 h-4" />
-                Usuário
+                Usuários
               </TabsTrigger>
               <TabsTrigger value="team" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                Time
+                Times
               </TabsTrigger>
               <TabsTrigger value="profile" className="flex items-center gap-2">
                 <Shield className="w-4 h-4" />
-                Perfil
+                Perfis
               </TabsTrigger>
             </TabsList>
 
@@ -231,10 +231,10 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <User className="w-5 h-5" />
-                    Criar Novo Usuário
+                    Gerenciar Usuários
                   </CardTitle>
                   <CardDescription>
-                    Adicione um novo usuário ao sistema com perfil e permissões
+                    Crie, edite ou remova usuários do sistema
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -297,13 +297,23 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                       </div>
                     </div>
 
-                    <Button 
-                      type="submit" 
-                      className="w-full"
-                      disabled={createUserMutation.isPending}
-                    >
-                      {createUserMutation.isPending ? "Criando..." : "Criar Usuário"}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        type="submit" 
+                        className="flex-1"
+                        disabled={createUserMutation.isPending}
+                      >
+                        {createUserMutation.isPending ? "Criando..." : "Criar Usuário"}
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => {/* TODO: Open user list/management */}}
+                      >
+                        Ver Usuários
+                      </Button>
+                    </div>
                   </form>
                 </CardContent>
               </Card>
@@ -314,10 +324,10 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Users className="w-5 h-5" />
-                    Criar Novo Time
+                    Gerenciar Times
                   </CardTitle>
                   <CardDescription>
-                    Organize usuários em times para melhor colaboração
+                    Crie, edite ou remova times de colaboração
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -354,13 +364,23 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                       </div>
                     </div>
 
-                    <Button 
-                      type="submit" 
-                      className="w-full"
-                      disabled={createTeamMutation.isPending}
-                    >
-                      {createTeamMutation.isPending ? "Criando..." : "Criar Time"}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        type="submit" 
+                        className="flex-1"
+                        disabled={createTeamMutation.isPending}
+                      >
+                        {createTeamMutation.isPending ? "Criando..." : "Criar Time"}
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => {/* TODO: Open team list/management */}}
+                      >
+                        Ver Times
+                      </Button>
+                    </div>
                   </form>
                 </CardContent>
               </Card>
@@ -371,10 +391,10 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Shield className="w-5 h-5" />
-                    Criar Novo Perfil
+                    Gerenciar Perfis
                   </CardTitle>
                   <CardDescription>
-                    Configure um perfil de acesso com permissões específicas
+                    Crie, edite ou remova perfis e suas permissões
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -462,13 +482,23 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                       )}
                     </div>
 
-                    <Button 
-                      type="submit" 
-                      className="w-full"
-                      disabled={createProfileMutation.isPending}
-                    >
-                      {createProfileMutation.isPending ? "Criando..." : "Criar Perfil com Permissões"}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        type="submit" 
+                        className="flex-1"
+                        disabled={createProfileMutation.isPending}
+                      >
+                        {createProfileMutation.isPending ? "Criando..." : "Criar Perfil"}
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => {/* TODO: Open profile list/management */}}
+                      >
+                        Ver Perfis
+                      </Button>
+                    </div>
                   </form>
                 </CardContent>
               </Card>
