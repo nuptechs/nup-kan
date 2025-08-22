@@ -134,18 +134,42 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
     };
 
     if (exportOptions.includeTasks && Array.isArray(tasks)) {
-      const processedTasks = tasks.map((task: any) => ({
-        id: task.id,
-        title: task.title,
-        description: task.description,
-        status: task.status,
-        priority: task.priority,
-        assigneeName: task.assigneeName || 'Não atribuído',
-        progress: task.progress,
-        tags: Array.isArray(task.tags) ? task.tags.join(', ') : '',
-        createdAt: new Date(task.createdAt).toLocaleDateString('pt-BR'),
-        updatedAt: new Date(task.updatedAt).toLocaleDateString('pt-BR')
-      }));
+      const processedTasks = tasks.map((task: any) => {
+        // Enriquecer dados da tarefa com informações das tags
+        const taskTags = Array.isArray(task.tags) ? task.tags : [];
+        const tagDetails = taskTags.map((tagName: string) => {
+          const tagInfo = tags.find((tag: any) => tag.name === tagName);
+          return tagInfo ? { name: tagInfo.name, color: tagInfo.color } : { name: tagName, color: '#gray' };
+        });
+
+        // Obter informações da coluna
+        const columnInfo = columns.find((col: any) => col.id === task.status);
+        const statusColor = columnInfo?.color || '#gray';
+
+        // Calcular dias desde criação
+        const createdDate = new Date(task.createdAt);
+        const daysSinceCreated = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+
+        return {
+          'ID': task.id,
+          'Título': task.title,
+          'Descrição': task.description || 'Sem descrição',
+          'Status': task.status,
+          'Cor do Status': statusColor,
+          'Prioridade': task.priority,
+          'Responsável': task.assigneeName || 'Não atribuído',
+          'Avatar': task.assigneeAvatar || '',
+          'Progresso %': task.progress,
+          'Tags (Nomes)': taskTags.join(', '),
+          'Tags (Detalhes)': tagDetails.map((tag: any) => `${tag.name} (${tag.color})`).join('; '),
+          'Total de Tags': taskTags.length,
+          'Data de Criação': new Date(task.createdAt).toLocaleDateString('pt-BR'),
+          'Data de Atualização': new Date(task.updatedAt).toLocaleDateString('pt-BR'),
+          'Dias Criados': daysSinceCreated,
+          'Status Visual': task.status.toUpperCase(),
+          'Prioridade Visual': task.priority.toUpperCase()
+        };
+      });
       exportData.tasks = processedTasks;
       exportData.metadata.totalRecords += processedTasks.length;
     }
@@ -215,56 +239,223 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
   const generateExcelFile = (data: Record<string, any>) => {
     const workbook = XLSX.utils.book_new();
 
-    // Tasks sheet
+    // Helper function to apply styles to headers
+    const createStyledHeader = (ws: any, headerRow: number = 0) => {
+      const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: headerRow, c: col });
+        if (!ws[cellAddress]) continue;
+        
+        ws[cellAddress].s = {
+          font: { bold: true, color: { rgb: "FFFFFF" } },
+          fill: { fgColor: { rgb: "4F46E5" } },
+          border: {
+            top: { style: "thin", color: { rgb: "000000" } },
+            bottom: { style: "thin", color: { rgb: "000000" } },
+            left: { style: "thin", color: { rgb: "000000" } },
+            right: { style: "thin", color: { rgb: "000000" } }
+          },
+          alignment: { horizontal: "center", vertical: "center" }
+        };
+      }
+    };
+
+    // Helper function to apply conditional formatting based on priority/status
+    const applyConditionalFormatting = (ws: any, data: any[], priorityCol: number, statusCol: number) => {
+      data.forEach((row, idx) => {
+        const rowIdx = idx + 1; // +1 because headers are at row 0
+        
+        // Priority coloring
+        const priorityCell = XLSX.utils.encode_cell({ r: rowIdx, c: priorityCol });
+        if (ws[priorityCell]) {
+          const priority = row['Prioridade']?.toLowerCase();
+          let bgColor = 'FFFFFF';
+          if (priority === 'high') bgColor = 'FEF2F2'; // Light red
+          else if (priority === 'medium') bgColor = 'FEF3C7'; // Light yellow
+          else if (priority === 'low') bgColor = 'F0FDF4'; // Light green
+          
+          ws[priorityCell].s = {
+            fill: { fgColor: { rgb: bgColor } },
+            border: {
+              top: { style: "thin", color: { rgb: "E5E7EB" } },
+              bottom: { style: "thin", color: { rgb: "E5E7EB" } },
+              left: { style: "thin", color: { rgb: "E5E7EB" } },
+              right: { style: "thin", color: { rgb: "E5E7EB" } }
+            }
+          };
+        }
+        
+        // Status coloring
+        const statusCell = XLSX.utils.encode_cell({ r: rowIdx, c: statusCol });
+        if (ws[statusCell]) {
+          const status = row['Status']?.toLowerCase();
+          let bgColor = 'FFFFFF';
+          if (status === 'done') bgColor = 'DCFCE7'; // Green
+          else if (status === 'inprogress') bgColor = 'DBEAFE'; // Blue
+          else if (status === 'review') bgColor = 'FEF3C7'; // Yellow
+          else if (status === 'backlog') bgColor = 'F3F4F6'; // Gray
+          
+          ws[statusCell].s = {
+            fill: { fgColor: { rgb: bgColor } },
+            border: {
+              top: { style: "thin", color: { rgb: "E5E7EB" } },
+              bottom: { style: "thin", color: { rgb: "E5E7EB" } },
+              left: { style: "thin", color: { rgb: "E5E7EB" } },
+              right: { style: "thin", color: { rgb: "E5E7EB" } }
+            }
+          };
+        }
+      });
+    };
+
+    // Summary sheet with enhanced information
+    const summaryData = [
+      { 'Categoria': '📊 RESUMO GERAL', 'Valor': '', 'Detalhes': '' },
+      { 'Categoria': 'Data de Exportação', 'Valor': new Date().toLocaleDateString('pt-BR'), 'Detalhes': new Date().toLocaleTimeString('pt-BR') },
+      { 'Categoria': 'Total de Registros', 'Valor': data.metadata.totalRecords, 'Detalhes': 'Todos os dados exportados' },
+      { 'Categoria': '', 'Valor': '', 'Detalhes': '' },
+      { 'Categoria': '📋 DADOS EXPORTADOS', 'Valor': '', 'Detalhes': '' },
+      { 'Categoria': 'Tarefas', 'Valor': data.tasks?.length || 0, 'Detalhes': 'Com tags, responsáveis e status' },
+      { 'Categoria': 'Colunas do Kanban', 'Valor': data.columns?.length || 0, 'Detalhes': 'Com cores e limites WIP' },
+      { 'Categoria': 'Membros da Equipe', 'Valor': data.teamMembers?.length || 0, 'Detalhes': 'Com cargos e status' },
+      { 'Categoria': 'Tags', 'Valor': data.tags?.length || 0, 'Detalhes': 'Com cores e contadores de uso' },
+      { 'Categoria': 'Times', 'Valor': data.teams?.length || 0, 'Detalhes': 'Com descrições e membros' }
+    ];
+    
+    if (data.analytics) {
+      summaryData.push(
+        { 'Categoria': '', 'Valor': '', 'Detalhes': '' },
+        { 'Categoria': '📈 MÉTRICAS', 'Valor': '', 'Detalhes': '' },
+        { 'Categoria': 'Tempo Médio de Ciclo', 'Valor': data.analytics.averageCycleTime || 0, 'Detalhes': 'dias' },
+        { 'Categoria': 'Throughput', 'Valor': data.analytics.throughput || 0, 'Detalhes': 'tarefas/semana' },
+        { 'Categoria': 'Eficiência', 'Valor': `${data.analytics.efficiency || 0}%`, 'Detalhes': 'percentual' }
+      );
+    }
+
+    const summaryWS = XLSX.utils.json_to_sheet(summaryData);
+    createStyledHeader(summaryWS);
+    summaryWS['!cols'] = [{ width: 25 }, { width: 15 }, { width: 30 }];
+    XLSX.utils.book_append_sheet(workbook, summaryWS, "📊 Resumo");
+
+    // Tasks sheet with enhanced formatting
     if (data.tasks) {
       const tasksWS = XLSX.utils.json_to_sheet(data.tasks);
-      XLSX.utils.book_append_sheet(workbook, tasksWS, "Tarefas");
+      createStyledHeader(tasksWS);
+      applyConditionalFormatting(tasksWS, data.tasks, 5, 3); // Priority at col 5, Status at col 3
+      
+      // Set column widths
+      tasksWS['!cols'] = [
+        { width: 10 }, // ID
+        { width: 30 }, // Título
+        { width: 40 }, // Descrição
+        { width: 15 }, // Status
+        { width: 12 }, // Cor Status
+        { width: 12 }, // Prioridade
+        { width: 20 }, // Responsável
+        { width: 8 },  // Avatar
+        { width: 10 }, // Progresso
+        { width: 30 }, // Tags
+        { width: 40 }, // Tags Detalhes
+        { width: 8 },  // Total Tags
+        { width: 12 }, // Data Criação
+        { width: 12 }, // Data Atualização
+        { width: 8 },  // Dias
+        { width: 15 }, // Status Visual
+        { width: 15 }  // Prioridade Visual
+      ];
+      
+      XLSX.utils.book_append_sheet(workbook, tasksWS, "📋 Tarefas Completas");
     }
 
-    // Columns sheet
-    if (data.columns) {
-      const columnsWS = XLSX.utils.json_to_sheet(data.columns);
-      XLSX.utils.book_append_sheet(workbook, columnsWS, "Colunas");
-    }
-
-    // Team Members sheet
-    if (data.teamMembers) {
-      const membersWS = XLSX.utils.json_to_sheet(data.teamMembers);
-      XLSX.utils.book_append_sheet(workbook, membersWS, "Equipe");
-    }
-
-    // Tags sheet
+    // Enhanced Tags sheet
     if (data.tags) {
-      const tagsWS = XLSX.utils.json_to_sheet(data.tags);
-      XLSX.utils.book_append_sheet(workbook, tagsWS, "Tags");
+      const enhancedTags = data.tags.map((tag: any) => ({
+        'Nome da Tag': tag.name,
+        'Cor': tag.color,
+        'Cor Visual': tag.color,
+        'Usos': tag.usageCount,
+        'Popularidade': tag.usageCount > 5 ? 'Alta' : tag.usageCount > 2 ? 'Média' : 'Baixa',
+        'Data de Criação': tag.createdAt,
+        'ID': tag.id
+      }));
+      
+      const tagsWS = XLSX.utils.json_to_sheet(enhancedTags);
+      createStyledHeader(tagsWS);
+      tagsWS['!cols'] = [{ width: 20 }, { width: 12 }, { width: 12 }, { width: 8 }, { width: 15 }, { width: 15 }, { width: 25 }];
+      XLSX.utils.book_append_sheet(workbook, tagsWS, "🏷️ Tags");
     }
 
-    // Teams sheet
+    // Enhanced Columns sheet
+    if (data.columns) {
+      const enhancedColumns = data.columns.map((column: any) => ({
+        'Nome da Coluna': column.title,
+        'Posição': column.position,
+        'Limite WIP': column.wipLimit,
+        'Cor': column.color,
+        'Tarefas na Coluna': column.taskCount,
+        'Utilização': column.wipLimit ? `${Math.round((column.taskCount / column.wipLimit) * 100)}%` : 'Sem limite',
+        'Status': column.taskCount >= (column.wipLimit || Infinity) ? 'No limite' : 'Normal',
+        'ID': column.id
+      }));
+      
+      const columnsWS = XLSX.utils.json_to_sheet(enhancedColumns);
+      createStyledHeader(columnsWS);
+      columnsWS['!cols'] = [{ width: 20 }, { width: 10 }, { width: 12 }, { width: 12 }, { width: 15 }, { width: 15 }, { width: 12 }, { width: 25 }];
+      XLSX.utils.book_append_sheet(workbook, columnsWS, "📊 Colunas");
+    }
+
+    // Enhanced Team Members sheet
+    if (data.teamMembers) {
+      const enhancedMembers = data.teamMembers.map((member: any) => ({
+        'Nome': member.name,
+        'Cargo': member.role,
+        'Status': member.status,
+        'Tarefas Atribuídas': member.tasksAssigned,
+        'Carga de Trabalho': member.tasksAssigned > 5 ? 'Alta' : member.tasksAssigned > 2 ? 'Média' : 'Baixa',
+        'Disponibilidade': member.status === 'online' ? 'Disponível' : member.status === 'busy' ? 'Ocupado' : 'Offline',
+        'ID': member.id
+      }));
+      
+      const membersWS = XLSX.utils.json_to_sheet(enhancedMembers);
+      createStyledHeader(membersWS);
+      membersWS['!cols'] = [{ width: 20 }, { width: 15 }, { width: 10 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 25 }];
+      XLSX.utils.book_append_sheet(workbook, membersWS, "👥 Equipe");
+    }
+
+    // Enhanced Teams sheet
     if (data.teams) {
-      const teamsWS = XLSX.utils.json_to_sheet(data.teams);
-      XLSX.utils.book_append_sheet(workbook, teamsWS, "Times");
+      const enhancedTeams = data.teams.map((team: any) => ({
+        'Nome do Time': team.name,
+        'Descrição': team.description,
+        'Cor': team.color,
+        'Membros': team.memberCount,
+        'Data de Criação': team.createdAt,
+        'Tamanho': team.memberCount > 10 ? 'Grande' : team.memberCount > 5 ? 'Médio' : 'Pequeno',
+        'ID': team.id
+      }));
+      
+      const teamsWS = XLSX.utils.json_to_sheet(enhancedTeams);
+      createStyledHeader(teamsWS);
+      teamsWS['!cols'] = [{ width: 20 }, { width: 30 }, { width: 12 }, { width: 10 }, { width: 15 }, { width: 12 }, { width: 25 }];
+      XLSX.utils.book_append_sheet(workbook, teamsWS, "🏢 Times");
     }
 
     // Analytics sheet
     if (data.analytics) {
-      const analyticsData = [data.analytics];
-      const analyticsWS = XLSX.utils.json_to_sheet(analyticsData);
-      XLSX.utils.book_append_sheet(workbook, analyticsWS, "Analytics");
+      const analyticsDetailed = [
+        { 'Métrica': 'Tempo Médio de Ciclo', 'Valor': data.analytics.averageCycleTime || 0, 'Unidade': 'dias', 'Descrição': 'Tempo médio para completar uma tarefa' },
+        { 'Métrica': 'Throughput', 'Valor': data.analytics.throughput || 0, 'Unidade': 'tarefas/semana', 'Descrição': 'Quantidade de tarefas concluídas por semana' },
+        { 'Métrica': 'Eficiência', 'Valor': data.analytics.efficiency || 0, 'Unidade': '%', 'Descrição': 'Percentual de eficiência do time' },
+        { 'Métrica': 'Bloqueios', 'Valor': data.analytics.blockers || 0, 'Unidade': 'items', 'Descrição': 'Quantidade de bloqueios identificados' }
+      ];
+      
+      const analyticsWS = XLSX.utils.json_to_sheet(analyticsDetailed);
+      createStyledHeader(analyticsWS);
+      analyticsWS['!cols'] = [{ width: 25 }, { width: 12 }, { width: 15 }, { width: 40 }];
+      XLSX.utils.book_append_sheet(workbook, analyticsWS, "📈 Analytics");
     }
 
-    // Summary sheet
-    const summary = [
-      { 'Categoria': 'Tarefas', 'Quantidade': data.tasks?.length || 0 },
-      { 'Categoria': 'Colunas', 'Quantidade': data.columns?.length || 0 },
-      { 'Categoria': 'Membros da Equipe', 'Quantidade': data.teamMembers?.length || 0 },
-      { 'Categoria': 'Tags', 'Quantidade': data.tags?.length || 0 },
-      { 'Categoria': 'Times', 'Quantidade': data.teams?.length || 0 },
-      { 'Categoria': 'Total de Registros', 'Quantidade': data.metadata.totalRecords }
-    ];
-    const summaryWS = XLSX.utils.json_to_sheet(summary);
-    XLSX.utils.book_append_sheet(workbook, summaryWS, "Resumo");
-
-    const filename = `kanban-export-${new Date().toISOString().split('T')[0]}.xlsx`;
+    const filename = `uP-Kan-Export-Completo-${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(workbook, filename);
   };
 
