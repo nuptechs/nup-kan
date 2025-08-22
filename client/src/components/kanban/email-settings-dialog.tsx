@@ -20,11 +20,15 @@ export function EmailSettingsDialog({ children, open: isOpen, onOpenChange }: Em
   const [internalOpen, setInternalOpen] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [testEmail, setTestEmail] = useState("");
+  const [senderDomain, setSenderDomain] = useState("replit.app");
   const { toast } = useToast();
 
   const updateApiKeyMutation = useMutation({
-    mutationFn: async (newApiKey: string) => {
-      const response = await apiRequest("POST", "/api/settings/sendgrid-key", { apiKey: newApiKey });
+    mutationFn: async ({ apiKey: newApiKey, domain }: { apiKey: string; domain: string }) => {
+      const response = await apiRequest("POST", "/api/settings/sendgrid-key", { 
+        apiKey: newApiKey, 
+        senderDomain: domain 
+      });
       return response.json();
     },
     onSuccess: () => {
@@ -82,7 +86,7 @@ export function EmailSettingsDialog({ children, open: isOpen, onOpenChange }: Em
       return;
     }
 
-    updateApiKeyMutation.mutate(apiKey);
+    updateApiKeyMutation.mutate({ apiKey, domain: senderDomain });
   };
 
   const handleTestEmail = () => {
@@ -170,6 +174,21 @@ export function EmailSettingsDialog({ children, open: isOpen, onOpenChange }: Em
                 />
                 <p className="text-xs text-muted-foreground">
                   A chave API deve começar com "SG." e ter permissões de envio de email.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="senderDomain">Domínio de Remetente</Label>
+                <Input
+                  id="senderDomain"
+                  type="text"
+                  placeholder="exemplo: replit.app ou seudominio.com"
+                  value={senderDomain}
+                  onChange={(e) => setSenderDomain(e.target.value)}
+                  data-testid="input-sender-domain"
+                />
+                <p className="text-xs text-muted-foreground">
+                  O domínio deve estar verificado no SendGrid. Use "replit.app" para testes ou seu domínio próprio.
                 </p>
               </div>
 

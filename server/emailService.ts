@@ -10,9 +10,18 @@ if (process.env.SENDGRID_API_KEY && !process.env.SENDGRID_API_KEY.startsWith('SG
   console.error("Please configure a valid SendGrid API key to enable email functionality.");
 }
 
-const mailService = new MailService();
+let mailService = new MailService();
 if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY.startsWith('SG.')) {
   mailService.setApiKey(process.env.SENDGRID_API_KEY);
+}
+
+// Function to reinitialize the mail service with a new API key
+export function reinitializeMailService(apiKey: string) {
+  if (apiKey && apiKey.startsWith('SG.')) {
+    mailService = new MailService();
+    mailService.setApiKey(apiKey);
+    console.log('Mail service reinitialized with new API key');
+  }
 }
 
 interface WelcomeEmailParams {
@@ -108,9 +117,10 @@ Agora você pode começar a usar todas as funcionalidades do sistema!
 Este email foi enviado automaticamente pelo sistema uP - Kan.
     `;
 
+    const senderDomain = process.env.SENDER_DOMAIN || 'replit.app';
     await mailService.send({
       to: params.to,
-      from: 'noreply@up-kan.com', // Você pode alterar para seu domínio verificado
+      from: `noreply@${senderDomain}`,
       subject: '🎉 Bem-vindo(a) ao uP - Kan! Sua conta foi criada com sucesso',
       text: textContent,
       html: htmlContent,
@@ -179,9 +189,10 @@ export async function sendNotificationEmail(params: NotificationEmailParams): Pr
       </html>
     `;
 
+    const senderDomain = process.env.SENDER_DOMAIN || 'replit.app';
     await mailService.send({
       to: params.to,
-      from: 'noreply@up-kan.com',
+      from: `noreply@${senderDomain}`,
       subject: params.subject,
       text: params.message,
       html: htmlContent,

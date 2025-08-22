@@ -751,7 +751,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Email settings routes
   app.post("/api/settings/sendgrid-key", async (req, res) => {
     try {
-      const { apiKey } = req.body;
+      const { apiKey, senderDomain } = req.body;
       
       if (!apiKey || !apiKey.startsWith('SG.')) {
         return res.status(400).json({ 
@@ -759,13 +759,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Update environment variable (this is runtime only, not persistent)
+      // Update environment variables (this is runtime only, not persistent)
       process.env.SENDGRID_API_KEY = apiKey;
+      if (senderDomain) {
+        process.env.SENDER_DOMAIN = senderDomain;
+      }
       
       // Reinitialize SendGrid with new key
       const { MailService } = await import('@sendgrid/mail');
       const mailService = new MailService();
       mailService.setApiKey(apiKey);
+      
+      // Also update the main emailService module
+      const { reinitializeMailService } = await import('./emailService');
+      reinitializeMailService(apiKey);
       
       console.log("SendGrid API key updated successfully");
       res.json({ message: "SendGrid API key updated successfully" });
