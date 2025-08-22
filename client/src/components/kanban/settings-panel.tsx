@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Download, X, Columns, Users, Tags, Users2, UserCog } from "lucide-react";
+import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ColumnManagementDialog } from "./column-management-dialog";
@@ -14,6 +14,7 @@ import { UserManagementDialog } from "./user-management-dialog";
 import { TagManagementDialog } from "./tag-management-dialog";
 import { TeamManagementDialog } from "./team-management-dialog";
 import { ProfileManagementDialog } from "./profile-management-dialog";
+import { EmailSettingsDialog } from "./email-settings-dialog";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import type { Column, TeamMember } from "@shared/schema";
@@ -31,6 +32,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
   const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
   const [isTagManagementOpen, setIsTagManagementOpen] = useState(false);
+  const [isEmailSettingsOpen, setIsEmailSettingsOpen] = useState(false);
 
   const { data: columns = [] } = useQuery<Column[]>({
     queryKey: ["/api/columns"],
@@ -191,6 +193,16 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               <PermissionGuard permission="Gerenciar Times">
                 <TeamManagementDialog />
               </PermissionGuard>
+              
+              <Button
+                onClick={() => setIsEmailSettingsOpen(true)}
+                variant="outline"
+                className="w-full justify-start"
+                data-testid="button-email-settings"
+              >
+                <Mail className="w-4 h-4 mr-2" />
+                Configurações de Email
+              </Button>
             </div>
           </div>
 
@@ -339,6 +351,11 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
       <TagManagementDialog
         isOpen={isTagManagementOpen}
         onClose={() => setIsTagManagementOpen(false)}
+      />
+      
+      <EmailSettingsDialog 
+        open={isEmailSettingsOpen} 
+        onOpenChange={setIsEmailSettingsOpen}
       />
     </Sheet>
   );

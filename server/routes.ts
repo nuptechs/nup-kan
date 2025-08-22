@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema } from "@shared/schema";
-import { sendWelcomeEmail } from "./emailService";
+import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
@@ -719,6 +719,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating task event:", error);
       res.status(500).json({ message: "Failed to create task event" });
+    }
+  });
+
+  // Email settings routes
+  app.post("/api/settings/sendgrid-key", async (req, res) => {
+    try {
+      const { apiKey } = req.body;
+      
+      if (!apiKey || !apiKey.startsWith('SG.')) {
+        return res.status(400).json({ 
+          message: "Invalid API key format. SendGrid API keys must start with 'SG.'" 
+        });
+      }
+
+      // Update environment variable (this is runtime only, not persistent)
+      process.env.SENDGRID_API_KEY = apiKey;
+      
+      // Reinitialize SendGrid with new key
+      const { MailService } = await import('@sendgrid/mail');
+      const mailService = new MailService();
+      mailService.setApiKey(apiKey);
+      
+      console.log("SendGrid API key updated successfully");
+      res.json({ message: "SendGrid API key updated successfully" });
+    } catch (error) {
+      console.error("Error updating SendGrid API key:", error);
+      res.status(500).json({ message: "Failed to update API key" });
+    }
+  });
+
+  app.post("/api/settings/test-email", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
+      const success = await sendNotificationEmail({
+        to: email,
+        subject: "🧪 Teste de Configuração - uP - Kan",
+        message: `
+          Parabéns! O envio de emails está funcionando corretamente.
+          
+          Este é um email de teste enviado em ${new Date().toLocaleString('pt-BR')}.
+          
+          Configurações:
+          ✅ SendGrid API configurada
+          ✅ Sistema de emails ativo
+          ✅ Templates funcionando
+          
+          Agora o sistema pode enviar emails de boas-vindas para novos usuários automaticamente!
+        `,
+        type: 'success'
+      });
+
+      if (success) {
+        res.json({ message: "Test email sent successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to send test email" });
+      }
+    } catch (error) {
+      console.error("Error sending test email:", error);
+      res.status(500).json({ message: "Failed to send test email" });
     }
   });
 
