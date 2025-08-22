@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { SettingsPanel } from "@/components/kanban/settings-panel";
+import { UserProfileIndicator } from "@/components/user-profile-indicator";
 import { useQuery } from "@tanstack/react-query";
 import { Settings, Plus, Users, Clock, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,9 @@ export default function KanbanPage() {
               </span>
             </div>
           </div>
+          
+          {/* User Profile Indicator */}
+          <UserProfileIndicator />
           
           {/* Settings Button */}
           <Button
