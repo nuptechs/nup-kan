@@ -1225,8 +1225,9 @@ export class DatabaseStorage implements IStorage {
       const user = await this.getUser(userId);
       console.log("User found:", user);
       
-      if (!user || !user.profileId) {
-        console.log("No user or profileId found");
+      // Se não encontrar o usuário, retorna array vazio
+      if (!user) {
+        console.log("No user found");
         return [];
       }
 
@@ -1235,7 +1236,7 @@ export class DatabaseStorage implements IStorage {
       const allPermissions = await this.getPermissions();
       console.log("All permissions:", allPermissions.length);
       
-      // Simular permissões baseadas no perfil do usuário
+      // Simular permissões baseadas no perfil do usuário ou dar todas se não tiver perfil
       console.log("User profile ID:", user.profileId);
       
       // Por enquanto, vamos dar todas as permissões para qualquer usuário logado
