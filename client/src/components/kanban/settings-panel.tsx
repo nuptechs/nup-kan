@@ -119,9 +119,37 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto py-6 space-y-6">
+          {/* Export Data Section - Top Priority */}
+          <div className="space-y-4">
+            <h3 className="font-medium text-gray-900" data-testid="export-heading">📊 Exportar Dados</h3>
+            <div className="space-y-2">
+              <Button
+                onClick={handleExportData}
+                className="w-full bg-indigo-500 text-white hover:bg-indigo-600 transition-colors font-medium"
+                data-testid="button-export-data"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Exportar Dados (Excel, PDF, CSV, JSON)
+              </Button>
+              {user && (
+                <Button
+                  onClick={() => setIsExportHistoryOpen(true)}
+                  variant="outline"
+                  className="w-full justify-start"
+                  data-testid="button-export-history"
+                >
+                  <History className="w-4 h-4 mr-2" />
+                  Histórico de Exportações
+                </Button>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
           {/* Unified Management Section */}
           <div className="space-y-4">
-            <h3 className="font-medium text-gray-900">Gerenciamento</h3>
+            <h3 className="font-medium text-gray-900">⚙️ Gerenciamento</h3>
             <div className="grid grid-cols-1 gap-3">
               {/* Consolidated Management Button */}
               <Button
@@ -288,27 +316,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           </div>
         </div>
 
-        <div className="pt-6 border-t border-gray-200 space-y-3">
-          <Button
-            onClick={handleExportData}
-            className="w-full bg-indigo-500 text-white hover:bg-indigo-600 transition-colors font-medium"
-            data-testid="button-export-data"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Exportar Dados
-          </Button>
-          {user && (
-            <Button
-              onClick={() => setIsExportHistoryOpen(true)}
-              variant="outline"
-              className="w-full"
-              data-testid="button-export-history"
-            >
-              <History className="w-4 h-4 mr-2" />
-              Histórico de Exportações
-            </Button>
-          )}
-        </div>
+        {/* Export buttons moved to top */}
       </SheetContent>
 
       {/* Management Dialogs */}
