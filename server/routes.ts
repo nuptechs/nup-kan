@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema } from "@shared/schema";
+import { sendWelcomeEmail } from "./emailService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
@@ -302,6 +303,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userData = insertUserSchema.parse(req.body);
       const user = await storage.createUser(userData);
+      
+      // Enviar email de boas-vindas
+      if (user.email) {
+        try {
+          await sendWelcomeEmail({
+            to: user.email,
+            userName: user.name,
+            userRole: user.role || undefined
+          });
+          console.log(`Welcome email sent to ${user.email}`);
+        } catch (emailError) {
+          console.error(`Failed to send welcome email to ${user.email}:`, emailError);
+          // Não falha a criação do usuário se o email falhar
+        }
+      }
+      
       res.status(201).json(user);
     } catch (error) {
       res.status(400).json({ message: "Invalid user data" });

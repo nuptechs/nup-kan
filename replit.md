@@ -13,6 +13,9 @@ This is a Kanban board application called **"uP - Kan"** built with React and Ex
 - ✅ **CRITICAL FIX**: Corrigidos erros de apiRequest com parâmetros invertidos
 - ✅ Sistema de reordenação de colunas totalmente funcional
 - ✅ Limites WIP aprimorados com verificação correta
+- ✅ **EMAIL SYSTEM**: Sistema de emails implementado com SendGrid
+- ✅ Emails de boas-vindas automáticos para novos usuários
+- ✅ Templates HTML responsivos com branding uP - Kan
 
 **Previous Updates (August 21, 2025):**
 - ✅ Sistema completo de gerenciamento de times implementado com CRUD total
