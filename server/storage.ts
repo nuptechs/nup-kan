@@ -1,6 +1,6 @@
-import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type TaskEvent, type InsertTaskEvent } from "@shared/schema";
+import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory } from "@shared/schema";
 import { db } from "./db";
-import { tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, taskEvents } from "@shared/schema";
+import { tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, taskEvents, exportHistory } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -83,6 +83,11 @@ export interface IStorage {
   // Task Events  
   getTaskEvents(taskId: string): Promise<TaskEvent[]>;
   createTaskEvent(event: InsertTaskEvent): Promise<TaskEvent>;
+
+  // Export History
+  getExportHistory(userId: string): Promise<ExportHistory[]>;
+  createExportHistory(exportData: InsertExportHistory): Promise<ExportHistory>;
+  updateExportHistory(id: string, updates: Partial<ExportHistory>): Promise<ExportHistory>;
 }
 
 export class MemStorage implements IStorage {
@@ -486,9 +491,63 @@ export class MemStorage implements IStorage {
       ...event,
       userId: event.userId || null,
       userName: event.userName || null,
+      userAvatar: event.userAvatar || null,
+      metadata: event.metadata || null,
       createdAt: new Date(),
     };
     return taskEvent;
+  }
+
+  // Export History methods for MemStorage
+  async getExportHistory(userId: string): Promise<ExportHistory[]> {
+    // Return mock export history for memory storage
+    return [
+      {
+        id: randomUUID(),
+        userId,
+        exportType: "full",
+        status: "completed",
+        fileName: "kanban-data-2025-08-22.json",
+        fileSize: 15624,
+        recordsCount: 25,
+        errorMessage: null,
+        createdAt: new Date(Date.now() - 86400000), // 1 day ago
+        completedAt: new Date(Date.now() - 86400000 + 5000), // 5 seconds later
+      }
+    ];
+  }
+
+  async createExportHistory(exportData: InsertExportHistory): Promise<ExportHistory> {
+    const exportHistory: ExportHistory = {
+      id: randomUUID(),
+      userId: exportData.userId,
+      exportType: exportData.exportType,
+      status: exportData.status || "pending",
+      fileName: exportData.fileName || null,
+      fileSize: exportData.fileSize || null,
+      recordsCount: exportData.recordsCount || null,
+      errorMessage: exportData.errorMessage || null,
+      createdAt: new Date(),
+      completedAt: null,
+    };
+    return exportHistory;
+  }
+
+  async updateExportHistory(id: string, updates: Partial<ExportHistory>): Promise<ExportHistory> {
+    // Mock update for memory storage
+    const mockExport: ExportHistory = {
+      id,
+      userId: updates.userId || "mock-user",
+      exportType: updates.exportType || "full",
+      status: updates.status || "completed",
+      fileName: updates.fileName || null,
+      fileSize: updates.fileSize || null,
+      recordsCount: updates.recordsCount || null,
+      errorMessage: updates.errorMessage || null,
+      createdAt: new Date(),
+      completedAt: updates.completedAt || new Date(),
+    };
+    return mockExport;
   }
 
   private initializeDefaultColumns() {
@@ -1259,6 +1318,29 @@ export class DatabaseStorage implements IStorage {
       .values(event)
       .returning();
     return newEvent;
+  }
+
+  // Export History Methods
+  async getExportHistory(userId: string): Promise<ExportHistory[]> {
+    return await db.select().from(exportHistory)
+      .where(eq(exportHistory.userId, userId))
+      .orderBy(desc(exportHistory.createdAt))
+      .limit(50);
+  }
+
+  async createExportHistory(exportData: InsertExportHistory): Promise<ExportHistory> {
+    const [export_record] = await db.insert(exportHistory)
+      .values(exportData)
+      .returning();
+    return export_record;
+  }
+
+  async updateExportHistory(id: string, updates: Partial<ExportHistory>): Promise<ExportHistory> {
+    const [updated] = await db.update(exportHistory)
+      .set(updates)
+      .where(eq(exportHistory.id, id))
+      .returning();
+    return updated;
   }
 }
 

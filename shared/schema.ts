@@ -219,6 +219,23 @@ export type InsertUserTeam = z.infer<typeof insertUserTeamSchema>;
 export type TaskEvent = typeof taskEvents.$inferSelect;
 export type InsertTaskEvent = typeof taskEvents.$inferInsert;
 
+// Export History table for tracking exports
+export const exportHistory = pgTable("export_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  exportType: varchar("export_type").notNull(), // 'full', 'tasks', 'analytics', etc.
+  status: varchar("status").notNull().default("pending"), // 'pending', 'in_progress', 'completed', 'failed'
+  fileName: varchar("file_name"),
+  fileSize: integer("file_size"),
+  recordsCount: integer("records_count"),
+  errorMessage: varchar("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+export type InsertExportHistory = typeof exportHistory.$inferInsert;
+export type ExportHistory = typeof exportHistory.$inferSelect;
+
 export const insertTaskEventSchema = createInsertSchema(taskEvents).omit({
   id: true,
   createdAt: true,

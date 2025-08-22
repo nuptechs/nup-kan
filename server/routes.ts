@@ -278,6 +278,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User routes
+  app.get("/api/users/me", async (req, res) => {
+    try {
+      // For development, return the first user as current user
+      const users = await storage.getUsers();
+      const currentUser = users[0];
+      if (currentUser) {
+        res.json(currentUser);
+      } else {
+        res.status(404).json({ message: "Current user not found" });
+      }
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+      res.status(500).json({ message: "Failed to fetch current user" });
+    }
+  });
+
   app.get("/api/users", async (req, res) => {
     try {
       const users = await storage.getUsers();
@@ -793,6 +809,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error sending test email:", error);
       res.status(500).json({ message: "Failed to send test email" });
+    }
+  });
+
+  // Export History Routes
+  app.get("/api/exports/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const exports = await storage.getExportHistory(userId);
+      res.json(exports);
+    } catch (error) {
+      console.error("Error fetching export history:", error);
+      res.status(500).json({ message: "Failed to fetch export history" });
+    }
+  });
+
+  app.post("/api/exports", async (req, res) => {
+    try {
+      const exportData = req.body;
+      const newExport = await storage.createExportHistory(exportData);
+      res.status(201).json(newExport);
+    } catch (error) {
+      console.error("Error creating export history:", error);
+      res.status(500).json({ message: "Failed to create export history" });
+    }
+  });
+
+  app.patch("/api/exports/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      const updatedExport = await storage.updateExportHistory(id, updates);
+      res.json(updatedExport);
+    } catch (error) {
+      console.error("Error updating export history:", error);
+      res.status(500).json({ message: "Failed to update export history" });
     }
   });
 

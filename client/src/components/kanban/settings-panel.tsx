@@ -6,15 +6,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Plus } from "lucide-react";
+import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Plus, History } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ColumnManagementDialog } from "./column-management-dialog";
 import { TagManagementDialog } from "./tag-management-dialog";
 import { EmailSettingsDialog } from "./email-settings-dialog";
 import { QuickCreatePanel } from "./quick-create-panel";
+import { ExportProgressDialog } from "@/components/export/ExportProgressDialog";
+import { ExportHistoryDialog } from "@/components/export/ExportHistoryDialog";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useAuth } from "@/hooks/useAuth";
 import type { Column, TeamMember } from "@shared/schema";
 
 interface SettingsPanelProps {
@@ -25,12 +28,15 @@ interface SettingsPanelProps {
 export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { user } = useAuth();
   const { canManageColumns, canManageUsers, canManageTeams, canManageProfiles, canViewAnalytics, canExportData } = usePermissions();
   const [wipLimits, setWipLimits] = useState<Record<string, number>>({});
   const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
   const [isTagManagementOpen, setIsTagManagementOpen] = useState(false);
   const [isEmailSettingsOpen, setIsEmailSettingsOpen] = useState(false);
   const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false);
+  const [isExportProgressOpen, setIsExportProgressOpen] = useState(false);
+  const [isExportHistoryOpen, setIsExportHistoryOpen] = useState(false);
 
   const { data: columns = [] } = useQuery<Column[]>({
     queryKey: ["/api/columns"],
@@ -77,27 +83,12 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   };
 
   const handleExportData = () => {
-    const data = {
-      columns,
-      teamMembers,
-      analytics,
-      exportedAt: new Date().toISOString(),
-    };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `kanban-data-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Sucesso",
-      description: "Dados exportados com sucesso!",
-    });
+    setIsExportProgressOpen(true);
+  };
+
+  const handleExportComplete = () => {
+    // Invalidate queries to refresh any data that might have changed
+    queryClient.invalidateQueries();
   };
 
   const getStatusColor = (status: string) => {
@@ -306,7 +297,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           </div>
         </div>
 
-        <div className="pt-6 border-t border-gray-200">
+        <div className="pt-6 border-t border-gray-200 space-y-3">
           <Button
             onClick={handleExportData}
             className="w-full bg-indigo-500 text-white hover:bg-indigo-600 transition-colors font-medium"
@@ -315,6 +306,17 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             <Download className="w-4 h-4 mr-2" />
             Exportar Dados
           </Button>
+          {user && (
+            <Button
+              onClick={() => setIsExportHistoryOpen(true)}
+              variant="outline"
+              className="w-full"
+              data-testid="button-export-history"
+            >
+              <History className="w-4 h-4 mr-2" />
+              Histórico de Exportações
+            </Button>
+          )}
         </div>
       </SheetContent>
 
@@ -337,6 +339,21 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         isOpen={isQuickCreateOpen}
         onClose={() => setIsQuickCreateOpen(false)}
       />
+
+      {/* Export Dialogs */}
+      <ExportProgressDialog
+        open={isExportProgressOpen}
+        onOpenChange={setIsExportProgressOpen}
+        onExportComplete={handleExportComplete}
+      />
+      
+      {user && (
+        <ExportHistoryDialog
+          open={isExportHistoryOpen}
+          onOpenChange={setIsExportHistoryOpen}
+          userId={user.id}
+        />
+      )}
     </Sheet>
   );
 }
