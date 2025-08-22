@@ -157,8 +157,45 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
       });
       return;
     }
-    createUserMutation.mutate(userForm);
+    
+    if (editingUser) {
+      // Modo edição - atualizar usuário existente
+      updateUserMutation.mutate({
+        id: editingUser.id,
+        ...userForm
+      });
+    } else {
+      // Modo criação - criar novo usuário
+      createUserMutation.mutate(userForm);
+    }
   };
+  
+  // Update mutations
+  const updateUserMutation = useMutation({
+    mutationFn: (data: { id: string; name: string; email: string; role: string; profileId: string }) =>
+      apiRequest("PATCH", `/api/users/${data.id}`, {
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        profileId: data.profileId,
+      }),
+    onSuccess: () => {
+      toast({
+        title: "Usuário atualizado",
+        description: "As informações do usuário foram atualizadas.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      setEditingUser(null);
+      setUserForm({ name: "", email: "", role: "", profileId: "" });
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao atualizar usuário",
+        description: "Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleTeamSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,7 +245,7 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
 
   // Delete mutations
   const deleteUserMutation = useMutation({
-    mutationFn: (userId: string) => apiRequest(`/api/users/${userId}`, { method: "DELETE" }),
+    mutationFn: (userId: string) => apiRequest("DELETE", `/api/users/${userId}`),
     onSuccess: () => {
       toast({
         title: "Usuário excluído",
@@ -226,7 +263,7 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
   });
 
   const deleteTeamMutation = useMutation({
-    mutationFn: (teamId: string) => apiRequest(`/api/teams/${teamId}`, { method: "DELETE" }),
+    mutationFn: (teamId: string) => apiRequest("DELETE", `/api/teams/${teamId}`),
     onSuccess: () => {
       toast({
         title: "Time excluído",
@@ -244,7 +281,7 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
   });
 
   const deleteProfileMutation = useMutation({
-    mutationFn: (profileId: string) => apiRequest(`/api/profiles/${profileId}`, { method: "DELETE" }),
+    mutationFn: (profileId: string) => apiRequest("DELETE", `/api/profiles/${profileId}`),
     onSuccess: () => {
       toast({
         title: "Perfil excluído",
@@ -268,21 +305,56 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
 
   // Handle delete confirmations
   const handleDeleteUser = (userId: string) => {
-    if (confirm("Tem certeza que deseja excluir este usuário?")) {
+    if (window.confirm("Tem certeza que deseja excluir este usuário?")) {
       deleteUserMutation.mutate(userId);
     }
   };
 
   const handleDeleteTeam = (teamId: string) => {
-    if (confirm("Tem certeza que deseja excluir este time?")) {
+    if (window.confirm("Tem certeza que deseja excluir este time?")) {
       deleteTeamMutation.mutate(teamId);
     }
   };
 
   const handleDeleteProfile = (profileId: string) => {
-    if (confirm("Tem certeza que deseja excluir este perfil?")) {
+    if (window.confirm("Tem certeza que deseja excluir este perfil?")) {
       deleteProfileMutation.mutate(profileId);
     }
+  };
+
+  // Handle edit functions
+  const handleEditUser = (user: UserType) => {
+    setEditingUser(user);
+    setUserForm({
+      name: user.name,
+      email: user.email,
+      role: user.role || "",
+      profileId: user.profileId || "",
+    });
+    setActiveTab("user");
+    setViewMode("create");
+  };
+
+  const handleEditTeam = (team: Team) => {
+    setEditingTeam(team);
+    setTeamForm({
+      name: team.name,
+      description: team.description || "",
+    });
+    setActiveTab("team");
+    setViewMode("create");
+  };
+
+  const handleEditProfile = (profile: Profile) => {
+    setEditingProfile(profile);
+    setProfileForm({
+      name: profile.name,
+      description: profile.description || "",
+      color: profile.color,
+      selectedPermissions: [], // TODO: carregar permissões do perfil
+    });
+    setActiveTab("profile");
+    setViewMode("create");
   };
 
   if (!isOpen) return null;
@@ -388,18 +460,34 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                       <Button 
                         type="submit" 
                         className="flex-1"
-                        disabled={createUserMutation.isPending}
+                        disabled={createUserMutation.isPending || updateUserMutation.isPending}
                       >
-                        {createUserMutation.isPending ? "Criando..." : "Criar Usuário"}
+                        {editingUser 
+                          ? (updateUserMutation.isPending ? "Atualizando..." : "Atualizar Usuário")
+                          : (createUserMutation.isPending ? "Criando..." : "Criar Usuário")
+                        }
                       </Button>
                       <Button 
                         type="button" 
                         variant="outline"
                         className="flex-1"
-                        onClick={() => setViewMode("list")}
+                        onClick={() => {
+                          if (editingUser) {
+                            setEditingUser(null);
+                            setUserForm({ name: "", email: "", role: "", profileId: "" });
+                          } else {
+                            setViewMode("list");
+                          }
+                        }}
                       >
-                        <Eye className="w-4 h-4 mr-2" />
-                        Ver Usuários
+                        {editingUser ? (
+                          <>Cancelar</>
+                        ) : (
+                          <>
+                            <Eye className="w-4 h-4 mr-2" />
+                            Ver Usuários
+                          </>
+                        )}
                       </Button>
                     </div>
                   </form>
@@ -679,7 +767,7 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                                     size="sm" 
                                     variant="ghost" 
                                     className="h-8 w-8 p-0"
-                                    onClick={() => setEditingUser(user)}
+                                    onClick={() => handleEditUser(user)}
                                     data-testid={`edit-user-${user.id}`}
                                   >
                                     <Edit className="w-4 h-4" />
@@ -747,7 +835,7 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                                   size="sm" 
                                   variant="ghost" 
                                   className="h-8 w-8 p-0"
-                                  onClick={() => setEditingTeam(team)}
+                                  onClick={() => handleEditTeam(team)}
                                   data-testid={`edit-team-${team.id}`}
                                 >
                                   <Edit className="w-4 h-4" />
@@ -828,7 +916,7 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                                   size="sm" 
                                   variant="ghost" 
                                   className="h-8 w-8 p-0"
-                                  onClick={() => setEditingProfile(profile)}
+                                  onClick={() => handleEditProfile(profile)}
                                   data-testid={`edit-profile-${profile.id}`}
                                 >
                                   <Edit className="w-4 h-4" />
