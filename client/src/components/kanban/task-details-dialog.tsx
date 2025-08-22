@@ -20,7 +20,7 @@ import type { Task, TeamMember } from "@shared/schema";
 import { TagSelector } from "./tag-selector";
 import { UserSelector } from "./user-selector";
 import { z } from "zod";
-import { Edit, Trash2, User, Calendar, Clock, Flag, X } from "lucide-react";
+import { Edit, Trash2, User, Calendar, Clock, Flag, X, ChevronDown, ChevronRight, History } from "lucide-react";
 import { TaskTimeline } from "./task-timeline";
 
 interface TaskDetailsDialogProps {
@@ -38,6 +38,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -480,7 +481,32 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
 
             {/* Timeline Section */}
             <Separator />
-            <TaskTimeline taskId={task.id} />
+            <div className="space-y-3">
+              <Button
+                variant="ghost"
+                className="w-full justify-between p-0 h-auto hover:bg-gray-50"
+                onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
+                data-testid="button-toggle-history"
+              >
+                <div className="flex items-center space-x-2">
+                  <History className="w-4 h-4 text-gray-500" />
+                  <h4 className="text-sm font-semibold text-gray-900">
+                    Histórico da Tarefa
+                  </h4>
+                </div>
+                {isHistoryExpanded ? (
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronRight className="w-4 h-4 text-gray-500" />
+                )}
+              </Button>
+              
+              {isHistoryExpanded && (
+                <div className="mt-3" data-testid="timeline-content">
+                  <TaskTimeline taskId={task.id} />
+                </div>
+              )}
+            </div>
           </div>
         )}
       </DialogContent>
