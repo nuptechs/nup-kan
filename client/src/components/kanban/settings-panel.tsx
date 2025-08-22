@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail } from "lucide-react";
+import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Plus } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ColumnManagementDialog } from "./column-management-dialog";
@@ -15,6 +15,7 @@ import { TagManagementDialog } from "./tag-management-dialog";
 import { TeamManagementDialog } from "./team-management-dialog";
 import { ProfileManagementDialog } from "./profile-management-dialog";
 import { EmailSettingsDialog } from "./email-settings-dialog";
+import { QuickCreatePanel } from "./quick-create-panel";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import type { Column, TeamMember } from "@shared/schema";
@@ -33,6 +34,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
   const [isTagManagementOpen, setIsTagManagementOpen] = useState(false);
   const [isEmailSettingsOpen, setIsEmailSettingsOpen] = useState(false);
+  const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false);
 
   const { data: columns = [] } = useQuery<Column[]>({
     queryKey: ["/api/columns"],
@@ -139,6 +141,21 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto py-6 space-y-6">
+          {/* Quick Create Section */}
+          <div className="space-y-4">
+            <h3 className="font-medium text-gray-900">Criação Rápida</h3>
+            <Button
+              onClick={() => setIsQuickCreateOpen(true)}
+              className="w-full justify-start bg-blue-600 hover:bg-blue-700"
+              data-testid="button-quick-create"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Criar Usuário, Time ou Perfil
+            </Button>
+          </div>
+
+          <Separator />
+
           {/* Management Buttons */}
           <div className="space-y-4">
             <h3 className="font-medium text-gray-900">Gerenciamento</h3>
@@ -356,6 +373,11 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
       <EmailSettingsDialog 
         open={isEmailSettingsOpen} 
         onOpenChange={setIsEmailSettingsOpen}
+      />
+      
+      <QuickCreatePanel
+        isOpen={isQuickCreateOpen}
+        onClose={() => setIsQuickCreateOpen(false)}
       />
     </Sheet>
   );

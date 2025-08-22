@@ -616,6 +616,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/profiles/:profileId/permissions", async (req, res) => {
+    try {
+      const { permissionId } = req.body;
+      const profilePermission = await storage.addPermissionToProfile(req.params.profileId, permissionId);
+      res.status(201).json(profilePermission);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to add permission to profile" });
+    }
+  });
+
   app.post("/api/profiles/:profileId/permissions/:permissionId", async (req, res) => {
     try {
       const profilePermission = await storage.addPermissionToProfile(req.params.profileId, req.params.permissionId);
