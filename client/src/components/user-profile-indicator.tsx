@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { User, LogOut, Settings } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
 
 export function UserProfileIndicator() {
@@ -114,16 +114,11 @@ export function UserProfileIndicator() {
           <Button 
             variant="ghost" 
             className="w-full justify-start text-sm"
-            onClick={() => {/* Adicionar funcionalidade de perfil se necessário */}}
-          >
-            <User className="w-4 h-4 mr-2" />
-            Ver Perfil
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start text-sm"
-            onClick={() => {/* Adicionar funcionalidade de configurações se necessário */}}
+            onClick={() => {
+              // Implementar navegação para configurações da conta
+              console.log("Abrir configurações da conta");
+            }}
+            data-testid="button-user-settings"
           >
             <Settings className="w-4 h-4 mr-2" />
             Configurações
@@ -137,6 +132,7 @@ export function UserProfileIndicator() {
             onClick={() => {
               window.location.href = '/api/logout';
             }}
+            data-testid="button-logout"
           >
             <LogOut className="w-4 h-4 mr-2" />
             Sair
