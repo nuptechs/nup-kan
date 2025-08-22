@@ -218,15 +218,6 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="p-2 text-gray-400 hover:text-gray-600"
-                data-testid="button-close-dialog"
-              >
-                <X className="w-4 h-4" />
-              </Button>
             </div>
           </div>
           <DialogDescription>

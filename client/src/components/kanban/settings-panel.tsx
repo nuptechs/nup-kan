@@ -113,17 +113,8 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="w-96 sm:max-w-none" data-testid="settings-panel">
         <SheetHeader>
-          <SheetTitle className="flex items-center justify-between">
+          <SheetTitle>
             Configurações
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600"
-              data-testid="button-close-settings"
-            >
-              <X className="w-4 h-4" />
-            </Button>
           </SheetTitle>
         </SheetHeader>
 
