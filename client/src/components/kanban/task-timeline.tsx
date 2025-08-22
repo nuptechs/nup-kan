@@ -60,6 +60,10 @@ export function TaskTimeline({ taskId, className }: TaskTimelineProps) {
     enabled: !!taskId
   });
 
+  const { data: currentUser } = useQuery<{ name: string; avatar: string }>({
+    queryKey: ["/api/auth/current-user"]
+  });
+
   const addCommentMutation = useMutation({
     mutationFn: async (comment: string) => {
       const response = await fetch(`/api/tasks/${taskId}/events`, {
@@ -68,8 +72,8 @@ export function TaskTimeline({ taskId, className }: TaskTimelineProps) {
         body: JSON.stringify({
           eventType: "comment",
           description: comment,
-          userName: "Yuri Francis", // TODO: get from current user
-          userAvatar: "YF"
+          userName: currentUser?.name || "Usuário",
+          userAvatar: currentUser?.avatar || "U"
         })
       });
       

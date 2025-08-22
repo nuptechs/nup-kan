@@ -197,7 +197,7 @@ export function TeamManagementDialog() {
   });
 
   // Query para buscar todos os user-teams para o time selecionado
-  const { data: allTeamUsers = [] } = useQuery({
+  const { data: allTeamUsers = [] } = useQuery<Array<{ userId: string; teamId: string; role: string }>>({
     queryKey: ["/api/all-team-users", selectedTeamId],
     queryFn: async () => {
       if (!selectedTeamId) return [];
@@ -209,19 +209,19 @@ export function TeamManagementDialog() {
 
   const getTeamMembers = (teamId: string) => {
     if (!selectedTeamId || selectedTeamId !== teamId) return [];
-    const teamUserIds = allTeamUsers.map(ut => ut.userId);
+    const teamUserIds = allTeamUsers.map((ut: { userId: string }) => ut.userId);
     return users.filter(user => teamUserIds.includes(user.id));
   };
 
   const getUnassignedUsers = () => {
     if (!selectedTeamId) return users;
-    const assignedUserIds = allTeamUsers.map(ut => ut.userId);
+    const assignedUserIds = allTeamUsers.map((ut: { userId: string }) => ut.userId);
     return users.filter(user => !assignedUserIds.includes(user.id));
   };
 
   const isUserInTeam = (userId: string, teamId: string) => {
     if (!selectedTeamId || selectedTeamId !== teamId) return false;
-    return allTeamUsers.some(ut => ut.userId === userId);
+    return allTeamUsers.some((ut: { userId: string }) => ut.userId === userId);
   };
 
   const selectedTeam = selectedTeamId ? teams.find(t => t.id === selectedTeamId) : null;
