@@ -29,6 +29,7 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 // @ts-ignore
 import 'jspdf-autotable';
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface AdvancedExportDialogProps {
   open: boolean;
@@ -546,9 +547,30 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
   };
 
   const startExport = async () => {
+    let exportHistoryId: string | null = null;
+    
     try {
       setStatus('preparing');
       setStartTime(new Date());
+      
+      // Create export history record
+      if (user) {
+        const exportHistoryData = {
+          userId: user.id,
+          exportType: `${exportOptions.format}_export`,
+          status: 'pending' as const,
+          fileName: null,
+          fileSize: null,
+          recordsCount: null,
+          errorMessage: null
+        };
+        
+        const historyResponse = await apiRequest('/api/exports', {
+          method: 'POST',
+          body: exportHistoryData
+        });
+        exportHistoryId = historyResponse.id;
+      }
       
       // Progress through steps
       for (let i = 0; i < exportSteps.length - 1; i++) {
@@ -574,6 +596,16 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
 
       await new Promise(resolve => setTimeout(resolve, 500));
 
+      // Generate filename
+      const timestamp = new Date().toISOString().split('T')[0];
+      const formatExtension = {
+        'excel': 'xlsx',
+        'pdf': 'pdf',
+        'csv': 'csv',
+        'json': 'json'
+      }[exportOptions.format];
+      const fileName = `uP-Kan-Export-${timestamp}.${formatExtension}`;
+
       // Generate file based on format
       switch (exportOptions.format) {
         case 'excel':
@@ -594,6 +626,20 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
       setCurrentStep('Concluído!');
       setProgress(100);
 
+      // Update export history record with success
+      if (exportHistoryId) {
+        await apiRequest(`/api/exports/${exportHistoryId}`, {
+          method: 'PATCH',
+          body: {
+            status: 'completed',
+            fileName: fileName,
+            fileSize: JSON.stringify(exportData).length, // Approximate size
+            recordsCount: exportData.metadata.totalRecords,
+            completedAt: new Date().toISOString()
+          }
+        });
+      }
+
       toast({
         title: "Exportação concluída",
         description: `Arquivo ${getFormatLabel(exportOptions.format)} com ${exportData.metadata.totalRecords} registros exportado com sucesso!`,
@@ -601,10 +647,30 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
 
       onExportComplete?.();
       
+      // Invalidate export history cache to refresh the list
+      queryClient.invalidateQueries({ queryKey: [`/api/exports/${user?.id}`] });
+      
     } catch (error) {
       console.error('Export error:', error);
       setStatus('failed');
       setCurrentStep('Erro na exportação');
+      
+      // Update export history record with failure
+      if (exportHistoryId) {
+        try {
+          await apiRequest(`/api/exports/${exportHistoryId}`, {
+            method: 'PATCH',
+            body: {
+              status: 'failed',
+              errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
+              completedAt: new Date().toISOString()
+            }
+          });
+        } catch (updateError) {
+          console.error('Failed to update export history:', updateError);
+        }
+      }
+      
       toast({
         title: "Erro na exportação",
         description: "Ocorreu um erro ao exportar os dados. Tente novamente.",
