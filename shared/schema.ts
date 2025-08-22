@@ -98,7 +98,7 @@ export const profilePermissions = pgTable("profile_permissions", {
 export const taskEvents = pgTable("task_events", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   taskId: varchar("task_id").notNull().references(() => tasks.id, { onDelete: "cascade" }),
-  eventType: text("event_type").notNull(), // created, updated, moved, assigned, completed
+  eventType: text("event_type").notNull(), // created, updated, moved, assigned, completed, comment
   description: text("description").notNull(),
   userId: varchar("user_id").references(() => users.id),
   userName: text("user_name").default(""),
@@ -217,4 +217,9 @@ export type InsertTeamProfile = z.infer<typeof insertTeamProfileSchema>;
 export type UserTeam = typeof userTeams.$inferSelect;
 export type InsertUserTeam = z.infer<typeof insertUserTeamSchema>;
 export type TaskEvent = typeof taskEvents.$inferSelect;
-export type InsertTaskEvent = z.infer<typeof insertTaskEventSchema>;
+export type InsertTaskEvent = typeof taskEvents.$inferInsert;
+
+export const insertTaskEventSchema = createInsertSchema(taskEvents).omit({
+  id: true,
+  createdAt: true,
+});

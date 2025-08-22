@@ -21,6 +21,7 @@ import { TagSelector } from "./tag-selector";
 import { UserSelector } from "./user-selector";
 import { z } from "zod";
 import { Edit, Trash2, User, Calendar, Clock, Flag, X } from "lucide-react";
+import { TaskTimeline } from "./task-timeline";
 
 interface TaskDetailsDialogProps {
   task: Task | null;
@@ -476,6 +477,10 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
                 </div>
               </>
             )}
+
+            {/* Timeline Section */}
+            <Separator />
+            <TaskTimeline taskId={task.id} />
           </div>
         )}
       </DialogContent>

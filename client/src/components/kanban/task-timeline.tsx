@@ -1,7 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
-import { Clock, User, Settings, Play, CheckCircle, ArrowRight, GitCommit } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Clock, User, Settings, Play, CheckCircle, ArrowRight, GitCommit, MessageCircle, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { TaskEvent } from "@shared/schema";
+import { useState } from "react";
 
 interface TaskTimelineProps {
   taskId: string;
@@ -16,6 +20,7 @@ const getEventIcon = (eventType: string) => {
     assigned: User,
     completed: CheckCircle,
     started: Play,
+    comment: MessageCircle,
   };
   return iconMap[eventType] || Clock;
 };
@@ -28,6 +33,7 @@ const getEventColor = (eventType: string) => {
     assigned: "bg-green-500",
     completed: "bg-emerald-500",
     started: "bg-orange-500",
+    comment: "bg-indigo-500",
   };
   return colorMap[eventType] || "bg-gray-500";
 };
@@ -46,10 +52,45 @@ const formatTime = (date: Date) => {
 };
 
 export function TaskTimeline({ taskId, className }: TaskTimelineProps) {
+  const [newComment, setNewComment] = useState("");
+  const [isAddingComment, setIsAddingComment] = useState(false);
+
   const { data: events = [], isLoading } = useQuery<TaskEvent[]>({
     queryKey: [`/api/tasks/${taskId}/events`],
     enabled: !!taskId
   });
+
+  const addCommentMutation = useMutation({
+    mutationFn: async (comment: string) => {
+      const response = await fetch(`/api/tasks/${taskId}/events`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventType: "comment",
+          description: comment,
+          userName: "Yuri Francis", // TODO: get from current user
+          userAvatar: "YF"
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to add comment");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/tasks/${taskId}/events`] });
+      setNewComment("");
+      setIsAddingComment(false);
+    }
+  });
+
+  const handleAddComment = () => {
+    if (newComment.trim()) {
+      addCommentMutation.mutate(newComment.trim());
+    }
+  };
 
   if (isLoading) {
     return (
@@ -79,64 +120,137 @@ export function TaskTimeline({ taskId, className }: TaskTimelineProps) {
   }
 
   return (
-    <div className={cn("space-y-1", className)} data-testid={`timeline-${taskId}`}>
-      <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-3">
-        Atividade Recente
-      </h4>
-      
-      <div className="relative">
-        {/* Timeline line */}
-        <div className="absolute left-2.5 top-2 bottom-0 w-px bg-gray-200"></div>
-        
-        {events.map((event, index) => {
-          const Icon = getEventIcon(event.eventType);
-          const isLast = index === events.length - 1;
-          
-          return (
-            <div 
-              key={event.id} 
-              className="relative flex items-start space-x-3 pb-4"
-              data-testid={`timeline-event-${event.id}`}
+    <div className={cn("space-y-4", className)} data-testid={`timeline-${taskId}`}>
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-semibold text-gray-900">
+          Histórico da Tarefa
+        </h4>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsAddingComment(!isAddingComment)}
+          className="text-xs"
+          data-testid="button-add-comment"
+        >
+          <MessageCircle className="w-3 h-3 mr-1" />
+          Comentar
+        </Button>
+      </div>
+
+      {/* Add comment form */}
+      {isAddingComment && (
+        <div className="bg-gray-50 p-3 rounded-lg space-y-3">
+          <Textarea
+            placeholder="Adicione um comentário..."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            rows={3}
+            className="resize-none text-sm"
+            data-testid="textarea-new-comment"
+          />
+          <div className="flex justify-end space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setIsAddingComment(false);
+                setNewComment("");
+              }}
+              className="text-xs"
+              data-testid="button-cancel-comment"
             >
-              {/* Event icon */}
-              <div className={cn(
-                "flex items-center justify-center w-5 h-5 rounded-full border-2 border-white shadow-sm z-10",
-                getEventColor(event.eventType)
-              )}>
-                <Icon className="w-2.5 h-2.5 text-white" />
-              </div>
-              
-              {/* Event content */}
-              <div className="flex-1 min-w-0 pt-0.5">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs text-gray-900 font-medium leading-tight">
-                    {event.description}
-                  </p>
-                  <span className="text-xs text-gray-400 font-mono">
-                    {formatTime(new Date(event.createdAt || Date.now()))}
-                  </span>
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleAddComment}
+              disabled={!newComment.trim() || addCommentMutation.isPending}
+              className="text-xs"
+              data-testid="button-submit-comment"
+            >
+              {addCommentMutation.isPending ? (
+                "Enviando..."
+              ) : (
+                <>
+                  <Send className="w-3 h-3 mr-1" />
+                  Comentar
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
+      
+      <div className="relative max-h-80 overflow-y-auto">
+        {/* Timeline line */}
+        <div className="absolute left-2.5 top-2 bottom-2 w-px bg-gray-200"></div>
+        
+        {events.length === 0 ? (
+          <div className="text-center py-8">
+            <Clock className="w-8 h-8 mx-auto text-gray-300 mb-2" />
+            <p className="text-sm text-gray-400">Nenhuma atividade registrada</p>
+          </div>
+        ) : (
+          events.map((event, index) => {
+            const Icon = getEventIcon(event.eventType);
+            const isComment = event.eventType === "comment";
+            
+            return (
+              <div 
+                key={event.id} 
+                className="relative flex items-start space-x-3 pb-4"
+                data-testid={`timeline-event-${event.id}`}
+              >
+                {/* Event icon */}
+                <div className={cn(
+                  "flex items-center justify-center w-5 h-5 rounded-full border-2 border-white shadow-sm z-10 flex-shrink-0",
+                  getEventColor(event.eventType)
+                )}>
+                  <Icon className="w-2.5 h-2.5 text-white" />
                 </div>
                 
-                {event.userName && (
-                  <div className="flex items-center space-x-1 mb-1">
-                    <div className="w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center">
-                      <span className="text-xs font-semibold text-gray-600">
-                        {event.userAvatar || event.userName.split(' ').map(n => n[0]).join('')}
-                      </span>
+                {/* Event content */}
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <div className="flex items-start justify-between mb-1">
+                    <div className="flex-1">
+                      {isComment ? (
+                        <div className="bg-white border border-gray-200 rounded-lg p-3">
+                          <p className="text-sm text-gray-900 leading-relaxed">
+                            {event.description}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-gray-900 font-medium leading-tight">
+                          {event.description}
+                        </p>
+                      )}
                     </div>
-                    <span className="text-xs text-gray-500">{event.userName}</span>
+                    <span className="text-xs text-gray-400 font-mono ml-3 flex-shrink-0">
+                      {formatTime(new Date(event.createdAt || Date.now()))}
+                    </span>
                   </div>
-                )}
-                
-                {event.metadata && (
-                  <div className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-md">
-                    {event.metadata}
-                  </div>
-                )}
+                  
+                  {event.userName && (
+                    <div className="flex items-center space-x-1 mb-1">
+                      <div className="w-4 h-4 bg-indigo-100 rounded-full flex items-center justify-center">
+                        <span className="text-xs font-semibold text-indigo-600">
+                          {event.userAvatar || event.userName.split(' ').map(n => n[0]).join('')}
+                        </span>
+                      </div>
+                      <span className="text-xs text-gray-500 font-medium">{event.userName}</span>
+                    </div>
+                  )}
+                  
+                  {event.metadata && !isComment && (
+                    <div className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-md mt-1">
+                      {event.metadata}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );
