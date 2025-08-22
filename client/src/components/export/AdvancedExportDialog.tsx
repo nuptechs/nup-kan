@@ -81,6 +81,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
   const { data: analytics } = useQuery<any>({ queryKey: ["/api/analytics"], enabled: open });
   const { data: teams = [] } = useQuery<any[]>({ queryKey: ["/api/teams"], enabled: open });
   const { data: users = [] } = useQuery<any[]>({ queryKey: ["/api/users"], enabled: open });
+  const { data: user } = useQuery<any>({ queryKey: ["/api/users/me"], enabled: open });
 
   const exportSteps = [
     { label: 'Preparando exportação...', progress: 5 },
@@ -554,22 +555,27 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
       setStartTime(new Date());
       
       // Create export history record
-      if (user) {
-        const exportHistoryData = {
-          userId: user.id,
-          exportType: `${exportOptions.format}_export`,
-          status: 'pending' as const,
-          fileName: null,
-          fileSize: null,
-          recordsCount: null,
-          errorMessage: null
-        };
-        
-        const historyResponse = await apiRequest('/api/exports', {
-          method: 'POST',
-          body: exportHistoryData
-        });
-        exportHistoryId = historyResponse.id;
+      if (user?.id) {
+        try {
+          const exportHistoryData = {
+            userId: user.id,
+            exportType: `${exportOptions.format}_export`,
+            status: 'pending' as const,
+            fileName: null,
+            fileSize: null,
+            recordsCount: null,
+            errorMessage: null
+          };
+          
+          const historyResponse = await apiRequest('/api/exports', {
+            method: 'POST',
+            body: exportHistoryData
+          });
+          exportHistoryId = historyResponse.id;
+        } catch (historyError) {
+          console.warn('Failed to create export history:', historyError);
+          // Continue with export even if history creation fails
+        }
       }
       
       // Progress through steps
@@ -628,16 +634,20 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
 
       // Update export history record with success
       if (exportHistoryId) {
-        await apiRequest(`/api/exports/${exportHistoryId}`, {
-          method: 'PATCH',
-          body: {
-            status: 'completed',
-            fileName: fileName,
-            fileSize: JSON.stringify(exportData).length, // Approximate size
-            recordsCount: exportData.metadata.totalRecords,
-            completedAt: new Date().toISOString()
-          }
-        });
+        try {
+          await apiRequest(`/api/exports/${exportHistoryId}`, {
+            method: 'PATCH',
+            body: {
+              status: 'completed',
+              fileName: fileName,
+              fileSize: JSON.stringify(exportData).length, // Approximate size
+              recordsCount: exportData.metadata.totalRecords,
+              completedAt: new Date().toISOString()
+            }
+          });
+        } catch (updateError) {
+          console.warn('Failed to update export history:', updateError);
+        }
       }
 
       toast({
@@ -667,7 +677,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
             }
           });
         } catch (updateError) {
-          console.error('Failed to update export history:', updateError);
+          console.warn('Failed to update export history:', updateError);
         }
       }
       
