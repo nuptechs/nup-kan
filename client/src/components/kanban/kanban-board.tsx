@@ -80,7 +80,7 @@ export function KanbanBoard() {
 
     // Handle column reordering
     if (type === 'COLUMN') {
-      const sortedColumns = [...validColumns].sort((a, b) => a.position - b.position);
+      const sortedColumns = [...columns].sort((a, b) => a.position - b.position);
       const reorderedColumns = Array.from(sortedColumns);
       const [reorderedColumn] = reorderedColumns.splice(source.index, 1);
       reorderedColumns.splice(destination.index, 0, reorderedColumn);
@@ -99,10 +99,10 @@ export function KanbanBoard() {
     const task = tasks.find((t) => t.id === draggableId);
     if (!task) return;
 
-    // Check WIP limits
+    // Check WIP limits - only count if this is a different task or moving to different column
     const destinationColumn = columns.find((c) => c.id === destination.droppableId);
     if (destinationColumn?.wipLimit) {
-      const tasksInDestination = tasks.filter((t) => t.status === destination.droppableId);
+      const tasksInDestination = tasks.filter((t) => t.status === destination.droppableId && t.id !== draggableId);
       if (tasksInDestination.length >= destinationColumn.wipLimit) {
         toast({
           title: "Limite WIP Excedido",

@@ -55,7 +55,7 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
     mutationFn: async (data: FormData) => {
       const columnData = {
         ...data,
-        position: Math.max(...columns.map(c => c.position), 0) + 1,
+        position: columns.length > 0 ? Math.max(...columns.map(c => c.position)) + 1 : 0,
       };
       return await apiRequest("/api/columns", "POST", columnData);
     },

@@ -91,7 +91,7 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
         </div>
         
         {column.wipLimit && (
-          <div className="w-full bg-gray-200 rounded-full h-1" data-testid={`wip-progress-${column.id}`}>
+          <div className="w-full bg-gray-200 rounded-full h-1 mx-4" data-testid={`wip-progress-${column.id}`}>
             <div
               className={cn(
                 "h-1 rounded-full transition-all duration-200",
