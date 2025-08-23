@@ -6,6 +6,7 @@ import { TaskDetailsDialog } from "./task-details-dialog";
 import { AddTaskDialog } from "./add-task-dialog";
 import { ColumnManagementDialog } from "./column-management-dialog";
 import { apiRequest } from "@/lib/queryClient";
+import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -181,7 +182,7 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
     .sort((a, b) => a.position - b.position);
 
   return (
-    <div className="flex h-full" data-testid="kanban-board">
+    <div className="flex h-full bg-gradient-to-br from-gray-50 to-white" data-testid="kanban-board">
       <div className="flex-1 overflow-x-auto overflow-y-hidden">
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="columns" direction="horizontal" type="COLUMN">
@@ -189,7 +190,7 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="flex h-full p-6 space-x-6 min-w-max"
+                className="flex h-full p-4 space-x-4 min-w-max"
               >
                 {validColumns.map((column, index) => (
                   <Draggable key={column.id} draggableId={column.id} index={index}>
@@ -197,8 +198,8 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
                       <div
                         ref={columnProvided.innerRef}
                         {...columnProvided.draggableProps}
-                        className={`flex-shrink-0 w-80 transition-transform duration-200 ${
-                          columnSnapshot.isDragging ? 'rotate-2 scale-105' : ''
+                        className={`flex-shrink-0 w-72 transition-all duration-200 ${
+                          columnSnapshot.isDragging ? 'rotate-1 scale-105 shadow-xl' : ''
                         }`}
                       >
                         <div {...columnProvided.dragHandleProps}>
@@ -226,6 +227,25 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
                     )}
                   </Draggable>
                 ))}
+                
+                {/* Add Column Button */}
+                <div className="flex-shrink-0 w-72">
+                  <div className="h-full flex items-center justify-center">
+                    <button
+                      onClick={handleManageColumns}
+                      className="w-full h-32 border-2 border-dashed border-gray-300 rounded-xl hover:border-indigo-400 hover:bg-indigo-50/50 transition-all duration-200 flex flex-col items-center justify-center group"
+                      data-testid="button-add-column"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-gray-200 group-hover:bg-indigo-100 flex items-center justify-center mb-2 transition-colors">
+                        <Plus className="w-4 h-4 text-gray-400 group-hover:text-indigo-500" />
+                      </div>
+                      <span className="text-sm text-gray-500 group-hover:text-indigo-600 font-medium">
+                        Adicionar Coluna
+                      </span>
+                    </button>
+                  </div>
+                </div>
+                
                 {provided.placeholder}
               </div>
             )}

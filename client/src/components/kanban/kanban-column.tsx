@@ -47,99 +47,83 @@ const getColumnCountClasses = (color: string) => {
   return colorMap[color as keyof typeof colorMap] || "bg-gray-100 text-gray-600";
 };
 
-export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask, onManageColumns }: KanbanColumnProps) {
+export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask }: KanbanColumnProps) {
   const wipProgress = column.wipLimit ? (tasks.length / column.wipLimit) * 100 : 0;
   const isWipExceeded = column.wipLimit && tasks.length >= column.wipLimit;
 
   return (
-    <div className="relative">
-      {/* Manage Columns Button - Outside column as a handle */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onManageColumns}
-        className="absolute -top-2 -right-2 w-6 h-6 p-0 z-10 opacity-20 hover:opacity-80 transition-opacity duration-200 bg-white border border-gray-200 rounded-full shadow-sm hover:shadow-md"
-        data-testid={`button-manage-columns-${column.id}`}
-      >
-        <Plus className="w-3 h-3" />
-      </Button>
-
+    <div className="h-full">
       <div
         className={cn(
-          "bg-white rounded-xl shadow-sm border border-gray-200 h-full flex flex-col transition-all duration-200 cursor-grab active:cursor-grabbing",
-          isDragOver && "drag-over"
+          "bg-white/50 backdrop-blur-sm rounded-2xl border-0 h-full flex flex-col transition-all duration-300 cursor-grab active:cursor-grabbing",
+          isDragOver && "bg-indigo-50/80 shadow-lg"
         )}
         data-testid={`column-${column.id}`}
       >
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex items-center justify-between mb-2">
-          <h2 className="font-semibold text-gray-900 flex items-center" data-testid={`column-title-${column.id}`}>
-            <span className={cn("w-3 h-3 rounded-full mr-3", getColumnColorClasses(column.color))}></span>
-            {column.title}
-          </h2>
-          <div className="flex items-center space-x-2">
-            <span
-              className={cn("text-xs px-2 py-1 rounded-full font-medium", getColumnCountClasses(column.color))}
-              data-testid={`task-count-${column.id}`}
-            >
-              {tasks.length}
-            </span>
-            {column.wipLimit && (
-              <span className="text-xs text-gray-400">/{column.wipLimit}</span>
-            )}
+        {/* Header */}
+        <div className="p-4 pb-2">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-medium text-gray-800 flex items-center" data-testid={`column-title-${column.id}`}>
+              <span className={cn("w-2 h-2 rounded-full mr-2", getColumnColorClasses(column.color))}></span>
+              {column.title}
+            </h2>
+            <div className="flex items-center space-x-1">
+              <span
+                className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full font-medium"
+                data-testid={`task-count-${column.id}`}
+              >
+                {tasks.length}
+              </span>
+            </div>
           </div>
+          
+          {/* Simplified WIP Progress */}
+          {column.wipLimit && (
+            <div className="w-full bg-gray-100 rounded-full h-1 mb-3" data-testid={`wip-progress-${column.id}`}>
+              <div
+                className={cn(
+                  "h-1 rounded-full transition-all duration-300",
+                  getColumnProgressClasses(column.color),
+                  isWipExceeded && "bg-red-400"
+                )}
+                style={{ width: `${Math.min(wipProgress, 100)}%` }}
+              />
+            </div>
+          )}
         </div>
         
-        {column.wipLimit && (
-          <div className="w-full bg-gray-200 rounded-full h-1 mx-4" data-testid={`wip-progress-${column.id}`}>
-            <div
-              className={cn(
-                "h-1 rounded-full transition-all duration-200",
-                getColumnProgressClasses(column.color),
-                isWipExceeded && "bg-red-500"
+        {/* Tasks Container */}
+        <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2" data-testid={`tasks-container-${column.id}`}>
+          {tasks.map((task, index) => (
+            <Draggable key={task.id} draggableId={task.id} index={index}>
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                  className={cn(
+                    snapshot.isDragging && "rotate-1 scale-105 shadow-xl opacity-90"
+                  )}
+                  data-testid={`task-${task.id}`}
+                >
+                  <TaskCard task={task} columnColor={column.color} onTaskClick={onTaskClick} />
+                </div>
               )}
-              style={{ width: `${Math.min(wipProgress, 100)}%` }}
-            />
-          </div>
-        )}
-        
-        {column.id === "backlog" && (
-          <Button
-            variant="ghost"
-            size="sm"
+            </Draggable>
+          ))}
+          
+          {/* Add Task Button - Always visible but subtle */}
+          <button
             onClick={onAddTask}
-            className="w-full mt-2 text-left text-sm text-gray-500 hover:text-gray-700 transition-colors justify-start"
+            className="w-full py-3 border border-dashed border-gray-300 rounded-xl hover:border-indigo-400 hover:bg-indigo-50/50 transition-all duration-200 flex items-center justify-center group"
             data-testid={`button-add-task-${column.id}`}
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Adicionar tarefa
-          </Button>
-        )}
-        
-        {column.id === "done" && tasks.length > 0 && (
-          <p className="text-xs text-green-600 mt-2" data-testid="done-celebration">
-            🎉 {tasks.length} tarefa{tasks.length > 1 ? 's' : ''} concluída{tasks.length > 1 ? 's' : ''} esta semana
-          </p>
-        )}
-      </div>
-      
-      <div className="flex-1 overflow-y-auto column-scroll p-4 space-y-3" data-testid={`tasks-container-${column.id}`}>
-        {tasks.map((task, index) => (
-          <Draggable key={task.id} draggableId={task.id} index={index}>
-            {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.draggableProps}
-                {...provided.dragHandleProps}
-                className={cn(snapshot.isDragging && "dragging")}
-                data-testid={`task-${task.id}`}
-              >
-                <TaskCard task={task} columnColor={column.color} onTaskClick={onTaskClick} />
-              </div>
-            )}
-          </Draggable>
-        ))}
-      </div>
+            <Plus className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 mr-2" />
+            <span className="text-sm text-gray-500 group-hover:text-indigo-600">
+              Adicionar tarefa
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -128,8 +128,8 @@
 }
 
 .drag-over {
-  background-color: hsl(var(--blue-100)) !important;
-  border-color: hsl(var(--indigo-500)) !important;
+  background-color: hsl(217, 91%, 95%) !important;
+  border-color: hsl(239, 84%, 67%) !important;
 }
 
 .dragging {
