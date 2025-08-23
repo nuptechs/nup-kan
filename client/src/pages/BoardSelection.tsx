@@ -33,6 +33,10 @@ export default function BoardSelection() {
     queryKey: ["/api/boards"],
   });
 
+  const { data: currentUser } = useQuery<{ id: string; name: string; email: string }>({
+    queryKey: ["/api/users/me"],
+  });
+
   const form = useForm<BoardFormData>({
     resolver: zodResolver(boardSchema),
     defaultValues: {
@@ -46,7 +50,7 @@ export default function BoardSelection() {
     mutationFn: async (data: BoardFormData) => {
       return await apiRequest("/api/boards", "POST", {
         ...data,
-        createdById: "current-user", // TODO: Replace with actual user ID
+        createdById: currentUser?.id || "system",
       });
     },
     onSuccess: () => {

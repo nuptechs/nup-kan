@@ -86,11 +86,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/boards", async (req, res) => {
     try {
-      const boardData = insertBoardSchema.parse(req.body);
+      const boardData = insertBoardSchema.parse({
+        ...req.body,
+        createdById: req.body.createdById || "system", // Default to "system" if not provided
+      });
       const board = await storage.createBoard(boardData);
       res.status(201).json(board);
     } catch (error) {
-      res.status(400).json({ message: "Invalid board data" });
+      console.error("Board creation error:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      res.status(400).json({ message: "Invalid board data", details: errorMessage });
     }
   });
 
