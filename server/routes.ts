@@ -689,6 +689,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Team Profiles routes
+  app.get("/api/team-profiles", async (req, res) => {
+    try {
+      const teamProfiles = await storage.getAllTeamProfiles();
+      res.json(teamProfiles);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch team profiles" });
+    }
+  });
+
   app.get("/api/teams/:id/profiles", async (req, res) => {
     try {
       const teamProfiles = await storage.getTeamProfiles(req.params.id);
@@ -698,12 +707,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/team-profiles", async (req, res) => {
+    try {
+      const { teamId, profileId } = req.body;
+      const teamProfile = await storage.assignProfileToTeam(teamId, profileId);
+      res.status(201).json(teamProfile);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to assign profile to team" });
+    }
+  });
+
   app.post("/api/teams/:teamId/profiles/:profileId", async (req, res) => {
     try {
       const teamProfile = await storage.assignProfileToTeam(req.params.teamId, req.params.profileId);
       res.status(201).json(teamProfile);
     } catch (error) {
       res.status(400).json({ message: "Failed to assign profile to team" });
+    }
+  });
+
+  app.delete("/api/team-profiles/:id", async (req, res) => {
+    try {
+      await storage.deleteTeamProfile(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Team profile not found" });
+      }
+      res.status(500).json({ message: "Failed to remove profile from team" });
     }
   });
 

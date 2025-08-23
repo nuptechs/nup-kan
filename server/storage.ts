@@ -73,9 +73,11 @@ export interface IStorage {
   removePermissionFromProfile(profileId: string, permissionId: string): Promise<void>;
 
   // Team Profiles
+  getAllTeamProfiles(): Promise<TeamProfile[]>;
   getTeamProfiles(teamId: string): Promise<TeamProfile[]>;
   assignProfileToTeam(teamId: string, profileId: string): Promise<TeamProfile>;
   removeProfileFromTeam(teamId: string, profileId: string): Promise<void>;
+  deleteTeamProfile(id: string): Promise<void>;
 
   // User Permissions
   getUserPermissions(userId: string): Promise<Permission[]>;
@@ -453,8 +455,35 @@ export class MemStorage implements IStorage {
     return teamProfile;
   }
 
+  async getAllTeamProfiles(): Promise<TeamProfile[]> {
+    // Retorna todas as associações de perfis por time usando dados simulados
+    const allProfiles: TeamProfile[] = [];
+    const defaultTeamProfiles: { [key: string]: string[] } = {
+      "team-1": ["profile-developer", "profile-devops"],
+      "team-2": ["profile-designer"],
+      "team-3": ["profile-manager"],
+    };
+
+    Object.entries(defaultTeamProfiles).forEach(([teamId, profileIds]) => {
+      profileIds.forEach(profileId => {
+        allProfiles.push({
+          id: randomUUID(),
+          teamId,
+          profileId,
+          createdAt: new Date(),
+        });
+      });
+    });
+
+    return allProfiles;
+  }
+
   async removeProfileFromTeam(teamId: string, profileId: string): Promise<void> {
     // Simulação de remoção
+  }
+
+  async deleteTeamProfile(id: string): Promise<void> {
+    // Simulação de remoção por ID
   }
 
   // User Permissions methods for MemStorage
@@ -1257,6 +1286,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Team Profiles methods for DatabaseStorage
+  async getAllTeamProfiles(): Promise<TeamProfile[]> {
+    return await db.select().from(teamProfiles);
+  }
+
   async getTeamProfiles(teamId: string): Promise<TeamProfile[]> {
     return await db.select().from(teamProfiles).where(eq(teamProfiles.teamId, teamId));
   }
@@ -1267,6 +1300,13 @@ export class DatabaseStorage implements IStorage {
       .values({ teamId, profileId })
       .returning();
     return teamProfile;
+  }
+
+  async deleteTeamProfile(id: string): Promise<void> {
+    const result = await db.delete(teamProfiles).where(eq(teamProfiles.id, id));
+    if (result.rowCount === 0) {
+      throw new Error("Team profile not found");
+    }
   }
 
   async removeProfileFromTeam(teamId: string, profileId: string): Promise<void> {
