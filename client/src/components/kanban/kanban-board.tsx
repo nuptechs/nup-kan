@@ -268,20 +268,16 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
                 
                 {/* Add Column Button */}
                 <div className="flex-shrink-0 w-72">
-                  <div className="h-full flex items-center justify-center">
-                    <button
-                      onClick={handleManageColumns}
-                      className="w-full h-32 border-2 border-dashed border-gray-300 rounded-xl hover:border-indigo-400 hover:bg-indigo-50/50 transition-all duration-200 flex flex-col items-center justify-center group"
-                      data-testid="button-add-column"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-gray-200 group-hover:bg-indigo-100 flex items-center justify-center mb-2 transition-colors">
-                        <Plus className="w-4 h-4 text-gray-400 group-hover:text-indigo-500" />
-                      </div>
-                      <span className="text-sm text-gray-500 group-hover:text-indigo-600 font-medium">
-                        Adicionar Coluna
-                      </span>
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleManageColumns}
+                    className="w-full h-12 border border-dashed border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50/30 transition-all duration-200 flex items-center justify-center group bg-white/50 backdrop-blur-sm"
+                    data-testid="button-add-column"
+                  >
+                    <Plus className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 mr-2" />
+                    <span className="text-sm text-gray-500 group-hover:text-indigo-600">
+                      Adicionar Coluna
+                    </span>
+                  </button>
                 </div>
                 
                 {provided.placeholder}
