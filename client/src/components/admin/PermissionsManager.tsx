@@ -132,7 +132,7 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
   const permissionsByCategory = useMemo<PermissionsByCategory>(() => {
     const filtered = permissions.filter(permission =>
       permission.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      permission.description.toLowerCase().includes(searchTerm.toLowerCase())
+      (permission.description || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return filtered.reduce((acc, permission) => {

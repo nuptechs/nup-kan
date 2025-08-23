@@ -448,66 +448,102 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
                   </div>
                 ) : selectedProfile ? (
                   <div className="space-y-3">
-                    <h4 className="font-medium text-sm text-muted-foreground">Permissões do Perfil</h4>
-                    <div className="p-3 rounded-lg border">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: selectedProfile.color }}
-                        />
-                        <span className="font-medium">{selectedProfile.name}</span>
-                      </div>
-                      
-                      <ScrollArea className="h-48">
-                        <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: selectedProfile.color }}
+                      />
+                      <span className="font-medium">{selectedProfile.name}</span>
+                    </div>
+                    
+                    {/* Interface de Duas Colunas para Permissões */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Coluna Esquerda - Permissões Ativas */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-sm text-green-600">Permissões Ativas</h4>
+                          <Badge variant="secondary" className="bg-green-100 text-green-800">
+                            {profilePermissions.length}
+                          </Badge>
+                        </div>
+                        <div className="border rounded-md p-3 max-h-64 overflow-y-auto">
                           {profilePermissionsLoading ? (
-                            <div className="text-sm text-muted-foreground">Carregando permissões...</div>
-                          ) : (
-                            Object.entries(groupedPermissions).map(([category, perms]) => (
-                              <div key={category} className="space-y-2">
-                                <h5 className="font-medium text-sm">{categoryLabels[category] || category}</h5>
-                                <div className="space-y-1">
-                                  {perms.map((permission) => {
-                                    const hasPermission = profilePermissions.some(
-                                      pp => pp.permissionId === permission.id
-                                    );
-                                    return (
-                                      <div 
-                                        key={permission.id} 
-                                        className="flex items-center justify-between p-2 rounded border"
-                                      >
-                                        <div className="flex items-center space-x-2">
-                                          <Checkbox
-                                            checked={hasPermission}
-                                            onCheckedChange={() => togglePermission(permission.id)}
-                                            data-testid={`checkbox-permission-${permission.id}`}
-                                          />
-                                          <div>
-                                            <label className="text-sm font-medium cursor-pointer">
-                                              {permission.name}
-                                            </label>
-                                            {permission.description && (
-                                              <p className="text-xs text-muted-foreground">
-                                                {permission.description}
-                                              </p>
-                                            )}
-                                          </div>
-                                        </div>
-                                        {hasPermission ? (
-                                          <CheckCircle className="h-4 w-4 text-green-500" />
-                                        ) : (
-                                          <XCircle className="h-4 w-4 text-red-500" />
-                                        )}
-                                      </div>
-                                    );
-                                  })}
+                            <div className="text-sm text-muted-foreground">Carregando...</div>
+                          ) : profilePermissions.length > 0 ? (
+                            profilePermissions.map((pp) => {
+                              const permission = permissions.find(p => p.id === pp.permissionId);
+                              if (!permission) return null;
+                              return (
+                                <div key={permission.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                                  <div className="flex items-center space-x-2 flex-1">
+                                    <CheckCircle className="w-4 h-4 text-green-500" />
+                                    <div>
+                                      <p className="text-sm font-medium text-green-700">{permission.name}</p>
+                                      {permission.description && (
+                                        <p className="text-xs text-muted-foreground">{permission.description}</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => togglePermission(permission.id)}
+                                    data-testid={`button-remove-permission-${permission.id}`}
+                                  >
+                                    <XCircle className="w-4 h-4 text-red-500" />
+                                  </Button>
                                 </div>
-                                <Separator />
-                              </div>
-                            ))
+                              );
+                            })
+                          ) : (
+                            <p className="text-center text-muted-foreground py-4">Nenhuma permissão ativa</p>
                           )}
                         </div>
-                      </ScrollArea>
+                      </div>
+
+                      {/* Coluna Direita - Permissões Disponíveis */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-sm text-blue-600">Permissões Disponíveis</h4>
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                            {permissions.filter(p => !profilePermissions.some(pp => pp.permissionId === p.id)).length}
+                          </Badge>
+                        </div>
+                        <div className="border rounded-md p-3 max-h-64 overflow-y-auto">
+                          {profilePermissionsLoading ? (
+                            <div className="text-sm text-muted-foreground">Carregando...</div>
+                          ) : (
+                            permissions
+                              .filter(p => !profilePermissions.some(pp => pp.permissionId === p.id))
+                              .map((permission) => (
+                                <div key={permission.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                                  <div className="flex items-center space-x-2 flex-1">
+                                    <XCircle className="w-4 h-4 text-gray-400" />
+                                    <div>
+                                      <p className="text-sm font-medium text-blue-700">{permission.name}</p>
+                                      {permission.description && (
+                                        <p className="text-xs text-muted-foreground">{permission.description}</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => togglePermission(permission.id)}
+                                    data-testid={`button-add-permission-${permission.id}`}
+                                  >
+                                    <CheckCircle className="w-4 h-4 text-green-500" />
+                                  </Button>
+                                </div>
+                              ))
+                          )}
+                          {permissions.filter(p => !profilePermissions.some(pp => pp.permissionId === p.id)).length === 0 && !profilePermissionsLoading && (
+                            <p className="text-center text-muted-foreground py-4">Todas as permissões já estão ativas</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ) : (
