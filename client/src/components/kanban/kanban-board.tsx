@@ -80,13 +80,24 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
         duration: 3000,
       });
     },
-    onError: () => {
-      toast({
-        title: "Erro ao excluir coluna",
-        description: "Não foi possível excluir a coluna. Tente novamente.",
-        variant: "destructive",
-        duration: 3000,
-      });
+    onError: (error: any) => {
+      // If it's a 404, the column might already be deleted, refresh the data
+      if (error?.message?.includes('404') || error?.message?.includes('not found')) {
+        queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
+        queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
+        toast({
+          title: "Coluna já foi excluída",
+          description: "A página será atualizada com os dados mais recentes.",
+          duration: 3000,
+        });
+      } else {
+        toast({
+          title: "Erro ao excluir coluna",
+          description: "Não foi possível excluir a coluna. Tente novamente.",
+          variant: "destructive",
+          duration: 3000,
+        });
+      }
     },
   });
 
