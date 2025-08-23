@@ -206,14 +206,6 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Gerenciamento de Permissões</h2>
-          <p className="text-muted-foreground">
-            Configure permissões de forma fluida e visual
-          </p>
-        </div>
-      </div>
 
       <Tabs defaultValue="permissions" className="w-full">
         <TabsList className="grid w-full grid-cols-3">

@@ -159,7 +159,7 @@ export default function UserSettingsPage() {
                 <span>Voltar ao Kanban</span>
               </Button>
               <Separator orientation="vertical" className="h-6" />
-              <h1 className="text-xl font-semibold text-gray-900">Configurações da Conta</h1>
+              <h1 className="text-xl font-semibold text-gray-900">Configurações</h1>
             </div>
           </div>
         </div>
@@ -173,7 +173,7 @@ export default function UserSettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="w-5 h-5" />
-                Informações do Perfil
+                Perfil
               </CardTitle>
               <CardDescription>
                 Gerencie suas informações básicas de perfil

@@ -121,7 +121,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         <div className="flex-1 overflow-y-auto py-6 space-y-6">
           {/* Export Data Section - Top Priority */}
           <div className="space-y-4">
-            <h3 className="font-medium text-gray-900" data-testid="export-heading">📊 Exportar Dados</h3>
+            <h3 className="font-medium text-gray-900" data-testid="export-heading">📊 Exportação</h3>
             <div className="space-y-2">
               <Button
                 onClick={handleExportData}
@@ -149,7 +149,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
           {/* Unified Management Section */}
           <div className="space-y-4">
-            <h3 className="font-medium text-gray-900">⚙️ Gerenciamento</h3>
+            <h3 className="font-medium text-gray-900">⚙️ Sistema</h3>
             <div className="grid grid-cols-1 gap-3">
               {/* Consolidated Management Button */}
               <Button
@@ -259,7 +259,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
           {/* Automation */}
           <div className="space-y-4">
-            <h3 className="font-medium text-gray-900" data-testid="automation-heading">Automação</h3>
+            <h3 className="font-medium text-gray-900" data-testid="automation-heading">🤖 Automação</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label htmlFor="auto-assign" className="text-sm text-gray-700">
@@ -286,7 +286,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
           {/* Analytics */}
           <div className="space-y-4">
-            <h3 className="font-medium text-gray-900" data-testid="analytics-heading">Análises</h3>
+            <h3 className="font-medium text-gray-900" data-testid="analytics-heading">📈 Análises</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="p-3 bg-gray-50 rounded-lg text-center">
                 <p className="text-2xl font-bold text-gray-900" data-testid="analytics-cycle-time">

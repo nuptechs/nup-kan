@@ -207,7 +207,7 @@ export function FluidPermissionsInterface({ targetType, targetId, targetName }: 
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Settings2 className="w-5 h-5" />
-            <span>Atribuição Rápida de Perfis</span>
+            <span>Perfis Rápidos</span>
           </CardTitle>
           <CardDescription>
             Aplique conjuntos de permissões pré-configurados
@@ -247,7 +247,7 @@ export function FluidPermissionsInterface({ targetType, targetId, targetName }: 
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Search className="w-5 h-5" />
-            <span>Buscar Permissões</span>
+            <span>Busca</span>
           </CardTitle>
         </CardHeader>
         <CardContent>

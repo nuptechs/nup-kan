@@ -197,7 +197,7 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold flex items-center gap-2">
             <Columns className="w-5 h-5" />
-            Gerenciar Colunas
+            Colunas
           </DialogTitle>
           <DialogDescription>
             Crie, edite, exclua ou reordene as colunas do seu quadro Kanban.
@@ -207,7 +207,7 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
         <div className="space-y-6">
           {/* Formulário para criar nova coluna */}
           <div className="border rounded-lg p-4 space-y-4">
-            <h3 className="text-lg font-medium">Criar Nova Coluna</h3>
+            <h3 className="text-lg font-medium">Nova Coluna</h3>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onCreateSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -43,7 +43,7 @@ export function PermissionsManagerCard() {
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <Shield className="w-5 h-5 text-blue-600" />
-          <span>Gerenciamento de Permissões</span>
+          <span>Permissões</span>
           <Badge variant="secondary" className="ml-auto">
             <Zap className="w-3 h-3 mr-1" />
             Fluido
@@ -95,7 +95,7 @@ export function PermissionsManagerCard() {
             data-testid="button-open-permissions-manager"
           >
             <Shield className="w-4 h-4 mr-2" />
-            Gerenciar Permissões
+            Acessar Permissões
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>

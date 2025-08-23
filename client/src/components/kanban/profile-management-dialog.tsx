@@ -261,7 +261,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserCog className="h-5 w-5" />
-            Gerenciamento de Perfis
+            Perfis
           </DialogTitle>
           <DialogDescription id="profile-management-description">
             Gerencie perfis de usuário e suas permissões no sistema
@@ -282,7 +282,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
 
           <TabsContent value="profiles" className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Perfis do Sistema</h3>
+              <h3 className="text-lg font-semibold">Lista de Perfis</h3>
               <Button
                 onClick={() => {
                   setIsCreatingProfile(true);

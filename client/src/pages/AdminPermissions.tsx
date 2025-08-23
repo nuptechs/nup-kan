@@ -49,7 +49,7 @@ export default function AdminPermissions() {
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Gerenciamento de Permissões</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Permissões do Sistema</h1>
             <p className="text-muted-foreground">
               Configure permissões de forma visual e intuitiva
             </p>
@@ -62,7 +62,7 @@ export default function AdminPermissions() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Shield className="w-5 h-5" />
-              <span>Gerenciando: {getTargetName()}</span>
+              <span>{getTargetName()}</span>
             </CardTitle>
             <CardDescription>
               Tipo: {targetType === "user" ? "Usuário" : targetType === "team" ? "Time" : "Perfil"} • {getTargetDescription()}
