@@ -61,7 +61,6 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
         boardId,
         position: columns.length > 0 ? Math.max(...columns.map(c => c.position)) + 1 : 0,
       };
-      console.log('🚀 Making API call with data:', columnData);
       return await apiRequest("POST", "/api/columns", columnData);
     },
     onSuccess: () => {
@@ -73,8 +72,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
       });
       form.reset();
     },
-    onError: (error) => {
-      console.error('❌ Column creation error:', error);
+    onError: () => {
       toast({
         title: "Erro",
         description: "Falha ao criar coluna. Tente novamente.",
@@ -147,9 +145,6 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
   });
 
   const onCreateSubmit = (data: FormData) => {
-    console.log('🔄 Form submitted with data:', data);
-    console.log('🆔 BoardId:', boardId);
-    console.log('📋 Form errors:', form.formState.errors);
     createColumnMutation.mutate(data);
   };
 
