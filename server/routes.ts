@@ -137,15 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Board-specific tasks and columns routes
   app.get("/api/boards/:boardId/tasks", async (req, res) => {
     try {
-      let tasks = await storage.getBoardTasks(req.params.boardId);
-      
-      // If board has no tasks, initialize with default tasks
-      if (tasks.length === 0) {
-        console.log(`No tasks found for board ${req.params.boardId}, initializing with default tasks`);
-        await storage.initializeBoardWithDefaults(req.params.boardId);
-        tasks = await storage.getBoardTasks(req.params.boardId);
-      }
-      
+      const tasks = await storage.getBoardTasks(req.params.boardId);
       res.json(tasks);
     } catch (error) {
       console.error("Error fetching board tasks:", error);
