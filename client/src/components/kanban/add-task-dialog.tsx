@@ -20,6 +20,7 @@ import { z } from "zod";
 interface AddTaskDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  boardId?: string;
 }
 
 const formSchema = insertTaskSchema.extend({
@@ -28,7 +29,7 @@ const formSchema = insertTaskSchema.extend({
 
 type FormData = z.infer<typeof formSchema>;
 
-export function AddTaskDialog({ isOpen, onClose }: AddTaskDialogProps) {
+export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -57,6 +58,10 @@ export function AddTaskDialog({ isOpen, onClose }: AddTaskDialogProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+      // Invalidate board-specific queries
+      if (boardId) {
+        queryClient.invalidateQueries({ queryKey: ["/api/boards", boardId, "tasks"] });
+      }
       toast({
         title: "Sucesso",
         description: "Tarefa criada com sucesso!",
@@ -74,7 +79,12 @@ export function AddTaskDialog({ isOpen, onClose }: AddTaskDialogProps) {
   });
 
   const onSubmit = (data: FormData) => {
-    createTaskMutation.mutate(data);
+    // Adicionar o boardId à data da tarefa
+    const taskData = {
+      ...data,
+      boardId: boardId || "", // Use o boardId atual ou string vazia como fallback
+    };
+    createTaskMutation.mutate(taskData);
   };
 
   return (

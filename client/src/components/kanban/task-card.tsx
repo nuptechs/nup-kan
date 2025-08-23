@@ -43,7 +43,10 @@ const getRandomIcon = () => {
 };
 
 export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
+  const isInProgress = task.status === "inprogress";
+  const isReview = task.status === "review";
   const isDone = task.status === "done";
+  const Icon = getRandomIcon();
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -54,6 +57,7 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
     <div
       className={cn(
         "bg-white rounded-xl p-3 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group border border-gray-100",
+        (isInProgress || isReview) && `border-l-4 ${getColumnBorderClasses(columnColor)}`,
         isDone && "opacity-80"
       )}
       data-testid={`card-${task.id}`}
@@ -67,17 +71,13 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
         )}>
           {task.title}
         </h3>
-        {task.priority !== "low" && (
-          <span
-            className={cn(
-              "text-xs px-1.5 py-0.5 rounded-full font-medium shrink-0",
-              task.priority === "high" ? "bg-red-100 text-red-600" : "bg-yellow-100 text-yellow-600"
-            )}
-            data-testid={`priority-${task.id}`}
-          >
-            {task.priority === "high" ? "!" : "!"}
-          </span>
-        )}
+        <Badge
+          variant="secondary"
+          className={cn("text-xs px-2 py-0.5 rounded-md font-medium shrink-0", getPriorityClasses(task.priority))}
+          data-testid={`priority-${task.id}`}
+        >
+          {isDone ? "Concluída" : getPriorityText(task.priority)}
+        </Badge>
       </div>
       
       {/* Description - Only if exists */}
@@ -88,22 +88,54 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
       )}
       
       {/* Progress - Only for in-progress tasks */}
-      {task.status === "inprogress" && task.progress !== undefined && (
+      {isInProgress && task.progress !== undefined && (
         <div className="mb-2">
-          <Progress value={task.progress} className="h-1.5 bg-gray-100" />
-          <span className="text-xs text-gray-500 mt-1 block" data-testid={`progress-${task.id}`}>
-            {task.progress}% completo
-          </span>
+          <div className="flex justify-between text-xs text-gray-600 mb-1">
+            <span>Progresso</span>
+            <span data-testid={`progress-${task.id}`}>{task.progress}%</span>
+          </div>
+          <Progress value={task.progress} className="h-1.5" />
+        </div>
+      )}
+
+      {/* Review Status */}
+      {isReview && (
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-2">
+            <Code className="w-3 h-3 text-purple-500" />
+            <span className="text-xs text-gray-600">feature/branch</span>
+          </div>
+          <Badge
+            variant="secondary"
+            className="bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded-md"
+            data-testid={`review-status-${task.id}`}
+          >
+            Pronto para deploy
+          </Badge>
+        </div>
+      )}
+
+      {/* Done Status */}
+      {isDone && (
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-2 text-xs text-green-600">
+            <div className="w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
+              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+            </div>
+            <span data-testid={`completion-date-${task.id}`}>
+              Finalizada em {task.updatedAt ? new Date(task.updatedAt).toLocaleDateString('pt-BR') : 'Hoje'}
+            </span>
+          </div>
         </div>
       )}
       
-      {/* Bottom Row - Assignee */}
+      {/* Bottom Row - Assignee and Meta */}
       <div className="flex items-center justify-between mt-3">
         {task.assigneeName ? (
           <div className="flex items-center space-x-2">
             <div className="w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
               <span className="text-white text-xs font-medium" data-testid={`assignee-avatar-${task.id}`}>
-                {task.assigneeAvatar || task.assigneeName.slice(0, 1).toUpperCase()}
+                {task.assigneeAvatar || task.assigneeName.slice(0, 2).toUpperCase()}
               </span>
             </div>
             <span className="text-xs text-gray-600" data-testid={`assignee-name-${task.id}`}>
@@ -119,12 +151,12 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
           </div>
         )}
         
-        {/* Status indicator */}
-        <div className="flex items-center">
-          <span className={cn(
-            "w-2 h-2 rounded-full",
-            isDone ? "bg-green-500" : task.status === "inprogress" ? "bg-blue-500" : "bg-gray-300"
-          )}></span>
+        {/* Task Meta Info */}
+        <div className="flex items-center space-x-1.5 text-xs text-gray-400">
+          <Icon className="w-3 h-3" />
+          <span data-testid={`task-meta-${task.id}`}>
+            {isDone ? "Deploy" : task.tags?.[0] || "3h"}
+          </span>
         </div>
       </div>
     </div>

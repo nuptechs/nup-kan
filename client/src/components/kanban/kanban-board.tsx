@@ -264,6 +264,7 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
       <AddTaskDialog
         isOpen={isAddTaskOpen}
         onClose={() => setIsAddTaskOpen(false)}
+        boardId={boardId}
       />
       
       <ColumnManagementDialog
