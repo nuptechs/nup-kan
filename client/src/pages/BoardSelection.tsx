@@ -61,10 +61,11 @@ export default function BoardSelection() {
 
   const createBoardMutation = useMutation({
     mutationFn: async (data: BoardFormData) => {
-      return await apiRequest("/api/boards", "POST", {
+      const response = await apiRequest("POST", "/api/boards", {
         ...data,
         createdById: currentUser?.id || "system",
       });
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
@@ -88,7 +89,8 @@ export default function BoardSelection() {
   const editBoardMutation = useMutation({
     mutationFn: async (data: BoardFormData) => {
       if (!selectedBoard) throw new Error("No board selected");
-      return await apiRequest("PATCH", `/api/boards/${selectedBoard.id}`, data);
+      const response = await apiRequest("PATCH", `/api/boards/${selectedBoard.id}`, data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
@@ -113,7 +115,12 @@ export default function BoardSelection() {
   const deleteBoardMutation = useMutation({
     mutationFn: async () => {
       if (!selectedBoard) throw new Error("No board selected");
-      return await apiRequest("DELETE", `/api/boards/${selectedBoard.id}`);
+      const response = await apiRequest("DELETE", `/api/boards/${selectedBoard.id}`);
+      // DELETE may return 204 No Content
+      if (response.status === 204) {
+        return null;
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
@@ -314,6 +321,9 @@ export default function BoardSelection() {
         <DialogContent className="sm:max-w-md" data-testid="dialog-create-board">
           <DialogHeader>
             <DialogTitle>Criar Novo Board</DialogTitle>
+            <DialogDescription>
+              Crie um novo board Kanban para organizar suas tarefas e projetos.
+            </DialogDescription>
           </DialogHeader>
           
           <Form {...createForm}>
