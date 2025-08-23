@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -32,6 +33,8 @@ type Section = "users" | "teams" | "profiles" | "permissions" | null;
 export default function PermissionsHub() {
   const [activeSection, setActiveSection] = useState<Section>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -175,6 +178,15 @@ export default function PermissionsHub() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-profiles"] });
       toast({ title: "Vínculo removido" });
+    }
+  });
+
+  const addUserToTeam = useMutation({
+    mutationFn: ({ userId, teamId, role = "member" }: { userId: string; teamId: string; role?: string }) => 
+      apiRequest("POST", `/api/users/${userId}/teams/${teamId}`, { role }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
+      toast({ title: "Usuário adicionado ao time" });
     }
   });
 
@@ -492,13 +504,21 @@ export default function PermissionsHub() {
                 Novo Time
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Criar Time</DialogTitle>
                 <DialogDescription>Crie um agrupamento de usuários</DialogDescription>
               </DialogHeader>
               <Form {...teamForm}>
-                <form onSubmit={teamForm.handleSubmit((data) => createTeam.mutate(data))} className="space-y-4">
+                <form onSubmit={teamForm.handleSubmit(async (data) => {
+                  const response = await createTeam.mutateAsync(data);
+                  const team = await response.json();
+                  // Adicionar usuários selecionados ao time
+                  for (const userId of selectedUsers) {
+                    await addUserToTeam.mutateAsync({ userId, teamId: team.id, role: "member" });
+                  }
+                  setSelectedUsers([]);
+                })} className="space-y-4">
                   <FormField
                     control={teamForm.control}
                     name="name"
@@ -525,9 +545,55 @@ export default function PermissionsHub() {
                       </FormItem>
                     )}
                   />
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Membros do Time</FormLabel>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (selectedUsers.length === users.length) {
+                            setSelectedUsers([]);
+                          } else {
+                            setSelectedUsers(users.map(u => u.id));
+                          }
+                        }}
+                      >
+                        {selectedUsers.length === users.length ? "Desmarcar Todos" : "Selecionar Todos"}
+                      </Button>
+                    </div>
+                    <div className="border rounded-md p-3 max-h-48 overflow-y-auto">
+                      {users.map((user) => (
+                        <div key={user.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
+                          <Checkbox
+                            checked={selectedUsers.includes(user.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedUsers(prev => [...prev, user.id]);
+                              } else {
+                                setSelectedUsers(prev => prev.filter(id => id !== user.id));
+                              }
+                            }}
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{user.name}</p>
+                            <p className="text-xs text-muted-foreground">{user.email}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {selectedUsers.length > 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        {selectedUsers.length} usuário{selectedUsers.length > 1 ? 's' : ''} selecionado{selectedUsers.length > 1 ? 's' : ''}
+                      </p>
+                    )}
+                  </div>
+
                   <DialogFooter>
-                    <Button type="submit" disabled={createTeam.isPending}>
-                      {createTeam.isPending ? "Criando..." : "Criar"}
+                    <Button type="submit" disabled={createTeam.isPending || addUserToTeam.isPending}>
+                      {(createTeam.isPending || addUserToTeam.isPending) ? "Criando..." : "Criar Time"}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -646,13 +712,29 @@ export default function PermissionsHub() {
                 Novo Perfil
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Criar Perfil</DialogTitle>
-                <DialogDescription>Defina um conjunto de funcionalidades</DialogDescription>
+                <DialogDescription>Defina um conjunto de funcionalidades e associe usuários e times</DialogDescription>
               </DialogHeader>
               <Form {...profileForm}>
-                <form onSubmit={profileForm.handleSubmit((data) => createProfile.mutate(data))} className="space-y-4">
+                <form onSubmit={profileForm.handleSubmit(async (data) => {
+                  const response = await createProfile.mutateAsync(data);
+                  const profile = await response.json();
+                  
+                  // Vincular usuários selecionados ao perfil
+                  for (const userId of selectedUsers) {
+                    await linkUserToProfile.mutateAsync({ userId, profileId: profile.id });
+                  }
+                  
+                  // Vincular times selecionados ao perfil
+                  for (const teamId of selectedTeams) {
+                    await linkTeamToProfile.mutateAsync({ teamId, profileId: profile.id });
+                  }
+                  
+                  setSelectedUsers([]);
+                  setSelectedTeams([]);
+                })} className="space-y-4">
                   <FormField
                     control={profileForm.control}
                     name="name"
@@ -679,9 +761,113 @@ export default function PermissionsHub() {
                       </FormItem>
                     )}
                   />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Seleção de Usuários */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Usuários</FormLabel>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (selectedUsers.length === users.length) {
+                              setSelectedUsers([]);
+                            } else {
+                              setSelectedUsers(users.map(u => u.id));
+                            }
+                          }}
+                        >
+                          {selectedUsers.length === users.length ? "Desmarcar" : "Todos"}
+                        </Button>
+                      </div>
+                      <div className="border rounded-md p-3 max-h-48 overflow-y-auto">
+                        {users.map((user) => (
+                          <div key={user.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
+                            <Checkbox
+                              checked={selectedUsers.includes(user.id)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUsers(prev => [...prev, user.id]);
+                                } else {
+                                  setSelectedUsers(prev => prev.filter(id => id !== user.id));
+                                }
+                              }}
+                            />
+                            <div className="flex-1">
+                              <p className="text-sm font-medium">{user.name}</p>
+                              <p className="text-xs text-muted-foreground">{user.email}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {selectedUsers.length > 0 && (
+                        <p className="text-sm text-muted-foreground">
+                          {selectedUsers.length} usuário{selectedUsers.length > 1 ? 's' : ''}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Seleção de Times */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Times</FormLabel>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (selectedTeams.length === teams.length) {
+                              setSelectedTeams([]);
+                            } else {
+                              setSelectedTeams(teams.map(t => t.id));
+                            }
+                          }}
+                        >
+                          {selectedTeams.length === teams.length ? "Desmarcar" : "Todos"}
+                        </Button>
+                      </div>
+                      <div className="border rounded-md p-3 max-h-48 overflow-y-auto">
+                        {teams.map((team) => (
+                          <div key={team.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
+                            <Checkbox
+                              checked={selectedTeams.includes(team.id)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedTeams(prev => [...prev, team.id]);
+                                } else {
+                                  setSelectedTeams(prev => prev.filter(id => id !== team.id));
+                                }
+                              }}
+                            />
+                            <div className="flex-1 flex items-center space-x-2">
+                              <div 
+                                className="w-3 h-3 rounded-full" 
+                                style={{ backgroundColor: team.color }}
+                              />
+                              <div>
+                                <p className="text-sm font-medium">{team.name}</p>
+                                <p className="text-xs text-muted-foreground">{team.description}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {selectedTeams.length > 0 && (
+                        <p className="text-sm text-muted-foreground">
+                          {selectedTeams.length} time{selectedTeams.length > 1 ? 's' : ''}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
                   <DialogFooter>
-                    <Button type="submit" disabled={createProfile.isPending}>
-                      {createProfile.isPending ? "Criando..." : "Criar"}
+                    <Button 
+                      type="submit" 
+                      disabled={createProfile.isPending || linkUserToProfile.isPending || linkTeamToProfile.isPending}
+                    >
+                      {(createProfile.isPending || linkUserToProfile.isPending || linkTeamToProfile.isPending) ? "Criando..." : "Criar Perfil"}
                     </Button>
                   </DialogFooter>
                 </form>
