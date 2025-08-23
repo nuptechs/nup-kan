@@ -626,7 +626,7 @@ export default function PermissionsHub() {
           </Dialog>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 relative">
           {teams.map((team) => (
             <Card key={team.id}>
               <CardContent className="flex items-center justify-between p-4">
@@ -643,16 +643,6 @@ export default function PermissionsHub() {
                   </div>
                 </div>
                 <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsTeamManagementOpen(true)}
-                    className="border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950"
-                    title="Gerenciar Time e Membros"
-                  >
-                    <Settings className="w-4 h-4 text-blue-600 mr-1" />
-                    Gerenciar
-                  </Button>
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button 
@@ -716,6 +706,17 @@ export default function PermissionsHub() {
               </CardContent>
             </Card>
           ))}
+          
+          {/* Engrenagem Discreta no Canto Inferior Direito */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsTeamManagementOpen(true)}
+            className="absolute bottom-0 right-0 p-2 opacity-60 hover:opacity-100 transition-opacity"
+            title="Gerenciar Times e Membros"
+          >
+            <Settings className="w-5 h-5 text-gray-600" />
+          </Button>
         </div>
       </div>
     );
