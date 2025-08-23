@@ -69,6 +69,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
       toast({
         title: "Sucesso",
         description: "Coluna criada com sucesso!",
+        duration: 3000,
       });
       form.reset();
       onClose(); // Fecha a modal automaticamente
@@ -92,6 +93,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
       toast({
         title: "Sucesso",
         description: "Coluna atualizada com sucesso!",
+        duration: 3000,
       });
       setEditingColumn(null);
       editForm.reset();
@@ -117,6 +119,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
       toast({
         title: "Sucesso",
         description: "Coluna excluída com sucesso! As tarefas foram movidas para o Backlog.",
+        duration: 3000,
       });
     },
     onError: () => {
