@@ -25,7 +25,7 @@ import {
   User,
   Settings
 } from "lucide-react";
-import type { User as UserType, Team, Profile, Permission, UserTeam, TeamProfile } from "@shared/schema";
+import type { User as UserType, Team, Profile, Permission, UserTeam, TeamProfile, ProfilePermission } from "@shared/schema";
 import { insertUserSchema, insertTeamSchema, insertProfileSchema } from "@shared/schema";
 
 type Section = "users" | "teams" | "profiles" | "permissions" | null;
@@ -47,7 +47,7 @@ export default function PermissionsHub() {
   const { data: permissions = [] } = useQuery<Permission[]>({ queryKey: ["/api/permissions"] });
   const { data: userTeams = [] } = useQuery<UserTeam[]>({ queryKey: ["/api/user-teams"] });
   const { data: teamProfiles = [] } = useQuery<TeamProfile[]>({ queryKey: ["/api/team-profiles"] });
-  const { data: profilePermissions = [] } = useQuery({ queryKey: ["/api/profile-permissions"] });
+  const { data: profilePermissions = [] } = useQuery<ProfilePermission[]>({ queryKey: ["/api/profile-permissions"] });
 
   // Forms
   const userForm = useForm({
@@ -197,6 +197,7 @@ export default function PermissionsHub() {
       apiRequest("POST", `/api/profiles/${profileId}/permissions`, { permissionId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profile-permissions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
       // Toast removido - será mostrado apenas no final do processo
     }
   });
@@ -206,7 +207,8 @@ export default function PermissionsHub() {
       apiRequest("DELETE", `/api/profiles/${profileId}/permissions/${permissionId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profile-permissions"] });
-      // Toast removido - será mostrado apenas no final do processo
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      toast({ title: "Permissão removida do perfil" });
     }
   });
 
@@ -916,12 +918,12 @@ export default function PermissionsHub() {
                           
                           {(() => {
                             const currentPermissions = profilePermissions
-                              .filter(pp => pp.profileId === profile.id)
-                              .map(pp => permissions.find(p => p.id === pp.permissionId))
-                              .filter(Boolean);
+                              .filter((pp: ProfilePermission) => pp.profileId === profile.id)
+                              .map((pp: ProfilePermission) => permissions.find((p: Permission) => p.id === pp.permissionId))
+                              .filter(Boolean) as Permission[];
                             
-                            const availablePermissions = permissions.filter(p => 
-                              !currentPermissions.some(cp => cp.id === p.id)
+                            const availablePermissions = permissions.filter((p: Permission) => 
+                              !currentPermissions.some((cp: Permission) => cp && cp.id === p.id)
                             );
 
                             return (
@@ -933,7 +935,7 @@ export default function PermissionsHub() {
                                     <Badge variant="secondary">{currentPermissions.length}</Badge>
                                   </div>
                                   <div className="border rounded-md p-3 max-h-60 overflow-y-auto">
-                                    {currentPermissions.map((permission) => (
+                                    {currentPermissions.map((permission: Permission) => (
                                       <div key={permission.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
                                         <div className="flex-1">
                                           <p className="text-sm font-medium text-green-700">{permission.name}</p>
@@ -952,7 +954,6 @@ export default function PermissionsHub() {
                                                 permissionId: permission.id, 
                                                 profileId: profile.id 
                                               });
-                                              toast({ title: "Permissão removida do perfil" });
                                             }
                                           }}
                                         >
@@ -991,7 +992,7 @@ export default function PermissionsHub() {
                                     </div>
                                   </div>
                                   <div className="border rounded-md p-3 max-h-60 overflow-y-auto">
-                                    {availablePermissions.map((permission) => (
+                                    {availablePermissions.map((permission: Permission) => (
                                       <div key={permission.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
                                         <Checkbox
                                           checked={selectedPermissions.includes(permission.id)}
