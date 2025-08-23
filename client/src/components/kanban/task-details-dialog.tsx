@@ -27,6 +27,7 @@ interface TaskDetailsDialogProps {
   task: Task | null;
   isOpen: boolean;
   onClose: () => void;
+  boardId?: string;
 }
 
 const formSchema = updateTaskSchema.extend({
@@ -36,7 +37,7 @@ const formSchema = updateTaskSchema.extend({
 
 type FormData = z.infer<typeof formSchema>;
 
-export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogProps) {
+export function TaskDetailsDialog({ task, isOpen, onClose, boardId }: TaskDetailsDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const queryClient = useQueryClient();
@@ -93,6 +94,11 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+      // Invalidate board-specific queries
+      if (boardId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/tasks`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
+      }
       toast({
         title: "Sucesso",
         description: "Tarefa atualizada com sucesso!",
@@ -117,6 +123,11 @@ export function TaskDetailsDialog({ task, isOpen, onClose }: TaskDetailsDialogPr
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+      // Invalidate board-specific queries
+      if (boardId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/tasks`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
+      }
       toast({
         title: "Sucesso",
         description: "Tarefa excluída com sucesso!",

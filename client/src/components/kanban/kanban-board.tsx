@@ -296,6 +296,7 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
         task={selectedTask}
         isOpen={isTaskDetailsOpen}
         onClose={handleCloseTaskDetails}
+        boardId={boardId}
       />
 
       {/* Add Task Dialog */}
