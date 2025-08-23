@@ -35,6 +35,7 @@ export default function PermissionsHub() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -187,6 +188,15 @@ export default function PermissionsHub() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
       toast({ title: "Usuário adicionado ao time" });
+    }
+  });
+
+  const linkPermissionToProfile = useMutation({
+    mutationFn: ({ permissionId, profileId }: { permissionId: string; profileId: string }) => 
+      apiRequest("POST", `/api/profiles/${profileId}/permissions`, { permissionId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile-permissions"] });
+      toast({ title: "Permissão adicionada ao perfil" });
     }
   });
 
@@ -715,25 +725,19 @@ export default function PermissionsHub() {
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Criar Perfil</DialogTitle>
-                <DialogDescription>Defina um conjunto de funcionalidades e associe usuários e times</DialogDescription>
+                <DialogDescription>Defina um conjunto de funcionalidades do sistema</DialogDescription>
               </DialogHeader>
               <Form {...profileForm}>
                 <form onSubmit={profileForm.handleSubmit(async (data) => {
                   const response = await createProfile.mutateAsync(data);
                   const profile = await response.json();
                   
-                  // Vincular usuários selecionados ao perfil
-                  for (const userId of selectedUsers) {
-                    await linkUserToProfile.mutateAsync({ userId, profileId: profile.id });
+                  // Vincular permissões selecionadas ao perfil
+                  for (const permissionId of selectedPermissions) {
+                    await linkPermissionToProfile.mutateAsync({ permissionId, profileId: profile.id });
                   }
                   
-                  // Vincular times selecionados ao perfil
-                  for (const teamId of selectedTeams) {
-                    await linkTeamToProfile.mutateAsync({ teamId, profileId: profile.id });
-                  }
-                  
-                  setSelectedUsers([]);
-                  setSelectedTeams([]);
+                  setSelectedPermissions([]);
                 })} className="space-y-4">
                   <FormField
                     control={profileForm.control}
@@ -762,112 +766,60 @@ export default function PermissionsHub() {
                     )}
                   />
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Seleção de Usuários */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <FormLabel>Usuários</FormLabel>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (selectedUsers.length === users.length) {
-                              setSelectedUsers([]);
-                            } else {
-                              setSelectedUsers(users.map(u => u.id));
-                            }
-                          }}
-                        >
-                          {selectedUsers.length === users.length ? "Desmarcar" : "Todos"}
-                        </Button>
-                      </div>
-                      <div className="border rounded-md p-3 max-h-48 overflow-y-auto">
-                        {users.map((user) => (
-                          <div key={user.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
-                            <Checkbox
-                              checked={selectedUsers.includes(user.id)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedUsers(prev => [...prev, user.id]);
-                                } else {
-                                  setSelectedUsers(prev => prev.filter(id => id !== user.id));
-                                }
-                              }}
-                            />
-                            <div className="flex-1">
-                              <p className="text-sm font-medium">{user.name}</p>
-                              <p className="text-xs text-muted-foreground">{user.email}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      {selectedUsers.length > 0 && (
-                        <p className="text-sm text-muted-foreground">
-                          {selectedUsers.length} usuário{selectedUsers.length > 1 ? 's' : ''}
-                        </p>
-                      )}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Permissões do Perfil</FormLabel>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (selectedPermissions.length === permissions.length) {
+                            setSelectedPermissions([]);
+                          } else {
+                            setSelectedPermissions(permissions.map(p => p.id));
+                          }
+                        }}
+                      >
+                        {selectedPermissions.length === permissions.length ? "Desmarcar Todas" : "Selecionar Todas"}
+                      </Button>
                     </div>
-
-                    {/* Seleção de Times */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <FormLabel>Times</FormLabel>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (selectedTeams.length === teams.length) {
-                              setSelectedTeams([]);
-                            } else {
-                              setSelectedTeams(teams.map(t => t.id));
-                            }
-                          }}
-                        >
-                          {selectedTeams.length === teams.length ? "Desmarcar" : "Todos"}
-                        </Button>
-                      </div>
-                      <div className="border rounded-md p-3 max-h-48 overflow-y-auto">
-                        {teams.map((team) => (
-                          <div key={team.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
-                            <Checkbox
-                              checked={selectedTeams.includes(team.id)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedTeams(prev => [...prev, team.id]);
-                                } else {
-                                  setSelectedTeams(prev => prev.filter(id => id !== team.id));
-                                }
-                              }}
-                            />
-                            <div className="flex-1 flex items-center space-x-2">
-                              <div 
-                                className="w-3 h-3 rounded-full" 
-                                style={{ backgroundColor: team.color }}
-                              />
-                              <div>
-                                <p className="text-sm font-medium">{team.name}</p>
-                                <p className="text-xs text-muted-foreground">{team.description}</p>
-                              </div>
-                            </div>
+                    <div className="border rounded-md p-3 max-h-60 overflow-y-auto">
+                      {permissions.map((permission) => (
+                        <div key={permission.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
+                          <Checkbox
+                            checked={selectedPermissions.includes(permission.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedPermissions(prev => [...prev, permission.id]);
+                              } else {
+                                setSelectedPermissions(prev => prev.filter(id => id !== permission.id));
+                              }
+                            }}
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{permission.name}</p>
+                            <p className="text-xs text-muted-foreground">{permission.description}</p>
+                            <Badge variant="outline" className="mt-1">
+                              {permission.category}
+                            </Badge>
                           </div>
-                        ))}
-                      </div>
-                      {selectedTeams.length > 0 && (
-                        <p className="text-sm text-muted-foreground">
-                          {selectedTeams.length} time{selectedTeams.length > 1 ? 's' : ''}
-                        </p>
-                      )}
+                        </div>
+                      ))}
                     </div>
+                    {selectedPermissions.length > 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        {selectedPermissions.length} permissão{selectedPermissions.length > 1 ? 'ões' : ''} selecionada{selectedPermissions.length > 1 ? 's' : ''}
+                      </p>
+                    )}
                   </div>
 
                   <DialogFooter>
                     <Button 
                       type="submit" 
-                      disabled={createProfile.isPending || linkUserToProfile.isPending || linkTeamToProfile.isPending}
+                      disabled={createProfile.isPending || linkPermissionToProfile.isPending}
                     >
-                      {(createProfile.isPending || linkUserToProfile.isPending || linkTeamToProfile.isPending) ? "Criando..." : "Criar Perfil"}
+                      {(createProfile.isPending || linkPermissionToProfile.isPending) ? "Criando..." : "Criar Perfil"}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -909,7 +861,16 @@ export default function PermissionsHub() {
                         <DialogDescription>Altere as informações do perfil</DialogDescription>
                       </DialogHeader>
                       <Form {...profileForm}>
-                        <form onSubmit={profileForm.handleSubmit((data) => updateProfile.mutate({ id: profile.id, ...data }))} className="space-y-4">
+                        <form onSubmit={profileForm.handleSubmit(async (data) => {
+                          await updateProfile.mutateAsync({ id: profile.id, ...data });
+                          
+                          // Vincular permissões selecionadas ao perfil (se houver mudanças)
+                          for (const permissionId of selectedPermissions) {
+                            await linkPermissionToProfile.mutateAsync({ permissionId, profileId: profile.id });
+                          }
+                          
+                          setSelectedPermissions([]);
+                        })} className="space-y-4">
                           <FormField
                             control={profileForm.control}
                             name="name"
@@ -936,9 +897,58 @@ export default function PermissionsHub() {
                               </FormItem>
                             )}
                           />
+                          
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel>Permissões do Perfil</FormLabel>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  if (selectedPermissions.length === permissions.length) {
+                                    setSelectedPermissions([]);
+                                  } else {
+                                    setSelectedPermissions(permissions.map(p => p.id));
+                                  }
+                                }}
+                              >
+                                {selectedPermissions.length === permissions.length ? "Desmarcar Todas" : "Selecionar Todas"}
+                              </Button>
+                            </div>
+                            <div className="border rounded-md p-3 max-h-60 overflow-y-auto">
+                              {permissions.map((permission) => (
+                                <div key={permission.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
+                                  <Checkbox
+                                    checked={selectedPermissions.includes(permission.id)}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        setSelectedPermissions(prev => [...prev, permission.id]);
+                                      } else {
+                                        setSelectedPermissions(prev => prev.filter(id => id !== permission.id));
+                                      }
+                                    }}
+                                  />
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium">{permission.name}</p>
+                                    <p className="text-xs text-muted-foreground">{permission.description}</p>
+                                    <Badge variant="outline" className="mt-1">
+                                      {permission.category}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            {selectedPermissions.length > 0 && (
+                              <p className="text-sm text-muted-foreground">
+                                {selectedPermissions.length} permissão{selectedPermissions.length > 1 ? 'ões' : ''} selecionada{selectedPermissions.length > 1 ? 's' : ''}
+                              </p>
+                            )}
+                          </div>
+
                           <DialogFooter>
-                            <Button type="submit" disabled={updateProfile.isPending}>
-                              {updateProfile.isPending ? "Salvando..." : "Salvar"}
+                            <Button type="submit" disabled={updateProfile.isPending || linkPermissionToProfile.isPending}>
+                              {(updateProfile.isPending || linkPermissionToProfile.isPending) ? "Salvando..." : "Salvar"}
                             </Button>
                           </DialogFooter>
                         </form>
