@@ -88,16 +88,14 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
                   <Edit2 className="w-3 h-3 text-gray-400 hover:text-blue-500" />
                 </button>
                 
-                {column.title !== "Backlog" && (
-                  <button
-                    onClick={() => onDeleteColumn?.(column.id)}
-                    className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-red-100 flex items-center justify-center transition-all duration-200"
-                    data-testid={`button-delete-column-${column.id}`}
-                    title="Excluir coluna"
-                  >
-                    <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-500" />
-                  </button>
-                )}
+                <button
+                  onClick={() => onDeleteColumn?.(column.id)}
+                  className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-red-100 flex items-center justify-center transition-all duration-200"
+                  data-testid={`button-delete-column-${column.id}`}
+                  title="Excluir coluna"
+                >
+                  <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-500" />
+                </button>
               </div>
               
               <button

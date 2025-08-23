@@ -780,18 +780,10 @@ export class MemStorage implements IStorage {
   async initializeBoardWithDefaults(boardId: string): Promise<void> {
     console.log(`Initializing board ${boardId} with default data`);
     
-    // Create only one default column - Backlog
-    const defaultColumns = [
-      { id: `backlog-${boardId}`, boardId, title: "Backlog", position: 0, wipLimit: null, color: "gray" },
-    ];
-    
-    defaultColumns.forEach(column => {
-      this.columns.set(column.id, column);
-    });
+    // No default columns - board starts completely empty
+    // Users can create columns as needed
 
-    // No default tasks - board starts empty
-
-    console.log(`Board ${boardId} initialized with ${defaultColumns.length} columns and 0 tasks`);
+    console.log(`Board ${boardId} initialized with 0 columns and 0 tasks`);
   }
 
   async createBoard(insertBoard: InsertBoard): Promise<Board> {
@@ -1039,16 +1031,10 @@ export class DatabaseStorage implements IStorage {
       return; // Already initialized
     }
     
-    // Create only one default column - Backlog
-    const defaultColumnsData = [
-      { boardId, title: "Backlog", position: 0, wipLimit: null, color: "gray" },
-    ];
+    // No default columns - board starts completely empty
+    // Users can create columns as needed
     
-    const createdColumns = await db.insert(columns).values(defaultColumnsData).returning();
-    
-    // No default tasks - board starts empty
-    
-    console.log(`Board ${boardId} initialized with ${createdColumns.length} columns and 0 tasks`);
+    console.log(`Board ${boardId} initialized with 0 columns and 0 tasks`);
   }
 
   // Task methods
@@ -1190,11 +1176,12 @@ export class DatabaseStorage implements IStorage {
     
     const columnStatus = statusMap[column.title];
     
-    // If this column has tasks, move them to backlog
+    // If this column has tasks, move them to "todo" status
+    // (or leave them orphaned if no todo column exists - they won't show up but data is preserved)
     if (columnStatus) {
       await db
         .update(tasks)
-        .set({ status: "backlog" })
+        .set({ status: "todo" })
         .where(eq(tasks.status, columnStatus));
     }
     
