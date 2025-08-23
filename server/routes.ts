@@ -623,6 +623,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Profile Permissions routes
+  app.get("/api/profile-permissions", async (req, res) => {
+    try {
+      const profilePermissions = await storage.getAllProfilePermissions();
+      res.json(profilePermissions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch profile permissions" });
+    }
+  });
+
   app.get("/api/profiles/:id/permissions", async (req, res) => {
     try {
       const profilePermissions = await storage.getProfilePermissions(req.params.id);

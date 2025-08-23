@@ -68,6 +68,7 @@ export interface IStorage {
   deletePermission(id: string): Promise<void>;
 
   // Profile Permissions
+  getAllProfilePermissions(): Promise<ProfilePermission[]>;
   getProfilePermissions(profileId: string): Promise<ProfilePermission[]>;
   addPermissionToProfile(profileId: string, permissionId: string): Promise<ProfilePermission>;
   removePermissionFromProfile(profileId: string, permissionId: string): Promise<void>;
@@ -394,6 +395,30 @@ export class MemStorage implements IStorage {
   }
 
   // Profile Permissions methods for MemStorage
+  async getAllProfilePermissions(): Promise<ProfilePermission[]> {
+    // Retorna todas as associações perfil-permissão simuladas
+    const allPermissions: ProfilePermission[] = [];
+    
+    const defaultProfilePermissions: { [key: string]: string[] } = {
+      "profile-admin": ["perm-create-tasks", "perm-edit-tasks", "perm-delete-tasks", "perm-manage-users"],
+      "profile-developer": ["perm-create-tasks", "perm-edit-tasks", "perm-view-tasks"],
+      "profile-designer": ["perm-create-tasks", "perm-edit-tasks"],
+    };
+
+    Object.entries(defaultProfilePermissions).forEach(([profileId, permissionIds]) => {
+      permissionIds.forEach(permissionId => {
+        allPermissions.push({
+          id: randomUUID(),
+          profileId,
+          permissionId,
+          createdAt: new Date(),
+        });
+      });
+    });
+
+    return allPermissions;
+  }
+
   async getProfilePermissions(profileId: string): Promise<ProfilePermission[]> {
     // Retorna permissões baseadas no perfil
     const defaultPermissions: { [key: string]: string[] } = {
@@ -1264,6 +1289,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Profile Permissions methods for DatabaseStorage
+  async getAllProfilePermissions(): Promise<ProfilePermission[]> {
+    return await db.select().from(profilePermissions);
+  }
+
   async getProfilePermissions(profileId: string): Promise<ProfilePermission[]> {
     return await db.select().from(profilePermissions).where(eq(profilePermissions.profileId, profileId));
   }
