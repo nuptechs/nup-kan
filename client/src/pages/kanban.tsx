@@ -152,6 +152,7 @@ export default function KanbanPage({ params }: KanbanPageProps) {
       <SettingsPanel
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+        boardId={boardId}
       />
 
     </div>

@@ -23,9 +23,10 @@ import type { Column, TeamMember } from "@shared/schema";
 interface SettingsPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  boardId?: string;
 }
 
-export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
+export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -334,10 +335,13 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
       </SheetContent>
 
       {/* Management Dialogs */}
-      <ColumnManagementDialog
-        isOpen={isColumnManagementOpen}
-        onClose={() => setIsColumnManagementOpen(false)}
-      />
+      {boardId && (
+        <ColumnManagementDialog
+          isOpen={isColumnManagementOpen}
+          onClose={() => setIsColumnManagementOpen(false)}
+          boardId={boardId}
+        />
+      )}
       
       
       <TagManagementDialog
