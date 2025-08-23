@@ -213,6 +213,19 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
   };
 
   const handleDeleteColumn = async (columnId: string) => {
+    // Find the column to check its title
+    const column = columns.find(c => c.id === columnId);
+    
+    if (column?.title === "Backlog") {
+      toast({
+        title: "Ação não permitida",
+        description: "A coluna 'Backlog' não pode ser excluída pois é essencial para o funcionamento do quadro.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
     if (window.confirm("Tem certeza que deseja excluir esta coluna? Esta ação não pode ser desfeita.")) {
       try {
         await deleteColumnMutation.mutateAsync(columnId);

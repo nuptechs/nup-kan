@@ -223,6 +223,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/columns/:id", async (req, res) => {
     try {
+      // Get the column first to check if it's a Backlog column
+      const column = await storage.getColumn(req.params.id);
+      if (!column) {
+        return res.status(404).json({ message: "Column not found" });
+      }
+      
+      // Prevent deletion of Backlog columns
+      if (column.title === "Backlog") {
+        return res.status(400).json({ 
+          message: "Cannot delete Backlog column. This column is required for the kanban board to function properly." 
+        });
+      }
+      
       await storage.deleteColumn(req.params.id);
       res.status(204).send();
     } catch (error) {
