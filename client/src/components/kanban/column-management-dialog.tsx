@@ -128,23 +128,35 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
 
   const deleteColumnMutation = useMutation({
     mutationFn: async (columnId: string) => {
-      const response = await apiRequest("DELETE", `/api/columns/${columnId}`);
-      return response.json();
+      // DELETE returns 204 with no content, so don't try to parse JSON
+      await apiRequest("DELETE", `/api/columns/${columnId}`);
+      return { success: true };
     },
     onSuccess: () => {
+      // Invalidate all relevant queries to refresh the UI
       queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/tasks`] });
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+      
       toast({
         title: "Sucesso",
-        description: "Coluna excluída com sucesso! As tarefas foram movidas para o Backlog.",
+        description: "Coluna excluída com sucesso junto com suas tarefas!",
         duration: 3000,
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Error deleting column:", error);
+      let errorMessage = "Falha ao excluir coluna. Tente novamente.";
+      
+      if (error?.response?.status === 404) {
+        errorMessage = "Esta coluna já foi excluída ou não existe.";
+      }
+      
       toast({
         title: "Erro",
-        description: "Falha ao excluir coluna. Tente novamente.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -193,6 +205,19 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
   };
 
   const handleDelete = (columnId: string) => {
+    // Prevent multiple deletions and check if column still exists
+    if (deleteColumnMutation.isPending) return;
+    
+    const columnExists = columns.find(c => c.id === columnId);
+    if (!columnExists) {
+      toast({
+        title: "Erro",
+        description: "Esta coluna já foi excluída.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     deleteColumnMutation.mutate(columnId);
   };
 
@@ -495,7 +520,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
                                 <AlertDialogDescription>
                                   Tem certeza que deseja excluir a coluna "{column.title}"? 
                                   Esta ação não pode ser desfeita e todas as tarefas desta coluna 
-                                  serão movidas para o Backlog.
+                                  serão excluídas permanentemente.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>

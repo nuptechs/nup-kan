@@ -224,13 +224,9 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
   };
 
   const handleDeleteColumn = async (columnId: string) => {
-    if (window.confirm("Tem certeza que deseja excluir esta coluna? Esta ação não pode ser desfeita.")) {
-      try {
-        await deleteColumnMutation.mutateAsync(columnId);
-      } catch (error) {
-        console.error("Erro ao excluir coluna:", error);
-      }
-    }
+    // Open column management dialog to handle deletion
+    // This centralizes column deletion logic in one place
+    setIsColumnManagementOpen(true);
   };
 
   if (tasksLoading || columnsLoading) {
