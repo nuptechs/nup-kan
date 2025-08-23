@@ -196,7 +196,7 @@ export default function PermissionsHub() {
       apiRequest("POST", `/api/profiles/${profileId}/permissions`, { permissionId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profile-permissions"] });
-      toast({ title: "Permissão adicionada ao perfil" });
+      // Toast removido - será mostrado apenas no final do processo
     }
   });
 
@@ -733,8 +733,11 @@ export default function PermissionsHub() {
                   const profile = await response.json();
                   
                   // Vincular permissões selecionadas ao perfil
-                  for (const permissionId of selectedPermissions) {
-                    await linkPermissionToProfile.mutateAsync({ permissionId, profileId: profile.id });
+                  if (selectedPermissions.length > 0) {
+                    for (const permissionId of selectedPermissions) {
+                      await linkPermissionToProfile.mutateAsync({ permissionId, profileId: profile.id });
+                    }
+                    toast({ title: `Perfil criado com ${selectedPermissions.length} permiss${selectedPermissions.length > 1 ? 'ões' : 'ão'}` });
                   }
                   
                   setSelectedPermissions([]);
@@ -865,8 +868,11 @@ export default function PermissionsHub() {
                           await updateProfile.mutateAsync({ id: profile.id, ...data });
                           
                           // Vincular permissões selecionadas ao perfil (se houver mudanças)
-                          for (const permissionId of selectedPermissions) {
-                            await linkPermissionToProfile.mutateAsync({ permissionId, profileId: profile.id });
+                          if (selectedPermissions.length > 0) {
+                            for (const permissionId of selectedPermissions) {
+                              await linkPermissionToProfile.mutateAsync({ permissionId, profileId: profile.id });
+                            }
+                            toast({ title: `${selectedPermissions.length} permiss${selectedPermissions.length > 1 ? 'ões adicionadas' : 'ão adicionada'} ao perfil` });
                           }
                           
                           setSelectedPermissions([]);
