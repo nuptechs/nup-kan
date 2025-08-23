@@ -17,18 +17,20 @@ import { z } from "zod";
 interface ColumnManagementDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  boardId: string;
 }
 
 const formSchema = insertColumnSchema;
 type FormData = z.infer<typeof formSchema>;
 
-export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDialogProps) {
+export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManagementDialogProps) {
   const [editingColumn, setEditingColumn] = useState<Column | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const { data: columns = [], isLoading } = useQuery<Column[]>({
-    queryKey: ["/api/columns"],
+    queryKey: [`/api/boards/${boardId}/columns`],
+    enabled: !!boardId,
   });
 
   const form = useForm<FormData>({
@@ -55,11 +57,13 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
     mutationFn: async (data: FormData) => {
       const columnData = {
         ...data,
+        boardId,
         position: columns.length > 0 ? Math.max(...columns.map(c => c.position)) + 1 : 0,
       };
       return await apiRequest("POST", "/api/columns", columnData);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
       toast({
         title: "Sucesso",
@@ -81,6 +85,7 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
       return await apiRequest("PATCH", `/api/columns/${id}`, data);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
       toast({
         title: "Sucesso",
@@ -104,6 +109,7 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
       return response.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       toast({
@@ -125,6 +131,7 @@ export function ColumnManagementDialog({ isOpen, onClose }: ColumnManagementDial
       return await apiRequest("POST", "/api/columns/reorder", { columns: reorderedColumns });
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
     },
     onError: () => {
