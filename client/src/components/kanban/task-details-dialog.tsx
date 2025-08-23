@@ -118,6 +118,10 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId }: TaskDetail
     mutationFn: async () => {
       if (!task) return;
       const response = await apiRequest("DELETE", `/api/tasks/${task.id}`);
+      // DELETE returns 204 No Content, so no JSON to parse
+      if (response.status === 204) {
+        return null;
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -205,11 +209,12 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId }: TaskDetail
                     size="sm"
                     className="p-2 text-red-400 hover:text-red-600"
                     data-testid="button-delete-task"
+                    onClick={() => console.log("Botão de exclusão clicado!")}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent data-testid="dialog-delete-confirmation">
+                <AlertDialogContent data-testid="dialog-delete-confirmation" className="z-[10000]">
                   <AlertDialogHeader>
                     <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -219,7 +224,14 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId }: TaskDetail
                   <AlertDialogFooter>
                     <AlertDialogCancel data-testid="button-cancel-delete">Cancelar</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={() => deleteTaskMutation.mutate()}
+                      onClick={() => {
+                        console.log("Confirmando exclusão da tarefa:", task?.id);
+                        try {
+                          deleteTaskMutation.mutate();
+                        } catch (error) {
+                          console.error("Erro ao deletar tarefa:", error);
+                        }
+                      }}
                       disabled={deleteTaskMutation.isPending}
                       className="bg-red-600 hover:bg-red-700"
                       data-testid="button-confirm-delete"
