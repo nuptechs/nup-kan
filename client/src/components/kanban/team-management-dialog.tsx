@@ -415,114 +415,123 @@ export function TeamManagementDialog() {
           </TabsContent>
 
           <TabsContent value="assign" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Seleção de Time */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Selecionar Time</h3>
-                <Select value={selectedTeamId || ""} onValueChange={setSelectedTeamId}>
-                  <SelectTrigger data-testid="select-team">
-                    <SelectValue placeholder="Selecione um time..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {teams.map((team) => (
-                      <SelectItem key={team.id} value={team.id}>
-                        <div className="flex items-center space-x-2">
-                          <div 
-                            className="w-3 h-3 rounded-full" 
-                            style={{ backgroundColor: team.color }}
-                          />
-                          <span>{team.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {selectedTeam && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm flex items-center space-x-2">
+            {/* Seleção de Time */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Selecionar Time</h3>
+              <Select value={selectedTeamId || ""} onValueChange={setSelectedTeamId}>
+                <SelectTrigger data-testid="select-team">
+                  <SelectValue placeholder="Selecione um time..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {teams.map((team) => (
+                    <SelectItem key={team.id} value={team.id}>
+                      <div className="flex items-center space-x-2">
                         <div 
-                          className="w-4 h-4 rounded-full" 
-                          style={{ backgroundColor: selectedTeam.color }}
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: team.color }}
                         />
-                        <span>{selectedTeam.name}</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Membros atuais:</span>
-                          <Badge variant="outline">{selectedTeamMembers.length}</Badge>
-                        </div>
-                        <div className="space-y-1">
-                          {selectedTeamMembers.map((member) => (
-                            <div key={member.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                              <div className="flex items-center space-x-2">
-                                <Avatar className="w-6 h-6">
-                                  <AvatarFallback className="text-xs">{member.avatar}</AvatarFallback>
-                                </Avatar>
-                                <span className="text-sm">{member.name}</span>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => selectedTeamId && removeUserFromTeamMutation.mutate({ userId: member.id, teamId: selectedTeamId })}
-                                data-testid={`button-remove-member-${member.id}`}
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
+                        <span>{team.name}</span>
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-
-              {/* Usuários Não Atribuídos */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Usuários Disponíveis</h3>
-                  <Badge variant="outline">{getUnassignedUsers().length} disponíveis</Badge>
-                </div>
-
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {getUnassignedUsers().map((user) => (
-                    <Card key={user.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <Avatar>
-                              <AvatarFallback>{user.avatar}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium text-sm">{user.name}</p>
-                              <p className="text-xs text-muted-foreground">{user.role}</p>
-                            </div>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={!selectedTeamId || assignUserToTeamMutation.isPending || (selectedTeamId ? isUserInTeam(user.id, selectedTeamId) : true)}
-                            onClick={() => 
-                              selectedTeamId && 
-                              !isUserInTeam(user.id, selectedTeamId) &&
-                              assignUserToTeamMutation.mutate({ userId: user.id, teamId: selectedTeamId })
-                            }
-                            data-testid={`button-assign-user-${user.id}`}
-                          >
-                            <UserPlus className="w-3 h-3 mr-1" />
-                            Adicionar
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {selectedTeam && (
+              <div className="grid grid-cols-2 gap-6">
+                {/* Membros Atuais - Lado Esquerdo */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-green-600 font-semibold">Membros Atuais</Label>
+                    <Badge variant="secondary">{selectedTeamMembers.length}</Badge>
+                  </div>
+                  <div className="border rounded-md p-3 max-h-96 overflow-y-auto">
+                    {selectedTeamMembers.map((member) => (
+                      <div key={member.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                        <div className="flex items-center space-x-3 flex-1">
+                          <Avatar className="w-8 h-8">
+                            <AvatarFallback className="text-sm">{member.avatar}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium text-green-700">{member.name}</p>
+                            <p className="text-xs text-muted-foreground">{member.role}</p>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={async () => {
+                            if (window.confirm(`Remover ${member.name} do time?`)) {
+                              selectedTeamId && await removeUserFromTeamMutation.mutateAsync({ userId: member.id, teamId: selectedTeamId });
+                            }
+                          }}
+                          data-testid={`button-remove-member-${member.id}`}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </div>
+                    ))}
+                    {selectedTeamMembers.length === 0 && (
+                      <p className="text-center text-muted-foreground py-4">
+                        Nenhum membro no time
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Usuários Disponíveis - Lado Direito */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-blue-600 font-semibold">Usuários Disponíveis</Label>
+                    <Badge variant="secondary">{getUnassignedUsers().length}</Badge>
+                  </div>
+                  <div className="border rounded-md p-3 max-h-96 overflow-y-auto">
+                    {getUnassignedUsers().map((user) => (
+                      <div key={user.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                        <div className="flex items-center space-x-3 flex-1">
+                          <Avatar className="w-8 h-8">
+                            <AvatarFallback className="text-sm">{user.avatar}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{user.name}</p>
+                            <p className="text-xs text-muted-foreground">{user.role}</p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={assignUserToTeamMutation.isPending}
+                          onClick={() => 
+                            selectedTeamId && 
+                            assignUserToTeamMutation.mutate({ userId: user.id, teamId: selectedTeamId })
+                          }
+                          data-testid={`button-assign-user-${user.id}`}
+                        >
+                          <UserPlus className="w-4 h-4 mr-1" />
+                          Adicionar
+                        </Button>
+                      </div>
+                    ))}
+                    {getUnassignedUsers().length === 0 && (
+                      <p className="text-center text-muted-foreground py-4">
+                        Todos os usuários já estão no time
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {!selectedTeam && (
+              <div className="text-center py-8">
+                <Users2 className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
+                  Selecione um time acima para gerenciar seus membros
+                </p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </DialogContent>
