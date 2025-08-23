@@ -25,6 +25,7 @@ import {
   User,
   Settings
 } from "lucide-react";
+import { TeamManagementDialog } from "@/components/kanban/team-management-dialog";
 import type { User as UserType, Team, Profile, Permission, UserTeam, TeamProfile, ProfilePermission } from "@shared/schema";
 import { insertUserSchema, insertTeamSchema, insertProfileSchema } from "@shared/schema";
 
@@ -36,6 +37,7 @@ export default function PermissionsHub() {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const [isTeamManagementOpen, setIsTeamManagementOpen] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -641,6 +643,16 @@ export default function PermissionsHub() {
                   </div>
                 </div>
                 <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsTeamManagementOpen(true)}
+                    className="border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950"
+                    title="Gerenciar Time e Membros"
+                  >
+                    <Settings className="w-4 h-4 text-blue-600 mr-1" />
+                    Gerenciar
+                  </Button>
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button 
@@ -1364,6 +1376,12 @@ export default function PermissionsHub() {
             )}
           </CardContent>
         </Card>
+        
+        {/* Team Management Dialog */}
+        <TeamManagementDialog
+          open={isTeamManagementOpen}
+          onOpenChange={setIsTeamManagementOpen}
+        />
       </div>
     </div>
   );
