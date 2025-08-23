@@ -3,12 +3,14 @@ import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { SettingsPanel } from "@/components/kanban/settings-panel";
 import { UserProfileIndicator } from "@/components/user-profile-indicator";
 import { useQuery } from "@tanstack/react-query";
-import { Settings, Plus, Users, Clock, TrendingUp } from "lucide-react";
+import { Settings, Plus, Users, Clock, TrendingUp, Shield, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePermissions } from "@/hooks/usePermissions";
 import logoImage from "@assets/Slogan N_1755824338969.png";
 
 export default function KanbanPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { canManageProfiles } = usePermissions();
 
   const { data: analytics } = useQuery({
     queryKey: ["/api/analytics"],
@@ -57,6 +59,32 @@ export default function KanbanPage() {
             </div>
           </div>
           
+          {/* Admin Permissions Button */}
+          {canManageProfiles && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.location.href = "/admin/permissions"}
+              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+              data-testid="button-admin-permissions"
+              title="Gerenciar Permissões"
+            >
+              <Shield className="w-4 h-4" />
+            </Button>
+          )}
+
+          {/* User Settings Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.location.href = "/settings"}
+            className="p-2 text-gray-400 hover:text-gray-600"
+            data-testid="button-user-settings"
+            title="Configurações do Usuário"
+          >
+            <User className="w-4 h-4" />
+          </Button>
+
           {/* User Profile Indicator */}
           <UserProfileIndicator />
           
