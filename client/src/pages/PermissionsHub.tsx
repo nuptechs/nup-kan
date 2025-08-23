@@ -62,7 +62,7 @@ export default function PermissionsHub() {
 
   // Mutations
   const createUser = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/users", "POST", data),
+    mutationFn: (data: any) => apiRequest("POST", "/api/users", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       userForm.reset();
@@ -71,7 +71,7 @@ export default function PermissionsHub() {
   });
 
   const updateUser = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/users/${id}`, "PATCH", data),
+    mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/users/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       setEditingId(null);
@@ -81,7 +81,7 @@ export default function PermissionsHub() {
   });
 
   const deleteUser = useMutation({
-    mutationFn: (id: string) => apiRequest(`/api/users/${id}`, "DELETE"),
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/users/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       toast({ title: "Usuário excluído" });
@@ -89,7 +89,7 @@ export default function PermissionsHub() {
   });
 
   const createTeam = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/teams", "POST", data),
+    mutationFn: (data: any) => apiRequest("POST", "/api/teams", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
       teamForm.reset();
@@ -98,7 +98,7 @@ export default function PermissionsHub() {
   });
 
   const updateTeam = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/teams/${id}`, "PATCH", data),
+    mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/teams/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
       setEditingId(null);
@@ -108,7 +108,7 @@ export default function PermissionsHub() {
   });
 
   const deleteTeam = useMutation({
-    mutationFn: (id: string) => apiRequest(`/api/teams/${id}`, "DELETE"),
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/teams/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
       toast({ title: "Time excluído" });
@@ -116,7 +116,7 @@ export default function PermissionsHub() {
   });
 
   const createProfile = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/profiles", "POST", data),
+    mutationFn: (data: any) => apiRequest("POST", "/api/profiles", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
       profileForm.reset();
@@ -125,7 +125,7 @@ export default function PermissionsHub() {
   });
 
   const updateProfile = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/profiles/${id}`, "PATCH", data),
+    mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/profiles/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
       setEditingId(null);
@@ -135,7 +135,7 @@ export default function PermissionsHub() {
   });
 
   const deleteProfile = useMutation({
-    mutationFn: (id: string) => apiRequest(`/api/profiles/${id}`, "DELETE"),
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/profiles/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
       toast({ title: "Perfil excluído" });
@@ -144,7 +144,7 @@ export default function PermissionsHub() {
 
   const linkUserToProfile = useMutation({
     mutationFn: ({ userId, profileId }: { userId: string; profileId: string }) => 
-      apiRequest(`/api/users/${userId}`, "PATCH", { profileId }),
+      apiRequest("PATCH", `/api/users/${userId}`, { profileId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       toast({ title: "Usuário vinculado ao perfil" });
@@ -153,7 +153,7 @@ export default function PermissionsHub() {
 
   const unlinkUserFromProfile = useMutation({
     mutationFn: (userId: string) => 
-      apiRequest(`/api/users/${userId}`, "PATCH", { profileId: null }),
+      apiRequest("PATCH", `/api/users/${userId}`, { profileId: null }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       toast({ title: "Vínculo removido" });
@@ -162,7 +162,7 @@ export default function PermissionsHub() {
 
   const linkTeamToProfile = useMutation({
     mutationFn: ({ teamId, profileId }: { teamId: string; profileId: string }) => 
-      apiRequest("/api/team-profiles", "POST", { teamId, profileId }),
+      apiRequest("POST", "/api/team-profiles", { teamId, profileId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-profiles"] });
       toast({ title: "Time vinculado ao perfil" });
@@ -171,7 +171,7 @@ export default function PermissionsHub() {
 
   const unlinkTeamFromProfile = useMutation({
     mutationFn: (linkId: string) => 
-      apiRequest(`/api/team-profiles/${linkId}`, "DELETE"),
+      apiRequest("DELETE", `/api/team-profiles/${linkId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-profiles"] });
       toast({ title: "Vínculo removido" });
