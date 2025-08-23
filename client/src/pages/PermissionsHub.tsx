@@ -47,6 +47,7 @@ export default function PermissionsHub() {
   const { data: permissions = [] } = useQuery<Permission[]>({ queryKey: ["/api/permissions"] });
   const { data: userTeams = [] } = useQuery<UserTeam[]>({ queryKey: ["/api/user-teams"] });
   const { data: teamProfiles = [] } = useQuery<TeamProfile[]>({ queryKey: ["/api/team-profiles"] });
+  const { data: profilePermissions = [] } = useQuery({ queryKey: ["/api/profile-permissions"] });
 
   // Forms
   const userForm = useForm({
@@ -194,6 +195,15 @@ export default function PermissionsHub() {
   const linkPermissionToProfile = useMutation({
     mutationFn: ({ permissionId, profileId }: { permissionId: string; profileId: string }) => 
       apiRequest("POST", `/api/profiles/${profileId}/permissions`, { permissionId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile-permissions"] });
+      // Toast removido - será mostrado apenas no final do processo
+    }
+  });
+
+  const unlinkPermissionFromProfile = useMutation({
+    mutationFn: ({ permissionId, profileId }: { permissionId: string; profileId: string }) => 
+      apiRequest("DELETE", `/api/profiles/${profileId}/permissions/${permissionId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profile-permissions"] });
       // Toast removido - será mostrado apenas no final do processo
@@ -858,10 +868,10 @@ export default function PermissionsHub() {
                         <Edit className="w-4 h-4" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>Editar Perfil</DialogTitle>
-                        <DialogDescription>Altere as informações do perfil</DialogDescription>
+                        <DialogDescription>Altere as informações do perfil e gerencie suas permissões</DialogDescription>
                       </DialogHeader>
                       <Form {...profileForm}>
                         <form onSubmit={profileForm.handleSubmit(async (data) => {
@@ -904,53 +914,119 @@ export default function PermissionsHub() {
                             )}
                           />
                           
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <FormLabel>Permissões do Perfil</FormLabel>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  if (selectedPermissions.length === permissions.length) {
-                                    setSelectedPermissions([]);
-                                  } else {
-                                    setSelectedPermissions(permissions.map(p => p.id));
-                                  }
-                                }}
-                              >
-                                {selectedPermissions.length === permissions.length ? "Desmarcar Todas" : "Selecionar Todas"}
-                              </Button>
-                            </div>
-                            <div className="border rounded-md p-3 max-h-60 overflow-y-auto">
-                              {permissions.map((permission) => (
-                                <div key={permission.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
-                                  <Checkbox
-                                    checked={selectedPermissions.includes(permission.id)}
-                                    onCheckedChange={(checked) => {
-                                      if (checked) {
-                                        setSelectedPermissions(prev => [...prev, permission.id]);
-                                      } else {
-                                        setSelectedPermissions(prev => prev.filter(id => id !== permission.id));
-                                      }
-                                    }}
-                                  />
-                                  <div className="flex-1">
-                                    <p className="text-sm font-medium">{permission.name}</p>
-                                    <p className="text-xs text-muted-foreground">{permission.description}</p>
-                                    <Badge variant="outline" className="mt-1">
-                                      {permission.category}
-                                    </Badge>
+                          {(() => {
+                            const currentPermissions = profilePermissions
+                              .filter(pp => pp.profileId === profile.id)
+                              .map(pp => permissions.find(p => p.id === pp.permissionId))
+                              .filter(Boolean);
+                            
+                            const availablePermissions = permissions.filter(p => 
+                              !currentPermissions.some(cp => cp.id === p.id)
+                            );
+
+                            return (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Permissões Atuais */}
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <FormLabel className="text-green-600">Permissões Ativas</FormLabel>
+                                    <Badge variant="secondary">{currentPermissions.length}</Badge>
+                                  </div>
+                                  <div className="border rounded-md p-3 max-h-60 overflow-y-auto">
+                                    {currentPermissions.map((permission) => (
+                                      <div key={permission.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                                        <div className="flex-1">
+                                          <p className="text-sm font-medium text-green-700">{permission.name}</p>
+                                          <p className="text-xs text-muted-foreground">{permission.description}</p>
+                                          <Badge variant="outline" className="mt-1">
+                                            {permission.category}
+                                          </Badge>
+                                        </div>
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={async () => {
+                                            if (window.confirm(`Remover permissão ${permission.name}?`)) {
+                                              await unlinkPermissionFromProfile.mutateAsync({ 
+                                                permissionId: permission.id, 
+                                                profileId: profile.id 
+                                              });
+                                              toast({ title: "Permissão removida do perfil" });
+                                            }
+                                          }}
+                                        >
+                                          <Trash2 className="w-4 h-4 text-red-500" />
+                                        </Button>
+                                      </div>
+                                    ))}
+                                    {currentPermissions.length === 0 && (
+                                      <p className="text-center text-muted-foreground py-4">
+                                        Nenhuma permissão ativa
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
-                              ))}
-                            </div>
-                            {selectedPermissions.length > 0 && (
-                              <p className="text-sm text-muted-foreground">
-                                {selectedPermissions.length} permissão{selectedPermissions.length > 1 ? 'ões' : ''} selecionada{selectedPermissions.length > 1 ? 's' : ''}
-                              </p>
-                            )}
-                          </div>
+
+                                {/* Permissões Disponíveis */}
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <FormLabel className="text-blue-600">Disponíveis para Adicionar</FormLabel>
+                                    <div className="flex space-x-2">
+                                      <Badge variant="secondary">{availablePermissions.length}</Badge>
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          if (selectedPermissions.length === availablePermissions.length) {
+                                            setSelectedPermissions([]);
+                                          } else {
+                                            setSelectedPermissions(availablePermissions.map(p => p.id));
+                                          }
+                                        }}
+                                      >
+                                        {selectedPermissions.length === availablePermissions.length ? "Desmarcar" : "Todas"}
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div className="border rounded-md p-3 max-h-60 overflow-y-auto">
+                                    {availablePermissions.map((permission) => (
+                                      <div key={permission.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
+                                        <Checkbox
+                                          checked={selectedPermissions.includes(permission.id)}
+                                          onCheckedChange={(checked) => {
+                                            if (checked) {
+                                              setSelectedPermissions(prev => [...prev, permission.id]);
+                                            } else {
+                                              setSelectedPermissions(prev => prev.filter(id => id !== permission.id));
+                                            }
+                                          }}
+                                        />
+                                        <div className="flex-1">
+                                          <p className="text-sm font-medium">{permission.name}</p>
+                                          <p className="text-xs text-muted-foreground">{permission.description}</p>
+                                          <Badge variant="outline" className="mt-1">
+                                            {permission.category}
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                    ))}
+                                    {availablePermissions.length === 0 && (
+                                      <p className="text-center text-muted-foreground py-4">
+                                        Todas as permissões já foram atribuídas
+                                      </p>
+                                    )}
+                                  </div>
+                                  {selectedPermissions.length > 0 && (
+                                    <p className="text-sm text-muted-foreground">
+                                      {selectedPermissions.length} permissão{selectedPermissions.length > 1 ? 'ões' : ''} para adicionar
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })()}
 
                           <DialogFooter>
                             <Button type="submit" disabled={updateProfile.isPending || linkPermissionToProfile.isPending}>
