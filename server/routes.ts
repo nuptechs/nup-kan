@@ -766,7 +766,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Reinitialize SendGrid with new key
-      const { MailService } = await import('@sendgrid/mail');
+      const mailModule = await import('@sendgrid/mail');
+      const MailService = mailModule.default;
       const mailService = new MailService();
       mailService.setApiKey(apiKey);
       
@@ -828,6 +829,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching export history:", error);
       res.status(500).json({ message: "Failed to fetch export history" });
+    }
+  });
+
+  // User Permission Management routes
+  app.post("/api/users/:userId/permissions", async (req, res) => {
+    try {
+      const { permissionId } = req.body;
+      const result = await storage.addPermissionToUser(req.params.userId, permissionId);
+      res.status(201).json(result);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to add permission to user" });
+    }
+  });
+
+  app.delete("/api/users/:userId/permissions/:permissionId", async (req, res) => {
+    try {
+      await storage.removePermissionFromUser(req.params.userId, req.params.permissionId);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to remove permission from user" });
+    }
+  });
+
+  // Team Permission Management routes
+  app.get("/api/teams/:teamId/permissions", async (req, res) => {
+    try {
+      const permissions = await storage.getTeamPermissions(req.params.teamId);
+      res.json(permissions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch team permissions" });
+    }
+  });
+
+  app.post("/api/teams/:teamId/permissions", async (req, res) => {
+    try {
+      const { permissionId } = req.body;
+      const result = await storage.addPermissionToTeam(req.params.teamId, permissionId);
+      res.status(201).json(result);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to add permission to team" });
+    }
+  });
+
+  app.delete("/api/teams/:teamId/permissions/:permissionId", async (req, res) => {
+    try {
+      await storage.removePermissionFromTeam(req.params.teamId, req.params.permissionId);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to remove permission from team" });
     }
   });
 

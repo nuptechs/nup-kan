@@ -1307,6 +1307,54 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async addPermissionToUser(userId: string, permissionId: string): Promise<any> {
+    // Implementação temporária - na prática isso seria feito através de perfis
+    throw new Error("Direct user permissions not implemented. Use profiles instead.");
+  }
+
+  async removePermissionFromUser(userId: string, permissionId: string): Promise<void> {
+    // Implementação temporária - na prática isso seria feito através de perfis
+    throw new Error("Direct user permissions not implemented. Use profiles instead.");
+  }
+
+  async getTeamPermissions(teamId: string): Promise<Permission[]> {
+    try {
+      // Buscar perfis associados ao time
+      const teamProfilesData = await this.getTeamProfiles(teamId);
+      
+      if (teamProfilesData.length === 0) {
+        return [];
+      }
+      
+      // Buscar permissões de todos os perfis do time
+      const allPermissions: Permission[] = [];
+      for (const teamProfile of teamProfilesData) {
+        const profilePerms = await this.getProfilePermissions(teamProfile.profileId);
+        for (const pp of profilePerms) {
+          const permission = await this.getPermission(pp.permissionId);
+          if (permission && !allPermissions.find(p => p.id === permission.id)) {
+            allPermissions.push(permission);
+          }
+        }
+      }
+      
+      return allPermissions;
+    } catch (error) {
+      console.error("Error in getTeamPermissions:", error);
+      return [];
+    }
+  }
+
+  async addPermissionToTeam(teamId: string, permissionId: string): Promise<any> {
+    // Implementação temporária - na prática isso seria feito através de perfis
+    throw new Error("Direct team permissions not implemented. Use profiles instead.");
+  }
+
+  async removePermissionFromTeam(teamId: string, permissionId: string): Promise<void> {
+    // Implementação temporária - na prática isso seria feito através de perfis
+    throw new Error("Direct team permissions not implemented. Use profiles instead.");
+  }
+
   // Task Events methods
   async getTaskEvents(taskId: string): Promise<TaskEvent[]> {
     return await db.select().from(taskEvents).where(eq(taskEvents.taskId, taskId)).orderBy(desc(taskEvents.createdAt));

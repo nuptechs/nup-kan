@@ -11,6 +11,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, User, Mail, Shield, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { PermissionsManagerCard } from "@/components/admin/PermissionsManagerCard";
 import type { User as UserType } from "@shared/schema";
 
 export default function UserSettingsPage() {
@@ -307,6 +308,9 @@ export default function UserSettingsPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Permissions Manager Card */}
+          <PermissionsManagerCard />
         </div>
       </div>
     </div>

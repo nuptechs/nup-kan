@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import KanbanPage from "@/pages/kanban";
 import UserSettingsPage from "@/pages/user-settings";
+import AdminPermissions from "@/pages/AdminPermissions";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -12,6 +13,8 @@ function Router() {
     <Switch>
       <Route path="/" component={KanbanPage} />
       <Route path="/settings" component={UserSettingsPage} />
+      <Route path="/admin/permissions" component={AdminPermissions} />
+      <Route path="/admin/permissions/:type/:id" component={AdminPermissions} />
       <Route component={NotFound} />
     </Switch>
   );
