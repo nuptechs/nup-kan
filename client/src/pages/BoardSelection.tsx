@@ -88,7 +88,7 @@ export default function BoardSelection() {
   const editBoardMutation = useMutation({
     mutationFn: async (data: BoardFormData) => {
       if (!selectedBoard) throw new Error("No board selected");
-      return await apiRequest(`/api/boards/${selectedBoard.id}`, "PATCH", data);
+      return await apiRequest("PATCH", `/api/boards/${selectedBoard.id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
@@ -113,7 +113,7 @@ export default function BoardSelection() {
   const deleteBoardMutation = useMutation({
     mutationFn: async () => {
       if (!selectedBoard) throw new Error("No board selected");
-      return await apiRequest(`/api/boards/${selectedBoard.id}`, "DELETE");
+      return await apiRequest("DELETE", `/api/boards/${selectedBoard.id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
