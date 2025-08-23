@@ -1269,6 +1269,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addPermissionToProfile(profileId: string, permissionId: string): Promise<ProfilePermission> {
+    // Verificar se já existe antes de inserir
+    const existing = await db
+      .select()
+      .from(profilePermissions)
+      .where(and(eq(profilePermissions.profileId, profileId), eq(profilePermissions.permissionId, permissionId)));
+    
+    if (existing.length > 0) {
+      return existing[0];
+    }
+    
     const [profilePermission] = await db
       .insert(profilePermissions)
       .values({ profileId, permissionId })
