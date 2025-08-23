@@ -32,7 +32,7 @@ export const tasks = pgTable("tasks", {
 });
 
 export const columns = pgTable("columns", {
-  id: varchar("id").primaryKey(),
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   boardId: varchar("board_id").notNull().references(() => boards.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   position: integer("position").notNull(),
