@@ -80,13 +80,6 @@ export default function PermissionsHub() {
     return name.substring(0, maxLength) + '...';
   };
 
-  // Helper function para decidir layout baseado no tamanho do conteúdo
-  const shouldUseVerticalLayout = (userName: string, profileName: string) => {
-    const totalMinLength = 20 + 20 + 10; // userName + profileName + margin/buttons
-    const estimatedWidth = (userName.length + profileName.length) * 8; // rough estimate
-    return estimatedWidth > 400; // threshold for switching to vertical
-  };
-
   // Forms
   const userForm = useForm({
     resolver: zodResolver(insertUserSchema),
@@ -1331,153 +1324,79 @@ export default function PermissionsHub() {
           <CardContent className="space-y-3">
             {usersWithProfiles.map((user) => {
               const profile = profiles.find(p => p.id === user.profileId);
-              const useVerticalLayout = profile && shouldUseVerticalLayout(user.name, profile.name);
               
               return (
-                <div key={user.id} className={`p-2 border rounded ${useVerticalLayout ? 'space-y-2' : 'flex items-center justify-between'}`}>
-                  {useVerticalLayout ? (
-                    // Layout Vertical para conteúdo longo
-                    <>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 flex-1 min-w-0">
-                          <User className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium" title={user.name}>
-                              {truncateUserName(user.name, 30)}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex space-x-2 flex-shrink-0">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Editar Perfil do Usuário</DialogTitle>
-                                <DialogDescription>Altere o perfil de {user.name}</DialogDescription>
-                              </DialogHeader>
-                              <div className="space-y-3">
-                                {profiles.map((newProfile) => (
-                                  <Button
-                                    key={newProfile.id}
-                                    variant={newProfile.id === profile?.id ? "default" : "outline"}
-                                    className="w-full justify-start text-sm"
-                                    onClick={() => {
-                                      if (newProfile.id !== profile?.id) {
-                                        linkUserToProfile.mutate({ userId: user.id, profileId: newProfile.id });
-                                      }
-                                    }}
-                                  >
-                                    <div 
-                                      className="w-3 h-3 rounded-full mr-2" 
-                                      style={{ backgroundColor: newProfile.color }}
-                                    />
-                                    {truncateProfileName(newProfile.name, 25)}
-                                    {newProfile.id === profile?.id && (
-                                      <Badge className="ml-2 text-xs">Atual</Badge>
-                                    )}
-                                  </Button>
-                                ))}
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              if (window.confirm(`Remover perfil do usuário ${user.name}?`)) {
-                                unlinkUserFromProfile.mutate(user.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4 text-red-500" />
+                <div key={user.id} className="p-2 border rounded space-y-1">
+                  {/* Linha 1: Ícone + Nome + Perfil + Botões */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 flex-1 min-w-0 mr-2">
+                      <User className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                      <p className="text-sm font-medium flex-shrink-0" title={user.name}>
+                        {truncateUserName(user.name, 20)}
+                      </p>
+                      <span className="text-muted-foreground">•</span>
+                      {profile && (
+                        <Badge variant="outline" style={{ borderColor: profile.color }} className="text-xs flex-shrink-0" title={profile.name}>
+                          {truncateProfileName(profile.name, 20)}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex space-x-2 flex-shrink-0">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="w-4 h-4" />
                           </Button>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2 pl-6">
-                        <p className="text-xs text-muted-foreground" title={user.email}>
-                          {user.email}
-                        </p>
-                        {profile && (
-                          <Badge variant="outline" style={{ borderColor: profile.color }} className="text-xs" title={profile.name}>
-                            {truncateProfileName(profile.name, 25)}
-                          </Badge>
-                        )}
-                      </div>
-                    </>
-                  ) : (
-                    // Layout Horizontal para conteúdo curto
-                    <>
-                      <div className="flex items-center space-x-2 flex-1 min-w-0 mr-2">
-                        <User className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate" title={user.name}>
-                            {truncateUserName(user.name, 20)}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate" title={user.email}>
-                            {user.email}
-                          </p>
-                        </div>
-                        {profile && (
-                          <Badge variant="outline" style={{ borderColor: profile.color }} className="flex-shrink-0 text-xs" title={profile.name}>
-                            {truncateProfileName(profile.name, 20)}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex space-x-2 flex-shrink-0">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Editar Perfil do Usuário</DialogTitle>
-                              <DialogDescription>Altere o perfil de {user.name}</DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-3">
-                              {profiles.map((newProfile) => (
-                                <Button
-                                  key={newProfile.id}
-                                  variant={newProfile.id === profile?.id ? "default" : "outline"}
-                                  className="w-full justify-start text-sm"
-                                  onClick={() => {
-                                    if (newProfile.id !== profile?.id) {
-                                      linkUserToProfile.mutate({ userId: user.id, profileId: newProfile.id });
-                                    }
-                                  }}
-                                >
-                                  <div 
-                                    className="w-3 h-3 rounded-full mr-2" 
-                                    style={{ backgroundColor: newProfile.color }}
-                                  />
-                                  {truncateProfileName(newProfile.name, 25)}
-                                  {newProfile.id === profile?.id && (
-                                    <Badge className="ml-2 text-xs">Atual</Badge>
-                                  )}
-                                </Button>
-                              ))}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            if (window.confirm(`Remover perfil do usuário ${user.name}?`)) {
-                              unlinkUserFromProfile.mutate(user.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </>
-                  )}
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Editar Perfil do Usuário</DialogTitle>
+                            <DialogDescription>Altere o perfil de {user.name}</DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-3">
+                            {profiles.map((newProfile) => (
+                              <Button
+                                key={newProfile.id}
+                                variant={newProfile.id === profile?.id ? "default" : "outline"}
+                                className="w-full justify-start text-sm"
+                                onClick={() => {
+                                  if (newProfile.id !== profile?.id) {
+                                    linkUserToProfile.mutate({ userId: user.id, profileId: newProfile.id });
+                                  }
+                                }}
+                              >
+                                <div 
+                                  className="w-3 h-3 rounded-full mr-2" 
+                                  style={{ backgroundColor: newProfile.color }}
+                                />
+                                {truncateProfileName(newProfile.name, 25)}
+                                {newProfile.id === profile?.id && (
+                                  <Badge className="ml-2 text-xs">Atual</Badge>
+                                )}
+                              </Button>
+                            ))}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (window.confirm(`Remover perfil do usuário ${user.name}?`)) {
+                            unlinkUserFromProfile.mutate(user.id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                  {/* Linha 2: Email */}
+                  <div className="pl-6">
+                    <p className="text-xs text-muted-foreground" title={user.email}>
+                      {user.email}
+                    </p>
+                  </div>
                 </div>
               );
             })}
