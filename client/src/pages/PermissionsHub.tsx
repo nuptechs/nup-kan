@@ -1416,69 +1416,74 @@ export default function PermissionsHub() {
           </CardHeader>
           <CardContent className="space-y-3">
             {teamsWithProfiles.map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-2 border rounded">
-                <div className="flex items-center space-x-2 flex-1 min-w-0 mr-2">
+              <div key={item.id} className="p-2 border rounded space-y-2">
+                {/* Linha 1: Ícone + Nome do Time + Perfil */}
+                <div className="flex items-center space-x-2">
                   <Users2 className="w-4 h-4 text-green-500 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{item.team?.name}</p>
-                    <p className="text-xs text-muted-foreground truncate" title={item.team?.description || ""}>
-                      {item.team?.description}
-                    </p>
-                  </div>
+                  <p className="text-sm font-medium flex-shrink-0" title={item.team?.name}>
+                    {truncateUserName(item.team?.name || "", 20)}
+                  </p>
+                  <span className="text-muted-foreground">•</span>
                   {item.profile && (
-                    <Badge variant="outline" style={{ borderColor: item.profile.color }} className="flex-shrink-0 text-xs" title={item.profile.name}>
-                      {truncateProfileName(item.profile.name)}
+                    <Badge variant="outline" style={{ borderColor: item.profile.color }} className="text-xs flex-shrink-0" title={item.profile.name}>
+                      {truncateProfileName(item.profile.name, 20)}
                     </Badge>
                   )}
                 </div>
-                <div className="flex space-x-2 flex-shrink-0">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Editar Perfil do Time</DialogTitle>
-                        <DialogDescription>Altere o perfil de {item.team?.name}</DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-3">
-                        {profiles.map((newProfile) => (
-                          <Button
-                            key={newProfile.id}
-                            variant={newProfile.id === item.profile?.id ? "default" : "outline"}
-                            className="w-full justify-start text-sm"
-                            onClick={() => {
-                              if (newProfile.id !== item.profile?.id) {
-                                linkTeamToProfile.mutate({ teamId: item.teamId, profileId: newProfile.id });
-                              }
-                            }}
-                          >
-                            <div 
-                              className="w-3 h-3 rounded-full mr-2" 
-                              style={{ backgroundColor: newProfile.color }}
-                            />
-                            {truncateProfileName(newProfile.name, 25)}
-                            {newProfile.id === item.profile?.id && (
-                              <Badge className="ml-2 text-xs">Atual</Badge>
-                            )}
-                          </Button>
-                        ))}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      if (window.confirm(`Remover perfil do time ${item.team?.name}?`)) {
-                        unlinkTeamFromProfile.mutate(item.id);
-                      }
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4 text-red-500" />
-                  </Button>
+                {/* Linha 2: Descrição + Botões */}
+                <div className="flex items-center justify-between pl-6">
+                  <p className="text-xs text-muted-foreground flex-1 min-w-0 mr-2" title={item.team?.description || ""}>
+                    {item.team?.description}
+                  </p>
+                  <div className="flex space-x-2 flex-shrink-0">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Editar Perfil do Time</DialogTitle>
+                          <DialogDescription>Altere o perfil de {item.team?.name}</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-3">
+                          {profiles.map((newProfile) => (
+                            <Button
+                              key={newProfile.id}
+                              variant={newProfile.id === item.profile?.id ? "default" : "outline"}
+                              className="w-full justify-start text-sm"
+                              onClick={() => {
+                                if (newProfile.id !== item.profile?.id) {
+                                  linkTeamToProfile.mutate({ teamId: item.teamId, profileId: newProfile.id });
+                                }
+                              }}
+                            >
+                              <div 
+                                className="w-3 h-3 rounded-full mr-2" 
+                                style={{ backgroundColor: newProfile.color }}
+                              />
+                              {truncateProfileName(newProfile.name, 25)}
+                              {newProfile.id === item.profile?.id && (
+                                <Badge className="ml-2 text-xs">Atual</Badge>
+                              )}
+                            </Button>
+                          ))}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (window.confirm(`Remover perfil do time ${item.team?.name}?`)) {
+                          unlinkTeamFromProfile.mutate(item.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
