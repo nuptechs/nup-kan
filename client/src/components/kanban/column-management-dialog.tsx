@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -18,12 +18,13 @@ interface ColumnManagementDialogProps {
   isOpen: boolean;
   onClose: () => void;
   boardId: string;
+  editingColumn?: Column | null;
 }
 
 const formSchema = insertColumnSchema;
 type FormData = z.infer<typeof formSchema>;
 
-export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManagementDialogProps) {
+export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn: externalEditingColumn }: ColumnManagementDialogProps) {
   const [editingColumn, setEditingColumn] = useState<Column | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -54,6 +55,23 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
       color: "#3b82f6",
     },
   });
+
+  // Quando uma coluna externa for passada para edição, configure o formulário
+  useEffect(() => {
+    if (externalEditingColumn && isOpen) {
+      setEditingColumn(externalEditingColumn);
+      editForm.reset({
+        title: externalEditingColumn.title,
+        position: externalEditingColumn.position,
+        wipLimit: externalEditingColumn.wipLimit,
+        color: externalEditingColumn.color,
+        boardId: externalEditingColumn.boardId,
+      });
+    } else if (!isOpen) {
+      setEditingColumn(null);
+      editForm.reset();
+    }
+  }, [externalEditingColumn, isOpen, editForm]);
 
   const createColumnMutation = useMutation({
     mutationFn: async (data: FormData) => {
