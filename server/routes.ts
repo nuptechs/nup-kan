@@ -186,16 +186,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const inProgressTasks = tasks.filter(task => task.status === "inprogress");
       const totalTasks = tasks.length;
       
-      // Calculate average cycle time (mock calculation)
-      const averageCycleTime = doneTasks.length > 0 ? 
-        Math.round((Math.random() * 5 + 1) * 10) / 10 : 0;
-      
-      // Calculate throughput (tasks completed this week)
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      const throughput = doneTasks.filter(task => 
-        task.updatedAt && new Date(task.updatedAt) >= oneWeekAgo
-      ).length;
       
       // Calculate efficiency
       const efficiency = totalTasks > 0 ? 
@@ -207,8 +197,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ).length;
       
       res.json({
-        averageCycleTime,
-        throughput,
         efficiency,
         blockers,
         totalTasks,

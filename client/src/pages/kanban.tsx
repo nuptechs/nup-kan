@@ -41,23 +41,6 @@ export default function KanbanPage() {
         </div>
         
         <div className="flex items-center space-x-4">
-          {/* Metrics Display */}
-          <div className="hidden md:flex items-center space-x-6 text-sm">
-            <div className="flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-600">Tempo Médio:</span>
-              <span className="font-medium text-gray-900" data-testid="average-cycle-time">
-                {(analytics as any)?.averageCycleTime || 0} dias
-              </span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <TrendingUp className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-600">Throughput:</span>
-              <span className="font-medium text-gray-900" data-testid="throughput">
-                {(analytics as any)?.throughput || 0}/semana
-              </span>
-            </div>
-          </div>
           
           {/* Admin Permissions Button */}
           {canManageProfiles && (
