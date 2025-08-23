@@ -56,8 +56,9 @@ export function UserProfileIndicator() {
       <PopoverTrigger asChild>
         <Button 
           variant="ghost" 
-          className="flex items-center space-x-2 h-10 px-2 hover:bg-gray-100 transition-colors"
+          className="flex items-center justify-center h-10 w-10 p-1 hover:bg-gray-100 transition-colors rounded-full"
           data-testid="user-profile-indicator"
+          title={`${currentUser.name} - ${currentUser.role || 'Usuário'}`}
         >
           <div className="relative">
             <Avatar className="w-8 h-8">
@@ -74,14 +75,6 @@ export function UserProfileIndicator() {
               className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${getStatusColor(currentUser.status || 'offline')}`}
               title={getStatusText(currentUser.status || 'offline')}
             />
-          </div>
-          <div className="hidden sm:block text-left">
-            <p className="text-sm font-medium text-gray-900 truncate max-w-24">
-              {currentUser.name}
-            </p>
-            <p className="text-xs text-gray-500 truncate max-w-24">
-              {currentUser.role || 'Usuário'}
-            </p>
           </div>
         </Button>
       </PopoverTrigger>
