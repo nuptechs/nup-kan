@@ -11,7 +11,11 @@ import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import type { Task, Column } from "@shared/schema";
 
-export function KanbanBoard() {
+interface KanbanBoardProps {
+  boardId?: string;
+}
+
+export function KanbanBoard({ boardId }: KanbanBoardProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskDetailsOpen, setIsTaskDetailsOpen] = useState(false);
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
@@ -20,12 +24,16 @@ export function KanbanBoard() {
   const { toast } = useToast();
   const { canCreateTasks, canEditTasks, canManageColumns } = usePermissions();
 
+  // Use board-specific endpoints if boardId is provided
+  const tasksEndpoint = boardId ? `/api/boards/${boardId}/tasks` : "/api/tasks";
+  const columnsEndpoint = boardId ? `/api/boards/${boardId}/columns` : "/api/columns";
+
   const { data: tasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
-    queryKey: ["/api/tasks"],
+    queryKey: [tasksEndpoint],
   });
 
   const { data: columns = [], isLoading: columnsLoading } = useQuery<Column[]>({
-    queryKey: ["/api/columns"],
+    queryKey: [columnsEndpoint],
   });
 
   const updateTaskMutation = useMutation({

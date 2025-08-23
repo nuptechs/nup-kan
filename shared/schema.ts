@@ -3,8 +3,21 @@ import { pgTable, text, varchar, integer, timestamp } from "drizzle-orm/pg-core"
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Board/Kanban management table
+export const boards = pgTable("boards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description").default(""),
+  color: text("color").notNull().default("#3b82f6"),
+  createdById: varchar("created_by_id").notNull(),
+  isActive: text("is_active").notNull().default("true"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const tasks = pgTable("tasks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  boardId: varchar("board_id").notNull().references(() => boards.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description").default(""),
   status: text("status").notNull().default("backlog"),
@@ -20,6 +33,7 @@ export const tasks = pgTable("tasks", {
 
 export const columns = pgTable("columns", {
   id: varchar("id").primaryKey(),
+  boardId: varchar("board_id").notNull().references(() => boards.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   position: integer("position").notNull(),
   wipLimit: integer("wip_limit"),
@@ -114,6 +128,16 @@ export const teamProfiles = pgTable("team_profiles", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const insertBoardSchema = createInsertSchema(boards).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  name: z.string().min(3, "O nome do board deve conter pelo menos 3 caracteres").trim(),
+});
+
+export const updateBoardSchema = insertBoardSchema.partial();
+
 export const insertTaskSchema = createInsertSchema(tasks).omit({
   id: true,
   createdAt: true,
@@ -189,6 +213,9 @@ export const insertUserTeamSchema = createInsertSchema(userTeams).omit({
   createdAt: true,
 });
 
+export type Board = typeof boards.$inferSelect;
+export type InsertBoard = z.infer<typeof insertBoardSchema>;
+export type UpdateBoard = z.infer<typeof updateBoardSchema>;
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type UpdateTask = z.infer<typeof updateTaskSchema>;

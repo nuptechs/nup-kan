@@ -1,10 +1,19 @@
-import { type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory } from "@shared/schema";
+import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory } from "@shared/schema";
 import { db } from "./db";
-import { tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, taskEvents, exportHistory } from "@shared/schema";
+import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, taskEvents, exportHistory } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
+  // Boards
+  getBoards(): Promise<Board[]>;
+  getBoard(id: string): Promise<Board | undefined>;
+  createBoard(board: InsertBoard): Promise<Board>;
+  updateBoard(id: string, board: UpdateBoard): Promise<Board>;
+  deleteBoard(id: string): Promise<void>;
+  getBoardTasks(boardId: string): Promise<Task[]>;
+  getBoardColumns(boardId: string): Promise<Column[]>;
+  
   // Tasks
   getTasks(): Promise<Task[]>;
   getTask(id: string): Promise<Task | undefined>;
@@ -95,16 +104,19 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  private boards: Map<string, Board>;
   private tasks: Map<string, Task>;
   private columns: Map<string, Column>;
   private teamMembers: Map<string, TeamMember>;
 
   constructor() {
+    this.boards = new Map();
     this.tasks = new Map();
     this.columns = new Map();
     this.teamMembers = new Map();
     
-    // Initialize default columns
+    // Initialize default boards, columns, team members and tasks
+    this.initializeDefaultBoards();
     this.initializeDefaultColumns();
     this.initializeDefaultTeamMembers();
     this.initializeDefaultTasks();
@@ -609,13 +621,28 @@ export class MemStorage implements IStorage {
     return mockExport;
   }
 
+  private initializeDefaultBoards() {
+    const defaultBoard: Board = {
+      id: "default-board",
+      name: "Main Kanban Board",
+      description: "Principal quadro Kanban",
+      color: "#3b82f6",
+      createdById: "system",
+      isActive: "true",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.boards.set(defaultBoard.id, defaultBoard);
+  }
+
   private initializeDefaultColumns() {
+    const defaultBoardId = "default-board";
     const defaultColumns: Column[] = [
-      { id: "backlog", title: "Backlog", position: 0, wipLimit: null, color: "gray" },
-      { id: "todo", title: "To Do", position: 1, wipLimit: 5, color: "blue" },
-      { id: "inprogress", title: "In Progress", position: 2, wipLimit: 3, color: "yellow" },
-      { id: "review", title: "Review", position: 3, wipLimit: 4, color: "purple" },
-      { id: "done", title: "Done", position: 4, wipLimit: null, color: "green" },
+      { id: "backlog", boardId: defaultBoardId, title: "Backlog", position: 0, wipLimit: null, color: "gray" },
+      { id: "todo", boardId: defaultBoardId, title: "To Do", position: 1, wipLimit: 5, color: "blue" },
+      { id: "inprogress", boardId: defaultBoardId, title: "In Progress", position: 2, wipLimit: 3, color: "yellow" },
+      { id: "review", boardId: defaultBoardId, title: "Review", position: 3, wipLimit: 4, color: "purple" },
+      { id: "done", boardId: defaultBoardId, title: "Done", position: 4, wipLimit: null, color: "green" },
     ];
     
     defaultColumns.forEach(column => {
@@ -640,9 +667,11 @@ export class MemStorage implements IStorage {
   private initializeDefaultTasks() {
     // Get team members for assignment
     const members = Array.from(this.teamMembers.values());
+    const defaultBoardId = "default-board";
     
     const defaultTasks: Omit<Task, 'id'>[] = [
       {
+        boardId: defaultBoardId,
         title: "Redesign da página inicial",
         description: "Atualizar o design da landing page com nova identidade visual e melhorar conversão",
         status: "backlog",
@@ -656,6 +685,7 @@ export class MemStorage implements IStorage {
         updatedAt: new Date(),
       },
       {
+        boardId: defaultBoardId,
         title: "Integração com API de pagamento",
         description: "Implementar gateway de pagamento para checkout",
         status: "backlog",
@@ -669,6 +699,7 @@ export class MemStorage implements IStorage {
         updatedAt: new Date(),
       },
       {
+        boardId: defaultBoardId,
         title: "Otimização de performance",
         description: "Melhorar tempo de carregamento das páginas principais",
         status: "todo",
@@ -682,6 +713,7 @@ export class MemStorage implements IStorage {
         updatedAt: new Date(),
       },
       {
+        boardId: defaultBoardId,
         title: "Dashboard analytics",
         description: "Implementar gráficos e métricas no painel administrativo",
         status: "inprogress",
@@ -695,6 +727,7 @@ export class MemStorage implements IStorage {
         updatedAt: new Date(),
       },
       {
+        boardId: defaultBoardId,
         title: "Sistema de notificações",
         description: "Implementação de notificações push e email",
         status: "review",
@@ -708,6 +741,7 @@ export class MemStorage implements IStorage {
         updatedAt: new Date(),
       },
       {
+        boardId: defaultBoardId,
         title: "Login social OAuth",
         description: "Integração com Google, Facebook e GitHub",
         status: "done",
@@ -729,6 +763,54 @@ export class MemStorage implements IStorage {
       };
       this.tasks.set(task.id, task);
     });
+  }
+
+  // Board methods
+  async getBoards(): Promise<Board[]> {
+    return Array.from(this.boards.values());
+  }
+
+  async getBoard(id: string): Promise<Board | undefined> {
+    return this.boards.get(id);
+  }
+
+  async createBoard(insertBoard: InsertBoard): Promise<Board> {
+    const board: Board = {
+      id: randomUUID(),
+      ...insertBoard,
+      description: insertBoard.description || "",
+      color: insertBoard.color || "#3b82f6",
+      isActive: insertBoard.isActive || "true",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.boards.set(board.id, board);
+    return board;
+  }
+
+  async updateBoard(id: string, updateData: UpdateBoard): Promise<Board> {
+    const existingBoard = this.boards.get(id);
+    if (!existingBoard) {
+      throw new Error(`Board with id ${id} not found`);
+    }
+    const updatedBoard = { ...existingBoard, ...updateData, updatedAt: new Date() };
+    this.boards.set(id, updatedBoard);
+    return updatedBoard;
+  }
+
+  async deleteBoard(id: string): Promise<void> {
+    if (!this.boards.has(id)) {
+      throw new Error(`Board with id ${id} not found`);
+    }
+    this.boards.delete(id);
+  }
+
+  async getBoardTasks(boardId: string): Promise<Task[]> {
+    return Array.from(this.tasks.values()).filter(task => task.boardId === boardId);
+  }
+
+  async getBoardColumns(boardId: string): Promise<Column[]> {
+    return Array.from(this.columns.values()).filter(column => column.boardId === boardId).sort((a, b) => a.position - b.position);
   }
 
   // Task methods
@@ -875,6 +957,59 @@ export class MemStorage implements IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // Board methods
+  async getBoards(): Promise<Board[]> {
+    return await db.select().from(boards).orderBy(desc(boards.createdAt));
+  }
+
+  async getBoard(id: string): Promise<Board | undefined> {
+    const [board] = await db.select().from(boards).where(eq(boards.id, id));
+    return board || undefined;
+  }
+
+  async createBoard(insertBoard: InsertBoard): Promise<Board> {
+    const [board] = await db
+      .insert(boards)
+      .values({
+        ...insertBoard,
+        description: insertBoard.description || "",
+      })
+      .returning();
+    return board;
+  }
+
+  async updateBoard(id: string, updateData: UpdateBoard): Promise<Board> {
+    const [board] = await db
+      .update(boards)
+      .set({
+        ...updateData,
+        updatedAt: new Date(),
+      })
+      .where(eq(boards.id, id))
+      .returning();
+    
+    if (!board) {
+      throw new Error(`Board with id ${id} not found`);
+    }
+    
+    return board;
+  }
+
+  async deleteBoard(id: string): Promise<void> {
+    const result = await db.delete(boards).where(eq(boards.id, id));
+    if (result.rowCount === 0) {
+      throw new Error(`Board with id ${id} not found`);
+    }
+  }
+
+  async getBoardTasks(boardId: string): Promise<Task[]> {
+    return await db.select().from(tasks).where(eq(tasks.boardId, boardId)).orderBy(desc(tasks.createdAt));
+  }
+
+  async getBoardColumns(boardId: string): Promise<Column[]> {
+    return await db.select().from(columns).where(eq(columns.boardId, boardId)).orderBy(columns.position);
+  }
+
   // Task methods
   async getTasks(): Promise<Task[]> {
     return await db.select().from(tasks).orderBy(desc(tasks.createdAt));

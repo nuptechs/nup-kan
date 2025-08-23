@@ -3,14 +3,27 @@ import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { SettingsPanel } from "@/components/kanban/settings-panel";
 import { UserProfileIndicator } from "@/components/user-profile-indicator";
 import { useQuery } from "@tanstack/react-query";
-import { Settings, Plus, Users, Clock, TrendingUp, Shield, User } from "lucide-react";
+import { Settings, Plus, Users, Clock, TrendingUp, Shield, User, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/usePermissions";
+import { Link } from "wouter";
+import { apiRequest } from "@/lib/queryClient";
 import logoImage from "@assets/Slogan N_1755824338969.png";
+import type { Board } from "@shared/schema";
 
-export default function KanbanPage() {
+interface KanbanPageProps {
+  params: { boardId: string };
+}
+
+export default function KanbanPage({ params }: KanbanPageProps) {
+  const { boardId } = params;
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { canManageProfiles } = usePermissions();
+
+  // Load board data
+  const { data: board, isLoading: isLoadingBoard } = useQuery<Board>({
+    queryKey: ["/api/boards", boardId],
+  });
 
   const { data: analytics } = useQuery({
     queryKey: ["/api/analytics"],
@@ -21,18 +34,61 @@ export default function KanbanPage() {
     queryKey: ["/api/team-members"],
   });
 
+  // Show loading state while board data is loading
+  if (isLoadingBoard) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-bg-main">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando board...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if board not found
+  if (!board) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-bg-main">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Board não encontrado</h2>
+          <p className="text-gray-600 mb-4">O board solicitado não existe ou foi removido.</p>
+          <Link href="/">
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar aos Boards
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen overflow-hidden bg-bg-main relative" data-testid="kanban-page">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between" data-testid="header">
         <div className="flex items-center space-x-4">
+          <Link href="/">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              data-testid="button-back-to-boards"
+              title="Voltar aos Boards"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+          </Link>
           <div className="flex items-center space-x-2">
             <img 
               src={logoImage} 
               alt="Logo uP"
               className="w-8 h-8 object-contain"
             />
-            <h1 className="text-2xl font-semibold text-gray-900" data-testid="page-title">uP - Kan</h1>
+            <h1 className="text-2xl font-semibold text-gray-900" data-testid="page-title">
+              {board.name}
+            </h1>
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-500">
             <Users className="w-4 h-4" />
@@ -84,7 +140,7 @@ export default function KanbanPage() {
 
       {/* Main Kanban Board */}
       <main className="flex-1 overflow-hidden h-full" data-testid="main-content">
-        <KanbanBoard />
+        <KanbanBoard boardId={boardId} />
       </main>
 
       {/* User Profile Indicator - Fixed Bottom Left */}

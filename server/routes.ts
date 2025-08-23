@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema } from "@shared/schema";
+import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema } from "@shared/schema";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -59,6 +59,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Task not found" });
       }
       res.status(500).json({ message: "Failed to delete task" });
+    }
+  });
+
+  // Board routes
+  app.get("/api/boards", async (req, res) => {
+    try {
+      const boards = await storage.getBoards();
+      res.json(boards);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch boards" });
+    }
+  });
+
+  app.get("/api/boards/:id", async (req, res) => {
+    try {
+      const board = await storage.getBoard(req.params.id);
+      if (!board) {
+        return res.status(404).json({ message: "Board not found" });
+      }
+      res.json(board);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch board" });
+    }
+  });
+
+  app.post("/api/boards", async (req, res) => {
+    try {
+      const boardData = insertBoardSchema.parse(req.body);
+      const board = await storage.createBoard(boardData);
+      res.status(201).json(board);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid board data" });
+    }
+  });
+
+  app.patch("/api/boards/:id", async (req, res) => {
+    try {
+      const boardData = updateBoardSchema.parse(req.body);
+      const board = await storage.updateBoard(req.params.id, boardData);
+      res.json(board);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Board not found" });
+      }
+      res.status(400).json({ message: "Invalid board data" });
+    }
+  });
+
+  app.delete("/api/boards/:id", async (req, res) => {
+    try {
+      await storage.deleteBoard(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Board not found" });
+      }
+      res.status(500).json({ message: "Failed to delete board" });
+    }
+  });
+
+  // Board-specific tasks and columns routes
+  app.get("/api/boards/:boardId/tasks", async (req, res) => {
+    try {
+      const tasks = await storage.getBoardTasks(req.params.boardId);
+      res.json(tasks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch board tasks" });
+    }
+  });
+
+  app.get("/api/boards/:boardId/columns", async (req, res) => {
+    try {
+      const columns = await storage.getBoardColumns(req.params.boardId);
+      res.json(columns);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch board columns" });
     }
   });
 
