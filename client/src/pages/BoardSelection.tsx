@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Plus, Grid, Settings } from "lucide-react";
+import { Plus, Grid, Settings, Edit, Trash2, MoreVertical } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,6 +27,9 @@ type BoardFormData = z.infer<typeof boardSchema>;
 
 export default function BoardSelection() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -37,7 +41,16 @@ export default function BoardSelection() {
     queryKey: ["/api/users/me"],
   });
 
-  const form = useForm<BoardFormData>({
+  const createForm = useForm<BoardFormData>({
+    resolver: zodResolver(boardSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      color: "#3b82f6",
+    },
+  });
+
+  const editForm = useForm<BoardFormData>({
     resolver: zodResolver(boardSchema),
     defaultValues: {
       name: "",
@@ -56,7 +69,7 @@ export default function BoardSelection() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
       setIsCreateOpen(false);
-      form.reset();
+      createForm.reset();
       toast({
         title: "Board criado",
         description: "Novo board Kanban criado com sucesso!",
@@ -70,6 +83,70 @@ export default function BoardSelection() {
       });
     },
   });
+
+  // Edit board mutation
+  const editBoardMutation = useMutation({
+    mutationFn: async (data: BoardFormData) => {
+      if (!selectedBoard) throw new Error("No board selected");
+      return await apiRequest(`/api/boards/${selectedBoard.id}`, "PATCH", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
+      setIsEditOpen(false);
+      setSelectedBoard(null);
+      editForm.reset();
+      toast({
+        title: "Board atualizado",
+        description: "As informações do board foram atualizadas com sucesso!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar board. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete board mutation
+  const deleteBoardMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedBoard) throw new Error("No board selected");
+      return await apiRequest(`/api/boards/${selectedBoard.id}`, "DELETE");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
+      setIsDeleteOpen(false);
+      setSelectedBoard(null);
+      toast({
+        title: "Board excluído",
+        description: "O board foi excluído com sucesso!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir board. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEditBoard = (board: Board) => {
+    setSelectedBoard(board);
+    editForm.reset({
+      name: board.name,
+      description: board.description || "",
+      color: board.color,
+    });
+    setIsEditOpen(true);
+  };
+
+  const handleDeleteBoard = (board: Board) => {
+    setSelectedBoard(board);
+    setIsDeleteOpen(true);
+  };
 
   const colorOptions = [
     { value: "#3b82f6", label: "Azul", class: "bg-blue-500" },
@@ -150,36 +227,80 @@ export default function BoardSelection() {
             {boards?.map((board) => (
               <Card
                 key={board.id}
-                className="p-6 hover:shadow-lg transition-shadow cursor-pointer group"
+                className="p-6 hover:shadow-lg transition-shadow relative group"
                 data-testid={`card-board-${board.id}`}
               >
+                {/* Board Actions Menu */}
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost" 
+                        size="sm"
+                        className="h-8 w-8 p-0 hover:bg-gray-100"
+                        onClick={(e) => e.preventDefault()}
+                        data-testid={`dropdown-board-actions-${board.id}`}
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleEditBoard(board);
+                        }}
+                        className="cursor-pointer"
+                        data-testid={`menu-edit-board-${board.id}`}
+                      >
+                        <Edit className="mr-2 h-4 w-4" />
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDeleteBoard(board);
+                        }}
+                        className="cursor-pointer text-red-600 focus:text-red-600"
+                        data-testid={`menu-delete-board-${board.id}`}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Excluir
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                {/* Board Content - Clickable area */}
                 <Link href={`/kanban/${board.id}`}>
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center">
-                      <div
-                        className="w-4 h-4 rounded-full mr-3"
-                        style={{ backgroundColor: board.color }}
-                      />
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
-                        {board.name}
-                      </h3>
+                  <div className="cursor-pointer">
+                    <div className="flex items-start justify-between mb-4 pr-8">
+                      <div className="flex items-center">
+                        <div
+                          className="w-4 h-4 rounded-full mr-3"
+                          style={{ backgroundColor: board.color }}
+                        />
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
+                          {board.name}
+                        </h3>
+                      </div>
+                      <Badge variant="secondary" data-testid={`badge-status-${board.id}`}>
+                        {board.isActive === "true" ? "Ativo" : "Inativo"}
+                      </Badge>
                     </div>
-                    <Badge variant="secondary" data-testid={`badge-status-${board.id}`}>
-                      {board.isActive === "true" ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </div>
-                  
-                  {board.description && (
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
-                      {board.description}
-                    </p>
-                  )}
-                  
-                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                    <span>
-                      Criado em {new Date(board.createdAt || new Date()).toLocaleDateString("pt-BR")}
-                    </span>
-                    <Settings className="w-4 h-4" />
+                    
+                    {board.description && (
+                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+                        {board.description}
+                      </p>
+                    )}
+                    
+                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                      <span>
+                        Criado em {new Date(board.createdAt || new Date()).toLocaleDateString("pt-BR")}
+                      </span>
+                      <Settings className="w-4 h-4" />
+                    </div>
                   </div>
                 </Link>
               </Card>
@@ -195,13 +316,13 @@ export default function BoardSelection() {
             <DialogTitle>Criar Novo Board</DialogTitle>
           </DialogHeader>
           
-          <Form {...form}>
+          <Form {...createForm}>
             <form
-              onSubmit={form.handleSubmit((data) => createBoardMutation.mutate(data))}
+              onSubmit={createForm.handleSubmit((data) => createBoardMutation.mutate(data))}
               className="space-y-4"
             >
               <FormField
-                control={form.control}
+                control={createForm.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
@@ -219,7 +340,7 @@ export default function BoardSelection() {
               />
 
               <FormField
-                control={form.control}
+                control={createForm.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
@@ -238,7 +359,7 @@ export default function BoardSelection() {
               />
 
               <FormField
-                control={form.control}
+                control={createForm.control}
                 name="color"
                 render={({ field }) => (
                   <FormItem>
@@ -286,6 +407,144 @@ export default function BoardSelection() {
               </div>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Board Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="sm:max-w-[500px]" data-testid="edit-board-dialog">
+          <DialogHeader>
+            <DialogTitle>Editar Board</DialogTitle>
+            <DialogDescription>
+              Altere as informações do seu board.
+            </DialogDescription>
+          </DialogHeader>
+
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit((data) => editBoardMutation.mutate(data))} className="space-y-4">
+              <FormField
+                control={editForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome do Board</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Nome do board..."
+                        {...field}
+                        data-testid="input-edit-board-name"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={editForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descrição</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Descrição do board..."
+                        className="min-h-[60px] resize-none"
+                        {...field}
+                        data-testid="input-edit-board-description"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={editForm.control}
+                name="color"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cor do Board</FormLabel>
+                    <FormControl>
+                      <div className="grid grid-cols-6 gap-3">
+                        {colorOptions.map((color) => (
+                          <button
+                            key={color.value}
+                            type="button"
+                            onClick={() => field.onChange(color.value)}
+                            className={`
+                              w-10 h-10 rounded-lg border-2 transition-all
+                              ${color.class}
+                              ${field.value === color.value 
+                                ? 'border-gray-900 scale-110' 
+                                : 'border-gray-300 hover:border-gray-500'
+                              }
+                            `}
+                            title={color.label}
+                            data-testid={`edit-color-option-${color.label.toLowerCase()}`}
+                          />
+                        ))}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsEditOpen(false)}
+                  disabled={editBoardMutation.isPending}
+                  data-testid="button-cancel-edit"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={editBoardMutation.isPending}
+                  data-testid="button-save-edit"
+                >
+                  {editBoardMutation.isPending ? "Salvando..." : "Salvar"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Board Dialog */}
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <DialogContent className="sm:max-w-[400px]" data-testid="delete-board-dialog">
+          <DialogHeader>
+            <DialogTitle>Excluir Board</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir o board "{selectedBoard?.name}"? 
+              Esta ação é irreversível e todas as tarefas serão perdidas.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsDeleteOpen(false)}
+              disabled={deleteBoardMutation.isPending}
+              data-testid="button-cancel-delete"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => deleteBoardMutation.mutate()}
+              disabled={deleteBoardMutation.isPending}
+              data-testid="button-confirm-delete"
+            >
+              {deleteBoardMutation.isPending ? "Excluindo..." : "Excluir"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
