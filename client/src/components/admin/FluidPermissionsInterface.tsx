@@ -75,6 +75,40 @@ export function FluidPermissionsInterface({ targetType, targetId, targetName }: 
     },
   });
 
+  // Permission toggle mutation
+  const togglePermissionMutation = useMutation({
+    mutationFn: async ({ permissionId, isActive }: { permissionId: string; isActive: boolean }) => {
+      const endpoint = targetType === "user" 
+        ? `/api/users/${targetId}/permissions`
+        : `/api/teams/${targetId}/permissions`;
+      
+      if (isActive) {
+        // Remove permission
+        return apiRequest("DELETE", `${endpoint}/${permissionId}`);
+      } else {
+        // Add permission
+        return apiRequest("POST", endpoint, { permissionId });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ 
+        queryKey: targetType === "user" ? ["/api/users", targetId, "permissions"] : ["/api/teams", targetId, "permissions"]
+      });
+      toast({
+        title: "Sucesso",
+        description: "Permissão atualizada com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      console.error("Permission toggle error:", error);
+      toast({
+        title: "Erro",
+        description: "Falha ao atualizar permissão. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Filter permissions by search
   const filteredPermissions = useMemo(() => {
     return permissions.filter(permission =>
@@ -98,6 +132,12 @@ export function FluidPermissionsInterface({ targetType, targetId, targetName }: 
   // Check if permission is active
   const isPermissionActive = (permissionId: string) => {
     return targetPermissions.some(p => p.id === permissionId);
+  };
+
+  // Handle permission toggle
+  const handlePermissionToggle = (permissionId: string) => {
+    const isActive = isPermissionActive(permissionId);
+    togglePermissionMutation.mutate({ permissionId, isActive });
   };
 
   // Get category icon and color
@@ -255,25 +295,30 @@ export function FluidPermissionsInterface({ targetType, targetId, targetName }: 
               </CardHeader>
               <CardContent>
                 <div className="grid gap-3 md:grid-cols-2">
-                  {categoryPermissions.map((permission) => (
-                    <div key={permission.id} className={`p-3 rounded-lg border transition-all ${bg}`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="font-medium text-sm mb-1">{permission.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {permission.description || 'Sem descrição'}
+                  {categoryPermissions.map((permission) => {
+                    const isActive = isPermissionActive(permission.id);
+                    
+                    return (
+                      <div key={permission.id} className={`p-3 rounded-lg border transition-all ${bg}`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-sm mb-1">{permission.name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {permission.description || 'Sem descrição'}
+                            </div>
+                          </div>
+                          <div className="ml-3">
+                            <Switch
+                              checked={isActive}
+                              onCheckedChange={() => handlePermissionToggle(permission.id)}
+                              disabled={togglePermissionMutation.isPending}
+                              data-testid={`switch-permission-${permission.id}`}
+                            />
                           </div>
                         </div>
-                        <div className="ml-3">
-                          {isPermissionActive(permission.id) ? (
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                          ) : (
-                            <XCircle className="w-5 h-5 text-gray-400" />
-                          )}
-                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

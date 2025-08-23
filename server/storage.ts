@@ -1308,13 +1308,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addPermissionToUser(userId: string, permissionId: string): Promise<any> {
-    // Implementação temporária - na prática isso seria feito através de perfis
-    throw new Error("Direct user permissions not implemented. Use profiles instead.");
+    // Para demonstração, atribuir via perfil padrão do usuário
+    const user = await this.getUser(userId);
+    if (user?.profileId) {
+      return await this.addPermissionToProfile(user.profileId, permissionId);
+    }
+    throw new Error("User has no profile assigned");
   }
 
   async removePermissionFromUser(userId: string, permissionId: string): Promise<void> {
-    // Implementação temporária - na prática isso seria feito através de perfis
-    throw new Error("Direct user permissions not implemented. Use profiles instead.");
+    // Para demonstração, remover via perfil padrão do usuário
+    const user = await this.getUser(userId);
+    if (user?.profileId) {
+      return await this.removePermissionFromProfile(user.profileId, permissionId);
+    }
+    throw new Error("User has no profile assigned");
   }
 
   async getTeamPermissions(teamId: string): Promise<Permission[]> {
@@ -1346,13 +1354,48 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addPermissionToTeam(teamId: string, permissionId: string): Promise<any> {
-    // Implementação temporária - na prática isso seria feito através de perfis
-    throw new Error("Direct team permissions not implemented. Use profiles instead.");
+    try {
+      // Buscar perfis do time
+      const teamProfilesData = await this.getTeamProfiles(teamId);
+      
+      if (teamProfilesData.length === 0) {
+        // Se não tem perfil, criar um perfil padrão para o time
+        const defaultProfile = await this.createProfile({
+          name: `Perfil ${teamId}`,
+          description: `Perfil automático para o time ${teamId}`,
+          color: '#6366f1'
+        });
+        
+        await this.assignProfileToTeam(teamId, defaultProfile.id);
+        return await this.addPermissionToProfile(defaultProfile.id, permissionId);
+      } else {
+        // Adicionar permissão ao primeiro perfil do time
+        return await this.addPermissionToProfile(teamProfilesData[0].profileId, permissionId);
+      }
+    } catch (error) {
+      console.error("Error adding permission to team:", error);
+      throw error;
+    }
   }
 
   async removePermissionFromTeam(teamId: string, permissionId: string): Promise<void> {
-    // Implementação temporária - na prática isso seria feito através de perfis
-    throw new Error("Direct team permissions not implemented. Use profiles instead.");
+    try {
+      // Buscar perfis do time
+      const teamProfilesData = await this.getTeamProfiles(teamId);
+      
+      // Remover a permissão de todos os perfis do time
+      for (const teamProfile of teamProfilesData) {
+        try {
+          await this.removePermissionFromProfile(teamProfile.profileId, permissionId);
+        } catch (error) {
+          // Continuar mesmo se não encontrar a permissão em um perfil
+          console.warn(`Permission ${permissionId} not found in profile ${teamProfile.profileId}`);
+        }
+      }
+    } catch (error) {
+      console.error("Error removing permission from team:", error);
+      throw error;
+    }
   }
 
   // Task Events methods

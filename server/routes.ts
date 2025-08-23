@@ -767,8 +767,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Reinitialize SendGrid with new key
       const mailModule = await import('@sendgrid/mail');
-      const MailService = mailModule.default;
-      const mailService = new MailService();
+      const mailService = mailModule.default;
       mailService.setApiKey(apiKey);
       
       // Also update the main emailService module
@@ -865,10 +864,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/teams/:teamId/permissions", async (req, res) => {
     try {
       const { permissionId } = req.body;
+      console.log("Adding permission to team:", req.params.teamId, permissionId);
       const result = await storage.addPermissionToTeam(req.params.teamId, permissionId);
       res.status(201).json(result);
     } catch (error) {
-      res.status(400).json({ message: "Failed to add permission to team" });
+      console.error("Error adding permission to team:", error);
+      res.status(400).json({ message: "Failed to add permission to team", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
