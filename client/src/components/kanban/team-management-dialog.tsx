@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Dialog, 
   DialogContent, 
@@ -16,7 +17,7 @@ import {
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Users2, Edit, Trash2, Plus } from "lucide-react";
+import { Users2, Edit, Trash2, Plus, Minus, UserMinus, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
@@ -27,6 +28,13 @@ import type { Team, User } from "@shared/schema";
 interface TeamManagementDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+interface UserTeam {
+  id: string;
+  userId: string;
+  teamId: string;
+  role: string;
 }
 
 const colors = [
@@ -50,6 +58,7 @@ type TeamFormData = z.infer<typeof teamSchema>;
 
 export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialogProps) {
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -70,18 +79,66 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
     queryKey: ["/api/users"],
   });
 
+  const { data: userTeams = [] } = useQuery<UserTeam[]>({
+    queryKey: ["/api/user-teams"],
+  });
+
+  // Obter membros do time atual em edição
+  const currentTeamMembers = editingTeam 
+    ? userTeams
+        .filter(ut => ut.teamId === editingTeam.id)
+        .map(ut => users.find(u => u.id === ut.userId))
+        .filter(Boolean) as User[]
+    : [];
+
+  const currentTeamMemberIds = currentTeamMembers.map(u => u.id);
+
+  // Usuários disponíveis (que não estão no time atual)
+  const availableUsers = users.filter(u => !currentTeamMemberIds.includes(u.id));
+
+  // Reset quando editar um time diferente
+  useEffect(() => {
+    if (editingTeam) {
+      setSelectedUsers([]);
+    }
+  }, [editingTeam?.id]);
+
+  const addUserToTeamMutation = useMutation({
+    mutationFn: async ({ userId, teamId }: { userId: string; teamId: string }) => {
+      await apiRequest("POST", `/api/users/${userId}/teams/${teamId}`, { role: "member" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
+    },
+  });
+
+  const removeUserFromTeamMutation = useMutation({
+    mutationFn: async ({ userId, teamId }: { userId: string; teamId: string }) => {
+      await apiRequest("DELETE", `/api/users/${userId}/teams/${teamId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
+    },
+  });
+
   const createTeamMutation = useMutation({
     mutationFn: async (data: TeamFormData) => {
       const response = await apiRequest("POST", "/api/teams", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async (team) => {
+      // Adicionar membros selecionados ao time
+      for (const userId of selectedUsers) {
+        await addUserToTeamMutation.mutateAsync({ userId, teamId: team.id });
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
       toast({
         title: "Sucesso",
-        description: "Time criado com sucesso!",
+        description: `Time criado com ${selectedUsers.length} membros!`,
       });
       form.reset();
+      setSelectedUsers([]);
     },
     onError: () => {
       toast({
@@ -105,6 +162,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
       });
       setEditingTeam(null);
       form.reset();
+      setSelectedUsers([]);
     },
     onError: () => {
       toast({
@@ -145,6 +203,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
 
   const handleEdit = (team: Team) => {
     setEditingTeam(team);
+    setSelectedUsers([]);
     form.reset({
       name: team.name,
       description: team.description || "",
@@ -154,6 +213,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
 
   const cancelEdit = () => {
     setEditingTeam(null);
+    setSelectedUsers([]);
     form.reset();
   };
 
@@ -163,15 +223,25 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
     }
   };
 
+  const addMemberToTeam = async (userId: string) => {
+    if (editingTeam) {
+      await addUserToTeamMutation.mutateAsync({ userId, teamId: editingTeam.id });
+    }
+  };
+
+  const removeMemberFromTeam = async (userId: string) => {
+    if (editingTeam) {
+      await removeUserFromTeamMutation.mutateAsync({ userId, teamId: editingTeam.id });
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" data-testid="dialog-team-management">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" data-testid="dialog-team-management">
         <DialogHeader>
           <DialogTitle>Gerenciar Times</DialogTitle>
           <DialogDescription>
-            Crie, edite e organize times para melhor colaboração em seus projetos.
-            <br />
-            <span className="text-blue-600 font-medium">💡 Para atribuir membros aos times, use "Gerenciar Usuários, Times e Perfis"</span>
+            Crie, edite e organize times com seus membros para melhor colaboração em seus projetos.
           </DialogDescription>
         </DialogHeader>
 
@@ -198,6 +268,9 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
                           {team.description && (
                             <p className="text-xs text-muted-foreground">{team.description}</p>
                           )}
+                          <p className="text-xs text-blue-600">
+                            {userTeams.filter(ut => ut.teamId === team.id).length} membros
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-1">
@@ -331,6 +404,156 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
               </form>
             </Form>
           </div>
+        </div>
+
+        {/* Interface de Seleção de Membros - Duas Colunas */}
+        <div className="border-t pt-6 mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">
+              {editingTeam ? "Gerenciar Membros" : "Selecionar Membros"}
+            </h3>
+            {!editingTeam && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (selectedUsers.length === availableUsers.length) {
+                    setSelectedUsers([]);
+                  } else {
+                    setSelectedUsers(availableUsers.map(u => u.id));
+                  }
+                }}
+              >
+                {selectedUsers.length === availableUsers.length ? "Desmarcar Todos" : "Selecionar Todos"}
+              </Button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            {/* Coluna Esquerda - Membros Atuais ou Selecionados */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-green-600 font-semibold">
+                  {editingTeam ? "Membros Atuais" : "Membros Selecionados"}
+                </Label>
+                <Badge variant="secondary">
+                  {editingTeam ? currentTeamMembers.length : selectedUsers.length}
+                </Badge>
+              </div>
+              <div className="border rounded-md p-3 max-h-64 overflow-y-auto">
+                {editingTeam ? (
+                  currentTeamMembers.map((member) => (
+                    <div key={member.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                      <div className="flex items-center space-x-3 flex-1">
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback className="text-sm">{member.avatar}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium text-green-700">{member.name}</p>
+                          <p className="text-xs text-muted-foreground">{member.email}</p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeMemberFromTeam(member.id)}
+                        data-testid={`button-remove-member-${member.id}`}
+                      >
+                        <UserMinus className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ))
+                ) : (
+                  users.filter(u => selectedUsers.includes(u.id)).map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                      <div className="flex items-center space-x-3 flex-1">
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback className="text-sm">{user.avatar}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium text-green-700">{user.name}</p>
+                          <p className="text-xs text-muted-foreground">{user.email}</p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedUsers(prev => prev.filter(id => id !== user.id))}
+                        data-testid={`button-deselect-user-${user.id}`}
+                      >
+                        <Minus className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ))
+                )}
+                {((editingTeam && currentTeamMembers.length === 0) || (!editingTeam && selectedUsers.length === 0)) && (
+                  <p className="text-center text-muted-foreground py-4">
+                    {editingTeam ? "Nenhum membro no time" : "Nenhum membro selecionado"}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Coluna Direita - Usuários Disponíveis */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-blue-600 font-semibold">Usuários Disponíveis</Label>
+                <Badge variant="secondary">{availableUsers.length}</Badge>
+              </div>
+              <div className="border rounded-md p-3 max-h-64 overflow-y-auto">
+                {availableUsers.map((user) => (
+                  <div key={user.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                    <div className="flex items-center space-x-3 flex-1">
+                      {!editingTeam && (
+                        <Checkbox
+                          checked={selectedUsers.includes(user.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedUsers(prev => [...prev, user.id]);
+                            } else {
+                              setSelectedUsers(prev => prev.filter(id => id !== user.id));
+                            }
+                          }}
+                        />
+                      )}
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="text-sm">{user.avatar}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium text-blue-700">{user.name}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                    </div>
+                    {editingTeam && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => addMemberToTeam(user.id)}
+                        data-testid={`button-add-member-${user.id}`}
+                      >
+                        <UserPlus className="w-4 h-4 text-blue-500" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                {availableUsers.length === 0 && (
+                  <p className="text-center text-muted-foreground py-4">
+                    Todos os usuários já estão no time
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {!editingTeam && selectedUsers.length > 0 && (
+            <p className="text-sm text-muted-foreground mt-3 text-center">
+              {selectedUsers.length} usuário{selectedUsers.length > 1 ? 's' : ''} selecionado{selectedUsers.length > 1 ? 's' : ''} para o novo time
+            </p>
+          )}
         </div>
       </DialogContent>
     </Dialog>
