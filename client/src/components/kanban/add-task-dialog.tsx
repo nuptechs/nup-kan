@@ -30,6 +30,7 @@ const formSchema = insertTaskSchema.extend({
 type FormData = z.infer<typeof formSchema>;
 
 export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) {
+  console.log("AddTaskDialog render - isOpen:", isOpen, "boardId:", boardId);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
