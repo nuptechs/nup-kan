@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,7 +24,7 @@ import {
   User,
   Settings
 } from "lucide-react";
-import type { User as UserType, Team, Profile, Permission } from "@shared/schema";
+import type { User as UserType, Team, Profile, Permission, UserTeam, TeamProfile } from "@shared/schema";
 import { insertUserSchema, insertTeamSchema, insertProfileSchema } from "@shared/schema";
 
 type Section = "users" | "teams" | "profiles" | "permissions" | null;
@@ -41,6 +41,8 @@ export default function PermissionsHub() {
   const { data: teams = [] } = useQuery<Team[]>({ queryKey: ["/api/teams"] });
   const { data: profiles = [] } = useQuery<Profile[]>({ queryKey: ["/api/profiles"] });
   const { data: permissions = [] } = useQuery<Permission[]>({ queryKey: ["/api/permissions"] });
+  const { data: userTeams = [] } = useQuery<UserTeam[]>({ queryKey: ["/api/user-teams"] });
+  const { data: teamProfiles = [] } = useQuery<TeamProfile[]>({ queryKey: ["/api/team-profiles"] });
 
   // Forms
   const userForm = useForm({
@@ -137,6 +139,42 @@ export default function PermissionsHub() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
       toast({ title: "Perfil excluído" });
+    }
+  });
+
+  const linkUserToProfile = useMutation({
+    mutationFn: ({ userId, profileId }: { userId: string; profileId: string }) => 
+      apiRequest(`/api/users/${userId}`, "PATCH", { profileId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      toast({ title: "Usuário vinculado ao perfil" });
+    }
+  });
+
+  const unlinkUserFromProfile = useMutation({
+    mutationFn: (userId: string) => 
+      apiRequest(`/api/users/${userId}`, "PATCH", { profileId: null }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      toast({ title: "Vínculo removido" });
+    }
+  });
+
+  const linkTeamToProfile = useMutation({
+    mutationFn: ({ teamId, profileId }: { teamId: string; profileId: string }) => 
+      apiRequest("/api/team-profiles", "POST", { teamId, profileId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/team-profiles"] });
+      toast({ title: "Time vinculado ao perfil" });
+    }
+  });
+
+  const unlinkTeamFromProfile = useMutation({
+    mutationFn: (linkId: string) => 
+      apiRequest(`/api/team-profiles/${linkId}`, "DELETE"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/team-profiles"] });
+      toast({ title: "Vínculo removido" });
     }
   });
 
@@ -279,6 +317,7 @@ export default function PermissionsHub() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Criar Usuário</DialogTitle>
+                <DialogDescription>Adicione um novo usuário ao sistema</DialogDescription>
               </DialogHeader>
               <Form {...userForm}>
                 <form onSubmit={userForm.handleSubmit((data) => createUser.mutate(data))} className="space-y-4">
@@ -360,6 +399,7 @@ export default function PermissionsHub() {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Editar Usuário</DialogTitle>
+                        <DialogDescription>Altere as informações do usuário</DialogDescription>
                       </DialogHeader>
                       <Form {...userForm}>
                         <form onSubmit={userForm.handleSubmit((data) => updateUser.mutate({ id: user.id, ...data }))} className="space-y-4">
@@ -455,6 +495,7 @@ export default function PermissionsHub() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Criar Time</DialogTitle>
+                <DialogDescription>Crie um agrupamento de usuários</DialogDescription>
               </DialogHeader>
               <Form {...teamForm}>
                 <form onSubmit={teamForm.handleSubmit((data) => createTeam.mutate(data))} className="space-y-4">
@@ -525,6 +566,7 @@ export default function PermissionsHub() {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Editar Time</DialogTitle>
+                        <DialogDescription>Altere as informações do time</DialogDescription>
                       </DialogHeader>
                       <Form {...teamForm}>
                         <form onSubmit={teamForm.handleSubmit((data) => updateTeam.mutate({ id: team.id, ...data }))} className="space-y-4">
@@ -607,6 +649,7 @@ export default function PermissionsHub() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Criar Perfil</DialogTitle>
+                <DialogDescription>Defina um conjunto de funcionalidades</DialogDescription>
               </DialogHeader>
               <Form {...profileForm}>
                 <form onSubmit={profileForm.handleSubmit((data) => createProfile.mutate(data))} className="space-y-4">
@@ -677,6 +720,7 @@ export default function PermissionsHub() {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Editar Perfil</DialogTitle>
+                        <DialogDescription>Altere as informações do perfil</DialogDescription>
                       </DialogHeader>
                       <Form {...profileForm}>
                         <form onSubmit={profileForm.handleSubmit((data) => updateProfile.mutate({ id: profile.id, ...data }))} className="space-y-4">
@@ -731,7 +775,18 @@ export default function PermissionsHub() {
     );
   }
 
-  // Seção de Vínculos (placeholder)
+  // Seção de Vínculos  
+  const usersWithProfiles = users.filter(user => user.profileId);
+  const usersWithoutProfiles = users.filter(user => !user.profileId);
+  const teamsWithProfiles = teamProfiles.map(tp => ({
+    ...tp,
+    team: teams.find(t => t.id === tp.teamId),
+    profile: profiles.find(p => p.id === tp.profileId)
+  })).filter(item => item.team && item.profile);
+  const teamsWithoutProfiles = teams.filter(team => 
+    !teamProfiles.some(tp => tp.teamId === team.id)
+  );
+
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-6">
@@ -745,17 +800,216 @@ export default function PermissionsHub() {
           Voltar
         </Button>
         <h2 className="text-xl font-bold">Vínculos de Permissões</h2>
+        <p className="text-muted-foreground">Conecte perfis a usuários e times</p>
       </div>
-      
-      <Card className="p-8 text-center">
-        <CardContent>
-          <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium mb-2">Em Desenvolvimento</h3>
-          <p className="text-muted-foreground">
-            Sistema de vínculos entre perfis e usuários/times será implementado aqui.
-          </p>
-        </CardContent>
-      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Usuários com Perfis */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Usuários com Perfis</span>
+              <Badge variant="secondary">{usersWithProfiles.length}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {usersWithProfiles.map((user) => {
+              const profile = profiles.find(p => p.id === user.profileId);
+              return (
+                <div key={user.id} className="flex items-center justify-between p-2 border rounded">
+                  <div className="flex items-center space-x-2">
+                    <User className="w-4 h-4 text-blue-500" />
+                    <div>
+                      <p className="text-sm font-medium">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                    {profile && (
+                      <Badge variant="outline" style={{ borderColor: profile.color }}>
+                        {profile.name}
+                      </Badge>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (window.confirm(`Remover perfil do usuário ${user.name}?`)) {
+                        unlinkUserFromProfile.mutate(user.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                  </Button>
+                </div>
+              );
+            })}
+            {usersWithProfiles.length === 0 && (
+              <p className="text-center text-muted-foreground py-4">
+                Nenhum usuário com perfil vinculado
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Times com Perfis */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Times com Perfis</span>
+              <Badge variant="secondary">{teamsWithProfiles.length}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {teamsWithProfiles.map((item) => (
+              <div key={item.id} className="flex items-center justify-between p-2 border rounded">
+                <div className="flex items-center space-x-2">
+                  <Users2 className="w-4 h-4 text-green-500" />
+                  <div>
+                    <p className="text-sm font-medium">{item.team?.name}</p>
+                    <p className="text-xs text-muted-foreground">{item.team?.description}</p>
+                  </div>
+                  {item.profile && (
+                    <Badge variant="outline" style={{ borderColor: item.profile.color }}>
+                      {item.profile.name}
+                    </Badge>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (window.confirm(`Remover perfil do time ${item.team?.name}?`)) {
+                      unlinkTeamFromProfile.mutate(item.id);
+                    }
+                  }}
+                >
+                  <Trash2 className="w-4 h-4 text-red-500" />
+                </Button>
+              </div>
+            ))}
+            {teamsWithProfiles.length === 0 && (
+              <p className="text-center text-muted-foreground py-4">
+                Nenhum time com perfil vinculado
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Vincular Usuários */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Vincular Usuários a Perfis</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {usersWithoutProfiles.map((user) => (
+              <div key={user.id} className="flex items-center justify-between p-2 border rounded">
+                <div className="flex items-center space-x-2">
+                  <User className="w-4 h-4 text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium">{user.name}</p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                  </div>
+                </div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Vincular Perfil ao Usuário</DialogTitle>
+                      <DialogDescription>Selecione um perfil para {user.name}</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                      {profiles.map((profile) => (
+                        <Button
+                          key={profile.id}
+                          variant="outline"
+                          className="w-full justify-start"
+                          onClick={() => {
+                            linkUserToProfile.mutate({ userId: user.id, profileId: profile.id });
+                          }}
+                        >
+                          <div 
+                            className="w-3 h-3 rounded-full mr-2" 
+                            style={{ backgroundColor: profile.color }}
+                          />
+                          {profile.name}
+                        </Button>
+                      ))}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            ))}
+            {usersWithoutProfiles.length === 0 && (
+              <p className="text-center text-muted-foreground py-4">
+                Todos os usuários já possuem perfis
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Vincular Times */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Vincular Times a Perfis</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {teamsWithoutProfiles.map((team) => (
+              <div key={team.id} className="flex items-center justify-between p-2 border rounded">
+                <div className="flex items-center space-x-2">
+                  <div 
+                    className="w-4 h-4 rounded-full" 
+                    style={{ backgroundColor: team.color }}
+                  />
+                  <div>
+                    <p className="text-sm font-medium">{team.name}</p>
+                    <p className="text-xs text-muted-foreground">{team.description}</p>
+                  </div>
+                </div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Vincular Perfil ao Time</DialogTitle>
+                      <DialogDescription>Selecione um perfil para {team.name}</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                      {profiles.map((profile) => (
+                        <Button
+                          key={profile.id}
+                          variant="outline"
+                          className="w-full justify-start"
+                          onClick={() => {
+                            linkTeamToProfile.mutate({ teamId: team.id, profileId: profile.id });
+                          }}
+                        >
+                          <div 
+                            className="w-3 h-3 rounded-full mr-2" 
+                            style={{ backgroundColor: profile.color }}
+                          />
+                          {profile.name}
+                        </Button>
+                      ))}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            ))}
+            {teamsWithoutProfiles.length === 0 && (
+              <p className="text-center text-muted-foreground py-4">
+                Todos os times já possuem perfis
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
