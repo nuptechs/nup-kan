@@ -139,6 +139,13 @@
 
 /* Force dialog to appear above everything */
 [data-radix-popper-content-wrapper],
-[data-state="open"][role="dialog"] {
+[data-state="open"][role="dialog"],
+[data-state="open"][role="alertdialog"] {
+  z-index: 999999 !important;
+}
+
+/* Force AlertDialog overlay and content above everything */
+[data-radix-alert-dialog-overlay],
+[data-radix-alert-dialog-content] {
   z-index: 999999 !important;
 }

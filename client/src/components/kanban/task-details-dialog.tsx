@@ -30,6 +30,13 @@ interface TaskDetailsDialogProps {
   boardId?: string;
 }
 
+interface DeleteConfirmationProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  isLoading: boolean;
+}
+
 const formSchema = updateTaskSchema.extend({
   assigneeId: z.string().optional(),
   tags: z.array(z.string()).default([]),
@@ -37,9 +44,36 @@ const formSchema = updateTaskSchema.extend({
 
 type FormData = z.infer<typeof formSchema>;
 
+function DeleteConfirmationDialog({ isOpen, onClose, onConfirm, isLoading }: DeleteConfirmationProps) {
+  return (
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent data-testid="dialog-delete-confirmation">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta ação não pode ser desfeita. A tarefa será permanentemente excluída.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel data-testid="button-cancel-delete">Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onConfirm}
+            disabled={isLoading}
+            className="bg-red-600 hover:bg-red-700"
+            data-testid="button-confirm-delete"
+          >
+            {isLoading ? "Excluindo..." : "Excluir"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 export function TaskDetailsDialog({ task, isOpen, onClose, boardId }: TaskDetailsDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -202,45 +236,15 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId }: TaskDetail
                   <Edit className="w-4 h-4" />
                 </Button>
               )}
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="p-2 text-red-400 hover:text-red-600"
-                    data-testid="button-delete-task"
-                    onClick={() => console.log("Botão de exclusão clicado!")}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent data-testid="dialog-delete-confirmation" className="z-[10000]">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Esta ação não pode ser desfeita. A tarefa será permanentemente excluída.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel data-testid="button-cancel-delete">Cancelar</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => {
-                        console.log("Confirmando exclusão da tarefa:", task?.id);
-                        try {
-                          deleteTaskMutation.mutate();
-                        } catch (error) {
-                          console.error("Erro ao deletar tarefa:", error);
-                        }
-                      }}
-                      disabled={deleteTaskMutation.isPending}
-                      className="bg-red-600 hover:bg-red-700"
-                      data-testid="button-confirm-delete"
-                    >
-                      {deleteTaskMutation.isPending ? "Excluindo..." : "Excluir"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-2 text-red-400 hover:text-red-600"
+                data-testid="button-delete-task"
+                onClick={() => setIsDeleteDialogOpen(true)}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
             </div>
           </div>
           <DialogDescription>
@@ -524,6 +528,17 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId }: TaskDetail
           </div>
         )}
       </DialogContent>
+
+      {/* Delete Confirmation Dialog - Outside the main dialog */}
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={() => {
+          deleteTaskMutation.mutate();
+          setIsDeleteDialogOpen(false);
+        }}
+        isLoading={deleteTaskMutation.isPending}
+      />
     </Dialog>
   );
 }
