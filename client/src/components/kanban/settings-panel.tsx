@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Shield, History } from "lucide-react";
+import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Shield, History, Grid } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ColumnManagementDialog } from "./column-management-dialog";
@@ -151,6 +151,19 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           <div className="space-y-4">
             <h3 className="font-medium text-gray-900">⚙️ Sistema</h3>
             <div className="grid grid-cols-1 gap-3">
+              {/* Navigate to Boards Page */}
+              <Button
+                onClick={() => {
+                  setLocation('/');
+                  onClose();
+                }}
+                className="w-full justify-start bg-green-600 hover:bg-green-700"
+                data-testid="button-view-boards"
+              >
+                <Grid className="w-4 h-4 mr-2" />
+                Ver Todos os Boards
+              </Button>
+              
               {/* Consolidated Management Button */}
               <Button
                 onClick={() => setLocation('/admin/permissions')}
