@@ -22,6 +22,7 @@ import {
   Edit,
   Trash2,
   ArrowLeft,
+  ArrowRight,
   User,
   Settings,
   Minus
@@ -1333,7 +1334,7 @@ export default function PermissionsHub() {
                     <p className="text-sm font-medium flex-shrink-0" title={user.name}>
                       {truncateUserName(user.name, 20)}
                     </p>
-                    <span className="text-muted-foreground">•</span>
+                    <ArrowRight className="w-3 h-3 text-muted-foreground" />
                     {profile && (
                       <Badge variant="outline" style={{ borderColor: profile.color }} className="text-xs flex-shrink-0" title={profile.name}>
                         {truncateProfileName(profile.name, 20)}
@@ -1423,7 +1424,7 @@ export default function PermissionsHub() {
                   <p className="text-sm font-medium flex-shrink-0" title={item.team?.name}>
                     {truncateUserName(item.team?.name || "", 20)}
                   </p>
-                  <span className="text-muted-foreground">•</span>
+                  <ArrowRight className="w-3 h-3 text-muted-foreground" />
                   {item.profile && (
                     <Badge variant="outline" style={{ borderColor: item.profile.color }} className="text-xs flex-shrink-0" title={item.profile.name}>
                       {truncateProfileName(item.profile.name, 20)}
