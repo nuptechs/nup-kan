@@ -1176,12 +1176,11 @@ export class DatabaseStorage implements IStorage {
     
     const columnStatus = statusMap[column.title];
     
-    // If this column has tasks, move them to "todo" status
-    // (or leave them orphaned if no todo column exists - they won't show up but data is preserved)
+    // If this column has tasks, delete them along with the column
+    // This prevents orphaned tasks and referential integrity issues
     if (columnStatus) {
       await db
-        .update(tasks)
-        .set({ status: "todo" })
+        .delete(tasks)
         .where(eq(tasks.status, columnStatus));
     }
     
