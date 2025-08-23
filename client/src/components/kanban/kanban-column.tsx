@@ -67,13 +67,20 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
               <span className={cn("w-2 h-2 rounded-full mr-2", getColumnColorClasses(column.color))}></span>
               {column.title}
             </h2>
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-2">
               <span
                 className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full font-medium"
                 data-testid={`task-count-${column.id}`}
               >
                 {tasks.length}
               </span>
+              <button
+                onClick={() => onAddTask?.()}
+                className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-indigo-100 flex items-center justify-center group transition-all duration-200 opacity-50 hover:opacity-100"
+                data-testid={`button-add-task-${column.id}`}
+              >
+                <Plus className="w-3 h-3 text-gray-400 group-hover:text-indigo-500" />
+              </button>
             </div>
           </div>
           
@@ -111,20 +118,6 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
               )}
             </Draggable>
           ))}
-          
-          {/* Add Task Button - Always visible but subtle */}
-          <button
-            onClick={() => {
-              onAddTask?.();
-            }}
-            className="w-full py-3 border border-dashed border-gray-300 rounded-xl hover:border-indigo-400 hover:bg-indigo-50/50 transition-all duration-200 flex items-center justify-center group"
-            data-testid={`button-add-task-${column.id}`}
-          >
-            <Plus className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 mr-2" />
-            <span className="text-sm text-gray-500 group-hover:text-indigo-600">
-              Adicionar tarefa
-            </span>
-          </button>
         </div>
       </div>
     </div>
