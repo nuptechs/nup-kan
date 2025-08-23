@@ -93,8 +93,12 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
 
   const currentTeamMemberIds = currentTeamMembers.map(u => u.id);
 
-  // Usuários disponíveis (que não estão no time atual)
-  const availableUsers = users.filter(u => !currentTeamMemberIds.includes(u.id));
+  // Usuários disponíveis 
+  // Na criação: todos os usuários
+  // Na edição: usuários que não estão no time atual
+  const availableUsers = editingTeam 
+    ? users.filter(u => !currentTeamMemberIds.includes(u.id))
+    : users; // Todos os usuários disponíveis para criar time
 
   // Reset quando editar um time diferente
   useEffect(() => {
