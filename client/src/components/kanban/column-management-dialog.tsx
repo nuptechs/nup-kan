@@ -28,10 +28,20 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: columns = [], isLoading } = useQuery<Column[]>({
+  const { data: columns = [], isLoading, error } = useQuery<Column[]>({
     queryKey: [`/api/boards/${boardId}/columns`],
-    enabled: !!boardId && isOpen,
+    enabled: !!boardId && isOpen && boardId.length > 0,
+    staleTime: 0, // Force fresh data
+    refetchOnMount: true,
   });
+
+  // Debug logs apenas quando modal está aberto
+  if (isOpen) {
+    console.log("MODAL ABERTO - BoardId:", boardId);
+    console.log("MODAL ABERTO - Colunas:", columns);
+    console.log("MODAL ABERTO - Enabled:", !!boardId && isOpen && boardId.length > 0);
+  }
+  
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -202,6 +212,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
   };
 
   const sortedColumns = [...columns].sort((a, b) => a.position - b.position);
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
