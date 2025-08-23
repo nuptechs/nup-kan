@@ -47,6 +47,7 @@ export interface IStorage {
   deleteUser(id: string): Promise<void>;
   
   // User Teams (many-to-many relationship)
+  getAllUserTeams(): Promise<UserTeam[]>;
   getUserTeams(userId: string): Promise<UserTeam[]>;
   getTeamUsers(teamId: string): Promise<UserTeam[]>;
   addUserToTeam(userTeam: InsertUserTeam): Promise<UserTeam>;
@@ -239,14 +240,18 @@ export class MemStorage implements IStorage {
   }
 
   // User Teams methods for MemStorage
-  async getUserTeams(userId: string): Promise<UserTeam[]> {
-    const userTeamsMock = [
+  async getAllUserTeams(): Promise<UserTeam[]> {
+    return [
       { id: "ut-1", userId: "1", teamId: "team-2", role: "member", createdAt: new Date() },
       { id: "ut-2", userId: "2", teamId: "team-1", role: "lead", createdAt: new Date() },
       { id: "ut-3", userId: "3", teamId: "team-3", role: "admin", createdAt: new Date() },
       { id: "ut-4", userId: "4", teamId: "team-1", role: "member", createdAt: new Date() },
       { id: "ut-5", userId: "5", teamId: "team-1", role: "member", createdAt: new Date() },
     ];
+  }
+
+  async getUserTeams(userId: string): Promise<UserTeam[]> {
+    const userTeamsMock = await this.getAllUserTeams();
     return userTeamsMock.filter(ut => ut.userId === userId);
   }
 
@@ -1167,6 +1172,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   // User Teams methods for DatabaseStorage
+  async getAllUserTeams(): Promise<UserTeam[]> {
+    return await db.select().from(userTeams);
+  }
+
   async getUserTeams(userId: string): Promise<UserTeam[]> {
     return await db.select().from(userTeams).where(eq(userTeams.userId, userId));
   }

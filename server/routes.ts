@@ -380,6 +380,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User Teams routes
+  app.get("/api/user-teams", async (req, res) => {
+    try {
+      const userTeams = await storage.getAllUserTeams();
+      res.json(userTeams);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get user teams" });
+    }
+  });
+
   app.get("/api/users/:userId/teams", async (req, res) => {
     try {
       const userTeams = await storage.getUserTeams(req.params.userId);
