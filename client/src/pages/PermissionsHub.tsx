@@ -67,10 +67,11 @@ export default function PermissionsHub() {
     return users.filter(u => !currentMemberIds.includes(u.id));
   };
 
-  // Helper function para truncar nome do perfil
+  // Helper function para garantir exibição de pelo menos 20 caracteres
   const truncateProfileName = (name: string, maxLength: number = 20) => {
+    // Sempre mostra pelo menos 20 caracteres
     if (name.length <= maxLength) return name;
-    return name.substring(0, maxLength - 3) + '...';
+    return name.substring(0, maxLength) + '...';
   };
 
   // Forms
@@ -1328,7 +1329,7 @@ export default function PermissionsHub() {
                       </p>
                     </div>
                     {profile && (
-                      <Badge variant="outline" style={{ borderColor: profile.color }} className="flex-shrink-0" title={profile.name}>
+                      <Badge variant="outline" style={{ borderColor: profile.color }} className="flex-shrink-0 text-xs" title={profile.name}>
                         {truncateProfileName(profile.name)}
                       </Badge>
                     )}
@@ -1350,7 +1351,7 @@ export default function PermissionsHub() {
                             <Button
                               key={newProfile.id}
                               variant={newProfile.id === profile?.id ? "default" : "outline"}
-                              className="w-full justify-start"
+                              className="w-full justify-start text-sm"
                               onClick={() => {
                                 if (newProfile.id !== profile?.id) {
                                   linkUserToProfile.mutate({ userId: user.id, profileId: newProfile.id });
@@ -1361,9 +1362,9 @@ export default function PermissionsHub() {
                                 className="w-3 h-3 rounded-full mr-2" 
                                 style={{ backgroundColor: newProfile.color }}
                               />
-                              {newProfile.name}
+                              {truncateProfileName(newProfile.name, 25)}
                               {newProfile.id === profile?.id && (
-                                <Badge className="ml-2">Atual</Badge>
+                                <Badge className="ml-2 text-xs">Atual</Badge>
                               )}
                             </Button>
                           ))}
@@ -1413,7 +1414,7 @@ export default function PermissionsHub() {
                     </p>
                   </div>
                   {item.profile && (
-                    <Badge variant="outline" style={{ borderColor: item.profile.color }} className="flex-shrink-0" title={item.profile.name}>
+                    <Badge variant="outline" style={{ borderColor: item.profile.color }} className="flex-shrink-0 text-xs" title={item.profile.name}>
                       {truncateProfileName(item.profile.name)}
                     </Badge>
                   )}
@@ -1435,7 +1436,7 @@ export default function PermissionsHub() {
                           <Button
                             key={newProfile.id}
                             variant={newProfile.id === item.profile?.id ? "default" : "outline"}
-                            className="w-full justify-start"
+                            className="w-full justify-start text-sm"
                             onClick={() => {
                               if (newProfile.id !== item.profile?.id) {
                                 linkTeamToProfile.mutate({ teamId: item.teamId, profileId: newProfile.id });
@@ -1446,9 +1447,9 @@ export default function PermissionsHub() {
                               className="w-3 h-3 rounded-full mr-2" 
                               style={{ backgroundColor: newProfile.color }}
                             />
-                            {newProfile.name}
+                            {truncateProfileName(newProfile.name, 25)}
                             {newProfile.id === item.profile?.id && (
-                              <Badge className="ml-2">Atual</Badge>
+                              <Badge className="ml-2 text-xs">Atual</Badge>
                             )}
                           </Button>
                         ))}
@@ -1510,7 +1511,7 @@ export default function PermissionsHub() {
                         <Button
                           key={profile.id}
                           variant="outline"
-                          className="w-full justify-start"
+                          className="w-full justify-start text-sm"
                           onClick={() => {
                             linkUserToProfile.mutate({ userId: user.id, profileId: profile.id });
                           }}
@@ -1519,7 +1520,7 @@ export default function PermissionsHub() {
                             className="w-3 h-3 rounded-full mr-2" 
                             style={{ backgroundColor: profile.color }}
                           />
-                          {truncateProfileName(profile.name)}
+                          {truncateProfileName(profile.name, 25)}
                         </Button>
                       ))}
                     </div>
@@ -1571,7 +1572,7 @@ export default function PermissionsHub() {
                         <Button
                           key={profile.id}
                           variant="outline"
-                          className="w-full justify-start"
+                          className="w-full justify-start text-sm"
                           onClick={() => {
                             linkTeamToProfile.mutate({ teamId: team.id, profileId: profile.id });
                           }}
@@ -1580,7 +1581,7 @@ export default function PermissionsHub() {
                             className="w-3 h-3 rounded-full mr-2" 
                             style={{ backgroundColor: profile.color }}
                           />
-                          {truncateProfileName(profile.name)}
+                          {truncateProfileName(profile.name, 25)}
                         </Button>
                       ))}
                     </div>
