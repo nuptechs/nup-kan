@@ -1,319 +1,759 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   Users, 
-  UserPlus, 
   Users2, 
   Shield, 
-  Settings, 
-  ArrowLeft,
   Plus,
   Edit,
   Trash2,
-  Link,
-  BarChart3
+  ArrowLeft,
+  User,
+  Settings
 } from "lucide-react";
-import type { User, Team, Profile, Permission } from "@shared/schema";
+import type { User as UserType, Team, Profile, Permission } from "@shared/schema";
+import { insertUserSchema, insertTeamSchema, insertProfileSchema } from "@shared/schema";
+
+type Section = "users" | "teams" | "profiles" | "permissions" | null;
 
 export default function PermissionsHub() {
-  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<Section>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Dados para estatísticas
-  const { data: users = [] } = useQuery<User[]>({ queryKey: ["/api/users"] });
+  // Dados
+  const { data: users = [] } = useQuery<UserType[]>({ queryKey: ["/api/users"] });
   const { data: teams = [] } = useQuery<Team[]>({ queryKey: ["/api/teams"] });
   const { data: profiles = [] } = useQuery<Profile[]>({ queryKey: ["/api/profiles"] });
   const { data: permissions = [] } = useQuery<Permission[]>({ queryKey: ["/api/permissions"] });
 
-  // Se uma seção específica está ativa, mostrar placeholder
-  if (activeSection) {
+  // Forms
+  const userForm = useForm({
+    resolver: zodResolver(insertUserSchema),
+    defaultValues: { name: "", email: "", role: "" }
+  });
+
+  const teamForm = useForm({
+    resolver: zodResolver(insertTeamSchema),
+    defaultValues: { name: "", description: "", color: "#3b82f6" }
+  });
+
+  const profileForm = useForm({
+    resolver: zodResolver(insertProfileSchema),
+    defaultValues: { name: "", description: "", color: "#3b82f6" }
+  });
+
+  // Mutations
+  const createUser = useMutation({
+    mutationFn: (data: any) => apiRequest("/api/users", "POST", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      userForm.reset();
+      toast({ title: "Usuário criado" });
+    }
+  });
+
+  const updateUser = useMutation({
+    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/users/${id}`, "PATCH", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      setEditingId(null);
+      userForm.reset();
+      toast({ title: "Usuário atualizado" });
+    }
+  });
+
+  const deleteUser = useMutation({
+    mutationFn: (id: string) => apiRequest(`/api/users/${id}`, "DELETE"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      toast({ title: "Usuário excluído" });
+    }
+  });
+
+  const createTeam = useMutation({
+    mutationFn: (data: any) => apiRequest("/api/teams", "POST", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
+      teamForm.reset();
+      toast({ title: "Time criado" });
+    }
+  });
+
+  const updateTeam = useMutation({
+    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/teams/${id}`, "PATCH", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
+      setEditingId(null);
+      teamForm.reset();
+      toast({ title: "Time atualizado" });
+    }
+  });
+
+  const deleteTeam = useMutation({
+    mutationFn: (id: string) => apiRequest(`/api/teams/${id}`, "DELETE"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
+      toast({ title: "Time excluído" });
+    }
+  });
+
+  const createProfile = useMutation({
+    mutationFn: (data: any) => apiRequest("/api/profiles", "POST", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      profileForm.reset();
+      toast({ title: "Perfil criado" });
+    }
+  });
+
+  const updateProfile = useMutation({
+    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/profiles/${id}`, "PATCH", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      setEditingId(null);
+      profileForm.reset();
+      toast({ title: "Perfil atualizado" });
+    }
+  });
+
+  const deleteProfile = useMutation({
+    mutationFn: (id: string) => apiRequest(`/api/profiles/${id}`, "DELETE"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      toast({ title: "Perfil excluído" });
+    }
+  });
+
+  // Handlers
+  const handleEdit = (type: string, item: any) => {
+    setEditingId(item.id);
+    if (type === 'user') {
+      userForm.reset({ name: item.name, email: item.email, role: item.role || "" });
+    } else if (type === 'team') {
+      teamForm.reset({ name: item.name, description: item.description || "", color: item.color });
+    } else if (type === 'profile') {
+      profileForm.reset({ name: item.name, description: item.description || "", color: item.color });
+    }
+  };
+
+  const handleDelete = (type: string, item: any) => {
+    if (window.confirm(`Excluir ${item.name}?`)) {
+      if (type === 'user') deleteUser.mutate(item.id);
+      else if (type === 'team') deleteTeam.mutate(item.id);
+      else if (type === 'profile') deleteProfile.mutate(item.id);
+    }
+  };
+
+  // Dashboard principal
+  if (!activeSection) {
     return (
-      <div className="container mx-auto p-6 max-w-7xl">
-        <div className="flex items-center space-x-4 mb-6">
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="mb-8">
           <Button 
             variant="ghost" 
-            size="icon" 
-            onClick={() => setActiveSection(null)}
-            data-testid="button-back-to-hub"
+            size="sm" 
+            onClick={() => window.history.back()}
+            className="mb-4"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              {activeSection === 'users' && 'Usuários'}
-              {activeSection === 'teams' && 'Times'}
-              {activeSection === 'profiles' && 'Perfis'} 
-              {activeSection === 'permissions' && 'Vínculos de Permissões'}
-            </h1>
-            <p className="text-muted-foreground">
-              {activeSection === 'users' && 'Gerencie usuários do sistema'}
-              {activeSection === 'teams' && 'Gerencie agrupamentos de usuários'}
-              {activeSection === 'profiles' && 'Gerencie agrupamentos de funcionalidades'}
-              {activeSection === 'permissions' && 'Vincule perfis a usuários e times'}
-            </p>
-          </div>
+          <h1 className="text-2xl font-bold">Sistema de Permissões</h1>
+          <p className="text-muted-foreground">Gerencie usuários, times e perfis</p>
         </div>
 
-        <Card className="p-8 text-center">
-          <CardContent>
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-                <Settings className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold">Seção em Desenvolvimento</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Esta seção está sendo implementada. Em breve você terá acesso completo ao CRUD de {activeSection}.
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <Card onClick={() => setActiveSection("users")} className="cursor-pointer hover:shadow-md">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center justify-between text-lg">
+                <div className="flex items-center space-x-2">
+                  <Users className="w-5 h-5 text-blue-500" />
+                  <span>Usuários</span>
+                </div>
+                <Badge variant="secondary">{users.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Criar, editar e gerenciar usuários do sistema
               </p>
-              <Button 
-                onClick={() => setActiveSection(null)}
-                className="mt-4"
-              >
-                Voltar ao Dashboard
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <Card onClick={() => setActiveSection("teams")} className="cursor-pointer hover:shadow-md">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center justify-between text-lg">
+                <div className="flex items-center space-x-2">
+                  <Users2 className="w-5 h-5 text-green-500" />
+                  <span>Times</span>
+                </div>
+                <Badge variant="secondary">{teams.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Agrupar usuários em times organizados
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card onClick={() => setActiveSection("profiles")} className="cursor-pointer hover:shadow-md">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center justify-between text-lg">
+                <div className="flex items-center space-x-2">
+                  <Shield className="w-5 h-5 text-purple-500" />
+                  <span>Perfis</span>
+                </div>
+                <Badge variant="secondary">{profiles.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Definir conjuntos de funcionalidades
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card onClick={() => setActiveSection("permissions")} className="cursor-pointer hover:shadow-md">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center justify-between text-lg">
+                <div className="flex items-center space-x-2">
+                  <Settings className="w-5 h-5 text-orange-500" />
+                  <span>Vínculos</span>
+                </div>
+                <Badge variant="secondary">Config</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Conectar perfis a usuários e times
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
-  // Dashboard principal
-  return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="flex items-center space-x-4 mb-8">
-        <Button variant="ghost" size="icon" onClick={() => window.history.back()}>
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Sistema de Permissões Moderno</h1>
-          <p className="text-muted-foreground">
-            Gerencie usuários, times, perfis e permissões de forma moderna e intuitiva
-          </p>
-        </div>
-      </div>
-
-      {/* Estatísticas Resumidas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card>
-          <CardContent className="flex items-center p-4">
-            <Users className="h-8 w-8 text-blue-500 mr-3" />
-            <div>
-              <p className="text-2xl font-bold">{users.length}</p>
-              <p className="text-xs text-muted-foreground">Usuários</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="flex items-center p-4">
-            <Users2 className="h-8 w-8 text-green-500 mr-3" />
-            <div>
-              <p className="text-2xl font-bold">{teams.length}</p>
-              <p className="text-xs text-muted-foreground">Times</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="flex items-center p-4">
-            <Shield className="h-8 w-8 text-purple-500 mr-3" />
-            <div>
-              <p className="text-2xl font-bold">{profiles.length}</p>
-              <p className="text-xs text-muted-foreground">Perfis</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="flex items-center p-4">
-            <Settings className="h-8 w-8 text-orange-500 mr-3" />
-            <div>
-              <p className="text-2xl font-bold">{permissions.length}</p>
-              <p className="text-xs text-muted-foreground">Funcionalidades</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Cards Principais de Navegação */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Usuários */}
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Users className="w-6 h-6 text-blue-500" />
-              <span>1. Usuários</span>
-              <Badge variant="secondary" className="ml-auto">{users.length}</Badge>
-            </CardTitle>
-            <CardDescription>
-              Gerencie os usuários do sistema: criar, editar, excluir e consultar
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Controle completo sobre contas de usuário, perfis individuais e informações básicas.
-              </p>
-              <div className="flex space-x-2">
-                <Button 
-                  onClick={() => setActiveSection('users')}
-                  className="flex-1"
-                  data-testid="button-manage-users"
-                >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Gerenciar Usuários
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Times */}
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Users2 className="w-6 h-6 text-green-500" />
-              <span>2. Times</span>
-              <Badge variant="secondary" className="ml-auto">{teams.length}</Badge>
-            </CardTitle>
-            <CardDescription>
-              Gerencie agrupamentos de usuários: criar, editar, excluir e consultar
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Organize usuários em times para facilitar o gerenciamento de permissões em grupo.
-              </p>
-              <div className="flex space-x-2">
-                <Button 
-                  onClick={() => setActiveSection('teams')}
-                  className="flex-1"
-                  data-testid="button-manage-teams"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Gerenciar Times
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Perfis */}
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Shield className="w-6 h-6 text-purple-500" />
-              <span>3. Perfis</span>
-              <Badge variant="secondary" className="ml-auto">{profiles.length}</Badge>
-            </CardTitle>
-            <CardDescription>
-              Gerencie agrupamentos de funcionalidades: criar, editar, excluir e consultar
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Defina conjuntos de funcionalidades que podem ser atribuídos a usuários ou times.
-              </p>
-              <div className="flex space-x-2">
-                <Button 
-                  onClick={() => setActiveSection('profiles')}
-                  className="flex-1"
-                  data-testid="button-manage-profiles"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Gerenciar Perfis
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Vínculos de Permissões */}
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Link className="w-6 h-6 text-orange-500" />
-              <span>4. Vínculos de Permissões</span>
-              <Badge variant="secondary" className="ml-auto">Ativo</Badge>
-            </CardTitle>
-            <CardDescription>
-              Vincule perfis a usuários e times: criar, editar, excluir e consultar
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Estabeleça conexões entre perfis e usuários/times para controlar o acesso às funcionalidades.
-              </p>
-              <div className="flex space-x-2">
-                <Button 
-                  onClick={() => setActiveSection('permissions')}
-                  className="flex-1"
-                  data-testid="button-manage-permission-links"
-                >
-                  <Link className="w-4 h-4 mr-2" />
-                  Gerenciar Vínculos
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Informações do Fluxo */}
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <BarChart3 className="w-5 h-5" />
-            <span>Nova Hierarquia de Permissões</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
-            <div className="flex flex-col items-center space-y-2">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <Users className="w-5 h-5 text-blue-600" />
-              </div>
-              <p className="font-medium">1. Usuários</p>
-              <p className="text-sm text-muted-foreground">Crie e gerencie contas de usuário</p>
-            </div>
-            
-            <div className="flex flex-col items-center space-y-2">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <Users2 className="w-5 h-5 text-green-600" />
-              </div>
-              <p className="font-medium">2. Times</p>
-              <p className="text-sm text-muted-foreground">Agrupe usuários em times</p>
-            </div>
-            
-            <div className="flex flex-col items-center space-y-2">
-              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                <Shield className="w-5 h-5 text-purple-600" />
-              </div>
-              <p className="font-medium">3. Perfis</p>
-              <p className="text-sm text-muted-foreground">Defina conjuntos de funcionalidades</p>
-            </div>
-            
-            <div className="flex flex-col items-center space-y-2">
-              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                <Link className="w-5 h-5 text-orange-600" />
-              </div>
-              <p className="font-medium">4. Vínculos</p>
-              <p className="text-sm text-muted-foreground">Conecte perfis a usuários/times</p>
-            </div>
+  // Seção de Usuários
+  if (activeSection === "users") {
+    return (
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setActiveSection(null)}
+              className="mb-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar
+            </Button>
+            <h2 className="text-xl font-bold">Usuários</h2>
           </div>
           
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2">✨ Sistema Redesenhado com Padrões Modernos</h4>
-            <p className="text-sm text-blue-700">
-              Nova interface intuitiva que segue hierarquia clara: Usuários podem ser agrupados em Times, 
-              Perfis definem conjuntos de funcionalidades, e Vínculos conectam tudo de forma organizada.
-            </p>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Usuário
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Criar Usuário</DialogTitle>
+              </DialogHeader>
+              <Form {...userForm}>
+                <form onSubmit={userForm.handleSubmit((data) => createUser.mutate(data))} className="space-y-4">
+                  <FormField
+                    control={userForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={userForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={userForm.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cargo</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <DialogFooter>
+                    <Button type="submit" disabled={createUser.isPending}>
+                      {createUser.isPending ? "Criando..." : "Criar"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <div className="space-y-3">
+          {users.map((user) => (
+            <Card key={user.id}>
+              <CardContent className="flex items-center justify-between p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{user.name}</p>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                  </div>
+                  {user.role && <Badge variant="outline">{user.role}</Badge>}
+                </div>
+                <div className="flex space-x-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleEdit('user', user)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Editar Usuário</DialogTitle>
+                      </DialogHeader>
+                      <Form {...userForm}>
+                        <form onSubmit={userForm.handleSubmit((data) => updateUser.mutate({ id: user.id, ...data }))} className="space-y-4">
+                          <FormField
+                            control={userForm.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nome</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={userForm.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                  <Input type="email" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={userForm.control}
+                            name="role"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Cargo</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <DialogFooter>
+                            <Button type="submit" disabled={updateUser.isPending}>
+                              {updateUser.isPending ? "Salvando..." : "Salvar"}
+                            </Button>
+                          </DialogFooter>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => handleDelete('user', user)}
+                  >
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Seção de Times
+  if (activeSection === "teams") {
+    return (
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setActiveSection(null)}
+              className="mb-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar
+            </Button>
+            <h2 className="text-xl font-bold">Times</h2>
           </div>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Time
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Criar Time</DialogTitle>
+              </DialogHeader>
+              <Form {...teamForm}>
+                <form onSubmit={teamForm.handleSubmit((data) => createTeam.mutate(data))} className="space-y-4">
+                  <FormField
+                    control={teamForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={teamForm.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <DialogFooter>
+                    <Button type="submit" disabled={createTeam.isPending}>
+                      {createTeam.isPending ? "Criando..." : "Criar"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <div className="space-y-3">
+          {teams.map((team) => (
+            <Card key={team.id}>
+              <CardContent className="flex items-center justify-between p-4">
+                <div className="flex items-center space-x-3">
+                  <div 
+                    className="w-4 h-4 rounded-full" 
+                    style={{ backgroundColor: team.color }}
+                  />
+                  <div>
+                    <p className="font-medium">{team.name}</p>
+                    {team.description && (
+                      <p className="text-sm text-muted-foreground">{team.description}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleEdit('team', team)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Editar Time</DialogTitle>
+                      </DialogHeader>
+                      <Form {...teamForm}>
+                        <form onSubmit={teamForm.handleSubmit((data) => updateTeam.mutate({ id: team.id, ...data }))} className="space-y-4">
+                          <FormField
+                            control={teamForm.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nome</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={teamForm.control}
+                            name="description"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Descrição</FormLabel>
+                                <FormControl>
+                                  <Textarea {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <DialogFooter>
+                            <Button type="submit" disabled={updateTeam.isPending}>
+                              {updateTeam.isPending ? "Salvando..." : "Salvar"}
+                            </Button>
+                          </DialogFooter>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => handleDelete('team', team)}
+                  >
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Seção de Perfis
+  if (activeSection === "profiles") {
+    return (
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setActiveSection(null)}
+              className="mb-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar
+            </Button>
+            <h2 className="text-xl font-bold">Perfis</h2>
+          </div>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Perfil
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Criar Perfil</DialogTitle>
+              </DialogHeader>
+              <Form {...profileForm}>
+                <form onSubmit={profileForm.handleSubmit((data) => createProfile.mutate(data))} className="space-y-4">
+                  <FormField
+                    control={profileForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={profileForm.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <DialogFooter>
+                    <Button type="submit" disabled={createProfile.isPending}>
+                      {createProfile.isPending ? "Criando..." : "Criar"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <div className="space-y-3">
+          {profiles.map((profile) => (
+            <Card key={profile.id}>
+              <CardContent className="flex items-center justify-between p-4">
+                <div className="flex items-center space-x-3">
+                  <div 
+                    className="w-4 h-4 rounded-full" 
+                    style={{ backgroundColor: profile.color }}
+                  />
+                  <div>
+                    <p className="font-medium">{profile.name}</p>
+                    {profile.description && (
+                      <p className="text-sm text-muted-foreground">{profile.description}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleEdit('profile', profile)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Editar Perfil</DialogTitle>
+                      </DialogHeader>
+                      <Form {...profileForm}>
+                        <form onSubmit={profileForm.handleSubmit((data) => updateProfile.mutate({ id: profile.id, ...data }))} className="space-y-4">
+                          <FormField
+                            control={profileForm.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nome</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={profileForm.control}
+                            name="description"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Descrição</FormLabel>
+                                <FormControl>
+                                  <Textarea {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <DialogFooter>
+                            <Button type="submit" disabled={updateProfile.isPending}>
+                              {updateProfile.isPending ? "Salvando..." : "Salvar"}
+                            </Button>
+                          </DialogFooter>
+                        </form>
+                      </Form>
+                    </DialogContent>
+                  </Dialog>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => handleDelete('profile', profile)}
+                  >
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Seção de Vínculos (placeholder)
+  return (
+    <div className="container mx-auto p-6 max-w-4xl">
+      <div className="mb-6">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => setActiveSection(null)}
+          className="mb-2"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Voltar
+        </Button>
+        <h2 className="text-xl font-bold">Vínculos de Permissões</h2>
+      </div>
+      
+      <Card className="p-8 text-center">
+        <CardContent>
+          <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">Em Desenvolvimento</h3>
+          <p className="text-muted-foreground">
+            Sistema de vínculos entre perfis e usuários/times será implementado aqui.
+          </p>
         </CardContent>
       </Card>
     </div>
