@@ -241,7 +241,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" data-testid="dialog-team-management">
+      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto" data-testid="dialog-team-management">
         <DialogHeader>
           <DialogTitle>Gerenciar Times</DialogTitle>
           <DialogDescription>
@@ -411,7 +411,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
         </div>
 
         {/* Interface de Seleção de Membros - Duas Colunas */}
-        <div className="border-t pt-6 mt-6">
+        <div className="border-t pt-6 mt-6 bg-yellow-50 p-4 rounded-lg">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">
               {editingTeam ? "Gerenciar Membros" : "Selecionar Membros"}
