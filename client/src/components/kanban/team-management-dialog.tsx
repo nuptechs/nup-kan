@@ -411,7 +411,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
         </div>
 
         {/* Interface de Seleção de Membros - Duas Colunas */}
-        <div className="border-t pt-6 mt-6 bg-yellow-50 p-4 rounded-lg">
+        <div className="border-t pt-6 mt-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">
               {editingTeam ? "Gerenciar Membros" : "Selecionar Membros"}

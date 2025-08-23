@@ -11,7 +11,6 @@ import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Shield, Histo
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ColumnManagementDialog } from "./column-management-dialog";
-import { TeamManagementDialog } from "./team-management-dialog";
 import { TagManagementDialog } from "./tag-management-dialog";
 import { EmailSettingsDialog } from "./email-settings-dialog";
 import { AdvancedExportDialog } from "@/components/export/AdvancedExportDialog";
@@ -34,7 +33,6 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const { canManageColumns, canManageUsers, canManageTeams, canManageProfiles, canViewAnalytics, canExportData } = usePermissions();
   const [wipLimits, setWipLimits] = useState<Record<string, number>>({});
   const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
-  const [isTeamManagementOpen, setIsTeamManagementOpen] = useState(false);
   const [isTagManagementOpen, setIsTagManagementOpen] = useState(false);
   const [isEmailSettingsOpen, setIsEmailSettingsOpen] = useState(false);
   const [isAdvancedExportOpen, setIsAdvancedExportOpen] = useState(false);
@@ -175,15 +173,6 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 </Button>
               </PermissionGuard>
               
-              <Button
-                onClick={() => setIsTeamManagementOpen(true)}
-                variant="outline"
-                className="w-full justify-start"
-                data-testid="button-manage-teams"
-              >
-                <Users2 className="w-4 h-4 mr-2" />
-                Gerenciar Times
-              </Button>
               
               <Button
                 onClick={() => setIsTagManagementOpen(true)}
@@ -337,10 +326,6 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         onClose={() => setIsColumnManagementOpen(false)}
       />
       
-      <TeamManagementDialog
-        open={isTeamManagementOpen}
-        onOpenChange={setIsTeamManagementOpen}
-      />
       
       <TagManagementDialog
         isOpen={isTagManagementOpen}

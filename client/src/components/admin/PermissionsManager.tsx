@@ -13,8 +13,9 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Shield, Users, User, Search, Settings2, Eye, FileText, Columns, UserCheck } from "lucide-react";
+import { Shield, Users, User, Search, Settings2, Eye, FileText, Columns, UserCheck, Settings } from "lucide-react";
 import type { Permission, Profile, User as UserType, Team } from "@shared/schema";
+import { TeamManagementDialog } from "@/components/kanban/team-management-dialog";
 
 interface PermissionsByCategory {
   [category: string]: Permission[];
@@ -28,6 +29,7 @@ interface PermissionsManagerProps {
 export function PermissionsManager({ targetType, targetId }: PermissionsManagerProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProfile, setSelectedProfile] = useState<string>("");
+  const [isTeamManagementOpen, setIsTeamManagementOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -353,15 +355,26 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
                           <p className="font-medium text-sm">{team.name}</p>
                           <p className="text-xs text-muted-foreground">{team.description}</p>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => window.location.href = `/admin/permissions/team/${team.id}`}
-                          data-testid={`button-manage-team-${team.id}`}
-                        >
-                          <Settings2 className="w-3 h-3 mr-1" />
-                          Gerenciar
-                        </Button>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setIsTeamManagementOpen(true)}
+                            data-testid={`button-edit-team-${team.id}`}
+                            title="Editar Time e Membros"
+                          >
+                            <Settings className="w-4 h-4 text-blue-600" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => window.location.href = `/admin/permissions/team/${team.id}`}
+                            data-testid={`button-manage-team-${team.id}`}
+                          >
+                            <Settings2 className="w-3 h-3 mr-1" />
+                            Gerenciar
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -371,6 +384,12 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
           </div>
         </TabsContent>
       </Tabs>
+      
+      {/* Team Management Dialog */}
+      <TeamManagementDialog
+        open={isTeamManagementOpen}
+        onOpenChange={setIsTeamManagementOpen}
+      />
     </div>
   );
 }
