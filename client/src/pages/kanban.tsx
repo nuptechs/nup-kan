@@ -22,7 +22,7 @@ export default function KanbanPage() {
   });
 
   return (
-    <div className="h-screen overflow-hidden bg-bg-main" data-testid="kanban-page">
+    <div className="h-screen overflow-hidden bg-bg-main relative" data-testid="kanban-page">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between" data-testid="header">
         <div className="flex items-center space-x-4">
@@ -68,8 +68,6 @@ export default function KanbanPage() {
             <User className="w-4 h-4" />
           </Button>
 
-          {/* User Profile Indicator */}
-          <UserProfileIndicator />
           
           {/* Settings Button */}
           <Button
@@ -85,9 +83,14 @@ export default function KanbanPage() {
       </header>
 
       {/* Main Kanban Board */}
-      <main className="flex-1 overflow-hidden" data-testid="main-content">
+      <main className="flex-1 overflow-hidden h-full" data-testid="main-content">
         <KanbanBoard />
       </main>
+
+      {/* User Profile Indicator - Fixed Bottom Left */}
+      <div className="fixed bottom-4 left-4 z-10">
+        <UserProfileIndicator />
+      </div>
 
       {/* Settings Panel */}
       <SettingsPanel
