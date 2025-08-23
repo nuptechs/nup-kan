@@ -1015,17 +1015,55 @@ export default function PermissionsHub() {
                       </Badge>
                     )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      if (window.confirm(`Remover perfil do usuário ${user.name}?`)) {
-                        unlinkUserFromProfile.mutate(user.id);
-                      }
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4 text-red-500" />
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Editar Perfil do Usuário</DialogTitle>
+                          <DialogDescription>Altere o perfil de {user.name}</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-3">
+                          {profiles.map((newProfile) => (
+                            <Button
+                              key={newProfile.id}
+                              variant={newProfile.id === profile?.id ? "default" : "outline"}
+                              className="w-full justify-start"
+                              onClick={() => {
+                                if (newProfile.id !== profile?.id) {
+                                  linkUserToProfile.mutate({ userId: user.id, profileId: newProfile.id });
+                                }
+                              }}
+                            >
+                              <div 
+                                className="w-3 h-3 rounded-full mr-2" 
+                                style={{ backgroundColor: newProfile.color }}
+                              />
+                              {newProfile.name}
+                              {newProfile.id === profile?.id && (
+                                <Badge className="ml-2">Atual</Badge>
+                              )}
+                            </Button>
+                          ))}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (window.confirm(`Remover perfil do usuário ${user.name}?`)) {
+                          unlinkUserFromProfile.mutate(user.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </Button>
+                  </div>
                 </div>
               );
             })}
@@ -1060,17 +1098,55 @@ export default function PermissionsHub() {
                     </Badge>
                   )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    if (window.confirm(`Remover perfil do time ${item.team?.name}?`)) {
-                      unlinkTeamFromProfile.mutate(item.id);
-                    }
-                  }}
-                >
-                  <Trash2 className="w-4 h-4 text-red-500" />
-                </Button>
+                <div className="flex space-x-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Editar Perfil do Time</DialogTitle>
+                        <DialogDescription>Altere o perfil de {item.team?.name}</DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-3">
+                        {profiles.map((newProfile) => (
+                          <Button
+                            key={newProfile.id}
+                            variant={newProfile.id === item.profile?.id ? "default" : "outline"}
+                            className="w-full justify-start"
+                            onClick={() => {
+                              if (newProfile.id !== item.profile?.id) {
+                                linkTeamToProfile.mutate({ teamId: item.teamId, profileId: newProfile.id });
+                              }
+                            }}
+                          >
+                            <div 
+                              className="w-3 h-3 rounded-full mr-2" 
+                              style={{ backgroundColor: newProfile.color }}
+                            />
+                            {newProfile.name}
+                            {newProfile.id === item.profile?.id && (
+                              <Badge className="ml-2">Atual</Badge>
+                            )}
+                          </Button>
+                        ))}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (window.confirm(`Remover perfil do time ${item.team?.name}?`)) {
+                        unlinkTeamFromProfile.mutate(item.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                  </Button>
+                </div>
               </div>
             ))}
             {teamsWithProfiles.length === 0 && (
