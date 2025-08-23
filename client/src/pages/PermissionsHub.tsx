@@ -67,6 +67,12 @@ export default function PermissionsHub() {
     return users.filter(u => !currentMemberIds.includes(u.id));
   };
 
+  // Helper function para truncar nome do perfil
+  const truncateProfileName = (name: string, maxLength: number = 20) => {
+    if (name.length <= maxLength) return name;
+    return name.substring(0, maxLength - 3) + '...';
+  };
+
   // Forms
   const userForm = useForm({
     resolver: zodResolver(insertUserSchema),
@@ -1070,7 +1076,7 @@ export default function PermissionsHub() {
                     style={{ backgroundColor: profile.color }}
                   />
                   <div>
-                    <p className="font-medium">{profile.name}</p>
+                    <p className="font-medium" title={profile.name}>{truncateProfileName(profile.name)}</p>
                     {profile.description && (
                       <p className="text-sm text-muted-foreground">{profile.description}</p>
                     )}
@@ -1322,8 +1328,8 @@ export default function PermissionsHub() {
                       </p>
                     </div>
                     {profile && (
-                      <Badge variant="outline" style={{ borderColor: profile.color }} className="flex-shrink-0">
-                        {profile.name}
+                      <Badge variant="outline" style={{ borderColor: profile.color }} className="flex-shrink-0" title={profile.name}>
+                        {truncateProfileName(profile.name)}
                       </Badge>
                     )}
                   </div>
@@ -1402,13 +1408,13 @@ export default function PermissionsHub() {
                   <Users2 className="w-4 h-4 text-green-500 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{item.team?.name}</p>
-                    <p className="text-xs text-muted-foreground truncate" title={item.team?.description}>
+                    <p className="text-xs text-muted-foreground truncate" title={item.team?.description || ""}>
                       {item.team?.description}
                     </p>
                   </div>
                   {item.profile && (
-                    <Badge variant="outline" style={{ borderColor: item.profile.color }} className="flex-shrink-0">
-                      {item.profile.name}
+                    <Badge variant="outline" style={{ borderColor: item.profile.color }} className="flex-shrink-0" title={item.profile.name}>
+                      {truncateProfileName(item.profile.name)}
                     </Badge>
                   )}
                 </div>
@@ -1513,7 +1519,7 @@ export default function PermissionsHub() {
                             className="w-3 h-3 rounded-full mr-2" 
                             style={{ backgroundColor: profile.color }}
                           />
-                          {profile.name}
+                          {truncateProfileName(profile.name)}
                         </Button>
                       ))}
                     </div>
@@ -1544,7 +1550,7 @@ export default function PermissionsHub() {
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{team.name}</p>
-                    <p className="text-xs text-muted-foreground truncate" title={team.description}>
+                    <p className="text-xs text-muted-foreground truncate" title={team.description || ""}>
                       {team.description}
                     </p>
                   </div>
@@ -1574,7 +1580,7 @@ export default function PermissionsHub() {
                             className="w-3 h-3 rounded-full mr-2" 
                             style={{ backgroundColor: profile.color }}
                           />
-                          {profile.name}
+                          {truncateProfileName(profile.name)}
                         </Button>
                       ))}
                     </div>
