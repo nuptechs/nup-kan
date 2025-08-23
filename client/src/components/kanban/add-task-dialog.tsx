@@ -61,7 +61,8 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
       queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
       // Invalidate board-specific queries
       if (boardId) {
-        queryClient.invalidateQueries({ queryKey: ["/api/boards", boardId, "tasks"] });
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/tasks`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
       }
       toast({
         title: "Sucesso",

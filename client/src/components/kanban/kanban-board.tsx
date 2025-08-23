@@ -16,6 +16,18 @@ interface KanbanBoardProps {
   boardId?: string;
 }
 
+// Utility function to map column titles to task status values
+const getStatusFromColumnTitle = (columnTitle: string): string | null => {
+  const statusMap: Record<string, string> = {
+    "Backlog": "backlog",
+    "To Do": "todo", 
+    "In Progress": "inprogress",
+    "Review": "review",
+    "Done": "done"
+  };
+  return statusMap[columnTitle] || null;
+};
+
 export function KanbanBoard({ boardId }: KanbanBoardProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskDetailsOpen, setIsTaskDetailsOpen] = useState(false);
@@ -45,6 +57,11 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+      // Invalidate board-specific queries
+      if (boardId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/tasks`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
+      }
     },
     onError: () => {
       toast({
@@ -65,6 +82,10 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
+      // Invalidate board-specific queries
+      if (boardId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
+      }
     },
     onError: () => {
       toast({
@@ -109,28 +130,45 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
     if (!task) return;
 
     // Check WIP limits - only count if this is a different task or moving to different column
-    const destinationColumn = columns.find((c) => c.id === destination.droppableId);
-    if (destinationColumn?.wipLimit) {
-      const tasksInDestination = tasks.filter((t) => t.status === destination.droppableId && t.id !== draggableId);
-      if (tasksInDestination.length >= destinationColumn.wipLimit) {
-        toast({
-          title: "Limite WIP Excedido",
-          description: `A coluna ${destinationColumn.title} já atingiu o limite de ${destinationColumn.wipLimit} tarefas.`,
-          variant: "destructive",
-        });
-        return;
+    const destColumn = columns.find((c) => c.id === destination.droppableId);
+    if (destColumn?.wipLimit) {
+      // Need to check actual status instead of column ID for WIP limits
+      const expectedStatus = getStatusFromColumnTitle(destColumn.title);
+      if (expectedStatus) {
+        const tasksInDestination = tasks.filter((t) => t.status === expectedStatus && t.id !== draggableId);
+        if (tasksInDestination.length >= destColumn.wipLimit) {
+          toast({
+            title: "Limite WIP Excedido",
+            description: `A coluna ${destColumn.title} já atingiu o limite de ${destColumn.wipLimit} tarefas.`,
+            variant: "destructive",
+          });
+          return;
+        }
       }
     }
 
-    // Update task status
+    // Update task status - convert column ID to correct status
+    const destinationColumn = columns.find(col => col.id === destination.droppableId);
+    if (!destinationColumn) return;
+    
+    const newStatus = getStatusFromColumnTitle(destinationColumn.title);
+    if (!newStatus) return;
+    
     updateTaskMutation.mutate({
       taskId: draggableId,
-      updates: { status: destination.droppableId },
+      updates: { status: newStatus },
     });
   };
 
   const getTasksByColumn = (columnId: string) => {
-    return tasks.filter((task) => task.status === columnId);
+    // Find the column to get its title
+    const column = columns.find(col => col.id === columnId);
+    if (!column) return [];
+    
+    const expectedStatus = getStatusFromColumnTitle(column.title);
+    if (!expectedStatus) return [];
+    
+    return tasks.filter((task) => task.status === expectedStatus);
   };
 
   const handleTaskClick = (task: Task) => {
