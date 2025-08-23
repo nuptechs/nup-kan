@@ -1313,19 +1313,21 @@ export default function PermissionsHub() {
               const profile = profiles.find(p => p.id === user.profileId);
               return (
                 <div key={user.id} className="flex items-center justify-between p-2 border rounded">
-                  <div className="flex items-center space-x-2">
-                    <User className="w-4 h-4 text-blue-500" />
-                    <div>
-                      <p className="text-sm font-medium">{user.name}</p>
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                  <div className="flex items-center space-x-2 flex-1 min-w-0 mr-2">
+                    <User className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{user.name}</p>
+                      <p className="text-xs text-muted-foreground truncate" title={user.email}>
+                        {user.email}
+                      </p>
                     </div>
                     {profile && (
-                      <Badge variant="outline" style={{ borderColor: profile.color }}>
+                      <Badge variant="outline" style={{ borderColor: profile.color }} className="flex-shrink-0">
                         {profile.name}
                       </Badge>
                     )}
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 flex-shrink-0">
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button variant="ghost" size="sm">
@@ -1396,19 +1398,21 @@ export default function PermissionsHub() {
           <CardContent className="space-y-3">
             {teamsWithProfiles.map((item) => (
               <div key={item.id} className="flex items-center justify-between p-2 border rounded">
-                <div className="flex items-center space-x-2">
-                  <Users2 className="w-4 h-4 text-green-500" />
-                  <div>
-                    <p className="text-sm font-medium">{item.team?.name}</p>
-                    <p className="text-xs text-muted-foreground">{item.team?.description}</p>
+                <div className="flex items-center space-x-2 flex-1 min-w-0 mr-2">
+                  <Users2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{item.team?.name}</p>
+                    <p className="text-xs text-muted-foreground truncate" title={item.team?.description}>
+                      {item.team?.description}
+                    </p>
                   </div>
                   {item.profile && (
-                    <Badge variant="outline" style={{ borderColor: item.profile.color }}>
+                    <Badge variant="outline" style={{ borderColor: item.profile.color }} className="flex-shrink-0">
                       {item.profile.name}
                     </Badge>
                   )}
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 flex-shrink-0">
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="ghost" size="sm">
@@ -1475,11 +1479,13 @@ export default function PermissionsHub() {
           <CardContent className="space-y-3">
             {usersWithoutProfiles.map((user) => (
               <div key={user.id} className="flex items-center justify-between p-2 border rounded">
-                <div className="flex items-center space-x-2">
-                  <User className="w-4 h-4 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                <div className="flex items-center space-x-2 flex-1 min-w-0 mr-2">
+                  <User className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{user.name}</p>
+                    <p className="text-xs text-muted-foreground truncate" title={user.email}>
+                      {user.email}
+                    </p>
                   </div>
                 </div>
                 <Dialog>
@@ -1531,14 +1537,16 @@ export default function PermissionsHub() {
           <CardContent className="space-y-3">
             {teamsWithoutProfiles.map((team) => (
               <div key={team.id} className="flex items-center justify-between p-2 border rounded">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-1 min-w-0 mr-2">
                   <div 
-                    className="w-4 h-4 rounded-full" 
+                    className="w-4 h-4 rounded-full flex-shrink-0" 
                     style={{ backgroundColor: team.color }}
                   />
-                  <div>
-                    <p className="text-sm font-medium">{team.name}</p>
-                    <p className="text-xs text-muted-foreground">{team.description}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{team.name}</p>
+                    <p className="text-xs text-muted-foreground truncate" title={team.description}>
+                      {team.description}
+                    </p>
                   </div>
                 </div>
                 <Dialog>
