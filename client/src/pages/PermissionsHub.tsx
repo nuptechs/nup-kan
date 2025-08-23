@@ -23,7 +23,8 @@ import {
   Trash2,
   ArrowLeft,
   User,
-  Settings
+  Settings,
+  Minus
 } from "lucide-react";
 import { TeamManagementDialog } from "@/components/kanban/team-management-dialog";
 import type { User as UserType, Team, Profile, Permission, UserTeam, TeamProfile, ProfilePermission } from "@shared/schema";
@@ -38,6 +39,7 @@ export default function PermissionsHub() {
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [isTeamManagementOpen, setIsTeamManagementOpen] = useState(false);
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -50,6 +52,20 @@ export default function PermissionsHub() {
   const { data: userTeams = [] } = useQuery<UserTeam[]>({ queryKey: ["/api/user-teams"] });
   const { data: teamProfiles = [] } = useQuery<TeamProfile[]>({ queryKey: ["/api/team-profiles"] });
   const { data: profilePermissions = [] } = useQuery<ProfilePermission[]>({ queryKey: ["/api/profile-permissions"] });
+
+  // Para edição de times - obter membros atuais
+  const getCurrentTeamMembers = (teamId: string) => {
+    return userTeams
+      .filter(ut => ut.teamId === teamId)
+      .map(ut => users.find(u => u.id === ut.userId))
+      .filter(Boolean) as UserType[];
+  };
+
+  const getAvailableUsers = (teamId?: string) => {
+    if (!teamId) return users; // Para criação de novo time
+    const currentMemberIds = getCurrentTeamMembers(teamId).map(u => u.id);
+    return users.filter(u => !currentMemberIds.includes(u.id));
+  };
 
   // Forms
   const userForm = useForm({
@@ -191,6 +207,15 @@ export default function PermissionsHub() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
       toast({ title: "Usuário adicionado ao time" });
+    }
+  });
+
+  const removeUserFromTeam = useMutation({
+    mutationFn: ({ userId, teamId }: { userId: string; teamId: string }) => 
+      apiRequest("DELETE", `/api/users/${userId}/teams/${teamId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
+      toast({ title: "Usuário removido do time" });
     }
   });
 
@@ -581,6 +606,7 @@ export default function PermissionsHub() {
                     )}
                   />
                   
+                  {/* Interface de Duas Colunas para Seleção de Membros */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <FormLabel>Membros do Time</FormLabel>
@@ -599,31 +625,78 @@ export default function PermissionsHub() {
                         {selectedUsers.length === users.length ? "Desmarcar Todos" : "Selecionar Todos"}
                       </Button>
                     </div>
-                    <div className="border rounded-md p-3 max-h-48 overflow-y-auto">
-                      {users.map((user) => (
-                        <div key={user.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
-                          <Checkbox
-                            checked={selectedUsers.includes(user.id)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                setSelectedUsers(prev => [...prev, user.id]);
-                              } else {
-                                setSelectedUsers(prev => prev.filter(id => id !== user.id));
-                              }
-                            }}
-                          />
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">{user.name}</p>
-                            <p className="text-xs text-muted-foreground">{user.email}</p>
-                          </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Coluna Esquerda - Membros Selecionados */}
+                      <div className="space-y-2">
+                        <Label className="text-green-600 font-semibold flex items-center justify-between">
+                          Membros Selecionados
+                          <Badge variant="secondary">{selectedUsers.length}</Badge>
+                        </Label>
+                        <div className="border rounded-md p-3 max-h-48 overflow-y-auto min-h-[120px]">
+                          {selectedUsers.length === 0 ? (
+                            <p className="text-center text-muted-foreground py-4 text-sm">
+                              Nenhum membro selecionado
+                            </p>
+                          ) : (
+                            users.filter(u => selectedUsers.includes(u.id)).map((user) => (
+                              <div key={user.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                                <div className="flex items-center space-x-2 flex-1">
+                                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                  <div>
+                                    <p className="text-sm font-medium text-green-700">{user.name}</p>
+                                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                                  </div>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setSelectedUsers(prev => prev.filter(id => id !== user.id))}
+                                >
+                                  <Minus className="w-3 h-3 text-red-500" />
+                                </Button>
+                              </div>
+                            ))
+                          )}
                         </div>
-                      ))}
+                      </div>
+
+                      {/* Coluna Direita - Membros Disponíveis */}
+                      <div className="space-y-2">
+                        <Label className="text-blue-600 font-semibold flex items-center justify-between">
+                          Membros Disponíveis
+                          <Badge variant="secondary">{users.filter(u => !selectedUsers.includes(u.id)).length}</Badge>
+                        </Label>
+                        <div className="border rounded-md p-3 max-h-48 overflow-y-auto min-h-[120px]">
+                          {users.filter(u => !selectedUsers.includes(u.id)).length === 0 ? (
+                            <p className="text-center text-muted-foreground py-4 text-sm">
+                              Todos os usuários selecionados
+                            </p>
+                          ) : (
+                            users.filter(u => !selectedUsers.includes(u.id)).map((user) => (
+                              <div key={user.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                                <div className="flex items-center space-x-2 flex-1">
+                                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                                  <div>
+                                    <p className="text-sm font-medium">{user.name}</p>
+                                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                                  </div>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setSelectedUsers(prev => [...prev, user.id])}
+                                >
+                                  <Plus className="w-3 h-3 text-green-500" />
+                                </Button>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    {selectedUsers.length > 0 && (
-                      <p className="text-sm text-muted-foreground">
-                        {selectedUsers.length} usuário{selectedUsers.length > 1 ? 's' : ''} selecionado{selectedUsers.length > 1 ? 's' : ''}
-                      </p>
-                    )}
                   </div>
 
                   <DialogFooter>
@@ -659,18 +732,48 @@ export default function PermissionsHub() {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleEdit('team', team)}
+                        onClick={() => {
+                          setEditingTeam(team);
+                          // Inicializar com membros atuais do time
+                          const currentMembers = getCurrentTeamMembers(team.id);
+                          setSelectedUsers(currentMembers.map(m => m.id));
+                          handleEdit('team', team);
+                        }}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>Editar Time</DialogTitle>
-                        <DialogDescription>Altere as informações do time</DialogDescription>
+                        <DialogDescription>Altere as informações e membros do time</DialogDescription>
                       </DialogHeader>
                       <Form {...teamForm}>
-                        <form onSubmit={teamForm.handleSubmit((data) => updateTeam.mutate({ id: team.id, ...data }))} className="space-y-4">
+                        <form onSubmit={teamForm.handleSubmit(async (data) => {
+                          // Atualizar dados do time
+                          await updateTeam.mutateAsync({ id: team.id, ...data });
+                          
+                          // Gerenciar membros
+                          const currentMembers = getCurrentTeamMembers(team.id);
+                          const currentMemberIds = currentMembers.map(m => m.id);
+                          
+                          // Remover membros que não estão mais selecionados
+                          for (const memberId of currentMemberIds) {
+                            if (!selectedUsers.includes(memberId)) {
+                              await removeUserFromTeam.mutateAsync({ userId: memberId, teamId: team.id });
+                            }
+                          }
+                          
+                          // Adicionar novos membros selecionados
+                          for (const userId of selectedUsers) {
+                            if (!currentMemberIds.includes(userId)) {
+                              await addUserToTeam.mutateAsync({ userId, teamId: team.id, role: "member" });
+                            }
+                          }
+                          
+                          setEditingTeam(null);
+                          setSelectedUsers([]);
+                        })} className="space-y-4">
                           <FormField
                             control={teamForm.control}
                             name="name"
@@ -697,9 +800,104 @@ export default function PermissionsHub() {
                               </FormItem>
                             )}
                           />
+
+                          {/* Interface de Duas Colunas para Edição de Membros */}
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <FormLabel>Gerenciar Membros</FormLabel>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const availableUsers = getAvailableUsers(team.id);
+                                  if (selectedUsers.length === (getCurrentTeamMembers(team.id).length + availableUsers.length)) {
+                                    setSelectedUsers([]);
+                                  } else {
+                                    setSelectedUsers([...getCurrentTeamMembers(team.id).map(m => m.id), ...availableUsers.map(u => u.id)]);
+                                  }
+                                }}
+                              >
+                                Selecionar/Desmarcar Todos
+                              </Button>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              {/* Coluna Esquerda - Membros Selecionados */}
+                              <div className="space-y-2">
+                                <Label className="text-green-600 font-semibold flex items-center justify-between">
+                                  Membros do Time
+                                  <Badge variant="secondary">{selectedUsers.length}</Badge>
+                                </Label>
+                                <div className="border rounded-md p-3 max-h-48 overflow-y-auto min-h-[120px]">
+                                  {selectedUsers.length === 0 ? (
+                                    <p className="text-center text-muted-foreground py-4 text-sm">
+                                      Nenhum membro no time
+                                    </p>
+                                  ) : (
+                                    users.filter(u => selectedUsers.includes(u.id)).map((user) => (
+                                      <div key={user.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                                        <div className="flex items-center space-x-2 flex-1">
+                                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                          <div>
+                                            <p className="text-sm font-medium text-green-700">{user.name}</p>
+                                            <p className="text-xs text-muted-foreground">{user.email}</p>
+                                          </div>
+                                        </div>
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => setSelectedUsers(prev => prev.filter(id => id !== user.id))}
+                                        >
+                                          <Minus className="w-3 h-3 text-red-500" />
+                                        </Button>
+                                      </div>
+                                    ))
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Coluna Direita - Membros Disponíveis */}
+                              <div className="space-y-2">
+                                <Label className="text-blue-600 font-semibold flex items-center justify-between">
+                                  Usuários Disponíveis
+                                  <Badge variant="secondary">{users.filter(u => !selectedUsers.includes(u.id)).length}</Badge>
+                                </Label>
+                                <div className="border rounded-md p-3 max-h-48 overflow-y-auto min-h-[120px]">
+                                  {users.filter(u => !selectedUsers.includes(u.id)).length === 0 ? (
+                                    <p className="text-center text-muted-foreground py-4 text-sm">
+                                      Todos os usuários estão no time
+                                    </p>
+                                  ) : (
+                                    users.filter(u => !selectedUsers.includes(u.id)).map((user) => (
+                                      <div key={user.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
+                                        <div className="flex items-center space-x-2 flex-1">
+                                          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                                          <div>
+                                            <p className="text-sm font-medium">{user.name}</p>
+                                            <p className="text-xs text-muted-foreground">{user.email}</p>
+                                          </div>
+                                        </div>
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => setSelectedUsers(prev => [...prev, user.id])}
+                                        >
+                                          <Plus className="w-3 h-3 text-green-500" />
+                                        </Button>
+                                      </div>
+                                    ))
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
                           <DialogFooter>
-                            <Button type="submit" disabled={updateTeam.isPending}>
-                              {updateTeam.isPending ? "Salvando..." : "Salvar"}
+                            <Button type="submit" disabled={updateTeam.isPending || addUserToTeam.isPending || removeUserFromTeam.isPending}>
+                              {(updateTeam.isPending || addUserToTeam.isPending || removeUserFromTeam.isPending) ? "Salvando..." : "Salvar Alterações"}
                             </Button>
                           </DialogFooter>
                         </form>
