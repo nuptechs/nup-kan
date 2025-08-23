@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Plus, History } from "lucide-react";
+import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Shield, History } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ColumnManagementDialog } from "./column-management-dialog";
+import { TeamManagementDialog } from "./team-management-dialog";
 import { TagManagementDialog } from "./tag-management-dialog";
 import { EmailSettingsDialog } from "./email-settings-dialog";
-import { QuickCreatePanel } from "./quick-create-panel";
 import { AdvancedExportDialog } from "@/components/export/AdvancedExportDialog";
 import { ExportHistoryDialog } from "@/components/export/ExportHistoryDialog";
 import { PermissionGuard } from "@/components/PermissionGuard";
@@ -29,12 +30,13 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
   const { canManageColumns, canManageUsers, canManageTeams, canManageProfiles, canViewAnalytics, canExportData } = usePermissions();
   const [wipLimits, setWipLimits] = useState<Record<string, number>>({});
   const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
+  const [isTeamManagementOpen, setIsTeamManagementOpen] = useState(false);
   const [isTagManagementOpen, setIsTagManagementOpen] = useState(false);
   const [isEmailSettingsOpen, setIsEmailSettingsOpen] = useState(false);
-  const [isQuickCreateOpen, setIsQuickCreateOpen] = useState(false);
   const [isAdvancedExportOpen, setIsAdvancedExportOpen] = useState(false);
   const [isExportHistoryOpen, setIsExportHistoryOpen] = useState(false);
 
@@ -153,11 +155,11 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             <div className="grid grid-cols-1 gap-3">
               {/* Consolidated Management Button */}
               <Button
-                onClick={() => setIsQuickCreateOpen(true)}
+                onClick={() => setLocation('/admin/permissions')}
                 className="w-full justify-start bg-blue-600 hover:bg-blue-700"
                 data-testid="button-manage-all"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Shield className="w-4 h-4 mr-2" />
                 Gerenciar Usuários, Times e Perfis
               </Button>
               
@@ -172,6 +174,16 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                   Gerenciar Colunas
                 </Button>
               </PermissionGuard>
+              
+              <Button
+                onClick={() => setIsTeamManagementOpen(true)}
+                variant="outline"
+                className="w-full justify-start"
+                data-testid="button-manage-teams"
+              >
+                <Users2 className="w-4 h-4 mr-2" />
+                Gerenciar Times
+              </Button>
               
               <Button
                 onClick={() => setIsTagManagementOpen(true)}
@@ -324,6 +336,12 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         isOpen={isColumnManagementOpen}
         onClose={() => setIsColumnManagementOpen(false)}
       />
+      
+      <TeamManagementDialog
+        open={isTeamManagementOpen}
+        onOpenChange={setIsTeamManagementOpen}
+      />
+      
       <TagManagementDialog
         isOpen={isTagManagementOpen}
         onClose={() => setIsTagManagementOpen(false)}
@@ -334,10 +352,6 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         onOpenChange={setIsEmailSettingsOpen}
       />
       
-      <QuickCreatePanel
-        isOpen={isQuickCreateOpen}
-        onClose={() => setIsQuickCreateOpen(false)}
-      />
 
       {/* Export Dialogs */}
       <AdvancedExportDialog
