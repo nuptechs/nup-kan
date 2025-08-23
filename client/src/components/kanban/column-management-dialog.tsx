@@ -30,13 +30,8 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
 
   const { data: columns = [], isLoading } = useQuery<Column[]>({
     queryKey: [`/api/boards/${boardId}/columns`],
-    enabled: !!boardId,
+    enabled: !!boardId && isOpen,
   });
-
-  // Debug logs
-  console.log("ColumnManagementDialog - boardId:", boardId);
-  console.log("ColumnManagementDialog - columns:", columns);
-  console.log("ColumnManagementDialog - isLoading:", isLoading);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -305,7 +300,11 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Colunas Existentes</h3>
             
-            {isLoading ? (
+            {!boardId ? (
+              <div className="text-center py-4 text-gray-500">
+                Aguardando seleção do board...
+              </div>
+            ) : isLoading ? (
               <div className="text-center py-4 text-gray-500">
                 Carregando colunas...
               </div>
