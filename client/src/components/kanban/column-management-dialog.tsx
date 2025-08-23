@@ -33,6 +33,11 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
     enabled: !!boardId,
   });
 
+  // Debug logs
+  console.log("ColumnManagementDialog - boardId:", boardId);
+  console.log("ColumnManagementDialog - columns:", columns);
+  console.log("ColumnManagementDialog - isLoading:", isLoading);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
