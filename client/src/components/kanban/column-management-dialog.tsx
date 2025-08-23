@@ -28,19 +28,10 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: columns = [], isLoading, error } = useQuery<Column[]>({
+  const { data: columns = [], isLoading } = useQuery<Column[]>({
     queryKey: [`/api/boards/${boardId}/columns`],
-    enabled: !!boardId && isOpen && boardId.length > 0,
-    staleTime: 0, // Force fresh data
-    refetchOnMount: true,
+    enabled: !!boardId,
   });
-
-  // Debug logs apenas quando modal está aberto
-  if (isOpen) {
-    console.log("MODAL ABERTO - BoardId:", boardId);
-    console.log("MODAL ABERTO - Colunas:", columns);
-    console.log("MODAL ABERTO - Enabled:", !!boardId && isOpen && boardId.length > 0);
-  }
   
 
   const form = useForm<FormData>({
@@ -311,11 +302,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Colunas Existentes</h3>
             
-            {!boardId ? (
-              <div className="text-center py-4 text-gray-500">
-                Aguardando seleção do board...
-              </div>
-            ) : isLoading ? (
+            {isLoading ? (
               <div className="text-center py-4 text-gray-500">
                 Carregando colunas...
               </div>

@@ -302,11 +302,13 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
         boardId={boardId}
       />
       
-      <ColumnManagementDialog
-        isOpen={isColumnManagementOpen}
-        onClose={() => setIsColumnManagementOpen(false)}
-        boardId={boardId || ''}
-      />
+      {boardId && (
+        <ColumnManagementDialog
+          isOpen={isColumnManagementOpen}
+          onClose={() => setIsColumnManagementOpen(false)}
+          boardId={boardId}
+        />
+      )}
     </div>
   );
 }
