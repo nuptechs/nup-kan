@@ -47,6 +47,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
       assigneeId: "",
       progress: 0,
       tags: [],
+      boardId: boardId || "",
     },
   });
 
@@ -79,12 +80,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
   });
 
   const onSubmit = (data: FormData) => {
-    // Adicionar o boardId à data da tarefa
-    const taskData = {
-      ...data,
-      boardId: boardId || "", // Use o boardId atual ou string vazia como fallback
-    };
-    createTaskMutation.mutate(taskData);
+    createTaskMutation.mutate(data);
   };
 
   return (
