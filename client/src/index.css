@@ -136,3 +136,9 @@
   opacity: 0.5;
   transform: rotate(5deg);
 }
+
+/* Force dialog to appear above everything */
+[data-radix-popper-content-wrapper],
+[data-state="open"][role="dialog"] {
+  z-index: 999999 !important;
+}

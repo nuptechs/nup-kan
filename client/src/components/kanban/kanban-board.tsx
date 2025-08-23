@@ -139,7 +139,6 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
   };
 
   const handleAddTask = () => {
-    console.log("handleAddTask called - opening dialog");
     setIsAddTaskOpen(true);
   };
 

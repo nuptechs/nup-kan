@@ -115,7 +115,6 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
           {/* Add Task Button - Always visible but subtle */}
           <button
             onClick={() => {
-              console.log("Add Task button clicked for column:", column.id);
               onAddTask?.();
             }}
             className="w-full py-3 border border-dashed border-gray-300 rounded-xl hover:border-indigo-400 hover:bg-indigo-50/50 transition-all duration-200 flex items-center justify-center group"
