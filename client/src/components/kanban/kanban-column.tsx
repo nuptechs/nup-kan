@@ -1,7 +1,7 @@
 import { Draggable } from "react-beautiful-dnd";
 import { TaskCard } from "./task-card";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings } from "lucide-react";
+import { Plus, Settings, Edit2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Task, Column } from "@shared/schema";
 
@@ -12,6 +12,8 @@ interface KanbanColumnProps {
   onTaskClick?: (task: Task) => void;
   onAddTask?: () => void;
   onManageColumns?: () => void;
+  onEditColumn?: (column: Column) => void;
+  onDeleteColumn?: (columnId: string) => void;
 }
 
 const getColumnColorClasses = (color: string) => {
@@ -47,7 +49,7 @@ const getColumnCountClasses = (color: string) => {
   return colorMap[color as keyof typeof colorMap] || "bg-gray-100 text-gray-600";
 };
 
-export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask }: KanbanColumnProps) {
+export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask, onEditColumn, onDeleteColumn }: KanbanColumnProps) {
   const wipProgress = column.wipLimit ? (tasks.length / column.wipLimit) * 100 : 0;
   const isWipExceeded = column.wipLimit && tasks.length >= column.wipLimit;
 
@@ -61,19 +63,43 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
         data-testid={`column-${column.id}`}
       >
         {/* Header */}
-        <div className="p-4 pb-2">
+        <div className="p-4 pb-2 group">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-medium text-gray-800 flex items-center" data-testid={`column-title-${column.id}`}>
               <span className={cn("w-2 h-2 rounded-full mr-2", getColumnColorClasses(column.color))}></span>
               {column.title}
             </h2>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
               <span
                 className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full font-medium"
                 data-testid={`task-count-${column.id}`}
               >
                 {tasks.length}
               </span>
+              
+              {/* Botões de edição - aparecem no hover */}
+              <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <button
+                  onClick={() => onEditColumn?.(column)}
+                  className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-blue-100 flex items-center justify-center transition-all duration-200"
+                  data-testid={`button-edit-column-${column.id}`}
+                  title="Editar coluna"
+                >
+                  <Edit2 className="w-3 h-3 text-gray-400 hover:text-blue-500" />
+                </button>
+                
+                {column.title !== "Backlog" && (
+                  <button
+                    onClick={() => onDeleteColumn?.(column.id)}
+                    className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-red-100 flex items-center justify-center transition-all duration-200"
+                    data-testid={`button-delete-column-${column.id}`}
+                    title="Excluir coluna"
+                  >
+                    <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-500" />
+                  </button>
+                )}
+              </div>
+              
               <button
                 onClick={() => onAddTask?.()}
                 className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-indigo-100 flex items-center justify-center group transition-all duration-200 opacity-50 hover:opacity-100"

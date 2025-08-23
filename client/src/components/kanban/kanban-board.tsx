@@ -33,6 +33,7 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
   const [isTaskDetailsOpen, setIsTaskDetailsOpen] = useState(false);
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
   const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
+  const [editingColumn, setEditingColumn] = useState<Column | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { canCreateTasks, canEditTasks, canManageColumns } = usePermissions();
@@ -63,11 +64,28 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
         queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
       }
     },
+  });
+
+  const deleteColumnMutation = useMutation({
+    mutationFn: async (columnId: string) => {
+      const response = await apiRequest("DELETE", `/api/columns/${columnId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
+      queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
+      toast({
+        title: "Coluna excluída",
+        description: "A coluna foi removida com sucesso.",
+        duration: 3000,
+      });
+    },
     onError: () => {
       toast({
-        title: "Erro",
-        description: "Falha ao mover tarefa. Tente novamente.",
+        title: "Erro ao excluir coluna",
+        description: "Não foi possível excluir a coluna. Tente novamente.",
         variant: "destructive",
+        duration: 3000,
       });
     },
   });
@@ -189,6 +207,17 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
     setIsColumnManagementOpen(true);
   };
 
+  const handleEditColumn = (column: Column) => {
+    setEditingColumn(column);
+    setIsColumnManagementOpen(true);
+  };
+
+  const handleDeleteColumn = async (columnId: string) => {
+    if (window.confirm("Tem certeza que deseja excluir esta coluna? Esta ação não pode ser desfeita.")) {
+      await deleteColumnMutation.mutateAsync(columnId);
+    }
+  };
+
   if (tasksLoading || columnsLoading) {
     return (
       <div className="flex h-full">
@@ -255,6 +284,8 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
                                   onTaskClick={handleTaskClick}
                                   onAddTask={handleAddTask}
                                   onManageColumns={handleManageColumns}
+                                  onEditColumn={handleEditColumn}
+                                  onDeleteColumn={handleDeleteColumn}
                                 />
                                 {taskProvided.placeholder}
                               </div>
@@ -305,7 +336,10 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
       {boardId && (
         <ColumnManagementDialog
           isOpen={isColumnManagementOpen}
-          onClose={() => setIsColumnManagementOpen(false)}
+          onClose={() => {
+            setIsColumnManagementOpen(false);
+            setEditingColumn(null);
+          }}
           boardId={boardId}
         />
       )}
