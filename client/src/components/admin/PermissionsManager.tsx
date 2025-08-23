@@ -358,12 +358,14 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
                         <div className="flex items-center space-x-2">
                           <Button
                             size="sm"
-                            variant="ghost"
+                            variant="outline"
                             onClick={() => setIsTeamManagementOpen(true)}
                             data-testid={`button-edit-team-${team.id}`}
                             title="Editar Time e Membros"
+                            className="border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950"
                           >
-                            <Settings className="w-4 h-4 text-blue-600" />
+                            <Settings className="w-4 h-4 text-blue-600 mr-2" />
+                            Editar
                           </Button>
                           <Button
                             size="sm"
@@ -372,7 +374,7 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
                             data-testid={`button-manage-team-${team.id}`}
                           >
                             <Settings2 className="w-3 h-3 mr-1" />
-                            Gerenciar
+                            Permissões
                           </Button>
                         </div>
                       </div>
