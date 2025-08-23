@@ -71,6 +71,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId }: ColumnManag
         description: "Coluna criada com sucesso!",
       });
       form.reset();
+      onClose(); // Fecha a modal automaticamente
     },
     onError: () => {
       toast({
