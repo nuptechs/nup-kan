@@ -1173,11 +1173,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteColumn(id: string): Promise<void> {
-    // Move tasks from deleted column to backlog
-    await db
-      .update(tasks)
-      .set({ status: "backlog" })
-      .where(eq(tasks.status, id));
+    // First, get the column to find out its title
+    const [column] = await db.select().from(columns).where(eq(columns.id, id));
+    if (!column) {
+      throw new Error(`Column with id ${id} not found`);
+    }
+
+    // Map column title to status value
+    const statusMap: Record<string, string> = {
+      "Backlog": "backlog",
+      "To Do": "todo", 
+      "In Progress": "inprogress",
+      "Review": "review",
+      "Done": "done"
+    };
+    
+    const columnStatus = statusMap[column.title];
+    
+    // If this column has tasks, move them to backlog
+    if (columnStatus) {
+      await db
+        .update(tasks)
+        .set({ status: "backlog" })
+        .where(eq(tasks.status, columnStatus));
+    }
     
     const result = await db.delete(columns).where(eq(columns.id, id));
     if (result.rowCount === 0) {
