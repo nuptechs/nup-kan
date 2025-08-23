@@ -101,6 +101,9 @@ export interface IStorage {
   getExportHistory(userId: string): Promise<ExportHistory[]>;
   createExportHistory(exportData: InsertExportHistory): Promise<ExportHistory>;
   updateExportHistory(id: string, updates: Partial<ExportHistory>): Promise<ExportHistory>;
+
+  // Board initialization
+  initializeBoardWithDefaults(boardId: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -774,6 +777,124 @@ export class MemStorage implements IStorage {
     return this.boards.get(id);
   }
 
+  async initializeBoardWithDefaults(boardId: string): Promise<void> {
+    console.log(`Initializing board ${boardId} with default data`);
+    
+    // Create default columns for this board
+    const defaultColumns = [
+      { id: `backlog-${boardId}`, boardId, title: "Backlog", position: 0, wipLimit: null, color: "gray" },
+      { id: `todo-${boardId}`, boardId, title: "To Do", position: 1, wipLimit: 5, color: "blue" },
+      { id: `inprogress-${boardId}`, boardId, title: "In Progress", position: 2, wipLimit: 3, color: "yellow" },
+      { id: `review-${boardId}`, boardId, title: "Review", position: 3, wipLimit: 4, color: "purple" },
+      { id: `done-${boardId}`, boardId, title: "Done", position: 4, wipLimit: null, color: "green" },
+    ];
+    
+    defaultColumns.forEach(column => {
+      this.columns.set(column.id, column);
+    });
+
+    // Get team members for assignment
+    const members = Array.from(this.teamMembers.values());
+    
+    // Create default tasks for this board
+    const defaultTasks: Omit<Task, 'id'>[] = [
+      {
+        boardId,
+        title: "Redesign da página inicial",
+        description: "Atualizar o design da landing page com nova identidade visual e melhorar conversão",
+        status: "backlog",
+        priority: "high",
+        assigneeId: members[0]?.id || "",
+        assigneeName: members[0]?.name || "",
+        assigneeAvatar: members[0]?.avatar || "",
+        progress: 0,
+        tags: ["design", "ui"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        boardId,
+        title: "Integração com API de pagamento",
+        description: "Implementar gateway de pagamento para checkout",
+        status: "backlog",
+        priority: "medium",
+        assigneeId: members[1]?.id || "",
+        assigneeName: members[1]?.name || "",
+        assigneeAvatar: members[1]?.avatar || "",
+        progress: 0,
+        tags: ["backend", "api"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        boardId,
+        title: "Otimização de performance",
+        description: "Melhorar tempo de carregamento das páginas principais",
+        status: "todo",
+        priority: "high",
+        assigneeId: members[3]?.id || "",
+        assigneeName: members[3]?.name || "",
+        assigneeAvatar: members[3]?.avatar || "",
+        progress: 0,
+        tags: ["performance", "optimization"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        boardId,
+        title: "Dashboard analytics",
+        description: "Implementar gráficos e métricas no painel administrativo",
+        status: "inprogress",
+        priority: "high",
+        assigneeId: members[0]?.id || "",
+        assigneeName: members[0]?.name || "",
+        assigneeAvatar: members[0]?.avatar || "",
+        progress: 65,
+        tags: ["analytics", "dashboard"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        boardId,
+        title: "Sistema de notificações",
+        description: "Implementação de notificações push e email",
+        status: "review",
+        priority: "medium",
+        assigneeId: members[2]?.id || "",
+        assigneeName: members[2]?.name || "",
+        assigneeAvatar: members[2]?.avatar || "",
+        progress: 100,
+        tags: ["notifications", "backend"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        boardId,
+        title: "Login social OAuth",
+        description: "Integração com Google, Facebook e GitHub",
+        status: "done",
+        priority: "high",
+        assigneeId: members[3]?.id || "",
+        assigneeName: members[3]?.name || "",
+        assigneeAvatar: members[3]?.avatar || "",
+        progress: 100,
+        tags: ["auth", "integration"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
+
+    defaultTasks.forEach(taskData => {
+      const task: Task = {
+        id: randomUUID(),
+        ...taskData,
+      };
+      this.tasks.set(task.id, task);
+    });
+
+    console.log(`Board ${boardId} initialized with ${defaultColumns.length} columns and ${defaultTasks.length} tasks`);
+  }
+
   async createBoard(insertBoard: InsertBoard): Promise<Board> {
     const board: Board = {
       id: randomUUID(),
@@ -1008,6 +1129,91 @@ export class DatabaseStorage implements IStorage {
 
   async getBoardColumns(boardId: string): Promise<Column[]> {
     return await db.select().from(columns).where(eq(columns.boardId, boardId)).orderBy(columns.position);
+  }
+
+  async initializeBoardWithDefaults(boardId: string): Promise<void> {
+    console.log(`Initializing database board ${boardId} with default data`);
+    
+    // Check if board already has columns
+    const existingColumns = await this.getBoardColumns(boardId);
+    if (existingColumns.length > 0) {
+      return; // Already initialized
+    }
+    
+    // Create default columns for this board (don't specify ID, let database generate it)
+    const defaultColumnsData = [
+      { boardId, title: "Backlog", position: 0, wipLimit: null, color: "gray" },
+      { boardId, title: "To Do", position: 1, wipLimit: 5, color: "blue" },
+      { boardId, title: "In Progress", position: 2, wipLimit: 3, color: "yellow" },
+      { boardId, title: "Review", position: 3, wipLimit: 4, color: "purple" },
+      { boardId, title: "Done", position: 4, wipLimit: null, color: "green" },
+    ];
+    
+    const createdColumns = await db.insert(columns).values(defaultColumnsData).returning();
+    
+    // Create default tasks for this board (don't specify ID, let database generate it)
+    const defaultTasksData = [
+      {
+        boardId,
+        title: "Redesign da página inicial",
+        description: "Atualizar o design da landing page com nova identidade visual e melhorar conversão",
+        status: "backlog",
+        priority: "high",
+        assigneeId: "",
+        assigneeName: "",
+        assigneeAvatar: "",
+        progress: 0,
+        tags: ["design", "ui"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        boardId,
+        title: "Integração com API de pagamento",
+        description: "Implementar gateway de pagamento para checkout",
+        status: "backlog",
+        priority: "medium",
+        assigneeId: "",
+        assigneeName: "",
+        assigneeAvatar: "",
+        progress: 0,
+        tags: ["backend", "api"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        boardId,
+        title: "Otimização de performance",
+        description: "Melhorar tempo de carregamento das páginas principais",
+        status: "todo",
+        priority: "high",
+        assigneeId: "",
+        assigneeName: "",
+        assigneeAvatar: "",
+        progress: 0,
+        tags: ["performance", "optimization"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        boardId,
+        title: "Dashboard analytics",
+        description: "Implementar gráficos e métricas no painel administrativo",
+        status: "inprogress",
+        priority: "high",
+        assigneeId: "",
+        assigneeName: "",
+        assigneeAvatar: "",
+        progress: 65,
+        tags: ["analytics", "dashboard"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
+    
+    await db.insert(tasks).values(defaultTasksData);
+    
+    console.log(`Board ${boardId} initialized with ${createdColumns.length} columns and ${defaultTasksData.length} tasks`);
   }
 
   // Task methods
