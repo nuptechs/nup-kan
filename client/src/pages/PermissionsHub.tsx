@@ -1326,21 +1326,25 @@ export default function PermissionsHub() {
               const profile = profiles.find(p => p.id === user.profileId);
               
               return (
-                <div key={user.id} className="p-2 border rounded space-y-1">
-                  {/* Linha 1: Ícone + Nome + Perfil + Botões */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 flex-1 min-w-0 mr-2">
-                      <User className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                      <p className="text-sm font-medium flex-shrink-0" title={user.name}>
-                        {truncateUserName(user.name, 20)}
-                      </p>
-                      <span className="text-muted-foreground">•</span>
-                      {profile && (
-                        <Badge variant="outline" style={{ borderColor: profile.color }} className="text-xs flex-shrink-0" title={profile.name}>
-                          {truncateProfileName(profile.name, 20)}
-                        </Badge>
-                      )}
-                    </div>
+                <div key={user.id} className="p-2 border rounded space-y-2">
+                  {/* Linha 1: Ícone + Nome + Perfil */}
+                  <div className="flex items-center space-x-2">
+                    <User className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    <p className="text-sm font-medium flex-shrink-0" title={user.name}>
+                      {truncateUserName(user.name, 20)}
+                    </p>
+                    <span className="text-muted-foreground">•</span>
+                    {profile && (
+                      <Badge variant="outline" style={{ borderColor: profile.color }} className="text-xs flex-shrink-0" title={profile.name}>
+                        {truncateProfileName(profile.name, 20)}
+                      </Badge>
+                    )}
+                  </div>
+                  {/* Linha 2: Email + Botões */}
+                  <div className="flex items-center justify-between pl-6">
+                    <p className="text-xs text-muted-foreground flex-1 min-w-0 mr-2" title={user.email}>
+                      {user.email}
+                    </p>
                     <div className="flex space-x-2 flex-shrink-0">
                       <Dialog>
                         <DialogTrigger asChild>
@@ -1390,12 +1394,6 @@ export default function PermissionsHub() {
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </Button>
                     </div>
-                  </div>
-                  {/* Linha 2: Email */}
-                  <div className="pl-6">
-                    <p className="text-xs text-muted-foreground" title={user.email}>
-                      {user.email}
-                    </p>
                   </div>
                 </div>
               );
