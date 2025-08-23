@@ -718,6 +718,12 @@ export default function PermissionsHub() {
             </Card>
           ))}
         </div>
+        
+        {/* Team Management Dialog */}
+        <TeamManagementDialog
+          open={isTeamManagementOpen}
+          onOpenChange={setIsTeamManagementOpen}
+        />
       </div>
     );
   }
@@ -1377,12 +1383,6 @@ export default function PermissionsHub() {
             )}
           </CardContent>
         </Card>
-        
-        {/* Team Management Dialog */}
-        <TeamManagementDialog
-          open={isTeamManagementOpen}
-          onOpenChange={setIsTeamManagementOpen}
-        />
       </div>
     </div>
   );
