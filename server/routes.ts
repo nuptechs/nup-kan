@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
+import { promises as fs } from 'fs';
+import { join } from 'path';
 import { storage } from "./storage";
 import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema, insertTaskAssigneeSchema } from "@shared/schema";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
@@ -607,7 +609,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Sistema de Logs
+  // Sistema de Logs com persistência em arquivo
+  const LOGS_FILE = join(process.cwd(), 'system-logs.json');
   let systemLogs: Array<{
     id: string;
     timestamp: string;
@@ -624,6 +627,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     errorDetails?: any;
     duration?: number;
   }> = [];
+
+  // Carregar logs existentes na inicialização
+  async function loadLogs() {
+    try {
+      const data = await fs.readFile(LOGS_FILE, 'utf8');
+      systemLogs = JSON.parse(data);
+      console.log(`🔵 [SYSTEM] ${systemLogs.length} logs carregados do arquivo`);
+    } catch (error) {
+      // Arquivo não existe ou erro de leitura - inicializar array vazio
+      systemLogs = [];
+      console.log('🔵 [SYSTEM] Iniciando com logs vazios');
+    }
+  }
+
+  // Salvar logs no arquivo
+  async function saveLogs() {
+    try {
+      await fs.writeFile(LOGS_FILE, JSON.stringify(systemLogs, null, 2));
+    } catch (error) {
+      console.error('🔴 [ERROR] Falha ao salvar logs:', error);
+    }
+  }
+
+  // Inicializar logs
+  loadLogs();
 
   // Interceptar logs existentes e adicionar ao sistema
   const originalConsoleLog = console.log;
@@ -647,6 +675,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (systemLogs.length > 200) {
       systemLogs = systemLogs.slice(0, 200);
     }
+    
+    // Salvar logs no arquivo de forma assíncrona
+    saveLogs().catch(err => console.error('Erro ao salvar logs:', err));
     
     const emoji = level === 'info' ? '🔵' : level === 'warn' ? '🟡' : level === 'error' ? '🔴' : '⚪';
     originalConsoleLog(`${emoji} [${context || 'SYSTEM'}] ${message}`, details ? details : '');
@@ -681,6 +712,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (systemLogs.length > 200) {
       systemLogs = systemLogs.slice(0, 200);
     }
+    
+    // Salvar logs no arquivo de forma assíncrona
+    saveLogs().catch(err => console.error('Erro ao salvar logs:', err));
     
     const emoji = status === 'success' ? '✅' : status === 'error' ? '❌' : '⏳';
     const statusEmoji = status === 'success' ? '🟢' : status === 'error' ? '🔴' : '🟡';
@@ -729,6 +763,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/system/logs", async (req, res) => {
     try {
       systemLogs = [];
+      await saveLogs(); // Salvar imediatamente após limpar
       addLog('info', 'Logs do sistema foram limpos', 'ADMIN');
       res.json({ message: "Logs cleared successfully" });
     } catch (error) {
