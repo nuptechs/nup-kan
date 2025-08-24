@@ -223,12 +223,12 @@ export default function CustomFieldsPage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setLocation('/kanban/df8c9d00-1c13-4423-b2ab-130c69f641af')}
+          onClick={() => setLocation('/boards')}
           className="flex items-center gap-2"
           data-testid="button-back-kanban"
         >
           <ArrowLeft className="w-4 h-4" />
-          Voltar ao Board
+          Voltar aos Boards
         </Button>
       </div>
 

@@ -1,5 +1,33 @@
 [
   {
+    "id": "action_1756051935728_75axg803e",
+    "timestamp": "2025-08-24T16:12:15.728Z",
+    "level": "info",
+    "message": "Sistema executou: Criar coluna \"dsfasdf\"",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "system",
+    "userName": "Sistema",
+    "action": "Criar coluna \"dsfasdf\"",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 77
+  },
+  {
+    "id": "action_1756051815787_m4vj00q3w",
+    "timestamp": "2025-08-24T16:10:15.787Z",
+    "level": "info",
+    "message": "Sistema executou: Criar coluna \"Nome\"",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "system",
+    "userName": "Sistema",
+    "action": "Criar coluna \"Nome\"",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 303
+  },
+  {
     "id": "log_1756051790730_9syr67l8l",
     "timestamp": "2025-08-24T16:09:50.730Z",
     "level": "warn",
