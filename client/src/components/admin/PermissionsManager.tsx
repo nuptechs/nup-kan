@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Shield, Users, User, Search, Settings2, Eye, FileText, Columns, UserCheck, Settings } from "lucide-react";
+import { Shield, Users, User, Search, Settings2, Eye, FileText, Columns, UserCheck, Settings, RefreshCw, Activity, Tags, Grid, Download, Key, Database } from "lucide-react";
 import type { Permission, Profile, User as UserType, Team } from "@shared/schema";
 import { TeamManagementDialog } from "@/components/kanban/team-management-dialog";
 
@@ -30,6 +30,8 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProfile, setSelectedProfile] = useState<string>("");
   const [isTeamManagementOpen, setIsTeamManagementOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncReport, setSyncReport] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -128,6 +130,48 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
     },
   });
 
+  // Mutation para sincronização de permissões
+  const syncPermissionsMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", "/api/permissions/sync");
+    },
+    onSuccess: async (response) => {
+      const data = await response.json();
+      setSyncReport(data.report);
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions"] });
+      toast({
+        title: "Sincronização Concluída",
+        description: data.message || "Permissões sincronizadas com sucesso!",
+      });
+    },
+    onError: (error) => {
+      console.error("Error syncing permissions:", error);
+      toast({
+        title: "Erro na Sincronização",
+        description: "Falha ao sincronizar permissões",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setIsSyncing(false);
+    },
+  });
+
+  // Query para relatório de funcionalidades
+  const { data: functionalityReport, refetch: refetchReport } = useQuery({
+    queryKey: ["/api/permissions/functionality-report"],
+    enabled: false, // Só busca quando solicitado
+  });
+
+  const handleSyncPermissions = () => {
+    setIsSyncing(true);
+    syncPermissionsMutation.mutate();
+  };
+
+  const handleGetReport = async () => {
+    await refetchReport();
+  };
+
   // Group permissions by category
   const permissionsByCategory = useMemo<PermissionsByCategory>(() => {
     const filtered = permissions.filter(permission =>
@@ -158,6 +202,13 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
       case 'columns': return <Columns className="w-4 h-4" />;
       case 'profiles': return <Shield className="w-4 h-4" />;
       case 'analytics': return <Eye className="w-4 h-4" />;
+      case 'boards': return <Grid className="w-4 h-4" />;
+      case 'tags': return <Tags className="w-4 h-4" />;
+      case 'custom-fields': return <Database className="w-4 h-4" />;
+      case 'export': return <Download className="w-4 h-4" />;
+      case 'permissions': return <Key className="w-4 h-4" />;
+      case 'auth': return <Shield className="w-4 h-4" />;
+      case 'system': return <Settings className="w-4 h-4" />;
       default: return <Settings2 className="w-4 h-4" />;
     }
   };
@@ -171,6 +222,13 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
       case 'columns': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
       case 'profiles': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
       case 'analytics': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300';
+      case 'boards': return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300';
+      case 'tags': return 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300';
+      case 'custom-fields': return 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300';
+      case 'export': return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
+      case 'permissions': return 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-300';
+      case 'auth': return 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300';
+      case 'system': return 'bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-300';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
     }
   };
@@ -210,10 +268,11 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
     <div className="space-y-6">
 
       <Tabs defaultValue="permissions" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="permissions">Permissões Detalhadas</TabsTrigger>
           <TabsTrigger value="profiles">Perfis</TabsTrigger>
           <TabsTrigger value="quick-assign">Atribuição Rápida</TabsTrigger>
+          <TabsTrigger value="sync">Sincronização</TabsTrigger>
         </TabsList>
 
         <TabsContent value="permissions" className="space-y-4">
@@ -384,6 +443,88 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="sync" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Sincronização de Permissões
+              </CardTitle>
+              <CardDescription>
+                Sincronize automaticamente permissões com as funcionalidades da aplicação.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-4">
+                <Button
+                  onClick={handleSyncPermissions}
+                  disabled={isSyncing || syncPermissionsMutation.isPending}
+                  className="flex items-center gap-2"
+                  data-testid="button-sync-permissions"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                  {isSyncing ? 'Sincronizando...' : 'Sincronizar Agora'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleGetReport}
+                  disabled={syncPermissionsMutation.isPending}
+                  className="flex items-center gap-2"
+                  data-testid="button-get-report"
+                >
+                  <Activity className="w-4 h-4" />
+                  Gerar Relatório
+                </Button>
+              </div>
+
+              {(syncReport || functionalityReport) && (
+                <div className="space-y-4">
+                  <Separator />
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                        {(syncReport || functionalityReport)?.detectedFunctions || 0}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Categorias</div>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        {(syncReport || functionalityReport)?.generatedPermissions || 0}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Geradas</div>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                        {(syncReport || functionalityReport)?.existingPermissions || 0}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Existentes</div>
+                    </div>
+                    <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                        {(syncReport || functionalityReport)?.categories?.length || 0}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Módulos</div>
+                    </div>
+                  </div>
+
+                  {(syncReport || functionalityReport)?.categories && (
+                    <div>
+                      <h4 className="font-medium mb-2">Módulos Detectados:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {(syncReport || functionalityReport).categories.map((category: string) => (
+                          <Badge key={category} variant="outline" className={getCategoryColor(category)}>
+                            {category}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
       

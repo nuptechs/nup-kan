@@ -8,6 +8,7 @@ import { db } from "./db";
 import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema, insertTaskAssigneeSchema, insertCustomFieldSchema, updateCustomFieldSchema, insertTaskCustomValueSchema, updateTaskCustomValueSchema, customFields, taskCustomValues } from "@shared/schema";
 import { eq, sql, and } from "drizzle-orm";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
+import { PermissionSyncService } from "./permissionSync";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes
@@ -2738,6 +2739,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rota para sincronização manual de permissões (admin)
+  app.post("/api/permissions/sync", async (req, res) => {
+    try {
+      const permissionSyncService = PermissionSyncService.getInstance();
+      await permissionSyncService.syncPermissions(app);
+      
+      const report = await permissionSyncService.getFunctionalityReport(app);
+      
+      res.json({
+        success: true,
+        message: "Permissões sincronizadas com sucesso",
+        report
+      });
+    } catch (error) {
+      console.error("Error syncing permissions:", error);
+      res.status(500).json({ 
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to sync permissions" 
+      });
+    }
+  });
+
+  // Rota para relatório de funcionalidades
+  app.get("/api/permissions/functionality-report", async (req, res) => {
+    try {
+      const permissionSyncService = PermissionSyncService.getInstance();
+      const report = await permissionSyncService.getFunctionalityReport(app);
+      
+      res.json(report);
+    } catch (error) {
+      console.error("Error generating functionality report:", error);
+      res.status(500).json({ error: "Failed to generate functionality report" });
+    }
+  });
+
   const httpServer = createServer(app);
+  
+  // Sincronizar permissões automaticamente na inicialização
+  setTimeout(async () => {
+    try {
+      const permissionSyncService = PermissionSyncService.getInstance();
+      await permissionSyncService.syncPermissions(app);
+    } catch (error) {
+      console.error("❌ [STARTUP] Erro na sincronização automática de permissões:", error);
+    }
+  }, 5000); // Aguardar 5 segundos após inicialização
+  
   return httpServer;
 }
