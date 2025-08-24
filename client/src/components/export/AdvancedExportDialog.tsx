@@ -638,7 +638,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
             fileName: fileName,
             fileSize: JSON.stringify(exportData).length, // Approximate size
             recordsCount: exportData.metadata.totalRecords,
-            completedAt: new Date()
+            completedAt: new Date().toISOString()
           });
         } catch (updateError) {
           console.warn('Failed to update export history:', updateError);
@@ -666,7 +666,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
           await apiRequest('PATCH', `/api/exports/${exportHistoryId}`, {
             status: 'failed',
             errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
-            completedAt: new Date()
+            completedAt: new Date().toISOString()
           });
         } catch (updateError) {
           console.warn('Failed to update export history:', updateError);

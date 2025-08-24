@@ -1190,9 +1190,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       // If no password set, accept any password (backward compatibility)
       
-      // Store user ID in session (simple session management)
+      // Store user info in session (simple session management)
       req.session = req.session || {};
       req.session.userId = user.id;
+      req.session.userName = user.name;
       
       res.json({
         id: user.id,
