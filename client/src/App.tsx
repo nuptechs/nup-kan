@@ -14,6 +14,10 @@ import TaskPriorityPage from "@/pages/task-priority";
 import CustomFieldsPage from "@/pages/custom-fields";
 import NotFound from "@/pages/not-found";
 
+// Lazy loading para página de demonstração de segurança
+import { lazy } from "react";
+const SecurityDemoPage = lazy(() => import("@/pages/security-demo"));
+
 function Router() {
   return (
     <Switch>
@@ -70,6 +74,12 @@ function Router() {
       <Route path="/admin/custom-fields">
         <ProtectedRoute>
           <CustomFieldsPage />
+        </ProtectedRoute>
+      </Route>
+      
+      <Route path="/security-demo">
+        <ProtectedRoute>
+          <SecurityDemoPage />
         </ProtectedRoute>
       </Route>
 

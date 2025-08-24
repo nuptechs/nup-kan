@@ -9,10 +9,11 @@ import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchem
 import { eq, sql, and } from "drizzle-orm";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 import { PermissionSyncService } from "./permissionSync";
+import { authenticateUser, requirePermissions, requireAdmin, optionalAuth, type AuthenticatedRequest } from "./middleware/authMiddleware";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Task routes
-  app.get("/api/tasks", async (req, res) => {
+  // Task routes - Protegidas com permissões
+  app.get("/api/tasks", authenticateUser, requirePermissions("Listar Tasks"), async (req, res) => {
     try {
       const tasks = await storage.getTasks();
       res.json(tasks);
@@ -21,7 +22,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/tasks/:id", async (req, res) => {
+  app.get("/api/tasks/:id", authenticateUser, requirePermissions("Visualizar Tasks"), async (req, res) => {
     try {
       const task = await storage.getTask(req.params.id);
       if (!task) {
@@ -33,7 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/tasks", async (req, res) => {
+  app.post("/api/tasks", authenticateUser, requirePermissions("Criar Tasks"), async (req, res) => {
     const startTime = Date.now();
     const userId = req.body.createdBy || "system";
     const userName = req.body.createdByName || "Sistema";
@@ -68,7 +69,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/tasks/:id", async (req, res) => {
+  app.patch("/api/tasks/:id", authenticateUser, requirePermissions("Editar Tasks"), async (req, res) => {
     const startTime = Date.now();
     const userId = req.body.updatedBy || "system";
     const userName = req.body.updatedByName || "Sistema";
@@ -93,7 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/tasks/:id", async (req, res) => {
+  app.delete("/api/tasks/:id", authenticateUser, requirePermissions("Excluir Tasks"), async (req, res) => {
     const startTime = Date.now();
     const userId = req.query.deletedBy as string || "system";
     const userName = req.query.deletedByName as string || "Sistema";
@@ -165,8 +166,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Board routes
-  app.get("/api/boards", async (req, res) => {
+  // Board routes - Protegidas com permissões
+  app.get("/api/boards", authenticateUser, requirePermissions("Listar Boards"), async (req, res) => {
     try {
       const boards = await storage.getBoards();
       res.json(boards);
@@ -175,7 +176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/boards/:id", async (req, res) => {
+  app.get("/api/boards/:id", authenticateUser, requirePermissions("Visualizar Boards"), async (req, res) => {
     try {
       const board = await storage.getBoard(req.params.id);
       if (!board) {
@@ -187,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/boards", async (req, res) => {
+  app.post("/api/boards", authenticateUser, requirePermissions("Criar Boards"), async (req, res) => {
     try {
       const boardData = insertBoardSchema.parse({
         ...req.body,
@@ -202,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/boards/:id", async (req, res) => {
+  app.patch("/api/boards/:id", authenticateUser, requirePermissions("Editar Boards"), async (req, res) => {
     try {
       const boardData = updateBoardSchema.parse(req.body);
       const board = await storage.updateBoard(req.params.id, boardData);
@@ -215,7 +216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/boards/:id", async (req, res) => {
+  app.delete("/api/boards/:id", authenticateUser, requirePermissions("Excluir Boards"), async (req, res) => {
     try {
       await storage.deleteBoard(req.params.id);
       res.status(204).send();
@@ -256,8 +257,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Column routes
-  app.get("/api/columns", async (req, res) => {
+  // Column routes - Protegidas com permissões
+  app.get("/api/columns", authenticateUser, requirePermissions("Listar Columns"), async (req, res) => {
     try {
       const columns = await storage.getColumns();
       res.json(columns);
@@ -278,7 +279,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/columns", async (req, res) => {
+  app.post("/api/columns", authenticateUser, requirePermissions("Criar Columns"), async (req, res) => {
     const startTime = Date.now();
     const userId = req.body.createdBy || "system";
     const userName = req.body.createdByName || "Sistema";
@@ -313,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/columns/:id", async (req, res) => {
+  app.patch("/api/columns/:id", authenticateUser, requirePermissions("Editar Columns"), async (req, res) => {
     try {
       const columnData = updateColumnSchema.parse(req.body);
       const column = await storage.updateColumn(req.params.id, columnData);
@@ -326,7 +327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/columns/:id", async (req, res) => {
+  app.delete("/api/columns/:id", authenticateUser, requirePermissions("Excluir Columns"), async (req, res) => {
     try {
       await storage.deleteColumn(req.params.id);
       res.status(204).send();
@@ -2739,8 +2740,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Rota para sincronização manual de permissões (admin)
-  app.post("/api/permissions/sync", async (req, res) => {
+  // Rota para sincronização manual de permissões (admin) - Protegida
+  app.post("/api/permissions/sync", authenticateUser, requireAdmin, async (req, res) => {
     try {
       const permissionSyncService = PermissionSyncService.getInstance();
       await permissionSyncService.syncPermissions(app);

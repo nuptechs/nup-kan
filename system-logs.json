@@ -1,29 +1,15 @@
 [
   {
-    "id": "action_1756052595729_jkhqgr57p",
-    "timestamp": "2025-08-24T16:23:15.729Z",
-    "level": "info",
-    "message": "Yuri Francis executou: Atualizar perfil \"Analista\"",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
-    "userName": "Yuri Francis",
-    "action": "Atualizar perfil \"Analista\"",
-    "status": "success",
-    "errorDetails": null,
-    "duration": 307
-  },
-  {
-    "id": "log_1756052547963_fvcg22u26",
-    "timestamp": "2025-08-24T16:22:27.963Z",
+    "id": "log_1756053067465_ku0oy9ejf",
+    "timestamp": "2025-08-24T16:31:07.465Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756052545811_g8t3hhgk6",
-    "timestamp": "2025-08-24T16:22:25.811Z",
+    "id": "log_1756053066358_5fwlz3ax9",
+    "timestamp": "2025-08-24T16:31:06.358Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",
