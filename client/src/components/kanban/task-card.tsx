@@ -44,6 +44,21 @@ const getRandomIcon = () => {
   return icons[Math.floor(Math.random() * icons.length)];
 };
 
+const getTaskTimeInfo = (task: Task) => {
+  if (!task.createdAt) return "Recente";
+  
+  const created = new Date(task.createdAt);
+  const now = new Date();
+  const diffInHours = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60));
+  const diffInDays = Math.floor(diffInHours / 24);
+  
+  if (diffInHours < 1) return "< 1h";
+  if (diffInHours < 24) return `${diffInHours}h`;
+  if (diffInDays < 7) return `${diffInDays}d`;
+  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)}sem`;
+  return `${Math.floor(diffInDays / 30)}mês`;
+};
+
 function TaskAssignees({ taskId }: { taskId: string }) {
   const { data: assignees = [] } = useQuery<(TaskAssignee & { user: User })[]>({
     queryKey: ["/api/tasks", taskId, "assignees"],
@@ -189,7 +204,7 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
         <div className="flex items-center space-x-1.5 text-xs text-gray-400">
           <Icon className="w-3 h-3" />
           <span data-testid={`task-meta-${task.id}`}>
-            {isDone ? "Deploy" : task.tags?.[0] || "3h"}
+            {isDone ? "Deploy" : task.tags?.[0] || getTaskTimeInfo(task)}
           </span>
         </div>
       </div>
