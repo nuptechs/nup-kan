@@ -25,13 +25,126 @@ import {
   ArrowRight,
   User,
   Settings,
-  Minus
+  Minus,
+  Key
 } from "lucide-react";
 import { TeamManagementDialog } from "@/components/kanban/team-management-dialog";
 import type { User as UserType, Team, Profile, Permission, UserTeam, TeamProfile, ProfilePermission } from "@shared/schema";
 import { insertUserSchema, insertTeamSchema, insertProfileSchema } from "@shared/schema";
 
 type Section = "users" | "teams" | "profiles" | "permissions" | null;
+
+// Componente para alterar senha de usuário
+function PasswordChangeDialog({ userId, userName }: { userId: string; userName: string }) {
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: { newPassword: string }) => {
+      return apiRequest("PATCH", `/api/users/${userId}/password`, data);
+    },
+    onSuccess: () => {
+      toast({ description: "Senha alterada com sucesso!" });
+      setIsOpen(false);
+      setNewPassword("");
+      setConfirmPassword("");
+    },
+    onError: (error: any) => {
+      toast({ 
+        description: error.message || "Erro ao alterar senha",
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newPassword || newPassword.length < 6) {
+      toast({ 
+        description: "A senha deve ter pelo menos 6 caracteres",
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({ 
+        description: "As senhas não coincidem",
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    changePasswordMutation.mutate({ newPassword });
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          title={`Alterar senha de ${userName}`}
+          data-testid={`button-change-password-${userId}`}
+        >
+          <Key className="w-4 h-4 text-orange-500" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Alterar Senha</DialogTitle>
+          <DialogDescription>
+            Alterar senha do usuário: <strong>{userName}</strong>
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-sm font-medium mb-2 block">Nova Senha</label>
+            <Input
+              type="password"
+              placeholder="••••••••"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              disabled={changePasswordMutation.isPending}
+              data-testid="input-new-password"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-2 block">Confirmar Nova Senha</label>
+            <Input
+              type="password"
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={changePasswordMutation.isPending}
+              data-testid="input-confirm-new-password"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+              disabled={changePasswordMutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={changePasswordMutation.isPending}
+              data-testid="button-confirm-password-change"
+            >
+              {changePasswordMutation.isPending ? "Alterando..." : "Alterar Senha"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function PermissionsHub() {
   const [activeSection, setActiveSection] = useState<Section>(null);
@@ -544,6 +657,7 @@ export default function PermissionsHub() {
                       </Form>
                     </DialogContent>
                   </Dialog>
+                  <PasswordChangeDialog userId={user.id} userName={user.name} />
                   <Button 
                     variant="ghost" 
                     size="sm"

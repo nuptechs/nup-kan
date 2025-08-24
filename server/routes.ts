@@ -517,6 +517,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint para alterar senha
+  app.patch("/api/users/:id/password", async (req, res) => {
+    try {
+      const { newPassword } = req.body;
+      
+      if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({ message: "Nova senha deve ter pelo menos 6 caracteres" });
+      }
+
+      await storage.updateUserPassword(req.params.id, newPassword);
+      res.json({ message: "Senha alterada com sucesso" });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      console.error("Error updating password:", error);
+      res.status(500).json({ message: "Erro ao alterar senha" });
+    }
+  });
+
   // User Teams routes
   app.get("/api/user-teams", async (req, res) => {
     try {

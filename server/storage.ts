@@ -3,6 +3,7 @@ import { db } from "./db";
 import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory, taskStatuses, taskPriorities, taskAssignees } from "@shared/schema";
 import { eq, desc, and, inArray, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import bcrypt from "bcryptjs";
 
 export interface IStorage {
   // Boards
@@ -59,6 +60,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, user: UpdateUser): Promise<User>;
+  updateUserPassword(id: string, newPassword: string): Promise<void>;
   deleteUser(id: string): Promise<void>;
   
   // User Teams (many-to-many relationship)
@@ -1612,6 +1614,23 @@ export class DatabaseStorage implements IStorage {
     }
     
     return user;
+  }
+
+  async updateUserPassword(id: string, newPassword: string): Promise<void> {
+    // Hash da nova senha
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    const result = await db
+      .update(users)
+      .set({
+        password: hashedPassword,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id));
+    
+    if (result.rowCount === 0) {
+      throw new Error(`User with id ${id} not found`);
+    }
   }
 
   async deleteUser(id: string): Promise<void> {
