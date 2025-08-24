@@ -1,0 +1,486 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Plus, Edit, Trash, Type, Hash, Calendar, List, ToggleLeft, Link, Mail } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import type { CustomField } from "@shared/schema";
+
+interface CustomFieldFormData {
+  name: string;
+  label: string;
+  type: "text" | "number" | "date" | "select" | "boolean" | "url" | "email";
+  required: "true" | "false";
+  options: string[];
+  placeholder: string;
+  validation: string;
+}
+
+const FIELD_TYPES = [
+  { value: "text", label: "Texto", icon: Type, description: "Campo de texto livre" },
+  { value: "number", label: "Número", icon: Hash, description: "Valores numéricos" },
+  { value: "date", label: "Data", icon: Calendar, description: "Seletor de data" },
+  { value: "select", label: "Seleção", icon: List, description: "Lista de opções predefinidas" },
+  { value: "boolean", label: "Sim/Não", icon: ToggleLeft, description: "Verdadeiro ou falso" },
+  { value: "url", label: "URL", icon: Link, description: "Link válido" },
+  { value: "email", label: "Email", icon: Mail, description: "Endereço de email" },
+] as const;
+
+export default function CustomFieldsPage() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingField, setEditingField] = useState<CustomField | null>(null);
+  const [optionInput, setOptionInput] = useState("");
+  const [formData, setFormData] = useState<CustomFieldFormData>({
+    name: "",
+    label: "",
+    type: "text",
+    required: "false",
+    options: [],
+    placeholder: "",
+    validation: "",
+  });
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [location, setLocation] = useLocation();
+
+  // Queries
+  const { data: fields = [], isLoading } = useQuery<CustomField[]>({
+    queryKey: ["/api/custom-fields"],
+  });
+
+  // Mutations
+  const createMutation = useMutation({
+    mutationFn: (data: Omit<CustomFieldFormData, "position">) => 
+      apiRequest("POST", "/api/custom-fields", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-fields"] });
+      setDialogOpen(false);
+      resetForm();
+      toast({
+        title: "Campo criado",
+        description: "O campo personalizado foi criado com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao criar campo personalizado.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<CustomFieldFormData> }) =>
+      apiRequest("PATCH", `/api/custom-fields/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-fields"] });
+      setDialogOpen(false);
+      resetForm();
+      toast({
+        title: "Campo atualizado",
+        description: "O campo personalizado foi atualizado com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar campo personalizado.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/custom-fields/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-fields"] });
+      toast({
+        title: "Campo excluído",
+        description: "O campo personalizado foi excluído com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir campo personalizado.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      label: "",
+      type: "text",
+      required: "false",
+      options: [],
+      placeholder: "",
+      validation: "",
+    });
+    setEditingField(null);
+    setOptionInput("");
+  };
+
+  const openCreateDialog = () => {
+    resetForm();
+    setDialogOpen(true);
+  };
+
+  const openEditDialog = (field: CustomField) => {
+    setEditingField(field);
+    setFormData({
+      name: field.name,
+      label: field.label,
+      type: field.type as any,
+      required: field.required,
+      options: field.options || [],
+      placeholder: field.placeholder || "",
+      validation: field.validation || "",
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name.trim() || !formData.label.trim()) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Nome e rótulo são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (editingField) {
+      updateMutation.mutate({
+        id: editingField.id,
+        data: formData
+      });
+    } else {
+      createMutation.mutate(formData);
+    }
+  };
+
+  const handleDelete = (field: CustomField) => {
+    if (window.confirm(`Tem certeza que deseja excluir o campo "${field.label}"?`)) {
+      deleteMutation.mutate(field.id);
+    }
+  };
+
+  const addOption = () => {
+    if (optionInput.trim() && !formData.options.includes(optionInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        options: [...prev.options, optionInput.trim()]
+      }));
+      setOptionInput("");
+    }
+  };
+
+  const removeOption = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      options: prev.options.filter((_, i) => i !== index)
+    }));
+  };
+
+  const getFieldTypeIcon = (type: string) => {
+    const fieldType = FIELD_TYPES.find(t => t.value === type);
+    return fieldType ? fieldType.icon : Type;
+  };
+
+  const getFieldTypeLabel = (type: string) => {
+    const fieldType = FIELD_TYPES.find(t => t.value === type);
+    return fieldType ? fieldType.label : type;
+  };
+
+  return (
+    <div className="container mx-auto p-6 max-w-6xl">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setLocation('/kanban/df8c9d00-1c13-4423-b2ab-130c69f641af')}
+          className="flex items-center gap-2"
+          data-testid="button-back-kanban"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Voltar ao Board
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-2xl font-bold text-gray-900">
+              Campos Personalizados
+            </CardTitle>
+            <CardDescription>
+              Crie campos personalizados para enriquecer suas tarefas com informações específicas do seu projeto.
+            </CardDescription>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant="outline">{fields.length} campos</Badge>
+            </div>
+          </div>
+          <Button 
+            onClick={openCreateDialog}
+            className="bg-indigo-600 hover:bg-indigo-700"
+            data-testid="button-create-field"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Criar Campo
+          </Button>
+        </CardHeader>
+
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-8">Carregando campos...</div>
+          ) : fields.length === 0 ? (
+            <div className="text-center py-8">
+              <Type className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600">Nenhum campo personalizado criado ainda</p>
+              <p className="text-sm text-gray-500">Crie seu primeiro campo para personalizar suas tarefas</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Campo</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Obrigatório</TableHead>
+                  <TableHead>Opções</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {fields.map((field) => {
+                  const Icon = getFieldTypeIcon(field.type);
+                  return (
+                    <TableRow key={field.id}>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="font-medium">{field.label}</div>
+                          <div className="text-sm text-gray-500">{field.name}</div>
+                          {field.placeholder && (
+                            <div className="text-xs text-gray-400">Placeholder: {field.placeholder}</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Icon className="w-4 h-4" />
+                          {getFieldTypeLabel(field.type)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={field.required === "true" ? "destructive" : "secondary"}>
+                          {field.required === "true" ? "Sim" : "Não"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {field.type === "select" && field.options && field.options.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {field.options.slice(0, 3).map((option, i) => (
+                              <Badge key={i} variant="outline" className="text-xs">
+                                {option}
+                              </Badge>
+                            ))}
+                            {field.options.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{field.options.length - 3}
+                              </Badge>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-sm">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openEditDialog(field)}
+                            data-testid={`button-edit-field-${field.id}`}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(field)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            data-testid={`button-delete-field-${field.id}`}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Create/Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingField ? "Editar Campo" : "Criar Novo Campo"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingField 
+                ? "Modifique as propriedades do campo personalizado."
+                : "Configure um novo campo personalizado para suas tarefas."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nome do Campo *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="ex: budget, client, sprint"
+                  data-testid="input-field-name"
+                />
+                <p className="text-xs text-gray-500">
+                  Usado internamente (apenas letras, números e _)
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="label">Rótulo *</Label>
+                <Input
+                  id="label"
+                  value={formData.label}
+                  onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                  placeholder="ex: Orçamento, Cliente, Sprint"
+                  data-testid="input-field-label"
+                />
+                <p className="text-xs text-gray-500">
+                  Mostrado para os usuários
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="type">Tipo do Campo *</Label>
+              <Select 
+                value={formData.type} 
+                onValueChange={(value: any) => setFormData({ ...formData, type: value, options: value !== 'select' ? [] : formData.options })}
+              >
+                <SelectTrigger data-testid="select-field-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FIELD_TYPES.map((type) => {
+                    const Icon = type.icon;
+                    return (
+                      <SelectItem key={type.value} value={type.value}>
+                        <div className="flex items-center gap-2">
+                          <Icon className="w-4 h-4" />
+                          <div>
+                            <div>{type.label}</div>
+                            <div className="text-xs text-gray-500">{type.description}</div>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.type === "select" && (
+              <div className="space-y-2">
+                <Label>Opções de Seleção</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={optionInput}
+                    onChange={(e) => setOptionInput(e.target.value)}
+                    placeholder="Digite uma opção"
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addOption())}
+                    data-testid="input-option"
+                  />
+                  <Button type="button" onClick={addOption} variant="outline">
+                    Adicionar
+                  </Button>
+                </div>
+                {formData.options.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.options.map((option, index) => (
+                      <Badge 
+                        key={index} 
+                        variant="secondary" 
+                        className="cursor-pointer hover:bg-red-100"
+                        onClick={() => removeOption(index)}
+                      >
+                        {option} ×
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="placeholder">Placeholder (opcional)</Label>
+              <Input
+                id="placeholder"
+                value={formData.placeholder}
+                onChange={(e) => setFormData({ ...formData, placeholder: e.target.value })}
+                placeholder="Texto de ajuda para o usuário"
+                data-testid="input-placeholder"
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="required"
+                checked={formData.required === "true"}
+                onCheckedChange={(checked) => setFormData({ ...formData, required: checked ? "true" : "false" })}
+                data-testid="switch-required"
+              />
+              <Label htmlFor="required">Campo obrigatório</Label>
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button 
+                type="submit"
+                disabled={createMutation.isPending || updateMutation.isPending}
+                data-testid="button-save-field"
+              >
+                {editingField ? "Salvar Alterações" : "Criar Campo"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

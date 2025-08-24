@@ -4,7 +4,9 @@ import bcrypt from "bcryptjs";
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { storage } from "./storage";
-import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema, insertTaskAssigneeSchema } from "@shared/schema";
+import { db } from "./db";
+import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema, insertTaskAssigneeSchema, insertCustomFieldSchema, updateCustomFieldSchema, insertTaskCustomValueSchema, updateTaskCustomValueSchema, customFields, taskCustomValues } from "@shared/schema";
+import { eq, sql, and } from "drizzle-orm";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -2321,6 +2323,209 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Task priority not found" });
       }
       res.status(500).json({ message: "Failed to delete task priority" });
+    }
+  });
+
+  // Custom Fields Routes
+  app.get("/api/custom-fields", async (req, res) => {
+    try {
+      const fields = await db.select().from(customFields)
+        .where(eq(customFields.isActive, "true"))
+        .orderBy(customFields.position);
+      res.json(fields);
+    } catch (error) {
+      console.error("Error fetching custom fields:", error);
+      res.status(500).json({ error: "Failed to fetch custom fields" });
+    }
+  });
+
+  app.post("/api/custom-fields", async (req, res) => {
+    const startTime = Date.now();
+    try {
+      const userId = req.session?.user?.id;
+      const userName = req.session?.user?.name;
+      
+      const validatedData = insertCustomFieldSchema.parse(req.body);
+      
+      // Get the next position
+      const maxPosition = await db.select({ maxPos: sql<number>`MAX(position)` })
+        .from(customFields);
+      const position = (maxPosition[0]?.maxPos || 0) + 1;
+      
+      const [field] = await db.insert(customFields)
+        .values({ ...validatedData, position })
+        .returning();
+        
+      const duration = Date.now() - startTime;
+      if (userId && userName) {
+        addUserActionLog(userId, userName, `Criar campo personalizado "${field.label}"`, 'success', null, duration);
+      }
+      
+      res.json(field);
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      const userId = req.session?.user?.id;
+      const userName = req.session?.user?.name;
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      
+      if (userId && userName) {
+        addUserActionLog(userId, userName, `Criar campo personalizado "${req.body.label || 'sem nome'}"`, 'error', { error: errorMessage, details: error }, duration);
+      }
+      
+      console.error("Error creating custom field:", error);
+      res.status(400).json({ error: errorMessage });
+    }
+  });
+
+  app.patch("/api/custom-fields/:id", async (req, res) => {
+    const startTime = Date.now();
+    try {
+      const userId = req.session?.user?.id;
+      const userName = req.session?.user?.name;
+      
+      const validatedData = updateCustomFieldSchema.parse(req.body);
+      
+      const [field] = await db.update(customFields)
+        .set({ ...validatedData, updatedAt: new Date() })
+        .where(eq(customFields.id, req.params.id))
+        .returning();
+        
+      if (!field) {
+        const duration = Date.now() - startTime;
+        if (userId && userName) {
+          addUserActionLog(userId, userName, `Atualizar campo personalizado (ID: ${req.params.id})`, 'error', { error: 'Campo não encontrado' }, duration);
+        }
+        return res.status(404).json({ error: "Campo não encontrado" });
+      }
+      
+      const duration = Date.now() - startTime;
+      if (userId && userName) {
+        addUserActionLog(userId, userName, `Atualizar campo personalizado "${field.label}"`, 'success', null, duration);
+      }
+      
+      res.json(field);
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      const userId = req.session?.user?.id;
+      const userName = req.session?.user?.name;
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      
+      if (userId && userName) {
+        addUserActionLog(userId, userName, `Atualizar campo personalizado (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
+      }
+      
+      console.error("Error updating custom field:", error);
+      res.status(400).json({ error: errorMessage });
+    }
+  });
+
+  app.delete("/api/custom-fields/:id", async (req, res) => {
+    const startTime = Date.now();
+    try {
+      const userId = req.session?.user?.id;
+      const userName = req.session?.user?.name;
+      
+      // Soft delete - mark as inactive
+      const [field] = await db.update(customFields)
+        .set({ isActive: "false", updatedAt: new Date() })
+        .where(eq(customFields.id, req.params.id))
+        .returning();
+        
+      if (!field) {
+        const duration = Date.now() - startTime;
+        if (userId && userName) {
+          addUserActionLog(userId, userName, `Deletar campo personalizado (ID: ${req.params.id})`, 'error', { error: 'Campo não encontrado' }, duration);
+        }
+        return res.status(404).json({ error: "Campo não encontrado" });
+      }
+      
+      const duration = Date.now() - startTime;
+      if (userId && userName) {
+        addUserActionLog(userId, userName, `Deletar campo personalizado "${field.label}"`, 'success', null, duration);
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      const userId = req.session?.user?.id;
+      const userName = req.session?.user?.name;
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      
+      if (userId && userName) {
+        addUserActionLog(userId, userName, `Deletar campo personalizado (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
+      }
+      
+      console.error("Error deleting custom field:", error);
+      res.status(500).json({ error: errorMessage });
+    }
+  });
+
+  // Task Custom Values Routes
+  app.get("/api/tasks/:taskId/custom-values", async (req, res) => {
+    try {
+      const values = await db.select({
+        id: taskCustomValues.id,
+        taskId: taskCustomValues.taskId,
+        customFieldId: taskCustomValues.customFieldId,
+        value: taskCustomValues.value,
+        fieldName: customFields.name,
+        fieldLabel: customFields.label,
+        fieldType: customFields.type,
+        fieldOptions: customFields.options,
+        fieldRequired: customFields.required,
+      })
+        .from(taskCustomValues)
+        .innerJoin(customFields, eq(taskCustomValues.customFieldId, customFields.id))
+        .where(and(
+          eq(taskCustomValues.taskId, req.params.taskId),
+          eq(customFields.isActive, "true")
+        ));
+        
+      res.json(values);
+    } catch (error) {
+      console.error("Error fetching task custom values:", error);
+      res.status(500).json({ error: "Failed to fetch task custom values" });
+    }
+  });
+
+  app.post("/api/tasks/:taskId/custom-values", async (req, res) => {
+    try {
+      const validatedData = insertTaskCustomValueSchema.parse({
+        ...req.body,
+        taskId: req.params.taskId
+      });
+      
+      const [value] = await db.insert(taskCustomValues)
+        .values(validatedData)
+        .returning();
+        
+      res.json(value);
+    } catch (error) {
+      console.error("Error creating task custom value:", error);
+      res.status(400).json({ error: error instanceof Error ? error.message : "Failed to create custom value" });
+    }
+  });
+
+  app.patch("/api/tasks/:taskId/custom-values/:valueId", async (req, res) => {
+    try {
+      const validatedData = updateTaskCustomValueSchema.parse(req.body);
+      
+      const [value] = await db.update(taskCustomValues)
+        .set({ ...validatedData, updatedAt: new Date() })
+        .where(and(
+          eq(taskCustomValues.id, req.params.valueId),
+          eq(taskCustomValues.taskId, req.params.taskId)
+        ))
+        .returning();
+        
+      if (!value) {
+        return res.status(404).json({ error: "Custom value not found" });
+      }
+      
+      res.json(value);
+    } catch (error) {
+      console.error("Error updating task custom value:", error);
+      res.status(400).json({ error: error instanceof Error ? error.message : "Failed to update custom value" });
     }
   });
 

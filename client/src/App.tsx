@@ -11,6 +11,7 @@ import UserSettingsPage from "@/pages/user-settings";
 import PermissionsHub from "@/pages/PermissionsHub";
 import TaskStatusPage from "@/pages/task-status";
 import TaskPriorityPage from "@/pages/task-priority";
+import CustomFieldsPage from "@/pages/custom-fields";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -63,6 +64,12 @@ function Router() {
       <Route path="/admin/task-priority">
         <ProtectedRoute>
           <TaskPriorityPage />
+        </ProtectedRoute>
+      </Route>
+      
+      <Route path="/admin/custom-fields">
+        <ProtectedRoute>
+          <CustomFieldsPage />
         </ProtectedRoute>
       </Route>
 

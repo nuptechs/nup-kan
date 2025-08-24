@@ -259,6 +259,18 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
                     <Database className="w-4 h-4 mr-2" />
                     Prioridades das Tarefas
                   </Button>
+                  <Button
+                    onClick={() => {
+                      setLocation("/admin/custom-fields");
+                      onClose();
+                    }}
+                    variant="outline"
+                    className="w-full justify-start"
+                    data-testid="button-manage-custom-fields"
+                  >
+                    <Database className="w-4 h-4 mr-2" />
+                    Campos Personalizados
+                  </Button>
                 </div>
               </div>
               

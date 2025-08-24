@@ -171,6 +171,32 @@ export const boardShares = pgTable("board_shares", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Custom fields definition table
+export const customFields = pgTable("custom_fields", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  label: text("label").notNull(),
+  type: text("type").notNull(), // text, number, date, select, boolean, url, email
+  required: text("required").default("false"),
+  options: text("options").array().default([]), // for select type
+  placeholder: text("placeholder").default(""),
+  validation: text("validation").default(""), // regex or validation rules
+  position: integer("position").notNull().default(0),
+  isActive: text("is_active").default("true"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Task custom field values table  
+export const taskCustomValues = pgTable("task_custom_values", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  taskId: varchar("task_id").notNull().references(() => tasks.id, { onDelete: "cascade" }),
+  customFieldId: varchar("custom_field_id").notNull().references(() => customFields.id, { onDelete: "cascade" }),
+  value: text("value").default(""),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertBoardSchema = createInsertSchema(boards).omit({
   id: true,
   createdAt: true,
@@ -354,6 +380,29 @@ export const insertTaskPrioritySchema = createInsertSchema(taskPriorities).omit(
 
 export const updateTaskPrioritySchema = insertTaskPrioritySchema.partial();
 
+// Custom Fields schemas
+export const insertCustomFieldSchema = createInsertSchema(customFields).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  name: z.string().min(1, "Nome do campo obrigatório").regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, "Nome deve conter apenas letras, números e underscore, começando com letra"),
+  label: z.string().min(1, "Rótulo obrigatório").trim(),
+  type: z.enum(["text", "number", "date", "select", "boolean", "url", "email"], { message: "Tipo de campo inválido" }),
+  required: z.enum(["true", "false"]).default("false"),
+  isActive: z.enum(["true", "false"]).default("true"),
+});
+
+export const updateCustomFieldSchema = insertCustomFieldSchema.partial();
+
+export const insertTaskCustomValueSchema = createInsertSchema(taskCustomValues).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateTaskCustomValueSchema = insertTaskCustomValueSchema.partial();
+
 // Task auxiliary data types
 export type TaskStatus = typeof taskStatuses.$inferSelect;
 export type InsertTaskStatus = z.infer<typeof insertTaskStatusSchema>;
@@ -361,3 +410,11 @@ export type UpdateTaskStatus = z.infer<typeof updateTaskStatusSchema>;
 export type TaskPriority = typeof taskPriorities.$inferSelect;
 export type InsertTaskPriority = z.infer<typeof insertTaskPrioritySchema>;
 export type UpdateTaskPriority = z.infer<typeof updateTaskPrioritySchema>;
+
+// Custom Fields types
+export type CustomField = typeof customFields.$inferSelect;
+export type InsertCustomField = z.infer<typeof insertCustomFieldSchema>;
+export type UpdateCustomField = z.infer<typeof updateCustomFieldSchema>;
+export type TaskCustomValue = typeof taskCustomValues.$inferSelect;
+export type InsertTaskCustomValue = z.infer<typeof insertTaskCustomValueSchema>;
+export type UpdateTaskCustomValue = z.infer<typeof updateTaskCustomValueSchema>;
