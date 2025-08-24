@@ -1,29 +1,15 @@
 [
   {
-    "id": "action_1756051218639_7ndpuec0x",
-    "timestamp": "2025-08-24T16:00:18.639Z",
-    "level": "info",
-    "message": "Sistema executou: Atualizar tarefa \"jhjh\"",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "system",
-    "userName": "Sistema",
-    "action": "Atualizar tarefa \"jhjh\"",
-    "status": "success",
-    "errorDetails": null,
-    "duration": 226
-  },
-  {
-    "id": "log_1756051204525_pjlkokj1j",
-    "timestamp": "2025-08-24T16:00:04.525Z",
+    "id": "log_1756051334491_fos0hh0v8",
+    "timestamp": "2025-08-24T16:02:14.491Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756051203617_y2hgf1r1r",
-    "timestamp": "2025-08-24T16:00:03.617Z",
+    "id": "log_1756051333044_cw53k7vg0",
+    "timestamp": "2025-08-24T16:02:13.044Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

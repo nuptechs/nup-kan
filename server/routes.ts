@@ -394,7 +394,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (boardId && typeof boardId === 'string') {
         columns = columns.filter(col => col.boardId === boardId);
         const columnIds = columns.map(col => col.id);
-        tasks = tasks.filter(task => columnIds.includes(task.status));
+        // Include tasks that belong to board columns OR tasks with "done" status (legacy completed tasks)
+        tasks = tasks.filter(task => 
+          columnIds.includes(task.status) || 
+          task.status === 'done' || 
+          task.status === 'completed'
+        );
       }
       
       // Create column mapping for categorization
@@ -448,13 +453,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Categorize tasks based on their column
       const tasksWithCategories = tasks.map(task => {
         const column = columnMap.get(task.status);
+        // If task has "done" or "completed" status but no matching column, treat as done
+        if (!column && (task.status === 'done' || task.status === 'completed')) {
+          return { ...task, category: 'done' };
+        }
         const category = column ? categorizeColumn(column) : 'todo';
         return { ...task, category };
       });
       
-      // Smart task categorization using actual column data
+      // Smart task categorization using actual column data  
       const smartCompletedTasks = detectCompletedTasks();
-      const doneTasks = smartCompletedTasks;
+      // Also include tasks with explicit "done" category from categorization
+      const explicitlyDoneTasks = tasksWithCategories.filter(task => task.category === 'done');
+      const allDoneTasks = [...smartCompletedTasks, ...explicitlyDoneTasks];
+      // Remove duplicates by ID
+      const doneTasks = allDoneTasks.filter((task, index, arr) => 
+        arr.findIndex(t => t.id === task.id) === index
+      );
       const inProgressTasks = tasksWithCategories.filter(task => task.category === 'inprogress');
       const todoTasks = tasksWithCategories.filter(task => task.category === 'todo');
       const backlogTasks = tasksWithCategories.filter(task => task.category === 'backlog');
