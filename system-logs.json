@@ -1,55 +1,15 @@
 [
   {
-    "id": "log_1756054166576_mn8flstz4",
-    "timestamp": "2025-08-24T16:49:26.576Z",
-    "level": "warn",
-    "message": "🚫 [SECURITY] Acesso negado para usuário Analista (fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763) na rota GET /api/boards. Permissões requeridas: \"Listar Boards\"",
-    "context": "WARNING",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756054156730_ceuvszb02",
-    "timestamp": "2025-08-24T16:49:16.730Z",
-    "level": "warn",
-    "message": "🚫 [SECURITY] Acesso negado para usuário Analista (fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763) na rota GET /api/boards. Permissões requeridas: \"Listar Boards\"",
-    "context": "WARNING",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756054123926_8ih2aq94v",
-    "timestamp": "2025-08-24T16:48:43.926Z",
-    "level": "warn",
-    "message": "🚫 [SECURITY] Acesso negado para usuário Analista (fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763) na rota POST /api/boards. Permissões requeridas: \"Criar Boards\"",
-    "context": "WARNING",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756054088569_hlev5t360",
-    "timestamp": "2025-08-24T16:48:08.569Z",
-    "level": "warn",
-    "message": "🚫 [SECURITY] Acesso negado para usuário Analista (fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763) na rota GET /api/boards. Permissões requeridas: \"Listar Boards\"",
-    "context": "WARNING",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756054073135_tzts6uiur",
-    "timestamp": "2025-08-24T16:47:53.135Z",
-    "level": "warn",
-    "message": "🔐 [AUTH] Tentativa de acesso não autenticado na rota GET /api/boards de IP: 172.31.108.34",
-    "context": "WARNING",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756054044883_ymoc4i55y",
-    "timestamp": "2025-08-24T16:47:24.883Z",
+    "id": "log_1756054424949_byx1cax1n",
+    "timestamp": "2025-08-24T16:53:44.949Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756054042862_eczsa1kp0",
-    "timestamp": "2025-08-24T16:47:22.862Z",
+    "id": "log_1756054421003_oieh7ytam",
+    "timestamp": "2025-08-24T16:53:41.003Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

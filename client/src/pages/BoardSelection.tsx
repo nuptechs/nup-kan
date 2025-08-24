@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useProfileMode } from "@/hooks/useProfileMode";
 import type { Board } from "@shared/schema";
 
 const boardSchema = z.object({
@@ -31,6 +32,7 @@ type BoardFormData = z.infer<typeof boardSchema>;
 export default function BoardSelection() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const { hasPermission } = usePermissions();
+  const { mode, isReadOnly, canCreate, canEdit, canDelete } = useProfileMode();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
@@ -231,7 +233,15 @@ export default function BoardSelection() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {hasPermission("Criar Boards") && (
+              {/* Modo indicador */}
+              {isReadOnly && (
+                <div className="px-3 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+                  Modo Visualização
+                </div>
+              )}
+              
+              {/* Botão criar - só para quem pode criar */}
+              {canCreate("Boards") && (
                 <Button
                   onClick={() => setIsCreateOpen(true)}
                   className="bg-blue-600 hover:bg-blue-700"
@@ -254,7 +264,10 @@ export default function BoardSelection() {
             Seus Boards Kanban
           </h2>
           <p className="text-xs text-muted-foreground">
-            Selecione um board ou crie um novo.
+            {isReadOnly 
+              ? "Selecione um board para visualizar e analisar as tarefas."
+              : "Selecione um board ou crie um novo."
+            }
           </p>
         </div>
 
@@ -285,46 +298,60 @@ export default function BoardSelection() {
                 className="p-6 hover:shadow-lg transition-shadow relative group"
                 data-testid={`card-board-${board.id}`}
               >
-                {/* Board Actions Menu */}
-                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost" 
-                        size="sm"
-                        className="h-8 w-8 p-0 hover:bg-gray-100"
-                        onClick={(e) => e.preventDefault()}
-                        data-testid={`dropdown-board-actions-${board.id}`}
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleEditBoard(board);
-                        }}
-                        className="cursor-pointer"
-                        data-testid={`menu-edit-board-${board.id}`}
-                      >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleDeleteBoard(board);
-                        }}
-                        className="cursor-pointer text-red-600 focus:text-red-600"
-                        data-testid={`menu-delete-board-${board.id}`}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                {/* Board Actions Menu - só para quem pode editar/excluir */}
+                {(canEdit("Boards") || canDelete("Boards")) && (
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost" 
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-gray-100"
+                          onClick={(e) => e.preventDefault()}
+                          data-testid={`dropdown-board-actions-${board.id}`}
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {canEdit("Boards") && (
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleEditBoard(board);
+                            }}
+                            className="cursor-pointer"
+                            data-testid={`menu-edit-board-${board.id}`}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Editar
+                          </DropdownMenuItem>
+                        )}
+                        {canDelete("Boards") && (
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleDeleteBoard(board);
+                            }}
+                            className="cursor-pointer text-red-600 focus:text-red-600"
+                            data-testid={`menu-delete-board-${board.id}`}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Excluir
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                )}
+                
+                {/* Indicador read-only */}
+                {isReadOnly && (
+                  <div className="absolute top-4 right-4 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs">
+                    <Eye className="w-3 h-3 inline mr-1" />
+                    Visualização
+                  </div>
+                )}
 
                 {/* Board Content - Clickable area */}
                 <Link href={`/kanban/${board.id}`}>
