@@ -458,7 +458,21 @@ export default function PermissionsHub() {
                     <p className="font-medium">{user.name}</p>
                     <p className="text-sm text-muted-foreground">{user.email}</p>
                   </div>
-                  {user.role && <Badge variant="outline">{user.role}</Badge>}
+                  <div className="flex items-center space-x-2">
+                    {user.role && <Badge variant="outline">{user.role}</Badge>}
+                    {user.profileId && (() => {
+                      const userProfile = profiles.find(p => p.id === user.profileId);
+                      return userProfile ? (
+                        <Badge 
+                          variant="secondary" 
+                          style={{ borderColor: userProfile.color, backgroundColor: `${userProfile.color}10` }}
+                          className="text-xs"
+                        >
+                          {userProfile.name}
+                        </Badge>
+                      ) : null;
+                    })()}
+                  </div>
                 </div>
                 <div className="flex space-x-2">
                   <Dialog>
