@@ -115,7 +115,7 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-96 sm:max-w-none" data-testid="settings-panel">
+      <SheetContent className="w-96 sm:max-w-none flex flex-col" data-testid="settings-panel">
         <SheetHeader>
           <SheetTitle>
             Configurações
@@ -125,7 +125,7 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto py-6 space-y-6">
+        <div className="flex-1 overflow-y-auto py-6 space-y-6 scrollbar-hide max-h-[calc(100vh-120px)]">
           {/* Export Data Section - Top Priority */}
           <div className="space-y-4">
             <h3 className="font-medium text-gray-900" data-testid="export-heading">📊 Exportação</h3>

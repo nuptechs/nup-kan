@@ -149,3 +149,15 @@
 [data-radix-alert-dialog-content] {
   z-index: 999999 !important;
 }
+
+/* Hide scrollbar for settings panel */
+.scrollbar-hide {
+  /* Firefox */
+  scrollbar-width: none;
+  /* Safari and Chrome */
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
