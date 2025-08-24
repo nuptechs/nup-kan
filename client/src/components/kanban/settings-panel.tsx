@@ -402,13 +402,11 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
                 <p className="text-[10px] text-green-500 mt-1">Movimentados este mês</p>
               </div>
               <div className="p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg text-center">
-                <p className="text-xl font-bold text-purple-800" data-testid="analytics-cycle-time">
-                  {(analytics as any)?.averageCycleTime || 0}d
+                <p className="text-xl font-bold text-purple-800" data-testid="analytics-done-tasks">
+                  {(analytics as any)?.doneTasks || 0}
                 </p>
-                <p className="text-xs text-purple-600">Tempo de Ciclo</p>
-                {((analytics as any)?.averageCycleTime || 0) === 0 && (analytics as any)?.totalTasks > 0 && (
-                  <p className="text-[10px] text-purple-500 mt-1">Sem dados históricos</p>
-                )}
+                <p className="text-xs text-purple-600">Cards Concluídos</p>
+                <p className="text-[10px] text-purple-500 mt-1">Total finalizados</p>
               </div>
             </div>
 
