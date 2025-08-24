@@ -145,7 +145,7 @@ export default function CustomFieldsPage() {
       name: field.name,
       label: field.label,
       type: field.type as any,
-      required: field.required,
+      required: (field.required || "false") as "true" | "false",
       options: field.options || [],
       placeholder: field.placeholder || "",
       validation: field.validation || "",
@@ -362,11 +362,11 @@ export default function CustomFieldsPage() {
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="ex: budget, client, sprint"
+                  placeholder="ex: orcamento, cliente, sprint"
                   data-testid="input-field-name"
                 />
                 <p className="text-xs text-gray-500">
-                  Usado internamente (apenas letras, números e _)
+                  Usado internamente (apenas letras, números, traços e _)
                 </p>
               </div>
 
