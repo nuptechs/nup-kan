@@ -1559,6 +1559,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const updates = req.body;
+      
+      // Convert completedAt string back to Date object if present
+      if (updates.completedAt && typeof updates.completedAt === 'string') {
+        updates.completedAt = new Date(updates.completedAt);
+      }
+      
       const updatedExport = await storage.updateExportHistory(id, updates);
       
       const duration = Date.now() - startTime;
