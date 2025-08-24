@@ -144,6 +144,14 @@ export const taskPriorities = pgTable("task_priorities", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Task assignees many-to-many table
+export const taskAssignees = pgTable("task_assignees", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  taskId: varchar("task_id").notNull().references(() => tasks.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  assignedAt: timestamp("assigned_at").defaultNow(),
+});
+
 export const teamProfiles = pgTable("team_profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   teamId: varchar("team_id").notNull().references(() => teams.id, { onDelete: "cascade" }),
@@ -178,6 +186,11 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   updatedAt: true,
 }).extend({
   title: z.string().min(3, "O título deve conter pelo menos 3 caracteres").trim(),
+});
+
+export const insertTaskAssigneeSchema = createInsertSchema(taskAssignees).omit({
+  id: true,
+  assignedAt: true,
 });
 
 export const updateTaskSchema = insertTaskSchema.partial();
@@ -290,6 +303,8 @@ export type InsertUserTeam = z.infer<typeof insertUserTeamSchema>;
 export type BoardShare = typeof boardShares.$inferSelect;
 export type InsertBoardShare = z.infer<typeof insertBoardShareSchema>;
 export type UpdateBoardShare = z.infer<typeof updateBoardShareSchema>;
+export type TaskAssignee = typeof taskAssignees.$inferSelect;
+export type InsertTaskAssignee = z.infer<typeof insertTaskAssigneeSchema>;
 export type TaskEvent = typeof taskEvents.$inferSelect;
 export type InsertTaskEvent = typeof taskEvents.$inferInsert;
 

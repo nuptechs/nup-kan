@@ -1,8 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MessageCircle, Paperclip, Clock, Flag, Eye, FileText, Code, Server, Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Task } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
+import type { Task, TaskAssignee, User } from "@shared/schema";
 
 interface TaskCardProps {
   task: Task;
@@ -41,6 +43,56 @@ const getRandomIcon = () => {
   const icons = [MessageCircle, Paperclip, Clock, Flag, Eye, FileText, Code, Server, Rocket];
   return icons[Math.floor(Math.random() * icons.length)];
 };
+
+function TaskAssignees({ taskId }: { taskId: string }) {
+  const { data: assignees = [] } = useQuery<(TaskAssignee & { user: User })[]>({
+    queryKey: ["/api/tasks", taskId, "assignees"],
+  });
+
+  if (assignees.length === 0) {
+    return (
+      <div className="flex items-center space-x-1.5">
+        <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center">
+          <span className="text-gray-400 text-xs">?</span>
+        </div>
+        <span className="text-xs text-gray-400">Não atribuído</span>
+      </div>
+    );
+  }
+
+  const getUserInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  return (
+    <div className="flex items-center space-x-1.5">
+      <div className="flex -space-x-1">
+        {assignees.slice(0, 3).map((assignee, index) => (
+          <Avatar 
+            key={assignee.user.id} 
+            className="w-5 h-5 border border-white"
+            style={{ zIndex: assignees.length - index }}
+          >
+            <AvatarFallback className="bg-indigo-500 text-white text-xs">
+              {assignee.user.avatar || getUserInitials(assignee.user.name)}
+            </AvatarFallback>
+          </Avatar>
+        ))}
+        {assignees.length > 3 && (
+          <div className="w-5 h-5 bg-gray-500 rounded-full flex items-center justify-center border border-white text-white text-xs">
+            +{assignees.length - 3}
+          </div>
+        )}
+      </div>
+      <span className="text-xs text-gray-600">
+        {assignees.length === 1 
+          ? assignees[0].user.name 
+          : `${assignees.length} responsáveis`
+        }
+      </span>
+    </div>
+  );
+}
 
 export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
   const isInProgress = task.status === "inprogress";
@@ -131,25 +183,7 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
       
       {/* Bottom Row - Assignee and Meta */}
       <div className="flex items-center justify-between mt-3">
-        {task.assigneeName ? (
-          <div className="flex items-center space-x-2">
-            <div className="w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs font-medium" data-testid={`assignee-avatar-${task.id}`}>
-                {task.assigneeAvatar || task.assigneeName.slice(0, 2).toUpperCase()}
-              </span>
-            </div>
-            <span className="text-xs text-gray-600" data-testid={`assignee-name-${task.id}`}>
-              {task.assigneeName}
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center space-x-1.5">
-            <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-gray-400 text-xs">?</span>
-            </div>
-            <span className="text-xs text-gray-400">Não atribuído</span>
-          </div>
-        )}
+        <TaskAssignees taskId={task.id} />
         
         {/* Task Meta Info */}
         <div className="flex items-center space-x-1.5 text-xs text-gray-400">

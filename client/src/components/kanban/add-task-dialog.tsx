@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { insertTaskSchema } from "@shared/schema";
 import type { TeamMember } from "@shared/schema";
 import { TagSelector } from "./tag-selector";
-import { UserSelector } from "./user-selector";
+import { MultiUserSelector } from "./multi-user-selector";
 import { z } from "zod";
 
 interface AddTaskDialogProps {
@@ -25,6 +25,7 @@ interface AddTaskDialogProps {
 
 const formSchema = insertTaskSchema.extend({
   tags: z.array(z.string()).default([]),
+  assigneeIds: z.array(z.string()).default([]),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -70,6 +71,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
       assigneeId: "",
       progress: 0,
       tags: [],
+      assigneeIds: [],
       boardId: boardId || "",
     },
   });
@@ -85,6 +87,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
         assigneeId: "",
         progress: 0,
         tags: [],
+        assigneeIds: [],
         boardId: boardId || "",
       });
     }
@@ -92,8 +95,20 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const response = await apiRequest("POST", "/api/tasks", data);
-      return response.json();
+      const { assigneeIds, ...restTaskData } = data;
+      
+      // Create the task first
+      const response = await apiRequest("POST", "/api/tasks", restTaskData);
+      const task = await response.json();
+      
+      // Add assignees if any were selected
+      if (assigneeIds && assigneeIds.length > 0) {
+        await apiRequest("PUT", `/api/tasks/${task.id}/assignees`, {
+          userIds: assigneeIds,
+        });
+      }
+      
+      return task;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
@@ -103,6 +118,8 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
         queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/tasks`] });
         queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
       }
+      // Invalidate assignees queries for new task
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       toast({
         title: "Sucesso",
         description: "Tarefa criada com sucesso!",
@@ -222,12 +239,10 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
               />
             </div>
 
-            <UserSelector
-              selectedUserId={form.watch("assigneeId") || ""}
-              onUserChange={(userId, userName, userAvatar) => {
-                form.setValue("assigneeId", userId || undefined);
-                form.setValue("assigneeName", userName);
-                form.setValue("assigneeAvatar", userAvatar);
+            <MultiUserSelector
+              selectedUserIds={form.watch("assigneeIds")}
+              onUserSelectionChange={(userIds) => {
+                form.setValue("assigneeIds", userIds);
               }}
             />
 

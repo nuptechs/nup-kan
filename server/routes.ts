@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema } from "@shared/schema";
+import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema, insertTaskAssigneeSchema } from "@shared/schema";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -69,6 +69,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Task not found" });
       }
       res.status(500).json({ message: "Failed to delete task" });
+    }
+  });
+
+  // Task Assignee routes
+  app.get("/api/tasks/:taskId/assignees", async (req, res) => {
+    try {
+      const assignees = await storage.getTaskAssignees(req.params.taskId);
+      res.json(assignees);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch task assignees" });
+    }
+  });
+
+  app.post("/api/tasks/:taskId/assignees", async (req, res) => {
+    try {
+      const assigneeData = insertTaskAssigneeSchema.parse({
+        taskId: req.params.taskId,
+        userId: req.body.userId,
+      });
+      const assignee = await storage.addTaskAssignee(assigneeData);
+      res.status(201).json(assignee);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid assignee data" });
+    }
+  });
+
+  app.delete("/api/tasks/:taskId/assignees/:userId", async (req, res) => {
+    try {
+      await storage.removeTaskAssignee(req.params.taskId, req.params.userId);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Assignee not found" });
+      }
+      res.status(500).json({ message: "Failed to remove assignee" });
+    }
+  });
+
+  app.put("/api/tasks/:taskId/assignees", async (req, res) => {
+    try {
+      const { userIds } = req.body;
+      if (!Array.isArray(userIds)) {
+        return res.status(400).json({ message: "userIds must be an array" });
+      }
+      await storage.setTaskAssignees(req.params.taskId, userIds);
+      res.status(204).send();
+    } catch (error) {
+      res.status(400).json({ message: "Failed to set task assignees" });
     }
   });
 

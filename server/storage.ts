@@ -1,6 +1,6 @@
-import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type BoardShare, type InsertBoardShare, type UpdateBoardShare, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory, type TaskStatus, type InsertTaskStatus, type UpdateTaskStatus, type TaskPriority, type InsertTaskPriority, type UpdateTaskPriority } from "@shared/schema";
+import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type BoardShare, type InsertBoardShare, type UpdateBoardShare, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory, type TaskStatus, type InsertTaskStatus, type UpdateTaskStatus, type TaskPriority, type InsertTaskPriority, type UpdateTaskPriority, type TaskAssignee, type InsertTaskAssignee } from "@shared/schema";
 import { db } from "./db";
-import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory, taskStatuses, taskPriorities } from "@shared/schema";
+import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory, taskStatuses, taskPriorities, taskAssignees } from "@shared/schema";
 import { eq, desc, and, inArray, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -20,6 +20,12 @@ export interface IStorage {
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: string, task: UpdateTask): Promise<Task>;
   deleteTask(id: string): Promise<void>;
+  
+  // Task Assignees
+  getTaskAssignees(taskId: string): Promise<(TaskAssignee & { user: User })[]>;
+  addTaskAssignee(assignee: InsertTaskAssignee): Promise<TaskAssignee>;
+  removeTaskAssignee(taskId: string, userId: string): Promise<void>;
+  setTaskAssignees(taskId: string, userIds: string[]): Promise<void>;
   
   // Columns
   getColumns(): Promise<Column[]>;
@@ -903,6 +909,28 @@ export class MemStorage implements IStorage {
     this.tasks.delete(id);
   }
 
+  // Task Assignees methods (placeholder for MemStorage)
+  async getTaskAssignees(taskId: string): Promise<(TaskAssignee & { user: User })[]> {
+    return [];
+  }
+
+  async addTaskAssignee(assignee: InsertTaskAssignee): Promise<TaskAssignee> {
+    const taskAssignee: TaskAssignee = {
+      id: randomUUID(),
+      ...assignee,
+      assignedAt: new Date(),
+    };
+    return taskAssignee;
+  }
+
+  async removeTaskAssignee(taskId: string, userId: string): Promise<void> {
+    // Placeholder implementation for MemStorage
+  }
+
+  async setTaskAssignees(taskId: string, userIds: string[]): Promise<void> {
+    // Placeholder implementation for MemStorage
+  }
+
   // Column methods
   async getColumns(): Promise<Column[]> {
     return Array.from(this.columns.values()).sort((a, b) => a.position - b.position);
@@ -1312,6 +1340,52 @@ export class DatabaseStorage implements IStorage {
     const result = await db.delete(tasks).where(eq(tasks.id, id));
     if (result.rowCount === 0) {
       throw new Error(`Task with id ${id} not found`);
+    }
+  }
+
+  // Task Assignees methods
+  async getTaskAssignees(taskId: string): Promise<(TaskAssignee & { user: User })[]> {
+    const assignees = await db
+      .select({
+        id: taskAssignees.id,
+        taskId: taskAssignees.taskId,
+        userId: taskAssignees.userId,
+        assignedAt: taskAssignees.assignedAt,
+        user: users,
+      })
+      .from(taskAssignees)
+      .leftJoin(users, eq(taskAssignees.userId, users.id))
+      .where(eq(taskAssignees.taskId, taskId));
+    
+    return assignees.filter(a => a.user !== null) as (TaskAssignee & { user: User })[];
+  }
+
+  async addTaskAssignee(assignee: InsertTaskAssignee): Promise<TaskAssignee> {
+    const [newAssignee] = await db
+      .insert(taskAssignees)
+      .values(assignee)
+      .returning();
+    return newAssignee;
+  }
+
+  async removeTaskAssignee(taskId: string, userId: string): Promise<void> {
+    const result = await db
+      .delete(taskAssignees)
+      .where(and(eq(taskAssignees.taskId, taskId), eq(taskAssignees.userId, userId)));
+    
+    if (result.rowCount === 0) {
+      throw new Error(`Assignee ${userId} not found for task ${taskId}`);
+    }
+  }
+
+  async setTaskAssignees(taskId: string, userIds: string[]): Promise<void> {
+    // Remove all existing assignees for this task
+    await db.delete(taskAssignees).where(eq(taskAssignees.taskId, taskId));
+    
+    // Add new assignees
+    if (userIds.length > 0) {
+      const newAssignees = userIds.map(userId => ({ taskId, userId }));
+      await db.insert(taskAssignees).values(newAssignees);
     }
   }
 
