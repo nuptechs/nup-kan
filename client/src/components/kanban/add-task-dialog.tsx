@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -37,12 +37,35 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
     queryKey: ["/api/team-members"],
   });
 
+  // Get columns for this board to set the default status
+  const columnsEndpoint = boardId ? `/api/boards/${boardId}/columns` : "/api/columns";
+  const { data: columns = [] } = useQuery<any[]>({
+    queryKey: [columnsEndpoint],
+  });
+
+  // Get the first column's status for default value
+  const getDefaultStatus = () => {
+    if (columns.length === 0) return "backlog";
+    const firstColumn = columns.sort((a, b) => a.position - b.position)[0];
+    
+    // Convert column title to status format
+    const statusMap: Record<string, string> = {
+      "Backlog": "backlog",
+      "To Do": "todo", 
+      "In Progress": "inprogress",
+      "Review": "review",
+      "Done": "done"
+    };
+    
+    return statusMap[firstColumn.title] || firstColumn.title.toLowerCase().replace(/\s+/g, '');
+  };
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       description: "",
-      status: "backlog",
+      status: getDefaultStatus(),
       priority: "medium",
       assigneeId: "",
       progress: 0,
@@ -50,6 +73,22 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
       boardId: boardId || "",
     },
   });
+
+  // Reset form with updated default status when columns change
+  useEffect(() => {
+    if (columns.length > 0) {
+      form.reset({
+        title: "",
+        description: "",
+        status: getDefaultStatus(),
+        priority: "medium",
+        assigneeId: "",
+        progress: 0,
+        tags: [],
+        boardId: boardId || "",
+      });
+    }
+  }, [columns, form, boardId]);
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: FormData) => {

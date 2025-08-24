@@ -25,7 +25,15 @@ const getStatusFromColumnTitle = (columnTitle: string): string | null => {
     "Review": "review",
     "Done": "done"
   };
-  return statusMap[columnTitle] || null;
+  
+  // If direct mapping exists, use it
+  if (statusMap[columnTitle]) {
+    return statusMap[columnTitle];
+  }
+  
+  // Otherwise, convert column title to lowercase status format
+  // This allows custom column names to work
+  return columnTitle.toLowerCase().replace(/\s+/g, '');
 };
 
 export function KanbanBoard({ boardId }: KanbanBoardProps) {
