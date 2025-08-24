@@ -19,7 +19,7 @@ import { SystemLogsDialog } from "@/components/system-logs-dialog";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useAuth } from "@/hooks/useAuth";
-import type { Column, TeamMember } from "@shared/schema";
+import type { Column, Team } from "@shared/schema";
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -45,8 +45,8 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
     queryKey: ["/api/columns"],
   });
 
-  const { data: teamMembers = [] } = useQuery<TeamMember[]>({
-    queryKey: ["/api/team-members"],
+  const { data: teams = [] } = useQuery<Team[]>({
+    queryKey: ["/api/teams"],
   });
 
   const { data: analytics } = useQuery({
@@ -95,23 +95,6 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
     queryClient.invalidateQueries();
   };
 
-  const getStatusColor = (status: string) => {
-    const colorMap = {
-      online: "bg-green-500",
-      busy: "bg-yellow-500",
-      offline: "bg-gray-400",
-    };
-    return colorMap[status as keyof typeof colorMap] || "bg-gray-400";
-  };
-
-  const getStatusText = (status: string) => {
-    const textMap = {
-      online: "Online",
-      busy: "Ocupado",
-      offline: "Offline",
-    };
-    return textMap[status as keyof typeof textMap] || status;
-  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -319,33 +302,39 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
 
           <Separator />
 
-          {/* Team Settings */}
+          {/* Teams */}
           <div className="space-y-4">
-            <h3 className="font-medium text-gray-900" data-testid="team-heading">Equipe</h3>
+            <h3 className="font-medium text-gray-900" data-testid="teams-heading">Times</h3>
             <div className="space-y-3">
-              {teamMembers.map((member) => (
-                <div key={member.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-medium" data-testid={`member-avatar-${member.id}`}>
-                      {member.avatar}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900" data-testid={`member-name-${member.id}`}>
-                      {member.name}
-                    </p>
-                    <p className="text-xs text-gray-500" data-testid={`member-role-${member.id}`}>
-                      {member.role}
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <div className={`w-2 h-2 rounded-full ${getStatusColor(member.status || 'offline')}`}></div>
-                    <span className="text-xs text-gray-500" data-testid={`member-status-${member.id}`}>
-                      {getStatusText(member.status || 'offline')}
-                    </span>
-                  </div>
+              {teams.length === 0 ? (
+                <div className="text-center py-4 text-gray-500 text-sm">
+                  Nenhum time cadastrado
                 </div>
-              ))}
+              ) : (
+                teams.map((team) => (
+                  <div key={team.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm font-medium" data-testid={`team-icon-${team.id}`}>
+                        {team.name.substring(0, 2).toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900" data-testid={`team-name-${team.id}`}>
+                        {team.name}
+                      </p>
+                      <p className="text-xs text-gray-500" data-testid={`team-description-${team.id}`}>
+                        {team.description || 'Sem descrição'}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      <span className="text-xs text-gray-500" data-testid={`team-status-${team.id}`}>
+                        Ativo
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
