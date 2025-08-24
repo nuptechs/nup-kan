@@ -380,6 +380,13 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
                 <p className="text-xs text-blue-600">Cards/Dia</p>
                 <p className="text-[10px] text-blue-500 mt-1">Movimentados hoje</p>
               </div>
+              <div className="p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg text-center">
+                <p className="text-xl font-bold text-orange-800" data-testid="analytics-weekly-throughput">
+                  {(analytics as any)?.weeklyThroughput || 0}
+                </p>
+                <p className="text-xs text-orange-600">Cards/Semana</p>
+                <p className="text-[10px] text-orange-500 mt-1">Últimos 7 dias</p>
+              </div>
               <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg text-center">
                 <p className="text-xl font-bold text-green-800" data-testid="analytics-monthly-throughput">
                   {(analytics as any)?.monthlyThroughput || 0}
@@ -396,36 +403,8 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
                   <p className="text-[10px] text-purple-500 mt-1">Sem dados históricos</p>
                 )}
               </div>
-              <div className="p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg text-center">
-                <p className="text-xl font-bold text-orange-800" data-testid="analytics-weekly-throughput">
-                  {(analytics as any)?.weeklyThroughput || 0}
-                </p>
-                <p className="text-xs text-orange-600">Cards/Semana</p>
-                <p className="text-[10px] text-orange-500 mt-1">Últimos 7 dias</p>
-              </div>
             </div>
 
-            {/* Secondary metrics */}
-            <div className="grid grid-cols-3 gap-2 text-sm">
-              <div className="p-2 bg-gray-50 rounded text-center">
-                <p className="font-semibold text-gray-700" data-testid="analytics-lead-time">
-                  {(analytics as any)?.averageLeadTime || 0}d
-                </p>
-                <p className="text-xs text-gray-500">Lead Time</p>
-              </div>
-              <div className="p-2 bg-gray-50 rounded text-center">
-                <p className="font-semibold text-gray-700" data-testid="analytics-recent-activity">
-                  {(analytics as any)?.recentActivity || 0}
-                </p>
-                <p className="text-xs text-gray-500">Atividade 24h</p>
-              </div>
-              <div className="p-2 bg-gray-50 rounded text-center">
-                <p className="font-semibold text-gray-700" data-testid="analytics-total-tasks">
-                  {(analytics as any)?.totalTasks || 0}
-                </p>
-                <p className="text-xs text-gray-500">Total Tarefas</p>
-              </div>
-            </div>
 
             {/* Alert indicators */}
             {((analytics as any)?.blockers > 0 || (analytics as any)?.wipViolations > 0) && (
