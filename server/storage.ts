@@ -583,9 +583,19 @@ export class MemStorage implements IStorage {
 
       // Buscar permissões específicas do perfil do usuário
       const profilePermissions = await this.getProfilePermissions(user.profileId);
-      console.log(`🔑 [SECURITY MemStorage] ${profilePermissions.length} permissões encontradas para perfil`);
+      console.log(`🔑 [SECURITY MemStorage] ${profilePermissions.length} relações de permissão encontradas`);
       
-      return profilePermissions;
+      // Buscar os dados completos das permissões
+      const permissions: Permission[] = [];
+      for (const pp of profilePermissions) {
+        const permission = await this.getPermission(pp.permissionId);
+        if (permission) {
+          permissions.push(permission);
+        }
+      }
+      
+      console.log(`🔑 [SECURITY MemStorage] ${permissions.length} permissões completas carregadas:`, permissions.map(p => p.name));
+      return permissions;
     } catch (error) {
       console.error("❌ [SECURITY MemStorage] Erro em getUserPermissions:", error);
       return [];
@@ -1876,9 +1886,19 @@ export class DatabaseStorage implements IStorage {
       
       // Buscar permissões específicas do perfil do usuário
       const profilePermissions = await this.getProfilePermissions(user.profileId);
-      console.log(`🔑 [SECURITY] ${profilePermissions.length} permissões encontradas para perfil`);
+      console.log(`🔑 [SECURITY] ${profilePermissions.length} relações de permissão encontradas`);
       
-      return profilePermissions;
+      // Buscar os dados completos das permissões
+      const permissions: Permission[] = [];
+      for (const pp of profilePermissions) {
+        const permission = await this.getPermission(pp.permissionId);
+        if (permission) {
+          permissions.push(permission);
+        }
+      }
+      
+      console.log(`🔑 [SECURITY] ${permissions.length} permissões completas carregadas:`, permissions.map(p => p.name));
+      return permissions;
     } catch (error) {
       console.error("❌ [SECURITY] Erro em getUserPermissions:", error);
       return [];

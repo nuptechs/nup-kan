@@ -1,31 +1,15 @@
 [
   {
-    "id": "log_1756053787163_57zo7413k",
-    "timestamp": "2025-08-24T16:43:07.163Z",
-    "level": "warn",
-    "message": "🚫 [SECURITY] Acesso negado para usuário Analista (fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763) na rota POST /api/boards. Permissões requeridas: \"Criar Boards\"",
-    "context": "WARNING",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756053780791_cpzqobi0u",
-    "timestamp": "2025-08-24T16:43:00.791Z",
-    "level": "warn",
-    "message": "🚫 [SECURITY] Acesso negado para usuário Analista (fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763) na rota GET /api/boards. Permissões requeridas: \"Listar Boards\"",
-    "context": "WARNING",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756053774119_myrv0l3va",
-    "timestamp": "2025-08-24T16:42:54.119Z",
+    "id": "log_1756054044883_ymoc4i55y",
+    "timestamp": "2025-08-24T16:47:24.883Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756053773149_mtltxgwqb",
-    "timestamp": "2025-08-24T16:42:53.149Z",
+    "id": "log_1756054042862_eczsa1kp0",
+    "timestamp": "2025-08-24T16:47:22.862Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

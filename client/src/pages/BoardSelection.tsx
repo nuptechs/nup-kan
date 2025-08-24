@@ -16,6 +16,7 @@ import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { PermissionGuard } from "@/components/PermissionGuard";
 import type { Board } from "@shared/schema";
 
 const boardSchema = z.object({
@@ -228,14 +229,16 @@ export default function BoardSelection() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button
-                onClick={() => setIsCreateOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700"
-                data-testid="button-create-board"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Novo Board
-              </Button>
+              <PermissionGuard requiredPermissions={["Criar Boards"]}>
+                <Button
+                  onClick={() => setIsCreateOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                  data-testid="button-create-board"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Novo Board
+                </Button>
+              </PermissionGuard>
               <LogoutButton size="sm" />
             </div>
           </div>
