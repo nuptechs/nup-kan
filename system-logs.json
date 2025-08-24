@@ -1,5 +1,13 @@
 [
   {
+    "id": "log_1756053787163_57zo7413k",
+    "timestamp": "2025-08-24T16:43:07.163Z",
+    "level": "warn",
+    "message": "🚫 [SECURITY] Acesso negado para usuário Analista (fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763) na rota POST /api/boards. Permissões requeridas: \"Criar Boards\"",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756053780791_cpzqobi0u",
     "timestamp": "2025-08-24T16:43:00.791Z",
     "level": "warn",
