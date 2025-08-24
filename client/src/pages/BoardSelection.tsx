@@ -65,24 +65,36 @@ export default function BoardSelection() {
         ...data,
         createdById: currentUser?.id || "system",
       });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Erro ao criar board: ${errorData}`);
+      }
+      
       return response.json();
     },
-    onSuccess: (newBoard) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
+    onSuccess: async (newBoard) => {
+      // Force refresh da lista de boards
+      await queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/boards"] });
+      
       // Invalidate member count for the new board since creator is auto-added
       queryClient.invalidateQueries({ queryKey: [`/api/boards/${newBoard.id}/member-count`] });
       queryClient.invalidateQueries({ queryKey: [`/api/boards/${newBoard.id}/members`] });
+      
       setIsCreateOpen(false);
       createForm.reset();
+      
       toast({
         title: "Board criado",
         description: "Novo board Kanban criado com sucesso!",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Erro ao criar board:", error);
       toast({
         title: "Erro",
-        description: "Erro ao criar board. Tente novamente.",
+        description: error?.message || "Erro ao criar board. Tente novamente.",
         variant: "destructive",
       });
     },
