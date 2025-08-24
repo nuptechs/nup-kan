@@ -869,9 +869,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/logout", async (req, res) => {
     try {
-      req.session = null;
+      // Clear the session completely
+      if (req.session) {
+        req.session = null;
+      }
+      
+      // Clear cookies
+      res.clearCookie('session');
+      res.clearCookie('session.sig');
+      
       res.json({ message: "Logout realizado com sucesso" });
     } catch (error) {
+      console.error("Logout error:", error);
       res.status(500).json({ message: "Erro ao fazer logout" });
     }
   });
@@ -882,12 +891,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session?.userId;
       
       if (!userId) {
-        // For development, return Yuri Francis as default user
-        const users = await storage.getUsers();
-        const yuriUser = users.find(u => u.name === "Yuri Francis");
-        if (yuriUser) {
-          return res.json(yuriUser);
-        }
         return res.status(401).json({ message: "Not authenticated" });
       }
 
@@ -895,7 +898,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentUser = users.find(u => u.id === userId);
       
       if (!currentUser) {
-        return res.status(404).json({ message: "User not found" });
+        // Clear invalid session
+        req.session = null;
+        return res.status(401).json({ message: "User not found" });
       }
       
       res.json(currentUser);

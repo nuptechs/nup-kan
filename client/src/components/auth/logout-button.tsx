@@ -32,15 +32,24 @@ export function LogoutButton({
       await apiRequest("POST", "/api/auth/logout");
     },
     onSuccess: () => {
-      // Clear all queries
+      // Clear all queries to force re-authentication
       queryClient.clear();
+      
+      // Force invalidate specific auth queries
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
+      
+      // Remove any cached user data
+      queryClient.removeQueries({ queryKey: ["/api/auth/current-user"] });
+      queryClient.removeQueries({ queryKey: ["/api/users/me"] });
       
       toast({
         title: "Logout realizado",
         description: "Você foi desconectado com sucesso.",
       });
       
-      setLocation("/login");
+      // Force redirect to login
+      window.location.href = "/login";
     },
     onError: (error: any) => {
       toast({
