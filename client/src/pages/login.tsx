@@ -18,17 +18,34 @@ const loginSchema = z.object({
   password: z.string().min(1, "Senha é obrigatória"),
 });
 
+const registerSchema = z.object({
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("Email inválido"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+});
+
 type LoginFormData = z.infer<typeof loginSchema>;
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
 
-  const form = useForm<LoginFormData>({
+  const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const registerForm = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
@@ -61,8 +78,45 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = (data: LoginFormData) => {
+  const registerMutation = useMutation({
+    mutationFn: async (data: RegisterFormData) => {
+      setIsLoading(true);
+      const response = await apiRequest("POST", "/api/auth/register", data);
+      return response.json();
+    },
+    onSuccess: (user) => {
+      toast({
+        title: "Conta criada!",
+        description: `Bem-vindo(a), ${user.name}! Você pode agora gerenciar usuários.`,
+      });
+      // Redirect to user settings page where users can be managed
+      setLocation("/settings");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro no cadastro",
+        description: error.message || "Falha ao criar conta",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setIsLoading(false);
+    },
+  });
+
+  const onLoginSubmit = (data: LoginFormData) => {
     loginMutation.mutate(data);
+  };
+
+  const onRegisterSubmit = (data: RegisterFormData) => {
+    registerMutation.mutate(data);
+  };
+
+  const toggleMode = () => {
+    setIsRegisterMode(!isRegisterMode);
+    // Reset forms when switching
+    loginForm.reset();
+    registerForm.reset();
   };
 
   return (
@@ -77,101 +131,229 @@ export default function LoginPage() {
             uP - Kan
           </h1>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Entre na sua conta para continuar
+            {isRegisterMode ? "Crie sua conta para começar" : "Entre na sua conta para continuar"}
           </p>
         </div>
 
         <Card className="shadow-xl border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
           <CardHeader className="space-y-1 pb-6">
             <CardTitle className="text-2xl font-semibold flex items-center gap-2 text-center">
-              <LogIn className="h-6 w-6 text-blue-600" />
-              Entrar
+              {isRegisterMode ? (
+                <>
+                  <User className="h-6 w-6 text-green-600" />
+                  Criar Conta
+                </>
+              ) : (
+                <>
+                  <LogIn className="h-6 w-6 text-blue-600" />
+                  Entrar
+                </>
+              )}
             </CardTitle>
             <CardDescription className="text-center text-gray-600 dark:text-gray-400">
-              Use suas credenciais para acessar o sistema
+              {isRegisterMode ? "Preencha os dados para criar sua conta" : "Use suas credenciais para acessar o sistema"}
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2 text-sm font-medium">
-                        <Mail className="h-4 w-4 text-gray-500" />
-                        Email
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="seu@email.com"
-                          className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:focus:border-blue-400"
-                          {...field}
-                          data-testid="input-email"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {!isRegisterMode ? (
+              // Login Form
+              <Form {...loginForm}>
+                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                  <FormField
+                    control={loginForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                          <Mail className="h-4 w-4 text-gray-500" />
+                          Email
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="seu@email.com"
+                            className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:focus:border-blue-400"
+                            disabled={isLoading}
+                            {...field}
+                            data-testid="input-email"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2 text-sm font-medium">
-                        <User className="h-4 w-4 text-gray-500" />
-                        Senha
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="••••••••"
-                          className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:focus:border-blue-400"
-                          {...field}
-                          data-testid="input-password"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={loginForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                          <User className="h-4 w-4 text-gray-500" />
+                          Senha
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="••••••••"
+                            className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:focus:border-blue-400"
+                            disabled={isLoading}
+                            {...field}
+                            data-testid="input-password"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <Button
-                  type="submit"
-                  className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
-                  disabled={isLoading}
-                  data-testid="button-login"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Entrando...
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <LogIn className="h-4 w-4" />
-                      Entrar
-                    </div>
-                  )}
-                </Button>
-              </form>
-            </Form>
+                  <Button
+                    type="submit"
+                    className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+                    disabled={isLoading}
+                    data-testid="button-login"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Entrando...
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <LogIn className="h-4 w-4" />
+                        Entrar
+                      </div>
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            ) : (
+              // Register Form
+              <Form {...registerForm}>
+                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                  <FormField
+                    control={registerForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                          <User className="h-4 w-4 text-gray-500" />
+                          Nome Completo
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            placeholder="Seu nome completo"
+                            className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
+                            disabled={isLoading}
+                            {...field}
+                            data-testid="input-name"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            {/* Demo credentials hint */}
-            <div className="mt-6 p-4 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-slate-600">
-              <p className="text-sm text-gray-600 dark:text-gray-400 text-center font-medium mb-2">
-                Credenciais de demonstração:
-              </p>
-              <div className="space-y-1 text-xs text-gray-500 dark:text-gray-500">
-                <p><strong>Email:</strong> yfaf01@gmail.com</p>
-                <p><strong>Usuário:</strong> Yuri Francis (Administrador)</p>
-              </div>
+                  <FormField
+                    control={registerForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                          <Mail className="h-4 w-4 text-gray-500" />
+                          Email
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="seu@email.com"
+                            className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
+                            disabled={isLoading}
+                            {...field}
+                            data-testid="input-register-email"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={registerForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                          <User className="h-4 w-4 text-gray-500" />
+                          Senha
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="••••••••"
+                            className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
+                            disabled={isLoading}
+                            {...field}
+                            data-testid="input-register-password"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button
+                    type="submit"
+                    className="w-full h-11 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+                    disabled={isLoading}
+                    data-testid="button-register"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Criando conta...
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        Criar Conta
+                      </div>
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            )}
+
+            {/* Toggle button */}
+            <div className="text-center pt-2">
+              <button
+                onClick={toggleMode}
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                disabled={isLoading}
+                data-testid="button-toggle-mode"
+              >
+                {isRegisterMode ? (
+                  <>
+                    Já tem uma conta? <span className="text-blue-600 hover:text-blue-700 font-medium">Entre aqui</span>
+                  </>
+                ) : (
+                  <>
+                    Não tem conta? <span className="text-green-600 hover:text-green-700 font-medium">Cadastre-se</span>
+                  </>
+                )}
+              </button>
             </div>
+
+            {/* Login hint */}
+            {!isRegisterMode && (
+              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p className="text-sm text-blue-700 dark:text-blue-300 text-center">
+                  <strong>Email de teste:</strong> yfaf01@gmail.com (qualquer senha)
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema, insertTaskAssigneeSchema } from "@shared/schema";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
@@ -846,8 +847,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Email ou senha incorretos" });
       }
 
-      // For demo purposes, we'll accept any password for existing users
-      // In production, you would hash and compare passwords
+      // Check password if user has one (for backward compatibility)
+      if (user.password) {
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+          return res.status(401).json({ message: "Email ou senha incorretos" });
+        }
+      }
+      // If no password set, accept any password (backward compatibility)
       
       // Store user ID in session (simple session management)
       req.session = req.session || {};
@@ -863,6 +870,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Login error:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Register new user
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const { name, email, password } = req.body;
+      
+      if (!name || !email || !password) {
+        return res.status(400).json({ message: "Nome, email e senha são obrigatórios" });
+      }
+
+      // Check if user already exists
+      const users = await storage.getUsers();
+      const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      
+      if (existingUser) {
+        return res.status(409).json({ message: "Usuário já existe com este email" });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      // Create new user
+      const userData = {
+        name,
+        email,
+        password: hashedPassword,
+        role: "Usuário",
+        avatar: name.substring(0, 2).toUpperCase(),
+        status: "offline"
+      };
+
+      const newUser = await storage.createUser(userData);
+      
+      // Send welcome email if configured
+      try {
+        await sendWelcomeEmail({ to: email, userName: name });
+      } catch (emailError) {
+        console.warn("Failed to send welcome email:", emailError);
+      }
+
+      res.status(201).json({
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        avatar: newUser.avatar,
+        profileId: newUser.profileId
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
