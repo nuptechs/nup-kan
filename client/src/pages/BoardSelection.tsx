@@ -17,6 +17,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { PermissionGuard } from "@/components/PermissionGuard";
+import { usePermissions } from "@/hooks/usePermissions";
 import type { Board } from "@shared/schema";
 
 const boardSchema = z.object({
@@ -29,6 +30,7 @@ type BoardFormData = z.infer<typeof boardSchema>;
 
 export default function BoardSelection() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const { hasPermission } = usePermissions();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
@@ -229,7 +231,7 @@ export default function BoardSelection() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <PermissionGuard requiredPermissions={["Criar Boards"]}>
+              {hasPermission("Criar Boards") && (
                 <Button
                   onClick={() => setIsCreateOpen(true)}
                   className="bg-blue-600 hover:bg-blue-700"
@@ -238,7 +240,7 @@ export default function BoardSelection() {
                   <Plus className="w-4 h-4 mr-2" />
                   Novo Board
                 </Button>
-              </PermissionGuard>
+              )}
               <LogoutButton size="sm" />
             </div>
           </div>
