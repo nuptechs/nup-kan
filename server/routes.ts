@@ -2331,21 +2331,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const boardId = req.query.boardId as string;
       
+      // Get all active fields first
+      const allFields = await db.select().from(customFields)
+        .where(eq(customFields.isActive, "true"))
+        .orderBy(customFields.position);
+      
       if (boardId) {
-        // Filter fields for specific board
-        const fields = await db.select().from(customFields)
-          .where(and(
-            eq(customFields.isActive, "true"),
-            sql`${customFields.boardIds} @> ${JSON.stringify([boardId])}`
-          ))
-          .orderBy(customFields.position);
+        // Filter fields for specific board in JavaScript
+        const fields = allFields.filter(field => 
+          field.boardIds && field.boardIds.includes(boardId)
+        );
         res.json(fields);
       } else {
         // Return all active fields (for management)
-        const fields = await db.select().from(customFields)
-          .where(eq(customFields.isActive, "true"))
-          .orderBy(customFields.position);
-        res.json(fields);
+        res.json(allFields);
       }
     } catch (error) {
       console.error("Error fetching custom fields:", error);

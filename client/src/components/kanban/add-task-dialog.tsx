@@ -26,6 +26,7 @@ interface AddTaskDialogProps {
 const formSchema = insertTaskSchema.extend({
   tags: z.array(z.string()).default([]),
   assigneeIds: z.array(z.string()).default([]),
+  customFields: z.record(z.string()).optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -42,6 +43,13 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
   const columnsEndpoint = boardId ? `/api/boards/${boardId}/columns` : "/api/columns";
   const { data: columns = [] } = useQuery<any[]>({
     queryKey: [columnsEndpoint],
+  });
+
+  // Get custom fields for this board
+  const customFieldsEndpoint = boardId ? `/api/custom-fields?boardId=${boardId}` : "/api/custom-fields";
+  const { data: customFields = [] } = useQuery<any[]>({
+    queryKey: [customFieldsEndpoint],
+    enabled: !!boardId,
   });
 
   // Get the first column's status for default value
@@ -73,6 +81,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
       tags: [],
       assigneeIds: [],
       boardId: boardId || "",
+      customFields: {},
     },
   });
 
@@ -89,6 +98,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
         tags: [],
         assigneeIds: [],
         boardId: boardId || "",
+        customFields: {},
       });
     }
   }, [columns, form, boardId]);
@@ -250,6 +260,71 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
               selectedTags={form.watch("tags")}
               onTagsChange={(tags) => form.setValue("tags", tags)}
             />
+
+            {/* Custom Fields */}
+            {customFields.length > 0 && (
+              <div className="space-y-4">
+                <div className="border-t pt-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Campos Personalizados</h4>
+                  <div className="space-y-3">
+                    {customFields.map((field) => (
+                      <FormField
+                        key={field.id}
+                        control={form.control}
+                        name={`customFields.${field.name}`}
+                        render={({ field: formField }) => (
+                          <FormItem>
+                            <FormLabel>
+                              {field.label}
+                              {field.required === "true" && <span className="text-red-500 ml-1">*</span>}
+                            </FormLabel>
+                            <FormControl>
+                              {field.type === "text" && (
+                                <Input
+                                  {...formField}
+                                  placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
+                                  data-testid={`input-custom-${field.name}`}
+                                />
+                              )}
+                              {field.type === "textarea" && (
+                                <Textarea
+                                  {...formField}
+                                  placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
+                                  data-testid={`textarea-custom-${field.name}`}
+                                />
+                              )}
+                              {field.type === "select" && field.options && field.options.length > 0 && (
+                                <Select onValueChange={formField.onChange} value={formField.value || ""}>
+                                  <SelectTrigger data-testid={`select-custom-${field.name}`}>
+                                    <SelectValue placeholder={field.placeholder || `Selecione ${field.label.toLowerCase()}`} />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {field.options.map((option: string) => (
+                                      <SelectItem key={option} value={option}>
+                                        {option}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                              {field.type === "number" && (
+                                <Input
+                                  {...formField}
+                                  type="number"
+                                  placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
+                                  data-testid={`input-number-custom-${field.name}`}
+                                />
+                              )}
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex justify-end space-x-2 pt-4">
               <Button
