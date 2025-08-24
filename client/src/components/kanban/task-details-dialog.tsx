@@ -28,6 +28,7 @@ interface TaskDetailsDialogProps {
   isOpen: boolean;
   onClose: () => void;
   boardId?: string;
+  isReadOnly?: boolean;
 }
 
 interface DeleteConfirmationProps {
@@ -71,7 +72,7 @@ function DeleteConfirmationDialog({ isOpen, onClose, onConfirm, isLoading }: Del
   );
 }
 
-export function TaskDetailsDialog({ task, isOpen, onClose, boardId }: TaskDetailsDialogProps) {
+export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly = false }: TaskDetailsDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);

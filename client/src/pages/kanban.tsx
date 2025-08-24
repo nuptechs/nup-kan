@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Link, useParams } from "wouter";
 import logoImage from "@assets/generated_images/Modern_N_logo_transparent_background_dde0f619.png";
+import { useProfileMode } from "@/hooks/useProfileMode";
 import type { Board } from "@shared/schema";
 
 export default function KanbanPage() {
@@ -17,6 +18,7 @@ export default function KanbanPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSharingOpen, setIsSharingOpen] = useState(false);
   const { canManageProfiles } = usePermissions();
+  const { mode, isReadOnly, canCreate, canEdit } = useProfileMode();
 
   // Load board data
   const { data: board, isLoading: isLoadingBoard } = useQuery<Board>({
@@ -97,18 +99,26 @@ export default function KanbanPage() {
         </div>
         
         <div className="flex items-center space-x-4">
+          {/* Indicador de modo para read-only */}
+          {isReadOnly && (
+            <div className="px-3 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+              Modo Visualização
+            </div>
+          )}
           
-          {/* Share Board Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsSharingOpen(true)}
-            className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50"
-            data-testid="button-share-board"
-            title="Compartilhar Board"
-          >
-            <Share2 className="w-4 h-4" />
-          </Button>
+          {/* Share Board Button - só para quem pode compartilhar */}
+          {!isReadOnly && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsSharingOpen(true)}
+              className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50"
+              data-testid="button-share-board"
+              title="Compartilhar Board"
+            >
+              <Share2 className="w-4 h-4" />
+            </Button>
+          )}
 
           {/* Admin Permissions Button */}
           {canManageProfiles && (
@@ -124,35 +134,38 @@ export default function KanbanPage() {
             </Button>
           )}
 
-          {/* User Settings Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => window.location.href = "/settings"}
-            className="p-2 text-gray-400 hover:text-gray-600"
-            data-testid="button-user-settings"
-            title="Configurações do Usuário"
-          >
-            <User className="w-4 h-4" />
-          </Button>
+          {/* User Settings Button - só para quem não é read-only */}
+          {!isReadOnly && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.location.href = "/settings"}
+              className="p-2 text-gray-400 hover:text-gray-600"
+              data-testid="button-user-settings"
+              title="Configurações do Usuário"
+            >
+              <User className="w-4 h-4" />
+            </Button>
+          )}
 
-          
-          {/* Settings Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsSettingsOpen(true)}
-            className="p-2 text-gray-400 hover:text-gray-600"
-            data-testid="button-settings"
-          >
-            <Settings className="w-4 h-4" />
-          </Button>
+          {/* Settings Button - só para quem pode configurar */}
+          {!isReadOnly && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-2 text-gray-400 hover:text-gray-600"
+              data-testid="button-settings"
+            >
+              <Settings className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       </header>
 
       {/* Main Kanban Board */}
       <main className="flex-1 overflow-hidden h-full" data-testid="main-content">
-        <KanbanBoard boardId={boardId} />
+        <KanbanBoard boardId={boardId} isReadOnly={isReadOnly} profileMode={mode} />
       </main>
 
       {/* User Profile Indicator - Fixed Bottom Left */}
@@ -160,15 +173,17 @@ export default function KanbanPage() {
         <UserProfileIndicator />
       </div>
 
-      {/* Settings Panel */}
-      <SettingsPanel
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        boardId={boardId}
-      />
+      {/* Settings Panel - só para quem não é read-only */}
+      {!isReadOnly && (
+        <SettingsPanel
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          boardId={boardId}
+        />
+      )}
 
-      {/* Board Sharing Dialog */}
-      {board && (
+      {/* Board Sharing Dialog - só para quem não é read-only */}
+      {board && !isReadOnly && (
         <BoardSharingDialog
           board={board}
           open={isSharingOpen}

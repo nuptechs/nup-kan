@@ -14,6 +14,8 @@ import type { Task, Column } from "@shared/schema";
 
 interface KanbanBoardProps {
   boardId?: string;
+  isReadOnly?: boolean;
+  profileMode?: "read-only" | "full-access" | "admin";
 }
 
 // Utility function to map column titles to task status values
@@ -36,7 +38,7 @@ const getStatusFromColumnTitle = (columnTitle: string): string | null => {
   return columnTitle.toLowerCase().replace(/\s+/g, '');
 };
 
-export function KanbanBoard({ boardId }: KanbanBoardProps) {
+export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-access" }: KanbanBoardProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskDetailsOpen, setIsTaskDetailsOpen] = useState(false);
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
@@ -134,6 +136,9 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
   });
 
   const handleDragEnd = (result: DropResult) => {
+    // Block drag and drop in read-only mode
+    if (isReadOnly) return;
+    
     const { destination, source, draggableId, type } = result;
 
     if (!destination) return;
@@ -305,6 +310,8 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
                                   onManageColumns={handleManageColumns}
                                   onEditColumn={handleEditColumn}
                                   onDeleteColumn={handleDeleteColumn}
+                                  isReadOnly={isReadOnly}
+                                  profileMode={profileMode}
                                 />
                                 {taskProvided.placeholder}
                               </div>
@@ -316,19 +323,21 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
                   </Draggable>
                 ))}
                 
-                {/* Add Column Button */}
-                <div className="flex-shrink-0 w-72 sm:w-80 md:w-72 lg:w-80">
-                  <button
-                    onClick={handleManageColumns}
-                    className="w-full h-12 border border-dashed border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50/30 transition-all duration-200 flex items-center justify-center group bg-white/50 backdrop-blur-sm"
-                    data-testid="button-add-column"
-                  >
-                    <Plus className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 mr-2" />
-                    <span className="text-sm text-gray-500 group-hover:text-indigo-600">
-                      Adicionar Coluna
-                    </span>
-                  </button>
-                </div>
+                {/* Add Column Button - só para quem não é read-only */}
+                {!isReadOnly && (
+                  <div className="flex-shrink-0 w-72 sm:w-80 md:w-72 lg:w-80">
+                    <button
+                      onClick={handleManageColumns}
+                      className="w-full h-12 border border-dashed border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50/30 transition-all duration-200 flex items-center justify-center group bg-white/50 backdrop-blur-sm"
+                      data-testid="button-add-column"
+                    >
+                      <Plus className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 mr-2" />
+                      <span className="text-sm text-gray-500 group-hover:text-indigo-600">
+                        Adicionar Coluna
+                      </span>
+                    </button>
+                  </div>
+                )}
                 
                 {provided.placeholder}
               </div>
@@ -343,16 +352,20 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
         isOpen={isTaskDetailsOpen}
         onClose={handleCloseTaskDetails}
         boardId={boardId}
+        isReadOnly={isReadOnly}
       />
 
-      {/* Add Task Dialog */}
-      <AddTaskDialog
-        isOpen={isAddTaskOpen}
-        onClose={() => setIsAddTaskOpen(false)}
-        boardId={boardId}
-      />
+      {/* Add Task Dialog - só para quem não é read-only */}
+      {!isReadOnly && (
+        <AddTaskDialog
+          isOpen={isAddTaskOpen}
+          onClose={() => setIsAddTaskOpen(false)}
+          boardId={boardId}
+        />
+      )}
       
-      {boardId && (
+      {/* Column Management Dialog - só para quem não é read-only */}
+      {boardId && !isReadOnly && (
         <ColumnManagementDialog
           isOpen={isColumnManagementOpen}
           onClose={() => {

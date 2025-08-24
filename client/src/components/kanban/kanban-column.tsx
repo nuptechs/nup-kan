@@ -14,6 +14,8 @@ interface KanbanColumnProps {
   onManageColumns?: () => void;
   onEditColumn?: (column: Column) => void;
   onDeleteColumn?: (columnId: string) => void;
+  isReadOnly?: boolean;
+  profileMode?: "read-only" | "full-access" | "admin";
 }
 
 const getColumnColorClasses = (color: string) => {
@@ -49,7 +51,7 @@ const getColumnCountClasses = (color: string) => {
   return colorMap[color as keyof typeof colorMap] || "bg-gray-100 text-gray-600";
 };
 
-export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask, onEditColumn, onDeleteColumn }: KanbanColumnProps) {
+export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask, onEditColumn, onDeleteColumn, isReadOnly = false }: KanbanColumnProps) {
   const wipProgress = column.wipLimit ? (tasks.length / column.wipLimit) * 100 : 0;
   const isWipExceeded = column.wipLimit && tasks.length >= column.wipLimit;
 
@@ -77,34 +79,39 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
                 {tasks.length}
               </span>
               
-              {/* Botões de edição - aparecem no hover */}
-              <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <button
-                  onClick={() => onEditColumn?.(column)}
-                  className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-blue-100 flex items-center justify-center transition-all duration-200"
-                  data-testid={`button-edit-column-${column.id}`}
-                  title="Editar coluna"
-                >
-                  <Edit2 className="w-3 h-3 text-gray-400 hover:text-blue-500" />
-                </button>
-                
-                <button
-                  onClick={() => onDeleteColumn?.(column.id)}
-                  className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-red-100 flex items-center justify-center transition-all duration-200"
-                  data-testid={`button-delete-column-${column.id}`}
-                  title="Excluir coluna"
-                >
-                  <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-500" />
-                </button>
-              </div>
-              
-              <button
-                onClick={() => onAddTask?.()}
-                className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-indigo-100 flex items-center justify-center group transition-all duration-200 opacity-50 hover:opacity-100"
-                data-testid={`button-add-task-${column.id}`}
-              >
-                <Plus className="w-3 h-3 text-gray-400 group-hover:text-indigo-500" />
-              </button>
+              {/* Botões de ação - só aparecem se não for read-only */}
+              {!isReadOnly && (
+                <>
+                  {/* Botões de edição - aparecem no hover */}
+                  <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <button
+                      onClick={() => onEditColumn?.(column)}
+                      className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-blue-100 flex items-center justify-center transition-all duration-200"
+                      data-testid={`button-edit-column-${column.id}`}
+                      title="Editar coluna"
+                    >
+                      <Edit2 className="w-3 h-3 text-gray-400 hover:text-blue-500" />
+                    </button>
+                    
+                    <button
+                      onClick={() => onDeleteColumn?.(column.id)}
+                      className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-red-100 flex items-center justify-center transition-all duration-200"
+                      data-testid={`button-delete-column-${column.id}`}
+                      title="Excluir coluna"
+                    >
+                      <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-500" />
+                    </button>
+                  </div>
+                  
+                  <button
+                    onClick={() => onAddTask?.()}
+                    className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-indigo-100 flex items-center justify-center group transition-all duration-200 opacity-50 hover:opacity-100"
+                    data-testid={`button-add-task-${column.id}`}
+                  >
+                    <Plus className="w-3 h-3 text-gray-400 group-hover:text-indigo-500" />
+                  </button>
+                </>
+              )}
             </div>
           </div>
           
