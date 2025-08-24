@@ -31,7 +31,7 @@ export default function LoginPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isLoading, setIsLoading] = useState(false);
+  // Remove manual loading state - use mutation states instead
   const [isRegisterMode, setIsRegisterMode] = useState(false);
 
   const loginForm = useForm<LoginFormData>({
@@ -53,7 +53,6 @@ export default function LoginPage() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      setIsLoading(true);
       const response = await apiRequest("POST", "/api/auth/login", data);
       return response.json();
     },
@@ -73,14 +72,10 @@ export default function LoginPage() {
         variant: "destructive",
       });
     },
-    onSettled: () => {
-      setIsLoading(false);
-    },
   });
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterFormData) => {
-      setIsLoading(true);
       const response = await apiRequest("POST", "/api/auth/register", data);
       return response.json();
     },
@@ -98,9 +93,6 @@ export default function LoginPage() {
         description: error.message || "Falha ao criar conta",
         variant: "destructive",
       });
-    },
-    onSettled: () => {
-      setIsLoading(false);
     },
   });
 
@@ -174,7 +166,7 @@ export default function LoginPage() {
                             type="email"
                             placeholder="seu@email.com"
                             className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:focus:border-blue-400"
-                            disabled={isLoading}
+                            disabled={loginMutation.isPending}
                             {...field}
                             data-testid="input-email"
                           />
@@ -198,7 +190,7 @@ export default function LoginPage() {
                             type="password"
                             placeholder="••••••••"
                             className="h-11 border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:focus:border-blue-400"
-                            disabled={isLoading}
+                            disabled={loginMutation.isPending}
                             {...field}
                             data-testid="input-password"
                           />
@@ -211,10 +203,10 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
-                    disabled={isLoading}
+                    disabled={loginMutation.isPending || registerMutation.isPending}
                     data-testid="button-login"
                   >
-                    {isLoading ? (
+                    {loginMutation.isPending ? (
                       <div className="flex items-center gap-2">
                         <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         Entrando...
@@ -246,7 +238,7 @@ export default function LoginPage() {
                             type="text"
                             placeholder="Seu nome completo"
                             className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
-                            disabled={isLoading}
+                            disabled={loginMutation.isPending}
                             {...field}
                             data-testid="input-name"
                           />
@@ -270,7 +262,7 @@ export default function LoginPage() {
                             type="email"
                             placeholder="seu@email.com"
                             className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
-                            disabled={isLoading}
+                            disabled={loginMutation.isPending}
                             {...field}
                             data-testid="input-register-email"
                           />
@@ -294,7 +286,7 @@ export default function LoginPage() {
                             type="password"
                             placeholder="••••••••"
                             className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
-                            disabled={isLoading}
+                            disabled={loginMutation.isPending}
                             {...field}
                             data-testid="input-register-password"
                           />
@@ -307,10 +299,10 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     className="w-full h-11 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
-                    disabled={isLoading}
+                    disabled={loginMutation.isPending || registerMutation.isPending}
                     data-testid="button-register"
                   >
-                    {isLoading ? (
+                    {registerMutation.isPending ? (
                       <div className="flex items-center gap-2">
                         <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         Criando conta...
@@ -331,7 +323,7 @@ export default function LoginPage() {
               <button
                 onClick={toggleMode}
                 className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
-                disabled={isLoading}
+                disabled={loginMutation.isPending || registerMutation.isPending}
                 data-testid="button-toggle-mode"
               >
                 {isRegisterMode ? (
