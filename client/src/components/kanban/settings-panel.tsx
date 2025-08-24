@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Shield, History, Grid, Database } from "lucide-react";
+import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Shield, History, Grid, Database, FileText } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ColumnManagementDialog } from "./column-management-dialog";
@@ -15,6 +15,7 @@ import { TagManagementDialog } from "./tag-management-dialog";
 import { EmailSettingsDialog } from "./email-settings-dialog";
 import { AdvancedExportDialog } from "@/components/export/AdvancedExportDialog";
 import { ExportHistoryDialog } from "@/components/export/ExportHistoryDialog";
+import { SystemLogsDialog } from "@/components/system-logs-dialog";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,6 +39,7 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
   const [isEmailSettingsOpen, setIsEmailSettingsOpen] = useState(false);
   const [isAdvancedExportOpen, setIsAdvancedExportOpen] = useState(false);
   const [isExportHistoryOpen, setIsExportHistoryOpen] = useState(false);
+  const [isSystemLogsOpen, setIsSystemLogsOpen] = useState(false);
 
   const { data: columns = [] } = useQuery<Column[]>({
     queryKey: ["/api/columns"],
@@ -196,6 +198,16 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
               >
                 <Tags className="w-4 h-4 mr-2" />
                 Gerenciar Tags
+              </Button>
+              
+              <Button
+                onClick={() => setIsSystemLogsOpen(true)}
+                variant="outline"
+                className="w-full justify-start"
+                data-testid="button-system-logs"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Logs do Sistema
               </Button>
 
               {/* Auxiliary Data Section */}
@@ -381,6 +393,10 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
         onOpenChange={setIsEmailSettingsOpen}
       />
       
+      <SystemLogsDialog 
+        open={isSystemLogsOpen} 
+        onOpenChange={setIsSystemLogsOpen}
+      />
 
       {/* Export Dialogs */}
       <AdvancedExportDialog

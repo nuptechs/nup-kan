@@ -518,6 +518,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sistema de Logs
+  let systemLogs: Array<{
+    id: string;
+    timestamp: string;
+    level: 'info' | 'warn' | 'error' | 'debug';
+    message: string;
+    context?: string;
+    details?: any;
+  }> = [];
+
+  // Função para adicionar log
+  const addLog = (level: 'info' | 'warn' | 'error' | 'debug', message: string, context?: string, details?: any) => {
+    const log = {
+      id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      context,
+      details
+    };
+    
+    systemLogs.unshift(log); // Adiciona no início
+    
+    // Manter apenas os últimos 100 logs
+    if (systemLogs.length > 100) {
+      systemLogs = systemLogs.slice(0, 100);
+    }
+    
+    // Log também no console do servidor
+    const emoji = level === 'info' ? '🔵' : level === 'warn' ? '🟡' : level === 'error' ? '🔴' : '⚪';
+    console.log(`${emoji} [${context || 'SYSTEM'}] ${message}`, details ? details : '');
+  };
+
+  // Endpoint para obter logs
+  app.get("/api/system/logs", async (req, res) => {
+    try {
+      const { level, limit = "50" } = req.query;
+      let filteredLogs = systemLogs;
+      
+      if (level && typeof level === 'string') {
+        filteredLogs = systemLogs.filter(log => log.level === level);
+      }
+      
+      const limitNum = parseInt(limit as string, 10);
+      const result = filteredLogs.slice(0, Math.min(limitNum, 100));
+      
+      res.json({
+        logs: result,
+        total: filteredLogs.length,
+        levels: ['info', 'warn', 'error', 'debug']
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch logs" });
+    }
+  });
+
+  // Endpoint para limpar logs
+  app.delete("/api/system/logs", async (req, res) => {
+    try {
+      systemLogs = [];
+      addLog('info', 'Logs do sistema foram limpos', 'ADMIN');
+      res.json({ message: "Logs cleared successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to clear logs" });
+    }
+  });
+
+  // Interceptar logs existentes e adicionar ao sistema
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+  const originalConsoleWarn = console.warn;
+  
+  console.log = (...args) => {
+    const message = args.join(' ');
+    if (message.includes('🚀 API:') || message.includes('✅ API:') || message.includes('❌ API:')) {
+      const context = message.includes('Creating task') ? 'TASK_CREATION' : 'API';
+      const level = message.includes('❌') ? 'error' : message.includes('🚀') ? 'debug' : 'info';
+      addLog(level, message, context);
+    }
+    originalConsoleLog(...args);
+  };
+  
+  console.error = (...args) => {
+    const message = args.join(' ');
+    addLog('error', message, 'ERROR');
+    originalConsoleError(...args);
+  };
+  
+  console.warn = (...args) => {
+    const message = args.join(' ');
+    addLog('warn', message, 'WARNING');
+    originalConsoleWarn(...args);
+  };
+
+  // Log inicial
+  addLog('info', 'Sistema de logs iniciado', 'SYSTEM');
+
   // Endpoint para alterar senha
   app.patch("/api/users/:id/password", async (req, res) => {
     try {
