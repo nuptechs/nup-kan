@@ -26,6 +26,118 @@ const registerSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
 
+// Simple Register Form Component
+function RegisterFormComponent({ isLoading, onSubmit }: { 
+  isLoading: boolean; 
+  onSubmit: (data: RegisterFormData) => void; 
+}) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Clear previous errors
+    setErrors({});
+    
+    // Simple validation
+    const newErrors: Record<string, string> = {};
+    if (!name || name.length < 2) {
+      newErrors.name = "Nome deve ter pelo menos 2 caracteres";
+    }
+    if (!email || !email.includes("@")) {
+      newErrors.email = "Email inválido";
+    }
+    if (!password || password.length < 6) {
+      newErrors.password = "Senha deve ter pelo menos 6 caracteres";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    // Submit data
+    onSubmit({ name, email, password });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium mb-2">
+          <User className="h-4 w-4 text-gray-500" />
+          Nome Completo
+        </label>
+        <Input
+          type="text"
+          placeholder="Seu nome completo"
+          className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          disabled={isLoading}
+          data-testid="input-name"
+        />
+        {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium mb-2">
+          <Mail className="h-4 w-4 text-gray-500" />
+          Email
+        </label>
+        <Input
+          type="email"
+          placeholder="seu@email.com"
+          className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={isLoading}
+          data-testid="input-register-email"
+        />
+        {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium mb-2">
+          <User className="h-4 w-4 text-gray-500" />
+          Senha
+        </label>
+        <Input
+          type="password"
+          placeholder="••••••••"
+          className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          disabled={isLoading}
+          data-testid="input-register-password"
+        />
+        {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
+      </div>
+
+      <Button
+        type="submit"
+        className="w-full h-11 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+        disabled={isLoading}
+        data-testid="button-register"
+      >
+        {isLoading ? (
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            Criando conta...
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            Criar Conta
+          </div>
+        )}
+      </Button>
+    </form>
+  );
+}
+
 export default function LoginPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -40,15 +152,7 @@ export default function LoginPage() {
     },
   });
 
-  const registerForm = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-    },
-    mode: "onChange",
-  });
+  // Remove complex React Hook Form for register - using simple state instead
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
@@ -104,14 +208,8 @@ export default function LoginPage() {
   const toggleMode = () => {
     const newMode = !isRegisterMode;
     setIsRegisterMode(newMode);
-    // Reset forms when switching with explicit values
-    if (newMode) {
-      registerForm.reset({
-        name: "",
-        email: "",
-        password: "",
-      });
-    } else {
+    // Reset login form only
+    if (!newMode) {
       loginForm.reset({
         email: "",
         password: "",
@@ -219,101 +317,11 @@ export default function LoginPage() {
                 </form>
               </Form>
             ) : (
-              // Register Form
-              <Form {...registerForm}>
-                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                  <FormField
-                    control={registerForm.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-sm font-medium">
-                          <User className="h-4 w-4 text-gray-500" />
-                          Nome Completo
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="Seu nome completo"
-                            className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
-                            disabled={registerMutation.isPending}
-                            {...field}
-                            data-testid="input-name"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={registerForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-sm font-medium">
-                          <Mail className="h-4 w-4 text-gray-500" />
-                          Email
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="seu@email.com"
-                            className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
-                            disabled={registerMutation.isPending}
-                            {...field}
-                            data-testid="input-register-email"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={registerForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-sm font-medium">
-                          <User className="h-4 w-4 text-gray-500" />
-                          Senha
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="••••••••"
-                            className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
-                            disabled={registerMutation.isPending}
-                            {...field}
-                            data-testid="input-register-password"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button
-                    type="submit"
-                    className="w-full h-11 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
-                    disabled={registerMutation.isPending}
-                    data-testid="button-register"
-                  >
-                    {registerMutation.isPending ? (
-                      <div className="flex items-center gap-2">
-                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Criando conta...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        Criar Conta
-                      </div>
-                    )}
-                  </Button>
-                </form>
-              </Form>
+              // Simple Register Form - NO React Hook Form complexity
+              <RegisterFormComponent 
+                isLoading={registerMutation.isPending}
+                onSubmit={onRegisterSubmit}
+              />
             )}
 
             {/* Toggle button */}
