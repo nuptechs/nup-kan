@@ -409,6 +409,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (columnIndex >= totalColumns - 2) return 'review'; // Second to last is usually review
         return 'inprogress'; // Middle columns are usually in progress
       };
+
+      // Smart completion detection - if last column is empty, consider other columns as potentially completed
+      const detectCompletedTasks = () => {
+        const lastColumn = columns[columns.length - 1];
+        const lastColumnTasks = tasks.filter(task => task.status === lastColumn?.id);
+        
+        // If last column has tasks, use normal categorization
+        if (lastColumnTasks.length > 0) {
+          return tasksWithCategories.filter(task => task.category === 'done');
+        }
+        
+        // If last column is empty, consider the rightmost columns with tasks as completed
+        const columnsWithTasks = columns
+          .map(col => ({
+            ...col,
+            taskCount: tasks.filter(task => task.status === col.id).length,
+            index: columns.findIndex(c => c.id === col.id)
+          }))
+          .filter(col => col.taskCount > 0)
+          .sort((a, b) => b.index - a.index); // Sort by column position (rightmost first)
+        
+        // Consider tasks in the rightmost non-empty columns as completed
+        const completedColumnIds = columnsWithTasks.slice(0, Math.ceil(columnsWithTasks.length / 3)).map(col => col.id);
+        return tasks.filter(task => completedColumnIds.includes(task.status));
+      };
       
       // Categorize tasks based on their column
       const tasksWithCategories = tasks.map(task => {
@@ -417,8 +442,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return { ...task, category };
       });
       
-      // Basic task categorization using actual column data
-      const doneTasks = tasksWithCategories.filter(task => task.category === 'done');
+      // Smart task categorization using actual column data
+      const smartCompletedTasks = detectCompletedTasks();
+      const doneTasks = smartCompletedTasks;
       const inProgressTasks = tasksWithCategories.filter(task => task.category === 'inprogress');
       const todoTasks = tasksWithCategories.filter(task => task.category === 'todo');
       const backlogTasks = tasksWithCategories.filter(task => task.category === 'backlog');
@@ -440,9 +466,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }, 0) / completedTasksWithDates.length
         ) : 0;
       
-      // Calculate weekly throughput (tasks completed in last 7 days)
+      // Calculate weekly throughput (tasks moved/updated in last 7 days)
       const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      const weeklyThroughput = doneTasks.filter(task => 
+      const weeklyThroughput = tasks.filter(task => 
         task.updatedAt && new Date(task.updatedAt) > weekAgo
       ).length;
       
@@ -510,10 +536,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         task.updatedAt && new Date(task.updatedAt) > dayAgo
       ).length;
       
-      // Task health score (combination of completion rate, blocker rate, wip violations)
-      const blockerRate = totalTasks > 0 ? (blockers / totalTasks) * 100 : 0;
-      const wipViolationRate = columns.length > 0 ? (wipViolations / columns.length) * 100 : 0;
-      const healthScore = Math.max(0, Math.round(completionRate - blockerRate - wipViolationRate));
+      // Task health score (combination of activity, progress, and violations)
+      const activityScore = totalTasks > 0 ? Math.min(100, (recentActivity / totalTasks) * 100) : 0;
+      const progressScore = totalTasks > 0 ? 
+        Math.round(((inProgressTasks.length + reviewTasks.length + doneTasks.length) / totalTasks) * 100) : 0;
+      const blockerPenalty = totalTasks > 0 ? (blockers / totalTasks) * 50 : 0;
+      const wipPenalty = columns.length > 0 ? (wipViolations / columns.length) * 30 : 0;
+      const healthScore = Math.max(0, Math.round((activityScore * 0.3 + progressScore * 0.4 + completionRate * 0.3) - blockerPenalty - wipPenalty));
       
       res.json({
         // Core metrics
