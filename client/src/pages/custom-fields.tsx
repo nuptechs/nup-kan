@@ -22,6 +22,7 @@ interface CustomFieldFormData {
   type: "text" | "number" | "date" | "select" | "boolean" | "url" | "email";
   required: "true" | "false";
   options: string[];
+  boardIds: string[];
   placeholder: string;
   validation: string;
 }
@@ -46,6 +47,7 @@ export default function CustomFieldsPage() {
     type: "text",
     required: "false",
     options: [],
+    boardIds: [],
     placeholder: "",
     validation: "",
   });
@@ -57,6 +59,10 @@ export default function CustomFieldsPage() {
   // Queries
   const { data: fields = [], isLoading } = useQuery<CustomField[]>({
     queryKey: ["/api/custom-fields"],
+  });
+
+  const { data: boards = [] } = useQuery({
+    queryKey: ["/api/boards"],
   });
 
   // Mutations
@@ -127,6 +133,7 @@ export default function CustomFieldsPage() {
       type: "text",
       required: "false",
       options: [],
+      boardIds: [],
       placeholder: "",
       validation: "",
     });
@@ -147,6 +154,7 @@ export default function CustomFieldsPage() {
       type: field.type as any,
       required: (field.required || "false") as "true" | "false",
       options: field.options || [],
+      boardIds: field.boardIds || [],
       placeholder: field.placeholder || "",
       validation: field.validation || "",
     });
@@ -156,10 +164,10 @@ export default function CustomFieldsPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.label.trim()) {
+    if (!formData.name.trim() || !formData.label.trim() || formData.boardIds.length === 0) {
       toast({
         title: "Campos obrigatórios",
-        description: "Nome e rótulo são obrigatórios.",
+        description: "Nome, rótulo e pelo menos um board são obrigatórios.",
         variant: "destructive",
       });
       return;
@@ -263,6 +271,7 @@ export default function CustomFieldsPage() {
                   <TableHead>Campo</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Obrigatório</TableHead>
+                  <TableHead>Boards</TableHead>
                   <TableHead>Opções</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -291,6 +300,27 @@ export default function CustomFieldsPage() {
                         <Badge variant={field.required === "true" ? "destructive" : "secondary"}>
                           {field.required === "true" ? "Sim" : "Não"}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {field.boardIds && field.boardIds.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {field.boardIds.slice(0, 2).map((boardId, i) => {
+                              const board = boards.find((b: any) => b.id === boardId);
+                              return board ? (
+                                <Badge key={i} variant="outline" className="text-xs">
+                                  {board.name}
+                                </Badge>
+                              ) : null;
+                            })}
+                            {field.boardIds.length > 2 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{field.boardIds.length - 2}
+                              </Badge>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-sm">Nenhum</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         {field.type === "select" && field.options && field.options.length > 0 ? (
@@ -451,6 +481,56 @@ export default function CustomFieldsPage() {
                 )}
               </div>
             )}
+
+            <div className="space-y-2">
+              <Label>Boards Aplicáveis *</Label>
+              <div className="border rounded-md p-3 space-y-2 max-h-40 overflow-y-auto">
+                <p className="text-sm text-gray-600 mb-2">
+                  Selecione os boards onde este campo será exibido:
+                </p>
+                {boards.map((board: any) => (
+                  <div key={board.id} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`board-${board.id}`}
+                      checked={formData.boardIds.includes(board.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setFormData(prev => ({
+                            ...prev,
+                            boardIds: [...prev.boardIds, board.id]
+                          }));
+                        } else {
+                          setFormData(prev => ({
+                            ...prev,
+                            boardIds: prev.boardIds.filter(id => id !== board.id)
+                          }));
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <label htmlFor={`board-${board.id}`} className="text-sm cursor-pointer">
+                      {board.name}
+                    </label>
+                  </div>
+                ))}
+                {boards.length === 0 && (
+                  <p className="text-sm text-gray-500">Nenhum board disponível</p>
+                )}
+              </div>
+              {formData.boardIds.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {formData.boardIds.map(boardId => {
+                    const board = boards.find((b: any) => b.id === boardId);
+                    return board ? (
+                      <Badge key={boardId} variant="outline" className="text-xs">
+                        {board.name}
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              )}
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="placeholder">Placeholder (opcional)</Label>

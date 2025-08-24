@@ -179,6 +179,7 @@ export const customFields = pgTable("custom_fields", {
   type: text("type").notNull(), // text, number, date, select, boolean, url, email
   required: text("required").default("false"),
   options: text("options").array().default([]), // for select type
+  boardIds: text("board_ids").array().default([]), // boards where this field applies
   placeholder: text("placeholder").default(""),
   validation: text("validation").default(""), // regex or validation rules
   position: integer("position").notNull().default(0),
@@ -395,6 +396,7 @@ export const insertCustomFieldSchema = createInsertSchema(customFields).omit({
   label: z.string().min(1, "Rótulo obrigatório").trim(),
   type: z.enum(["text", "number", "date", "select", "boolean", "url", "email"], { message: "Tipo de campo inválido" }),
   required: z.enum(["true", "false"]).default("false"),
+  boardIds: z.array(z.string()).min(1, "Selecione pelo menos um board").default([]),
   isActive: z.enum(["true", "false"]).default("true"),
 });
 

@@ -2329,10 +2329,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Custom Fields Routes
   app.get("/api/custom-fields", async (req, res) => {
     try {
-      const fields = await db.select().from(customFields)
-        .where(eq(customFields.isActive, "true"))
-        .orderBy(customFields.position);
-      res.json(fields);
+      const boardId = req.query.boardId as string;
+      
+      if (boardId) {
+        // Filter fields for specific board
+        const fields = await db.select().from(customFields)
+          .where(and(
+            eq(customFields.isActive, "true"),
+            sql`${customFields.boardIds} @> ${JSON.stringify([boardId])}`
+          ))
+          .orderBy(customFields.position);
+        res.json(fields);
+      } else {
+        // Return all active fields (for management)
+        const fields = await db.select().from(customFields)
+          .where(eq(customFields.isActive, "true"))
+          .orderBy(customFields.position);
+        res.json(fields);
+      }
     } catch (error) {
       console.error("Error fetching custom fields:", error);
       res.status(500).json({ error: "Failed to fetch custom fields" });
