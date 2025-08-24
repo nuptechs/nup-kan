@@ -87,6 +87,7 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
 
   const handleExportData = () => {
     setIsAdvancedExportOpen(true);
+    onClose();
   };
 
   const handleExportComplete = () => {
@@ -139,7 +140,10 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
               </Button>
               {user && (
                 <Button
-                  onClick={() => setIsExportHistoryOpen(true)}
+                  onClick={() => {
+                    setIsExportHistoryOpen(true);
+                    onClose();
+                  }}
                   variant="outline"
                   className="w-full justify-start"
                   data-testid="button-export-history"
@@ -172,7 +176,10 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
               
               {/* Consolidated Management Button */}
               <Button
-                onClick={() => setLocation('/admin/permissions')}
+                onClick={() => {
+                  setLocation('/admin/permissions');
+                  onClose();
+                }}
                 className="w-full justify-start bg-blue-600 hover:bg-blue-700"
                 data-testid="button-manage-all"
               >
@@ -182,7 +189,10 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
               
               <PermissionGuard permissions={["Criar Colunas", "Editar Colunas", "Excluir Colunas"]}>
                 <Button
-                  onClick={() => setIsColumnManagementOpen(true)}
+                  onClick={() => {
+                    setIsColumnManagementOpen(true);
+                    onClose();
+                  }}
                   variant="outline"
                   className="w-full justify-start"
                   data-testid="button-manage-columns"
@@ -194,7 +204,10 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
               
               
               <Button
-                onClick={() => setIsTagManagementOpen(true)}
+                onClick={() => {
+                  setIsTagManagementOpen(true);
+                  onClose();
+                }}
                 variant="outline"
                 className="w-full justify-start"
                 data-testid="button-manage-tags"
@@ -204,7 +217,10 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
               </Button>
               
               <Button
-                onClick={() => setIsSystemLogsOpen(true)}
+                onClick={() => {
+                  setIsSystemLogsOpen(true);
+                  onClose();
+                }}
                 variant="outline"
                 className="w-full justify-start"
                 data-testid="button-system-logs"
@@ -220,7 +236,10 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
                 </Label>
                 <div className="space-y-2">
                   <Button
-                    onClick={() => setLocation("/admin/task-status")}
+                    onClick={() => {
+                      setLocation("/admin/task-status");
+                      onClose();
+                    }}
                     variant="outline"
                     className="w-full justify-start"
                     data-testid="button-manage-status"
@@ -229,7 +248,10 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
                     Status das Tarefas
                   </Button>
                   <Button
-                    onClick={() => setLocation("/admin/task-priority")}
+                    onClick={() => {
+                      setLocation("/admin/task-priority");
+                      onClose();
+                    }}
                     variant="outline"
                     className="w-full justify-start"
                     data-testid="button-manage-priorities"
@@ -241,7 +263,10 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
               </div>
               
               <Button
-                onClick={() => setIsEmailSettingsOpen(true)}
+                onClick={() => {
+                  setIsEmailSettingsOpen(true);
+                  onClose();
+                }}
                 variant="outline"
                 className="w-full justify-start"
                 data-testid="button-email-settings"
