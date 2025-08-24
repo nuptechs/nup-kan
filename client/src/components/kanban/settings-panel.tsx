@@ -369,33 +369,121 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
 
           {/* Analytics */}
           <div className="space-y-4">
-            <h3 className="font-medium text-gray-900" data-testid="analytics-heading">📈 Análises</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-3 bg-gray-50 rounded-lg text-center">
-                <p className="text-2xl font-bold text-gray-900" data-testid="analytics-cycle-time">
-                  {(analytics as any)?.averageCycleTime || 0}
+            <h3 className="font-medium text-gray-900" data-testid="analytics-heading">📈 Análises do Sistema</h3>
+            
+            {/* Main metrics grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg text-center">
+                <p className="text-xl font-bold text-blue-800" data-testid="analytics-completion-rate">
+                  {(analytics as any)?.completionRate || 0}%
                 </p>
-                <p className="text-xs text-gray-500">Tempo Médio (dias)</p>
+                <p className="text-xs text-blue-600">Taxa de Conclusão</p>
               </div>
-              <div className="p-3 bg-gray-50 rounded-lg text-center">
-                <p className="text-2xl font-bold text-gray-900" data-testid="analytics-throughput">
-                  {(analytics as any)?.throughput || 0}
+              <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg text-center">
+                <p className="text-xl font-bold text-green-800" data-testid="analytics-health-score">
+                  {(analytics as any)?.healthScore || 0}
                 </p>
-                <p className="text-xs text-gray-500">Cards/Semana</p>
+                <p className="text-xs text-green-600">Score de Saúde</p>
               </div>
-              <div className="p-3 bg-gray-50 rounded-lg text-center">
-                <p className="text-2xl font-bold text-gray-900" data-testid="analytics-efficiency">
-                  {(analytics as any)?.efficiency || 0}%
+              <div className="p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg text-center">
+                <p className="text-xl font-bold text-purple-800" data-testid="analytics-cycle-time">
+                  {(analytics as any)?.averageCycleTime || 0}d
                 </p>
-                <p className="text-xs text-gray-500">Eficiência</p>
+                <p className="text-xs text-purple-600">Tempo de Ciclo</p>
               </div>
-              <div className="p-3 bg-gray-50 rounded-lg text-center">
-                <p className="text-2xl font-bold text-gray-900" data-testid="analytics-blockers">
-                  {(analytics as any)?.blockers || 0}
+              <div className="p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg text-center">
+                <p className="text-xl font-bold text-orange-800" data-testid="analytics-throughput">
+                  {(analytics as any)?.weeklyThroughput || 0}
                 </p>
-                <p className="text-xs text-gray-500">Bloqueios</p>
+                <p className="text-xs text-orange-600">Cards/Semana</p>
               </div>
             </div>
+
+            {/* Secondary metrics */}
+            <div className="grid grid-cols-3 gap-2 text-sm">
+              <div className="p-2 bg-gray-50 rounded text-center">
+                <p className="font-semibold text-gray-700" data-testid="analytics-lead-time">
+                  {(analytics as any)?.averageLeadTime || 0}d
+                </p>
+                <p className="text-xs text-gray-500">Lead Time</p>
+              </div>
+              <div className="p-2 bg-gray-50 rounded text-center">
+                <p className="font-semibold text-gray-700" data-testid="analytics-recent-activity">
+                  {(analytics as any)?.recentActivity || 0}
+                </p>
+                <p className="text-xs text-gray-500">Atividade 24h</p>
+              </div>
+              <div className="p-2 bg-gray-50 rounded text-center">
+                <p className="font-semibold text-gray-700" data-testid="analytics-total-tasks">
+                  {(analytics as any)?.totalTasks || 0}
+                </p>
+                <p className="text-xs text-gray-500">Total Tarefas</p>
+              </div>
+            </div>
+
+            {/* Alert indicators */}
+            {((analytics as any)?.blockers > 0 || (analytics as any)?.wipViolations > 0) && (
+              <div className="space-y-2">
+                {(analytics as any)?.blockers > 0 && (
+                  <div className="flex items-center gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span className="text-sm text-red-700" data-testid="analytics-blockers">
+                      {(analytics as any).blockers} bloqueio{(analytics as any).blockers !== 1 ? 's' : ''} ativo{(analytics as any).blockers !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
+                {(analytics as any)?.wipViolations > 0 && (
+                  <div className="flex items-center gap-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <span className="text-sm text-yellow-700" data-testid="analytics-wip-violations">
+                      {(analytics as any).wipViolations} violação{(analytics as any).wipViolations !== 1 ? 'ões' : ''} de limite WIP
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Status distribution */}
+            {(analytics as any)?.statusDistribution && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-gray-600">Distribuição por Status:</p>
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-600">
+                    Backlog: <span className="font-semibold">{(analytics as any).statusDistribution.backlog || 0}</span>
+                  </span>
+                  <span className="text-blue-600">
+                    Todo: <span className="font-semibold">{(analytics as any).statusDistribution.todo || 0}</span>
+                  </span>
+                  <span className="text-yellow-600">
+                    Em Progresso: <span className="font-semibold">{(analytics as any).statusDistribution.inprogress || 0}</span>
+                  </span>
+                  <span className="text-purple-600">
+                    Review: <span className="font-semibold">{(analytics as any).statusDistribution.review || 0}</span>
+                  </span>
+                  <span className="text-green-600">
+                    Concluído: <span className="font-semibold">{(analytics as any).statusDistribution.done || 0}</span>
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Priority distribution */}
+            {(analytics as any)?.priorityDistribution && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-gray-600">Distribuição por Prioridade:</p>
+                <div className="flex justify-between text-xs">
+                  <span className="text-red-600">
+                    Alta: <span className="font-semibold">{(analytics as any).priorityDistribution.high || 0}</span>
+                  </span>
+                  <span className="text-yellow-600">
+                    Média: <span className="font-semibold">{(analytics as any).priorityDistribution.medium || 0}</span>
+                  </span>
+                  <span className="text-green-600">
+                    Baixa: <span className="font-semibold">{(analytics as any).priorityDistribution.low || 0}</span>
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

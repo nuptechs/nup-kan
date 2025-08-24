@@ -385,30 +385,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const tasks = await storage.getTasks();
       const columns = await storage.getColumns();
+      const users = await storage.getUsers();
       
-      // Calculate basic metrics
+      // Basic task categorization
       const doneTasks = tasks.filter(task => task.status === "done");
       const inProgressTasks = tasks.filter(task => task.status === "inprogress");
+      const todoTasks = tasks.filter(task => task.status === "todo");
+      const backlogTasks = tasks.filter(task => task.status === "backlog");
+      const reviewTasks = tasks.filter(task => task.status === "review");
       const totalTasks = tasks.length;
       
-      
-      // Calculate efficiency
-      const efficiency = totalTasks > 0 ? 
+      // Calculate completion rate
+      const completionRate = totalTasks > 0 ? 
         Math.round((doneTasks.length / totalTasks) * 100) : 0;
       
-      // Count blockers (tasks that haven't moved in a while or high priority in progress)
-      const blockers = inProgressTasks.filter(task => 
-        task.priority === "high" && task.progress < 50
+      // Calculate average cycle time (from creation to completion)
+      const completedTasksWithDates = doneTasks.filter(task => task.createdAt && task.updatedAt);
+      const averageCycleTime = completedTasksWithDates.length > 0 ? 
+        Math.round(
+          completedTasksWithDates.reduce((sum, task) => {
+            const created = new Date(task.createdAt!);
+            const completed = new Date(task.updatedAt!);
+            return sum + (completed.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+          }, 0) / completedTasksWithDates.length
+        ) : 0;
+      
+      // Calculate weekly throughput (tasks completed in last 7 days)
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const weeklyThroughput = doneTasks.filter(task => 
+        task.updatedAt && new Date(task.updatedAt) > weekAgo
       ).length;
       
+      // Priority distribution
+      const priorityDistribution = {
+        high: tasks.filter(t => t.priority === "high").length,
+        medium: tasks.filter(t => t.priority === "medium").length,
+        low: tasks.filter(t => t.priority === "low").length,
+      };
+      
+      // Identify blockers (high priority tasks in progress for more than 7 days)
+      const blockers = inProgressTasks.filter(task => {
+        if (task.priority === "high" && task.updatedAt) {
+          const daysSinceUpdate = (Date.now() - new Date(task.updatedAt).getTime()) / (1000 * 60 * 60 * 24);
+          return daysSinceUpdate > 7;
+        }
+        return false;
+      }).length;
+      
+      // WIP violations (columns exceeding their limits)
+      const wipViolations = columns.filter(column => {
+        if (column.wipLimit) {
+          const tasksInColumn = tasks.filter(task => task.status === column.id).length;
+          return tasksInColumn > column.wipLimit;
+        }
+        return false;
+      }).length;
+      
+      // Performance by status
+      const statusDistribution = {
+        backlog: backlogTasks.length,
+        todo: todoTasks.length,
+        inprogress: inProgressTasks.length,
+        review: reviewTasks.length,
+        done: doneTasks.length,
+      };
+      
+      // Calculate lead time (average time from todo to done)
+      const leadTimeTasks = doneTasks.filter(task => {
+        return task.createdAt && task.updatedAt;
+      });
+      
+      const averageLeadTime = leadTimeTasks.length > 0 ? 
+        Math.round(
+          leadTimeTasks.reduce((sum, task) => {
+            const start = new Date(task.createdAt!);
+            const end = new Date(task.updatedAt!);
+            return sum + (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
+          }, 0) / leadTimeTasks.length
+        ) : 0;
+      
+      // Recent activity (tasks updated in last 24 hours)
+      const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const recentActivity = tasks.filter(task => 
+        task.updatedAt && new Date(task.updatedAt) > dayAgo
+      ).length;
+      
+      // Task health score (combination of completion rate, blocker rate, wip violations)
+      const blockerRate = totalTasks > 0 ? (blockers / totalTasks) * 100 : 0;
+      const wipViolationRate = columns.length > 0 ? (wipViolations / columns.length) * 100 : 0;
+      const healthScore = Math.max(0, Math.round(completionRate - blockerRate - wipViolationRate));
+      
       res.json({
-        efficiency,
-        blockers,
+        // Core metrics
         totalTasks,
         doneTasks: doneTasks.length,
         inProgressTasks: inProgressTasks.length,
+        completionRate,
+        averageCycleTime,
+        weeklyThroughput,
+        averageLeadTime,
+        blockers,
+        wipViolations,
+        recentActivity,
+        healthScore,
+        
+        // Detailed breakdowns
+        statusDistribution,
+        priorityDistribution,
+        
+        // Legacy fields for compatibility
+        efficiency: completionRate,
+        throughput: weeklyThroughput,
       });
     } catch (error) {
+      console.error("Error calculating analytics:", error);
       res.status(500).json({ message: "Failed to fetch analytics" });
     }
   });
