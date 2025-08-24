@@ -505,6 +505,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/users", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.session?.userId || 'system';
+    const userName = req.session?.userName || 'Sistema';
+    
     try {
       const userData = insertUserSchema.parse(req.body);
       const user = await storage.createUser(userData);
@@ -524,8 +528,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Criar usuário "${user.name}" (${user.email})`, 'success', null, duration);
+      
       res.status(201).json(user);
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      addUserActionLog(userId, userName, `Criar usuário "${req.body.name || 'sem nome'}"`, 'error', { error: errorMessage, details: error }, duration);
+      
       res.status(400).json({ message: "Invalid user data" });
     }
   });
@@ -544,26 +555,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.patch("/api/users/:id", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.session?.userId || 'unknown';
+    const userName = req.session?.userName || 'Usuário desconhecido';
+    
     try {
       const userData = req.body;
       const user = await storage.updateUser(req.params.id, userData);
+      
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Atualizar usuário "${user.name}" (${user.email})`, 'success', null, duration);
+      
       res.json(user);
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      
       if (error instanceof Error && error.message.includes("not found")) {
+        addUserActionLog(userId, userName, `Atualizar usuário (ID: ${req.params.id})`, 'error', { error: 'Usuário não encontrado' }, duration);
         return res.status(404).json({ message: "User not found" });
       }
+      
+      addUserActionLog(userId, userName, `Atualizar usuário (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
       res.status(400).json({ message: "Invalid user data" });
     }
   });
 
   app.delete("/api/users/:id", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.session?.userId || 'unknown';
+    const userName = req.session?.userName || 'Usuário desconhecido';
+    
     try {
       await storage.deleteUser(req.params.id);
+      
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Deletar usuário (ID: ${req.params.id})`, 'success', null, duration);
+      
       res.status(204).send();
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      
       if (error instanceof Error && error.message.includes("not found")) {
+        addUserActionLog(userId, userName, `Deletar usuário (ID: ${req.params.id})`, 'error', { error: 'Usuário não encontrado' }, duration);
         return res.status(404).json({ message: "User not found" });
       }
+      
+      addUserActionLog(userId, userName, `Deletar usuário (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
       res.status(500).json({ message: "Failed to delete user" });
     }
   });
@@ -823,11 +862,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/teams", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.session?.userId || 'unknown';
+    const userName = req.session?.userName || 'Usuário desconhecido';
+    
     try {
       const teamData = insertTeamSchema.parse(req.body);
       const team = await storage.createTeam(teamData);
+      
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Criar time "${team.name}"`, 'success', null, duration);
+      
       res.status(201).json(team);
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      addUserActionLog(userId, userName, `Criar time "${req.body.name || 'sem nome'}"`, 'error', { error: errorMessage, details: error }, duration);
+      
       res.status(400).json({ message: "Invalid team data" });
     }
   });
@@ -846,26 +897,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.patch("/api/teams/:id", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.session?.userId || 'unknown';
+    const userName = req.session?.userName || 'Usuário desconhecido';
+    
     try {
       const teamData = req.body;
       const team = await storage.updateTeam(req.params.id, teamData);
+      
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Atualizar time "${team.name}"`, 'success', null, duration);
+      
       res.json(team);
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      
       if (error instanceof Error && error.message.includes("not found")) {
+        addUserActionLog(userId, userName, `Atualizar time (ID: ${req.params.id})`, 'error', { error: 'Time não encontrado' }, duration);
         return res.status(404).json({ message: "Team not found" });
       }
+      
+      addUserActionLog(userId, userName, `Atualizar time (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
       res.status(400).json({ message: "Invalid team data" });
     }
   });
 
   app.delete("/api/teams/:id", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.session?.userId || 'unknown';
+    const userName = req.session?.userName || 'Usuário desconhecido';
+    
     try {
       await storage.deleteTeam(req.params.id);
+      
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Deletar time (ID: ${req.params.id})`, 'success', null, duration);
+      
       res.status(204).send();
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      
       if (error instanceof Error && error.message.includes("not found")) {
+        addUserActionLog(userId, userName, `Deletar time (ID: ${req.params.id})`, 'error', { error: 'Time não encontrado' }, duration);
         return res.status(404).json({ message: "Team not found" });
       }
+      
+      addUserActionLog(userId, userName, `Deletar time (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
       res.status(500).json({ message: "Failed to delete team" });
     }
   });
@@ -893,36 +972,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/profiles", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.session?.userId || 'unknown';
+    const userName = req.session?.userName || 'Usuário desconhecido';
+    
     try {
       const profileData = insertProfileSchema.parse(req.body);
       const profile = await storage.createProfile(profileData);
+      
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Criar perfil "${profile.name}"`, 'success', null, duration);
+      
       res.status(201).json(profile);
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      addUserActionLog(userId, userName, `Criar perfil "${req.body.name || 'sem nome'}"`, 'error', { error: errorMessage, details: error }, duration);
+      
       res.status(400).json({ message: "Invalid profile data" });
     }
   });
 
   app.patch("/api/profiles/:id", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.session?.userId || 'unknown';
+    const userName = req.session?.userName || 'Usuário desconhecido';
+    
     try {
       const profileData = updateProfileSchema.parse(req.body);
       const profile = await storage.updateProfile(req.params.id, profileData);
+      
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Atualizar perfil "${profile.name}"`, 'success', null, duration);
+      
       res.json(profile);
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      
       if (error instanceof Error && error.message.includes("not found")) {
+        addUserActionLog(userId, userName, `Atualizar perfil (ID: ${req.params.id})`, 'error', { error: 'Perfil não encontrado' }, duration);
         return res.status(404).json({ message: "Profile not found" });
       }
+      
+      addUserActionLog(userId, userName, `Atualizar perfil (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
       res.status(400).json({ message: "Invalid profile data" });
     }
   });
 
   app.delete("/api/profiles/:id", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.session?.userId || 'unknown';
+    const userName = req.session?.userName || 'Usuário desconhecido';
+    
     try {
       await storage.deleteProfile(req.params.id);
+      
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Deletar perfil (ID: ${req.params.id})`, 'success', null, duration);
+      
       res.status(204).send();
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      
       if (error instanceof Error && error.message.includes("not found")) {
+        addUserActionLog(userId, userName, `Deletar perfil (ID: ${req.params.id})`, 'error', { error: 'Perfil não encontrado' }, duration);
         return res.status(404).json({ message: "Profile not found" });
       }
+      
+      addUserActionLog(userId, userName, `Deletar perfil (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
       res.status(500).json({ message: "Failed to delete profile" });
     }
   });
@@ -1409,23 +1528,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/exports", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.session?.userId || 'unknown';
+    const userName = req.session?.userName || 'Usuário desconhecido';
+    
     try {
       const exportData = req.body;
       const newExport = await storage.createExportHistory(exportData);
+      
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Iniciar exportação (${exportData.exportType || 'tipo não especificado'})`, 'success', null, duration);
+      
       res.status(201).json(newExport);
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      addUserActionLog(userId, userName, 'Iniciar exportação', 'error', { error: errorMessage, details: error }, duration);
+      
       console.error("Error creating export history:", error);
       res.status(500).json({ message: "Failed to create export history" });
     }
   });
 
   app.patch("/api/exports/:id", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.session?.userId || 'unknown';
+    const userName = req.session?.userName || 'Usuário desconhecido';
+    
     try {
       const { id } = req.params;
       const updates = req.body;
       const updatedExport = await storage.updateExportHistory(id, updates);
+      
+      const duration = Date.now() - startTime;
+      const action = updates.status === 'completed' ? 'Concluir exportação' : 
+                     updates.status === 'failed' ? 'Falha na exportação' : 
+                     'Atualizar exportação';
+      const status = updates.status === 'failed' ? 'error' : 'success';
+      addUserActionLog(userId, userName, `${action}${updates.fileName ? ` (${updates.fileName})` : ''}`, status, updates.status === 'failed' ? { error: updates.errorMessage } : null, duration);
+      
       res.json(updatedExport);
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      addUserActionLog(userId, userName, 'Atualizar exportação', 'error', { error: errorMessage, details: error }, duration);
+      
       console.error("Error updating export history:", error);
       res.status(500).json({ message: "Failed to update export history" });
     }
