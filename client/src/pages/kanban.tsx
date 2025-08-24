@@ -68,7 +68,7 @@ export default function KanbanPage({ params }: KanbanPageProps) {
     <div className="h-screen overflow-hidden bg-bg-main relative" data-testid="kanban-page">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between" data-testid="header">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 flex-1">
           <Link href="/">
             <Button
               variant="ghost"
@@ -80,17 +80,17 @@ export default function KanbanPage({ params }: KanbanPageProps) {
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-1 min-w-0">
             <img 
               src={logoImage} 
               alt="Logo uP"
-              className="w-8 h-8 object-contain"
+              className="w-8 h-8 object-contain flex-shrink-0"
             />
-            <h1 className="text-2xl font-semibold text-gray-900 truncate max-w-[300px]" data-testid="page-title" title={board.name}>
+            <h1 className="text-2xl font-semibold text-gray-900 truncate" data-testid="page-title" title={board.name}>
               {board.name}
             </h1>
           </div>
-          <div className="flex items-center space-x-2 text-sm text-gray-500">
+          <div className="flex items-center space-x-2 text-sm text-gray-500 flex-shrink-0 whitespace-nowrap">
             <Users className="w-4 h-4" />
             <span data-testid="team-count">{(teamMembers as any)?.length || 0} membros</span>
           </div>
