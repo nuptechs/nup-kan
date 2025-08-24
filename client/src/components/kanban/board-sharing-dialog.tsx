@@ -89,6 +89,8 @@ export function BoardSharingDialog({ board, open, onOpenChange }: BoardSharingDi
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/shares`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/member-count`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/members`] });
       form.reset();
       toast({
         title: "Board compartilhado",
@@ -110,6 +112,8 @@ export function BoardSharingDialog({ board, open, onOpenChange }: BoardSharingDi
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/shares`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/member-count`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/members`] });
       toast({
         title: "Compartilhamento removido",
         description: "O acesso ao board foi removido.",
@@ -130,6 +134,8 @@ export function BoardSharingDialog({ board, open, onOpenChange }: BoardSharingDi
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/shares`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/member-count`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/members`] });
       toast({
         title: "Permissão atualizada",
         description: "A permissão foi alterada com sucesso.",
