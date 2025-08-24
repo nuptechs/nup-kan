@@ -8,7 +8,6 @@ import { Settings, Users, Shield, User, ArrowLeft, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Link, useParams } from "wouter";
-import logoImage from "@assets/generated_images/Modern_N_logo_transparent_background_dde0f619.png";
 import { useProfileMode } from "@/hooks/useProfileMode";
 import type { Board } from "@shared/schema";
 
@@ -82,12 +81,8 @@ export default function KanbanPage() {
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
-          <div className="flex items-center space-x-2 flex-1 min-w-0">
-            <img 
-              src={logoImage} 
-              alt="Logo uP"
-              className="w-8 h-8 object-contain flex-shrink-0"
-            />
+          <div className="flex items-center space-x-3 flex-1 min-w-0">
+            <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full flex-shrink-0"></div>
             <h1 className="text-2xl font-semibold text-gray-900 truncate" data-testid="page-title" title={board.name}>
               {board.name}
             </h1>
