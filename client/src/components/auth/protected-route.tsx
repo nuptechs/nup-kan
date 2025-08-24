@@ -29,9 +29,9 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
       return;
     }
 
-    // If user is authenticated but trying to access login page, redirect to home
+    // If user is authenticated but trying to access login page, redirect to boards
     if (!requireAuth && currentUser) {
-      setLocation("/");
+      setLocation("/boards");
       return;
     }
   }, [isLoading, currentUser, error, requireAuth, setLocation]);

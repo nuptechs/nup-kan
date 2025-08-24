@@ -30,11 +30,17 @@ function Router() {
         </ProtectedRoute>
       </Route>
       
-      <Route path="/kanban/:boardId" component={({ params }) => (
+      <Route path="/boards">
+        <ProtectedRoute>
+          <BoardSelection />
+        </ProtectedRoute>
+      </Route>
+      
+      <Route path="/kanban/:boardId">
         <ProtectedRoute>
           <KanbanPage />
         </ProtectedRoute>
-      )} />
+      </Route>
       
       <Route path="/settings">
         <ProtectedRoute>
