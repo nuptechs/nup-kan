@@ -34,6 +34,7 @@ function RegisterFormComponent({ isLoading, onSubmit }: {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -52,6 +53,11 @@ function RegisterFormComponent({ isLoading, onSubmit }: {
     }
     if (!password || password.length < 6) {
       newErrors.password = "Senha deve ter pelo menos 6 caracteres";
+    }
+    if (!confirmPassword) {
+      newErrors.confirmPassword = "Confirmação de senha é obrigatória";
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Senhas não coincidem";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -114,6 +120,23 @@ function RegisterFormComponent({ isLoading, onSubmit }: {
           data-testid="input-register-password"
         />
         {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium mb-2">
+          <User className="h-4 w-4 text-gray-500" />
+          Confirmar Senha
+        </label>
+        <Input
+          type="password"
+          placeholder="••••••••"
+          className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          disabled={isLoading}
+          data-testid="input-confirm-password"
+        />
+        {errors.confirmPassword && <p className="text-sm text-red-500 mt-1">{errors.confirmPassword}</p>}
       </div>
 
       <Button
