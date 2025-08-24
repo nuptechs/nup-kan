@@ -22,10 +22,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Flag, Edit, Plus, Trash } from "lucide-react";
+import { Flag, Edit, Plus, Trash, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 
 interface TaskPriority {
   id: string;
@@ -59,6 +60,7 @@ export default function TaskPriorityPage() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location, setLocation] = useLocation();
 
   // Queries
   const { data: priorities = [], isLoading } = useQuery<TaskPriority[]>({
@@ -183,11 +185,22 @@ export default function TaskPriorityPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Prioridades das Tarefas</h1>
-          <p className="text-muted-foreground">
-            Gerencie as diferentes prioridades disponíveis para as tarefas
-          </p>
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setLocation("/kanban/cd3c01f3-e346-4213-9f8c-6acbf6dd69ab")}
+            data-testid="button-back-to-kanban"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">Prioridades das Tarefas</h1>
+            <p className="text-muted-foreground">
+              Gerencie as diferentes prioridades disponíveis para as tarefas
+            </p>
+          </div>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
