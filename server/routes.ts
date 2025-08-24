@@ -771,6 +771,464 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rota para interface independente de logs
+  app.get("/logs-viewer", (req, res) => {
+    const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>uP-Kan - Visualizador de Logs</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #374151;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .controls {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .control-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .control-group input,
+        .control-group select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            min-width: 150px;
+        }
+        
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-left: auto;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .stats span {
+            background: #f3f4f6;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+        
+        .logs-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .logs-header {
+            background: #f9fafb;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .logs-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .logs-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .log-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f3f4f6;
+            border-left: 4px solid transparent;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        
+        .log-item:last-child {
+            border-bottom: none;
+        }
+        
+        .log-item.user-action {
+            border-left-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.02);
+        }
+        
+        .log-item.system {
+            border-left-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.02);
+        }
+        
+        .log-item.error {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.02);
+        }
+        
+        .log-timestamp {
+            font-size: 0.75rem;
+            color: #6b7280;
+            min-width: 140px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .log-content {
+            flex: 1;
+        }
+        
+        .log-message {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .log-meta {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-level {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .badge-level.error {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        
+        .badge-level.warn {
+            background: #fffbeb;
+            color: #d97706;
+        }
+        
+        .badge-level.info {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+        
+        .badge-type {
+            background: #f0f9ff;
+            color: #0369a1;
+        }
+        
+        .badge-status {
+            background: #f0fdf4;
+            color: #166534;
+        }
+        
+        .badge-status.error {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+        
+        .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+        
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .auto-refresh input[type="checkbox"] {
+            width: auto;
+            min-width: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 uP-Kan - Visualizador de Logs</h1>
+        <p>Interface independente para monitoramento e análise de logs</p>
+    </div>
+    
+    <div class="container">
+        <div class="controls">
+            <div class="control-group">
+                <label>🔍 Buscar</label>
+                <input type="text" id="searchInput" placeholder="Buscar por usuário, ação ou mensagem...">
+            </div>
+            
+            <div class="control-group">
+                <label>📊 Nível</label>
+                <select id="levelFilter">
+                    <option value="all">Todos</option>
+                    <option value="info">Info</option>
+                    <option value="warn">Avisos</option>
+                    <option value="error">Erros</option>
+                    <option value="debug">Debug</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>🏷️ Tipo</label>
+                <select id="typeFilter">
+                    <option value="all">🔍 Todos os Tipos</option>
+                    <option value="user_action">👤 Ações do Usuário</option>
+                    <option value="system">⚙️ Sistema</option>
+                    <option value="api">🔗 API</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <button class="btn btn-primary" onclick="loadLogs()">🔄 Atualizar</button>
+            </div>
+            
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <div class="auto-refresh">
+                    <input type="checkbox" id="autoRefresh">
+                    <label for="autoRefresh">Auto-refresh (3s)</label>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <span id="logCount">0 logs</span>
+                <span id="lastUpdate">-</span>
+            </div>
+        </div>
+        
+        <div class="logs-container">
+            <div class="logs-header">
+                <h3>📋 Histórico de Logs</h3>
+            </div>
+            
+            <div class="logs-list" id="logsList">
+                <div class="loading">Carregando logs...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let autoRefreshInterval;
+        
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        
+        function getLogClass(log) {
+            if (log.actionType === 'user_action') return 'user-action';
+            if (log.actionType === 'system') return 'system';
+            if (log.level === 'error') return 'error';
+            return '';
+        }
+        
+        function renderLogs(logs) {
+            const logsList = document.getElementById('logsList');
+            
+            if (logs.length === 0) {
+                logsList.innerHTML = '<div class="empty-state">📝 Nenhum log encontrado</div>';
+                return;
+            }
+            
+            const html = logs.map(log => \`
+                <div class="log-item \${getLogClass(log)}">
+                    <div class="log-timestamp">\${formatTimestamp(log.timestamp)}</div>
+                    <div class="log-content">
+                        <div class="log-message">\${log.message}</div>
+                        <div class="log-meta">
+                            <span class="badge badge-level \${log.level}">\${log.level}</span>
+                            \${log.actionType ? \`<span class="badge badge-type">\${log.actionType}</span>\` : ''}
+                            \${log.status ? \`<span class="badge badge-status \${log.status}">\${log.status}</span>\` : ''}
+                            \${log.duration ? \`<span class="badge badge-level">\${log.duration}ms</span>\` : ''}
+                        </div>
+                    </div>
+                </div>
+            \`).join('');
+            
+            logsList.innerHTML = html;
+        }
+        
+        function updateStats(total) {
+            document.getElementById('logCount').textContent = \`\${total} logs\`;
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('pt-BR');
+        }
+        
+        function showError(message) {
+            const logsList = document.getElementById('logsList');
+            logsList.innerHTML = \`<div class="error-message">❌ \${message}</div>\`;
+        }
+        
+        async function loadLogs() {
+            try {
+                const search = document.getElementById('searchInput').value;
+                const level = document.getElementById('levelFilter').value;
+                const type = document.getElementById('typeFilter').value;
+                
+                const params = new URLSearchParams();
+                if (level !== 'all') params.append('level', level);
+                if (type !== 'all') params.append('type', type);
+                if (search.trim()) params.append('search', search.trim());
+                params.append('limit', '200');
+                
+                const response = await fetch(\`/api/system/logs?\${params}\`);
+                if (!response.ok) {
+                    throw new Error(\`Erro HTTP: \${response.status}\`);
+                }
+                
+                const data = await response.json();
+                renderLogs(data.logs);
+                updateStats(data.total);
+                
+            } catch (error) {
+                console.error('Erro ao carregar logs:', error);
+                showError(\`Falha ao carregar logs: \${error.message}\`);
+            }
+        }
+        
+        function setupAutoRefresh() {
+            const checkbox = document.getElementById('autoRefresh');
+            
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    loadLogs(); // Carregar imediatamente
+                    autoRefreshInterval = setInterval(loadLogs, 3000);
+                } else {
+                    clearInterval(autoRefreshInterval);
+                }
+            });
+        }
+        
+        function setupFilters() {
+            const searchInput = document.getElementById('searchInput');
+            const levelFilter = document.getElementById('levelFilter');
+            const typeFilter = document.getElementById('typeFilter');
+            
+            let searchTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(loadLogs, 500);
+            });
+            
+            levelFilter.addEventListener('change', loadLogs);
+            typeFilter.addEventListener('change', loadLogs);
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Definir filtro padrão para ações do usuário
+            document.getElementById('typeFilter').value = 'user_action';
+            
+            setupAutoRefresh();
+            setupFilters();
+            loadLogs();
+        });
+    </script>
+</body>
+</html>
+    `;
+    
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  });
+
   console.log = (...args) => {
     const message = args.join(' ');
     if (message.includes('🚀 API:') || message.includes('✅ API:') || message.includes('❌ API:')) {
