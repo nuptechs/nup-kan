@@ -454,24 +454,24 @@ export default function PermissionsHub() {
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                     <User className="w-4 h-4 text-blue-600" />
                   </div>
-                  <div>
-                    <p className="font-medium">{user.name}</p>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <p className="font-medium">{user.name}</p>
+                      {user.role && <Badge variant="outline">{user.role}</Badge>}
+                      {user.profileId && (() => {
+                        const userProfile = profiles.find(p => p.id === user.profileId);
+                        return userProfile ? (
+                          <Badge 
+                            variant="secondary" 
+                            style={{ borderColor: userProfile.color, backgroundColor: `${userProfile.color}15` }}
+                            className="text-xs"
+                          >
+                            {userProfile.name}
+                          </Badge>
+                        ) : null;
+                      })()}
+                    </div>
                     <p className="text-sm text-muted-foreground">{user.email}</p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {user.role && <Badge variant="outline">{user.role}</Badge>}
-                    {user.profileId && (() => {
-                      const userProfile = profiles.find(p => p.id === user.profileId);
-                      return userProfile ? (
-                        <Badge 
-                          variant="secondary" 
-                          style={{ borderColor: userProfile.color, backgroundColor: `${userProfile.color}10` }}
-                          className="text-xs"
-                        >
-                          {userProfile.name}
-                        </Badge>
-                      ) : null;
-                    })()}
                   </div>
                 </div>
                 <div className="flex space-x-2">
