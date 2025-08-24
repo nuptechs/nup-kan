@@ -99,13 +99,6 @@ export default function KanbanPage() {
         </div>
         
         <div className="flex items-center space-x-4">
-          {/* Indicador de modo para read-only */}
-          {isReadOnly && (
-            <div className="px-3 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
-              Modo Visualização
-            </div>
-          )}
-          
           {/* Share Board Button - só para quem pode compartilhar */}
           {!isReadOnly && (
             <Button

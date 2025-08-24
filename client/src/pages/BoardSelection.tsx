@@ -233,10 +233,10 @@ export default function BoardSelection() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {/* Modo indicador */}
+              {/* Modo indicador discreto */}
               {isReadOnly && (
-                <div className="px-3 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
-                  Modo Visualização
+                <div className="flex items-center text-orange-600" title="Modo somente visualização">
+                  <Eye className="w-4 h-4" />
                 </div>
               )}
               
@@ -345,13 +345,6 @@ export default function BoardSelection() {
                   </div>
                 )}
                 
-                {/* Indicador read-only */}
-                {isReadOnly && (
-                  <div className="absolute top-4 right-4 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs">
-                    <Eye className="w-3 h-3 inline mr-1" />
-                    Visualização
-                  </div>
-                )}
 
                 {/* Board Content - Clickable area */}
                 <Link href={`/kanban/${board.id}`}>
