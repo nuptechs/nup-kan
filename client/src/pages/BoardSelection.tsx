@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Grid, Settings, Edit, Trash2, MoreVertical } from "lucide-react";
+import { Plus, Grid, Settings, Edit, Trash2, MoreVertical, User } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { LogoutButton } from "@/components/auth/logout-button";
 import type { Board } from "@shared/schema";
 
 const boardSchema = z.object({
@@ -214,18 +215,29 @@ export default function BoardSelection() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Grid className="w-8 h-8 text-blue-600 mr-3" />
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                uP - Kan
-              </h1>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  uP - Kan
+                </h1>
+                {currentUser && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                    <User className="w-3 h-3 mr-1" />
+                    {currentUser.name}
+                  </p>
+                )}
+              </div>
             </div>
-            <Button
-              onClick={() => setIsCreateOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700"
-              data-testid="button-create-board"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Board
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={() => setIsCreateOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700"
+                data-testid="button-create-board"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Board
+              </Button>
+              <LogoutButton size="sm" />
+            </div>
           </div>
         </div>
       </div>

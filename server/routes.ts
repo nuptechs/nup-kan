@@ -829,14 +829,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Current user route (simulando usuário logado)
+  // Authentication routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email e senha são obrigatórios" });
+      }
+
+      // Find user by email
+      const users = await storage.getUsers();
+      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      
+      if (!user) {
+        return res.status(401).json({ message: "Email ou senha incorretos" });
+      }
+
+      // For demo purposes, we'll accept any password for existing users
+      // In production, you would hash and compare passwords
+      
+      // Store user ID in session (simple session management)
+      req.session = req.session || {};
+      req.session.userId = user.id;
+      
+      res.json({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+        profileId: user.profileId
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  app.post("/api/auth/logout", async (req, res) => {
+    try {
+      req.session = null;
+      res.json({ message: "Logout realizado com sucesso" });
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao fazer logout" });
+    }
+  });
+
   app.get("/api/auth/current-user", async (req, res) => {
     try {
-      // Por enquanto, vamos retornar o primeiro usuário como usuário "logado"
-      const users = await storage.getUsers();
-      const currentUser = users[0];
-      if (!currentUser) {
-        return res.status(404).json({ message: "No user found" });
+      // Check if user is logged in via session
+      const userId = req.session?.userId;
+      
+      if (!userId) {
+        // For development, return Yuri Francis as default user
+        const users = await storage.getUsers();
+        const yuriUser = users.find(u => u.name === "Yuri Francis");
+        if (yuriUser) {
+          return res.json(yuriUser);
+        }
+        return res.status(401).json({ message: "Not authenticated" });
       }
+
+      const users = await storage.getUsers();
+      const currentUser = users.find(u => u.id === userId);
+      
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
       res.json(currentUser);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch current user" });

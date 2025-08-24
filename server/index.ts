@@ -1,8 +1,19 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cookieSession from "cookie-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// Session configuration
+app.use(cookieSession({
+  name: 'session',
+  keys: ['your-secret-key', 'another-secret-key'], // Use environment variables in production
+  maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  secure: false, // Set to true in production with HTTPS
+  httpOnly: true,
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
