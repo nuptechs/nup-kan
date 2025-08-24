@@ -1,5 +1,57 @@
 [
   {
+    "id": "action_1756050530218_riyb4kjtd",
+    "timestamp": "2025-08-24T15:48:50.218Z",
+    "level": "info",
+    "message": "Sistema executou: Atualizar tarefa \"asdfasdfsadf\"",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "system",
+    "userName": "Sistema",
+    "action": "Atualizar tarefa \"asdfasdfsadf\"",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 477
+  },
+  {
+    "id": "action_1756050506491_qftolbk07",
+    "timestamp": "2025-08-24T15:48:26.491Z",
+    "level": "info",
+    "message": "Sistema executou: Criar tarefa \"asdfasdfsadf\"",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "system",
+    "userName": "Sistema",
+    "action": "Criar tarefa \"asdfasdfsadf\"",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 158
+  },
+  {
+    "id": "log_1756050506490_dv4hdhjky",
+    "timestamp": "2025-08-24T15:48:26.490Z",
+    "level": "info",
+    "message": "✅ API: Task created successfully, returning: [object Object]",
+    "context": "API",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756050506335_pcb5i9zsb",
+    "timestamp": "2025-08-24T15:48:26.335Z",
+    "level": "info",
+    "message": "✅ API: Parsed task data: [object Object]",
+    "context": "API",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756050506333_5b9qlh6i6",
+    "timestamp": "2025-08-24T15:48:26.333Z",
+    "level": "debug",
+    "message": "🚀 API: Creating task with data: [object Object]",
+    "context": "TASK_CREATION",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756050464721_n5yaxjvhk",
     "timestamp": "2025-08-24T15:47:44.721Z",
     "level": "warn",
