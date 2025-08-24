@@ -23,6 +23,14 @@ interface SystemLog {
   message: string;
   context?: string;
   details?: any;
+  // Novos campos para ações do usuário
+  actionType?: 'user_action' | 'system' | 'api';
+  userId?: string;
+  userName?: string;
+  action?: string;
+  status?: 'success' | 'error' | 'pending';
+  errorDetails?: any;
+  duration?: number;
 }
 
 interface LogsResponse {
@@ -38,18 +46,23 @@ interface SystemLogsDialogProps {
 
 export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) {
   const [selectedLevel, setSelectedLevel] = useState<string>("all");
+  const [selectedType, setSelectedType] = useState<string>("all");
+  const [selectedLogDetail, setSelectedLogDetail] = useState<SystemLog | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: logsData, isLoading, refetch } = useQuery<LogsResponse>({
-    queryKey: ["/api/system/logs", selectedLevel],
+    queryKey: ["/api/system/logs", selectedLevel, selectedType],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (selectedLevel !== "all") {
         params.append("level", selectedLevel);
       }
-      params.append("limit", "50");
+      if (selectedType !== "all") {
+        params.append("type", selectedType);
+      }
+      params.append("limit", "100");
       
       const response = await fetch(`/api/system/logs?${params}`);
       if (!response.ok) {
@@ -90,6 +103,32 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'debug':
         return 'bg-gray-100 text-gray-800 border-gray-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case 'success':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'error':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getActionTypeColor = (type?: string) => {
+    switch (type) {
+      case 'user_action':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'system':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'api':
+        return 'bg-indigo-100 text-indigo-800 border-indigo-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -151,6 +190,20 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
               </Select>
             </div>
 
+            <div className="flex items-center gap-2">
+              <Select value={selectedType} onValueChange={setSelectedType}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Tipos</SelectItem>
+                  <SelectItem value="user_action">Ações do Usuário</SelectItem>
+                  <SelectItem value="system">Sistema</SelectItem>
+                  <SelectItem value="api">API</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <Button
               onClick={() => setAutoRefresh(!autoRefresh)}
               variant={autoRefresh ? "default" : "outline"}
@@ -205,17 +258,49 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
                 </div>
               ) : (
                 logsData?.logs.map((log) => (
-                  <Card key={log.id} className="border-l-4 border-l-blue-500">
+                  <Card 
+                    key={log.id} 
+                    className={`border-l-4 ${
+                      log.actionType === 'user_action' ? 'border-l-purple-500' : 
+                      log.actionType === 'system' ? 'border-l-blue-500' : 
+                      'border-l-gray-500'
+                    } ${log.status === 'error' && log.errorDetails ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+                    onClick={() => {
+                      if (log.status === 'error' && log.errorDetails) {
+                        setSelectedLogDetail(log);
+                      }
+                    }}
+                  >
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2 flex-1">
+                        <div className="flex items-center gap-2 flex-1 flex-wrap">
                           <span className="text-lg">{getLevelEmoji(log.level)}</span>
+                          
+                          {/* Tipo de Ação */}
+                          {log.actionType && (
+                            <Badge className={getActionTypeColor(log.actionType)}>
+                              {log.actionType === 'user_action' ? 'USUÁRIO' : 
+                               log.actionType === 'system' ? 'SISTEMA' : 'API'}
+                            </Badge>
+                          )}
+                          
+                          {/* Status da Ação */}
+                          {log.status && (
+                            <Badge className={getStatusColor(log.status)}>
+                              {log.status === 'success' ? '✓ SUCESSO' : 
+                               log.status === 'error' ? '✗ ERRO' : '⏳ PENDENTE'}
+                            </Badge>
+                          )}
+                          
+                          {/* Nível do Log */}
                           <Badge className={getLevelColor(log.level)}>
                             {log.level.toUpperCase()}
                           </Badge>
-                          {log.context && (
+                          
+                          {/* Duração */}
+                          {log.duration && (
                             <Badge variant="outline" className="text-xs">
-                              {log.context}
+                              {log.duration}ms
                             </Badge>
                           )}
                         </div>
@@ -226,15 +311,40 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0">
+                      {/* Usuário e Ação */}
+                      {log.userName && log.action && (
+                        <div className="mb-2 p-2 bg-purple-50 rounded">
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium text-purple-800">
+                              👤 {log.userName}
+                            </span>
+                            <span className="text-sm text-purple-600">
+                              {log.action}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      
                       <p className="text-sm text-gray-700 font-mono break-words">
                         {formatMessage(log.message)}
                       </p>
-                      {log.details && typeof log.details === 'object' && (
+                      
+                      {/* Detalhes do Sistema */}
+                      {log.details && typeof log.details === 'object' && !log.errorDetails && (
                         <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
                           <strong>Detalhes:</strong>
                           <pre className="mt-1 text-gray-600 whitespace-pre-wrap">
                             {JSON.stringify(log.details, null, 2)}
                           </pre>
+                        </div>
+                      )}
+                      
+                      {/* Indicador de Erro Clicável */}
+                      {log.status === 'error' && log.errorDetails && (
+                        <div className="mt-2 p-2 bg-red-50 rounded border border-red-200">
+                          <p className="text-sm text-red-600 font-medium">
+                            ❌ Erro detectado - Clique para ver detalhes
+                          </p>
                         </div>
                       )}
                     </CardContent>
@@ -261,6 +371,66 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
           )}
         </div>
       </DialogContent>
+      
+      {/* Dialog de Detalhes do Erro */}
+      <Dialog open={!!selectedLogDetail} onOpenChange={() => setSelectedLogDetail(null)}>
+        <DialogContent className="max-w-2xl max-h-[70vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              🔴 Detalhes do Erro
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedLogDetail && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <strong>Usuário:</strong> {selectedLogDetail.userName || 'Sistema'}
+                </div>
+                <div>
+                  <strong>Ação:</strong> {selectedLogDetail.action || 'N/A'}
+                </div>
+                <div>
+                  <strong>Horário:</strong> {formatTimestamp(selectedLogDetail.timestamp)}
+                </div>
+                <div>
+                  <strong>Duração:</strong> {selectedLogDetail.duration}ms
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div>
+                <h4 className="font-medium mb-2">Mensagem de Erro:</h4>
+                <div className="p-3 bg-red-50 rounded border border-red-200">
+                  <p className="text-red-800 font-mono text-sm">
+                    {selectedLogDetail.message}
+                  </p>
+                </div>
+              </div>
+              
+              {selectedLogDetail.errorDetails && (
+                <div>
+                  <h4 className="font-medium mb-2">Detalhes Técnicos:</h4>
+                  <ScrollArea className="h-64 w-full rounded-md border">
+                    <div className="p-3">
+                      <pre className="text-xs text-gray-700 whitespace-pre-wrap">
+                        {JSON.stringify(selectedLogDetail.errorDetails, null, 2)}
+                      </pre>
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+              
+              <div className="flex justify-end">
+                <Button onClick={() => setSelectedLogDetail(null)}>
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

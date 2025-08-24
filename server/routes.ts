@@ -29,15 +29,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/tasks", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.body.createdBy || "system";
+    const userName = req.body.createdByName || "Sistema";
+    
     try {
       console.log("🚀 API: Creating task with data:", req.body);
       const taskData = insertTaskSchema.parse(req.body);
       console.log("✅ API: Parsed task data:", taskData);
+      
       const task = await storage.createTask(taskData);
       console.log("✅ API: Task created successfully, returning:", task);
+      
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Criar tarefa "${task.title}"`, 'success', null, duration);
+      
       res.status(201).json(task);
     } catch (error) {
       console.error("❌ API: Error creating task:", error);
+      
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      addUserActionLog(userId, userName, `Criar tarefa "${req.body.title || 'sem título'}"`, 'error', { error: errorMessage, details: error }, duration);
+      
       if (error instanceof Error) {
         res.status(400).json({ 
           message: "Invalid task data", 
@@ -50,11 +64,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.patch("/api/tasks/:id", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.body.updatedBy || "system";
+    const userName = req.body.updatedByName || "Sistema";
+    
     try {
       const taskData = updateTaskSchema.parse(req.body);
       const task = await storage.updateTask(req.params.id, taskData);
+      
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Atualizar tarefa "${task.title}"`, 'success', null, duration);
+      
       res.json(task);
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      addUserActionLog(userId, userName, `Atualizar tarefa (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
+      
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "Task not found" });
       }
@@ -63,10 +89,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete("/api/tasks/:id", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.query.deletedBy as string || "system";
+    const userName = req.query.deletedByName as string || "Sistema";
+    
     try {
       await storage.deleteTask(req.params.id);
+      
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Deletar tarefa (ID: ${req.params.id})`, 'success', null, duration);
+      
       res.status(204).send();
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      addUserActionLog(userId, userName, `Deletar tarefa (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
+      
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "Task not found" });
       }
@@ -236,11 +274,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/columns", async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.body.createdBy || "system";
+    const userName = req.body.createdByName || "Sistema";
+    
     try {
       const columnData = insertColumnSchema.parse(req.body);
       const column = await storage.createColumn(columnData);
+      
+      const duration = Date.now() - startTime;
+      addUserActionLog(userId, userName, `Criar coluna "${column.name}"`, 'success', null, duration);
+      
       res.status(201).json(column);
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      addUserActionLog(userId, userName, `Criar coluna "${req.body.name || 'sem nome'}"`, 'error', { error: errorMessage, details: error }, duration);
+      
       res.status(400).json({ message: "Invalid column data" });
     }
   });
@@ -526,9 +576,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     message: string;
     context?: string;
     details?: any;
+    // Novos campos para ações do usuário
+    actionType?: 'user_action' | 'system' | 'api';
+    userId?: string;
+    userName?: string;
+    action?: string;
+    status?: 'success' | 'error' | 'pending';
+    errorDetails?: any;
+    duration?: number;
   }> = [];
 
-  // Função para adicionar log
+  // Função para adicionar log do sistema
   const addLog = (level: 'info' | 'warn' | 'error' | 'debug', message: string, context?: string, details?: any) => {
     const log = {
       id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -536,38 +594,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
       level,
       message,
       context,
-      details
+      details,
+      actionType: 'system' as const
     };
     
-    systemLogs.unshift(log); // Adiciona no início
+    systemLogs.unshift(log);
     
-    // Manter apenas os últimos 100 logs
-    if (systemLogs.length > 100) {
-      systemLogs = systemLogs.slice(0, 100);
+    if (systemLogs.length > 200) {
+      systemLogs = systemLogs.slice(0, 200);
     }
     
-    // Log também no console do servidor
     const emoji = level === 'info' ? '🔵' : level === 'warn' ? '🟡' : level === 'error' ? '🔴' : '⚪';
     console.log(`${emoji} [${context || 'SYSTEM'}] ${message}`, details ? details : '');
+  };
+
+  // Função para adicionar log de ação do usuário
+  const addUserActionLog = (
+    userId: string, 
+    userName: string, 
+    action: string, 
+    status: 'success' | 'error' | 'pending',
+    errorDetails?: any,
+    duration?: number
+  ) => {
+    const log = {
+      id: `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date().toISOString(),
+      level: status === 'error' ? 'error' as const : 'info' as const,
+      message: `${userName} executou: ${action}`,
+      context: 'USER_ACTION',
+      actionType: 'user_action' as const,
+      userId,
+      userName,
+      action,
+      status,
+      errorDetails,
+      duration
+    };
+    
+    systemLogs.unshift(log);
+    
+    if (systemLogs.length > 200) {
+      systemLogs = systemLogs.slice(0, 200);
+    }
+    
+    const emoji = status === 'success' ? '✅' : status === 'error' ? '❌' : '⏳';
+    const statusEmoji = status === 'success' ? '🟢' : status === 'error' ? '🔴' : '🟡';
+    console.log(`${emoji} [USER_ACTION] ${userName} → ${action} ${statusEmoji}${duration ? ` (${duration}ms)` : ''}`, errorDetails ? errorDetails : '');
   };
 
   // Endpoint para obter logs
   app.get("/api/system/logs", async (req, res) => {
     try {
-      const { level, limit = "50" } = req.query;
+      const { level, type, limit = "100" } = req.query;
       let filteredLogs = systemLogs;
       
       if (level && typeof level === 'string') {
-        filteredLogs = systemLogs.filter(log => log.level === level);
+        filteredLogs = filteredLogs.filter(log => log.level === level);
+      }
+      
+      if (type && typeof type === 'string') {
+        filteredLogs = filteredLogs.filter(log => log.actionType === type);
       }
       
       const limitNum = parseInt(limit as string, 10);
-      const result = filteredLogs.slice(0, Math.min(limitNum, 100));
+      const result = filteredLogs.slice(0, Math.min(limitNum, 200));
       
       res.json({
         logs: result,
         total: filteredLogs.length,
-        levels: ['info', 'warn', 'error', 'debug']
+        levels: ['info', 'warn', 'error', 'debug'],
+        types: ['user_action', 'system', 'api']
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch logs" });
