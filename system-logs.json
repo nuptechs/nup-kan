@@ -1,5 +1,27 @@
 [
   {
+    "id": "action_1756053221190_dhasxpdyl",
+    "timestamp": "2025-08-24T16:33:41.190Z",
+    "level": "info",
+    "message": "Usuário desconhecido executou: Atualizar usuário \"Analista\" (teste@teste.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "unknown",
+    "userName": "Usuário desconhecido",
+    "action": "Atualizar usuário \"Analista\" (teste@teste.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 314
+  },
+  {
+    "id": "log_1756053125998_txlqug9nj",
+    "timestamp": "2025-08-24T16:32:05.998Z",
+    "level": "warn",
+    "message": "🔐 [AUTH] Tentativa de acesso não autenticado na rota GET /api/boards de IP: 172.31.108.34",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756053067465_ku0oy9ejf",
     "timestamp": "2025-08-24T16:31:07.465Z",
     "level": "warn",
