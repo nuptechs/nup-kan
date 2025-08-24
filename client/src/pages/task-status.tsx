@@ -68,7 +68,7 @@ export default function TaskStatusPage() {
   // Mutations
   const createMutation = useMutation({
     mutationFn: (data: Omit<StatusFormData, "position">) => 
-      apiRequest("/api/task-statuses", "POST", {
+      apiRequest("POST", "/api/task-statuses", {
         ...data,
         position: statuses.length
       }),
@@ -92,7 +92,7 @@ export default function TaskStatusPage() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<StatusFormData> }) =>
-      apiRequest(`/api/task-statuses/${id}`, "PATCH", data),
+      apiRequest("PATCH", `/api/task-statuses/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/task-statuses"] });
       setDialogOpen(false);
@@ -112,7 +112,7 @@ export default function TaskStatusPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => apiRequest(`/api/task-statuses/${id}`, "DELETE"),
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/task-statuses/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/task-statuses"] });
       toast({

@@ -68,7 +68,7 @@ export default function TaskPriorityPage() {
   // Mutations
   const createMutation = useMutation({
     mutationFn: (data: PriorityFormData) => 
-      apiRequest("/api/task-priorities", "POST", data),
+      apiRequest("POST", "/api/task-priorities", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/task-priorities"] });
       setDialogOpen(false);
@@ -89,7 +89,7 @@ export default function TaskPriorityPage() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<PriorityFormData> }) =>
-      apiRequest(`/api/task-priorities/${id}`, "PATCH", data),
+      apiRequest("PATCH", `/api/task-priorities/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/task-priorities"] });
       setDialogOpen(false);
@@ -109,7 +109,7 @@ export default function TaskPriorityPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => apiRequest(`/api/task-priorities/${id}`, "DELETE"),
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/task-priorities/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/task-priorities"] });
       toast({
