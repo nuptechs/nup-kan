@@ -2342,6 +2342,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/custom-fields", async (req, res) => {
     const startTime = Date.now();
     try {
+      console.log("🔵 [DEBUG] Raw request body:", JSON.stringify(req.body, null, 2));
+      console.log("🔵 [DEBUG] Field name value:", JSON.stringify(req.body.name));
+      console.log("🔵 [DEBUG] Field name length:", req.body.name ? req.body.name.length : 'undefined');
+      console.log("🔵 [DEBUG] Field name type:", typeof req.body.name);
+      
       const userId = req.session?.user?.id;
       const userName = req.session?.user?.name;
       

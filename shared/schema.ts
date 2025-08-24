@@ -387,8 +387,11 @@ export const insertCustomFieldSchema = createInsertSchema(customFields).omit({
   updatedAt: true,
 }).extend({
   name: z.string().min(1, "Nome do campo obrigatório").trim()
-    .regex(/^[a-zA-Z][a-zA-Z0-9_-]*$/, "Nome deve começar com letra e conter apenas letras, números, traços e underscore")
-    .max(50, "Nome muito longo (máximo 50 caracteres)"),
+    .refine((val) => /^[a-zA-Z][a-zA-Z0-9_-]*$/.test(val), {
+      message: "Nome deve começar com letra e conter apenas letras, números, traços e underscore"
+    })
+    .transform((val) => val.toLowerCase())
+    .refine((val) => val.length <= 50, { message: "Nome muito longo (máximo 50 caracteres)" }),
   label: z.string().min(1, "Rótulo obrigatório").trim(),
   type: z.enum(["text", "number", "date", "select", "boolean", "url", "email"], { message: "Tipo de campo inválido" }),
   required: z.enum(["true", "false"]).default("false"),

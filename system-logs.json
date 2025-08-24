@@ -1,15 +1,23 @@
 [
   {
-    "id": "log_1756047783508_dulznz0x5",
-    "timestamp": "2025-08-24T15:03:03.508Z",
+    "id": "log_1756047944840_kmhckbr1r",
+    "timestamp": "2025-08-24T15:05:44.840Z",
+    "level": "error",
+    "message": "Error creating custom field: [\n  {\n    \"code\": \"custom\",\n    \"message\": \"Nome deve começar com letra e conter apenas letras, números, traços e underscore\",\n    \"path\": [\n      \"name\"\n    ]\n  }\n]",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756047922322_764mmwufj",
+    "timestamp": "2025-08-24T15:05:22.322Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756047782052_le2q1eu38",
-    "timestamp": "2025-08-24T15:03:02.052Z",
+    "id": "log_1756047920704_9u2f0gbfa",
+    "timestamp": "2025-08-24T15:05:20.704Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",
