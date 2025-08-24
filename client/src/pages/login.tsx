@@ -236,12 +236,8 @@ export default function LoginPage() {
                             type="text"
                             placeholder="Seu nome completo"
                             className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
                             disabled={registerMutation.isPending}
+                            {...field}
                             data-testid="input-name"
                           />
                         </FormControl>
@@ -264,12 +260,8 @@ export default function LoginPage() {
                             type="email"
                             placeholder="seu@email.com"
                             className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
                             disabled={registerMutation.isPending}
+                            {...field}
                             data-testid="input-register-email"
                           />
                         </FormControl>
@@ -292,12 +284,8 @@ export default function LoginPage() {
                             type="password"
                             placeholder="••••••••"
                             className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
                             disabled={registerMutation.isPending}
+                            {...field}
                             data-testid="input-register-password"
                           />
                         </FormControl>
