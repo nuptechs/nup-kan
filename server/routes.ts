@@ -779,7 +779,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>uP-Kan - Visualizador de Logs</title>
+    <title>NuP-Kan - Visualizador de Logs</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -1036,7 +1036,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 </head>
 <body>
     <div class="header">
-        <h1>🔍 uP-Kan - Visualizador de Logs</h1>
+        <h1>🔍 NuP-Kan - Visualizador de Logs</h1>
         <p>Interface independente para monitoramento e análise de logs</p>
     </div>
     

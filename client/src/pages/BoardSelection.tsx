@@ -217,7 +217,7 @@ export default function BoardSelection() {
               <Grid className="w-8 h-8 text-blue-600 mr-3" />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  uP - Kan
+                  NuP-Kan
                 </h1>
                 {currentUser && (
                   <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">

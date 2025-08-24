@@ -56,7 +56,7 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<bool
       <body>
         <div class="container">
           <div class="header">
-            <div class="logo">uP - Kan</div>
+            <div class="logo">NuP-Kan</div>
             <p>Sistema de Gerenciamento Kanban</p>
           </div>
           
@@ -64,7 +64,7 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<bool
             <div class="welcome-box">
               <h2>Bem-vindo(a), ${params.userName}! 🎉</h2>
               
-              <p>Estamos muito felizes em tê-lo(a) na nossa plataforma <strong>uP - Kan</strong>!</p>
+              <p>Estamos muito felizes em tê-lo(a) na nossa plataforma <strong>NuP-Kan</strong>!</p>
               
               <p>Sua conta foi criada com sucesso com as seguintes informações:</p>
               <ul>
@@ -73,7 +73,7 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<bool
                 ${params.userRole ? `<li><strong>Cargo:</strong> ${params.userRole}</li>` : ''}
               </ul>
               
-              <p>Com o uP - Kan, você poderá:</p>
+              <p>Com o NuP-Kan, você poderá:</p>
               <ul>
                 <li>✅ Gerenciar tarefas de forma organizada</li>
                 <li>✅ Colaborar eficientemente com sua equipe</li>
@@ -91,7 +91,7 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<bool
           </div>
           
           <div class="footer">
-            <p>Este email foi enviado automaticamente pelo sistema uP - Kan</p>
+            <p>Este email foi enviado automaticamente pelo sistema NuP-Kan</p>
             <p>Se você não se cadastrou em nossa plataforma, pode ignorar este email.</p>
           </div>
         </div>
@@ -100,7 +100,7 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<bool
     `;
 
     const textContent = `
-Bem-vindo(a) ao uP - Kan, ${params.userName}!
+Bem-vindo(a) ao NuP-Kan, ${params.userName}!
 
 Sua conta foi criada com sucesso em nosso sistema de gerenciamento Kanban.
 
@@ -109,19 +109,19 @@ Informações da conta:
 - Email: ${params.to}
 ${params.userRole ? `- Cargo: ${params.userRole}` : ''}
 
-Com o uP - Kan, você poderá gerenciar tarefas de forma organizada, colaborar com sua equipe e acompanhar o progresso dos projetos.
+Com o NuP-Kan, você poderá gerenciar tarefas de forma organizada, colaborar com sua equipe e acompanhar o progresso dos projetos.
 
 Agora você pode começar a usar todas as funcionalidades do sistema!
 
 ---
-Este email foi enviado automaticamente pelo sistema uP - Kan.
+Este email foi enviado automaticamente pelo sistema NuP-Kan.
     `;
 
     const senderDomain = process.env.SENDER_DOMAIN || 'replit.app';
     await mailService.send({
       to: params.to,
       from: `noreply@${senderDomain}`,
-      subject: '🎉 Bem-vindo(a) ao uP - Kan! Sua conta foi criada com sucesso',
+      subject: '🎉 Bem-vindo(a) ao NuP-Kan! Sua conta foi criada com sucesso',
       text: textContent,
       html: htmlContent,
     });
@@ -174,7 +174,7 @@ export async function sendNotificationEmail(params: NotificationEmailParams): Pr
       <body>
         <div class="container">
           <div class="header">
-            <h2>uP - Kan</h2>
+            <h2>NuP-Kan</h2>
           </div>
           <div class="content">
             <div class="message-box">
@@ -182,7 +182,7 @@ export async function sendNotificationEmail(params: NotificationEmailParams): Pr
             </div>
           </div>
           <div class="footer">
-            <p>Este email foi enviado automaticamente pelo sistema uP - Kan</p>
+            <p>Este email foi enviado automaticamente pelo sistema NuP-Kan</p>
           </div>
         </div>
       </body>

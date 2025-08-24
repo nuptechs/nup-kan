@@ -128,7 +128,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
     const exportData: Record<string, any> = {
       metadata: {
         exportedAt: new Date().toISOString(),
-        exportedBy: 'uP - Kan System',
+        exportedBy: 'NuP-Kan System',
         format: exportOptions.format,
         version: '2.0',
         totalRecords: 0
@@ -457,7 +457,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
       XLSX.utils.book_append_sheet(workbook, analyticsWS, "📈 Analytics");
     }
 
-    const filename = `uP-Kan-Export-Completo-${new Date().toISOString().split('T')[0]}.xlsx`;
+    const filename = `NuP-Kan-Export-Completo-${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(workbook, filename);
   };
 
@@ -466,7 +466,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
     
     // Title
     pdf.setFontSize(20);
-    pdf.text('uP - Kan - Relatório de Exportação', 20, 30);
+    pdf.text('NuP-Kan - Relatório de Exportação', 20, 30);
     
     pdf.setFontSize(12);
     pdf.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, 45);

@@ -1,8 +1,11 @@
 # Overview
 
-This is a Kanban board application called **"uP - Kan"** built with React and Express, featuring a modern task management interface with drag-and-drop functionality. The application allows users to organize tasks across different columns (Backlog, To Do, In Progress, Review, Done), manage team members, and track project analytics. It includes WIP (Work In Progress) limits, task assignments, progress tracking, and real-time updates. **The system uses PostgreSQL for persistent data storage with a many-to-many relationship between users and teams.**
+This is a Kanban board application called **"NuP-Kan"** built with React and Express, featuring a modern task management interface with drag-and-drop functionality. The application allows users to organize tasks across different columns (Backlog, To Do, In Progress, Review, Done), manage team members, and track project analytics. It includes WIP (Work In Progress) limits, task assignments, progress tracking, and real-time updates. **The system uses PostgreSQL for persistent data storage with a many-to-many relationship between users and teams.**
 
-**Recent Updates (August 22, 2025):**
+**Recent Updates (August 24, 2025):**
+- ✅ **BRANDING UPDATE**: Nome da aplicação alterado de "uP - Kan" para "NuP-Kan"
+
+**Previous Updates (August 22, 2025):**
 - ✅ **BRANDING UPDATE**: Nome da aplicação alterado de "Kanban Flow" para "uP - Kan"
 - ✅ Logo personalizado adicionado com a letra "N" estilizada
 - ✅ Timeline implementada como histórico dentro dos detalhes das tasks
@@ -15,7 +18,7 @@ This is a Kanban board application called **"uP - Kan"** built with React and Ex
 - ✅ Limites WIP aprimorados com verificação correta
 - ✅ **EMAIL SYSTEM**: Sistema de emails implementado com SendGrid
 - ✅ Emails de boas-vindas automáticos para novos usuários
-- ✅ Templates HTML responsivos com branding uP - Kan
+- ✅ Templates HTML responsivos com branding NuP-Kan
 
 **Previous Updates (August 21, 2025):**
 - ✅ Sistema completo de gerenciamento de times implementado com CRUD total
