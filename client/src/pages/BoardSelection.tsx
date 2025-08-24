@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { Board } from "@shared/schema";
 
 const boardSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
+  name: z.string().min(3, "O nome do board deve conter pelo menos 3 caracteres").trim(),
   description: z.string().optional(),
   color: z.string().default("#3b82f6"),
 });
@@ -61,17 +61,18 @@ export default function BoardSelection() {
 
   const createBoardMutation = useMutation({
     mutationFn: async (data: BoardFormData) => {
-      const response = await apiRequest("POST", "/api/boards", {
-        ...data,
-        createdById: currentUser?.id || "system",
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`Erro ao criar board: ${errorData}`);
+      try {
+        const response = await apiRequest("POST", "/api/boards", {
+          ...data,
+          createdById: currentUser?.id || "system",
+        });
+        return response.json();
+      } catch (error: any) {
+        // The apiRequest already handles the HTTP error and throws with the message
+        // Re-throw with a more structured format for better error handling
+        console.error("Original API error:", error);
+        throw error;
       }
-      
-      return response.json();
     },
     onSuccess: async (newBoard) => {
       // Force refresh da lista de boards
@@ -92,9 +93,24 @@ export default function BoardSelection() {
     },
     onError: (error: any) => {
       console.error("Erro ao criar board:", error);
+      
+      // Parse API error response for better user feedback
+      let errorMessage = "Erro ao criar board. Tente novamente.";
+      
+      if (error?.message) {
+        // Check if it's a validation error from the backend
+        if (error.message.includes("O nome do board deve conter pelo menos 3 caracteres")) {
+          errorMessage = "O nome do board deve conter pelo menos 3 caracteres.";
+        } else if (error.message.includes("Invalid board data")) {
+          errorMessage = "Dados do board inválidos. Verifique se todos os campos estão preenchidos corretamente.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
-        title: "Erro",
-        description: error?.message || "Erro ao criar board. Tente novamente.",
+        title: "Erro ao criar board",
+        description: errorMessage,
         variant: "destructive",
       });
     },

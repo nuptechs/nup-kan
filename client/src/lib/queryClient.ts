@@ -2,8 +2,33 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    try {
+      // Try to parse JSON error response first
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const errorData = await res.json();
+        
+        // Handle validation errors with details
+        if (errorData.details && typeof errorData.details === 'string') {
+          // Parse Zod validation error from details
+          if (errorData.details.includes("O nome do board deve conter pelo menos 3 caracteres")) {
+            throw new Error("O nome do board deve conter pelo menos 3 caracteres");
+          }
+          throw new Error(errorData.details);
+        }
+        
+        // Handle regular API errors
+        const errorMessage = errorData.message || errorData.error || res.statusText;
+        throw new Error(errorMessage);
+      } else {
+        // Fallback to text response
+        const text = (await res.text()) || res.statusText;
+        throw new Error(`${res.status}: ${text}`);
+      }
+    } catch (parseError) {
+      // If parsing fails, use status and statusText
+      throw new Error(`${res.status}: ${res.statusText}`);
+    }
   }
 }
 
