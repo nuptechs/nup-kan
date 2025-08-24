@@ -454,25 +454,29 @@ export default function PermissionsHub() {
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                     <User className="w-4 h-4 text-blue-600" />
                   </div>
-                  <div className="flex-1">
+                  <div>
                     <div className="flex items-center space-x-2">
                       <p className="font-medium">{user.name}</p>
-                      {user.role && <Badge variant="outline">{user.role}</Badge>}
                       {user.profileId && (() => {
                         const userProfile = profiles.find(p => p.id === user.profileId);
                         return userProfile ? (
-                          <Badge 
-                            variant="secondary" 
-                            style={{ borderColor: userProfile.color, backgroundColor: `${userProfile.color}15` }}
-                            className="text-xs"
-                          >
-                            {userProfile.name}
-                          </Badge>
+                          <span 
+                            className="w-2 h-2 rounded-full inline-block"
+                            style={{ backgroundColor: userProfile.color }}
+                            title={`Perfil: ${userProfile.name}`}
+                          />
                         ) : null;
                       })()}
                     </div>
                     <p className="text-sm text-muted-foreground">{user.email}</p>
+                    {user.profileId && (() => {
+                      const userProfile = profiles.find(p => p.id === user.profileId);
+                      return userProfile ? (
+                        <p className="text-xs text-gray-500">Perfil: {userProfile.name}</p>
+                      ) : null;
+                    })()}
                   </div>
+                  {user.role && <Badge variant="outline">{user.role}</Badge>}
                 </div>
                 <div className="flex space-x-2">
                   <Dialog>
