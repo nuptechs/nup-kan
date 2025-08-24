@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -119,6 +119,9 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
           <SheetTitle>
             Configurações
           </SheetTitle>
+          <SheetDescription>
+            Configure as opções do sistema e gerencie seus dados.
+          </SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto py-6 space-y-6">

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -100,7 +100,7 @@ export function ExportHistoryDialog({ open, onOpenChange, userId }: ExportHistor
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl" aria-describedby="history-dialog-description">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
@@ -115,9 +115,9 @@ export function ExportHistoryDialog({ open, onOpenChange, userId }: ExportHistor
               <RefreshCw className="w-4 h-4" />
             </Button>
           </DialogTitle>
-          <p id="history-dialog-description" className="text-sm text-muted-foreground">
+          <DialogDescription>
             Visualize o histórico completo de todas as suas exportações, incluindo status e detalhes dos arquivos gerados.
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="max-h-[60vh]">

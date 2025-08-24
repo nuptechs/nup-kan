@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -638,7 +638,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
             fileName: fileName,
             fileSize: JSON.stringify(exportData).length, // Approximate size
             recordsCount: exportData.metadata.totalRecords,
-            completedAt: new Date().toISOString()
+            completedAt: new Date()
           });
         } catch (updateError) {
           console.warn('Failed to update export history:', updateError);
@@ -666,7 +666,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
           await apiRequest('PATCH', `/api/exports/${exportHistoryId}`, {
             status: 'failed',
             errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
-            completedAt: new Date().toISOString()
+            completedAt: new Date()
           });
         } catch (updateError) {
           console.warn('Failed to update export history:', updateError);
@@ -706,15 +706,15 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto" aria-describedby="export-dialog-description">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Download className="w-5 h-5" />
             Exportação Avançada de Dados
           </DialogTitle>
-          <p id="export-dialog-description" className="text-sm text-muted-foreground">
+          <DialogDescription>
             Configure e exporte seus dados do kanban em diferentes formatos com opções avançadas de personalização.
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
