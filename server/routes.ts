@@ -690,7 +690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint para obter logs
   app.get("/api/system/logs", async (req, res) => {
     try {
-      const { level, type, limit = "100" } = req.query;
+      const { level, type, search, limit = "100" } = req.query;
       let filteredLogs = systemLogs;
       
       if (level && typeof level === 'string') {
@@ -699,6 +699,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (type && typeof type === 'string') {
         filteredLogs = filteredLogs.filter(log => log.actionType === type);
+      }
+      
+      if (search && typeof search === 'string') {
+        const searchTerm = search.toLowerCase();
+        filteredLogs = filteredLogs.filter(log => 
+          log.message.toLowerCase().includes(searchTerm) ||
+          log.action?.toLowerCase().includes(searchTerm) ||
+          log.userName?.toLowerCase().includes(searchTerm) ||
+          log.context?.toLowerCase().includes(searchTerm)
+        );
       }
       
       const limitNum = parseInt(limit as string, 10);

@@ -9,11 +9,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { RefreshCw, Trash2, Filter, Clock, FileText } from "lucide-react";
+import { RefreshCw, Trash2, Filter, Clock, FileText, Search } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -47,14 +48,15 @@ interface SystemLogsDialogProps {
 
 export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) {
   const [selectedLevel, setSelectedLevel] = useState<string>("all");
-  const [selectedType, setSelectedType] = useState<string>("all");
+  const [selectedType, setSelectedType] = useState<string>("user_action");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedLogDetail, setSelectedLogDetail] = useState<SystemLog | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: logsData, isLoading, refetch } = useQuery<LogsResponse>({
-    queryKey: ["/api/system/logs", selectedLevel, selectedType],
+    queryKey: ["/api/system/logs", selectedLevel, selectedType, searchQuery],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (selectedLevel !== "all") {
@@ -62,6 +64,9 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
       }
       if (selectedType !== "all") {
         params.append("type", selectedType);
+      }
+      if (searchQuery.trim()) {
+        params.append("search", searchQuery.trim());
       }
       params.append("limit", "100");
       
@@ -178,8 +183,19 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
         <div className="space-y-4">
           {/* Controles */}
           <div className="flex items-center gap-4 flex-wrap">
+            {/* Campo de Busca */}
+            <div className="flex items-center gap-2 min-w-[300px]">
+              <Search className="w-4 h-4" />
+              <Input
+                placeholder="Buscar por usuário, ação ou mensagem..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9"
+              />
+            </div>
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4" />
+              <span className="text-sm font-medium">Nível:</span>
               <Select value={selectedLevel} onValueChange={setSelectedLevel}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
@@ -195,15 +211,16 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
             </div>
 
             <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Tipo:</span>
               <Select value={selectedType} onValueChange={setSelectedType}>
                 <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos os Tipos</SelectItem>
-                  <SelectItem value="user_action">Ações do Usuário</SelectItem>
-                  <SelectItem value="system">Sistema</SelectItem>
-                  <SelectItem value="api">API</SelectItem>
+                  <SelectItem value="all">🔍 Todos os Tipos</SelectItem>
+                  <SelectItem value="user_action">👤 Ações do Usuário</SelectItem>
+                  <SelectItem value="system">⚙️ Sistema</SelectItem>
+                  <SelectItem value="api">🔗 API</SelectItem>
                 </SelectContent>
               </Select>
             </div>
