@@ -283,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const column = await storage.createColumn(columnData);
       
       const duration = Date.now() - startTime;
-      addUserActionLog(userId, userName, `Criar coluna "${column.name}"`, 'success', null, duration);
+      addUserActionLog(userId, userName, `Criar coluna "${column.title}"`, 'success', null, duration);
       
       res.status(201).json(column);
     } catch (error) {
