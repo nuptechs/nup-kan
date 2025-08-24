@@ -466,6 +466,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }, 0) / completedTasksWithDates.length
         ) : 0;
       
+      // Calculate daily throughput (tasks moved/updated today)
+      const today = new Date();
+      const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const dailyThroughput = tasks.filter(task => 
+        task.updatedAt && new Date(task.updatedAt) >= startOfToday
+      ).length;
+
+      // Calculate monthly throughput (tasks moved/updated this month)  
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const monthlyThroughput = tasks.filter(task => 
+        task.updatedAt && new Date(task.updatedAt) >= startOfMonth
+      ).length;
+
       // Calculate weekly throughput (tasks moved/updated in last 7 days)
       const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       const weeklyThroughput = tasks.filter(task => 
@@ -536,27 +549,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         task.updatedAt && new Date(task.updatedAt) > dayAgo
       ).length;
       
-      // Task health score (combination of activity, progress, and violations)
-      const activityScore = totalTasks > 0 ? Math.min(100, (recentActivity / totalTasks) * 100) : 0;
-      const progressScore = totalTasks > 0 ? 
-        Math.round(((inProgressTasks.length + reviewTasks.length + doneTasks.length) / totalTasks) * 100) : 0;
-      const blockerPenalty = totalTasks > 0 ? (blockers / totalTasks) * 50 : 0;
-      const wipPenalty = columns.length > 0 ? (wipViolations / columns.length) * 30 : 0;
-      const healthScore = Math.max(0, Math.round((activityScore * 0.3 + progressScore * 0.4 + completionRate * 0.3) - blockerPenalty - wipPenalty));
       
       res.json({
         // Core metrics
         totalTasks,
         doneTasks: doneTasks.length,
         inProgressTasks: inProgressTasks.length,
-        completionRate,
         averageCycleTime,
+        dailyThroughput,
+        monthlyThroughput,
         weeklyThroughput,
         averageLeadTime,
         blockers,
         wipViolations,
         recentActivity,
-        healthScore,
         
         // Detailed breakdowns
         statusDistribution,
@@ -564,7 +570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         actualStatusDistribution, // Real column-based distribution
         
         // Legacy fields for compatibility
-        efficiency: completionRate,
+        efficiency: 0, // Deprecated
         throughput: weeklyThroughput,
       });
     } catch (error) {

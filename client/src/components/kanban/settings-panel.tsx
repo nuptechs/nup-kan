@@ -374,22 +374,18 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
             {/* Main metrics grid */}
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg text-center">
-                <p className="text-xl font-bold text-blue-800" data-testid="analytics-completion-rate">
-                  {(analytics as any)?.completionRate || 0}%
+                <p className="text-xl font-bold text-blue-800" data-testid="analytics-daily-throughput">
+                  {(analytics as any)?.dailyThroughput || 0}
                 </p>
-                <p className="text-xs text-blue-600">Taxa de Conclusão</p>
-                {((analytics as any)?.completionRate || 0) === 0 && (analytics as any)?.totalTasks > 0 && (
-                  <p className="text-[10px] text-blue-500 mt-1">Nenhuma tarefa concluída</p>
-                )}
+                <p className="text-xs text-blue-600">Cards/Dia</p>
+                <p className="text-[10px] text-blue-500 mt-1">Movimentados hoje</p>
               </div>
               <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg text-center">
-                <p className="text-xl font-bold text-green-800" data-testid="analytics-health-score">
-                  {(analytics as any)?.healthScore || 0}
+                <p className="text-xl font-bold text-green-800" data-testid="analytics-monthly-throughput">
+                  {(analytics as any)?.monthlyThroughput || 0}
                 </p>
-                <p className="text-xs text-green-600">Score de Saúde</p>
-                {((analytics as any)?.healthScore || 0) === 0 && (analytics as any)?.totalTasks > 0 && (
-                  <p className="text-[10px] text-green-500 mt-1">Baseado na conclusão</p>
-                )}
+                <p className="text-xs text-green-600">Cards/Mês</p>
+                <p className="text-[10px] text-green-500 mt-1">Movimentados este mês</p>
               </div>
               <div className="p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg text-center">
                 <p className="text-xl font-bold text-purple-800" data-testid="analytics-cycle-time">
@@ -401,13 +397,11 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
                 )}
               </div>
               <div className="p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg text-center">
-                <p className="text-xl font-bold text-orange-800" data-testid="analytics-throughput">
+                <p className="text-xl font-bold text-orange-800" data-testid="analytics-weekly-throughput">
                   {(analytics as any)?.weeklyThroughput || 0}
                 </p>
                 <p className="text-xs text-orange-600">Cards/Semana</p>
-                {((analytics as any)?.weeklyThroughput || 0) === 0 && (analytics as any)?.totalTasks > 0 && (
-                  <p className="text-[10px] text-orange-500 mt-1">Última semana</p>
-                )}
+                <p className="text-[10px] text-orange-500 mt-1">Últimos 7 dias</p>
               </div>
             </div>
 
