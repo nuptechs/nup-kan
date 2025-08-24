@@ -383,9 +383,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Analytics endpoint
   app.get("/api/analytics", async (req, res) => {
     try {
-      const tasks = await storage.getTasks();
-      const columns = await storage.getColumns();
+      const { boardId } = req.query;
+      
+      // Get all tasks and columns, filter by boardId if provided
+      let tasks = await storage.getTasks();
+      let columns = await storage.getColumns();
       const users = await storage.getUsers();
+      
+      // Filter by boardId if provided
+      if (boardId && typeof boardId === 'string') {
+        columns = columns.filter(col => col.boardId === boardId);
+        const columnIds = columns.map(col => col.id);
+        tasks = tasks.filter(task => columnIds.includes(task.status));
+      }
       
       // Create column mapping for categorization
       const columnMap = new Map(columns.map(col => [col.id, col]));

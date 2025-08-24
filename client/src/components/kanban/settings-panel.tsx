@@ -50,7 +50,14 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
   });
 
   const { data: analytics } = useQuery({
-    queryKey: ["/api/analytics"],
+    queryKey: ["/api/analytics", boardId],
+    queryFn: async () => {
+      const url = boardId 
+        ? `/api/analytics?boardId=${boardId}`
+        : '/api/analytics';
+      const response = await fetch(url);
+      return response.json();
+    }
   });
 
   const updateColumnMutation = useMutation({
