@@ -387,12 +387,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const columns = await storage.getColumns();
       const users = await storage.getUsers();
       
-      // Basic task categorization
-      const doneTasks = tasks.filter(task => task.status === "done");
-      const inProgressTasks = tasks.filter(task => task.status === "inprogress");
-      const todoTasks = tasks.filter(task => task.status === "todo");
-      const backlogTasks = tasks.filter(task => task.status === "backlog");
-      const reviewTasks = tasks.filter(task => task.status === "review");
+      // Create column mapping for categorization
+      const columnMap = new Map(columns.map(col => [col.id, col]));
+      
+      // Categorize columns by name patterns (more flexible approach)
+      const categorizeColumn = (column: any) => {
+        const title = (column.title || '').toLowerCase();
+        if (title.includes('done') || title.includes('conclu') || title.includes('final')) return 'done';
+        if (title.includes('progress') || title.includes('progresso') || title.includes('fazendo')) return 'inprogress';
+        if (title.includes('review') || title.includes('revisão') || title.includes('teste')) return 'review';
+        if (title.includes('backlog') || title.includes('pendente')) return 'backlog';
+        if (title.includes('todo') || title.includes('fazer')) return 'todo';
+        
+        // Default categorization based on column position/order
+        const columnIndex = columns.findIndex(c => c.id === column.id);
+        const totalColumns = columns.length;
+        
+        if (columnIndex === totalColumns - 1) return 'done'; // Last column is usually done
+        if (columnIndex === 0) return 'backlog'; // First column is usually backlog
+        if (columnIndex === 1) return 'todo'; // Second column is usually todo
+        if (columnIndex >= totalColumns - 2) return 'review'; // Second to last is usually review
+        return 'inprogress'; // Middle columns are usually in progress
+      };
+      
+      // Categorize tasks based on their column
+      const tasksWithCategories = tasks.map(task => {
+        const column = columnMap.get(task.status);
+        const category = column ? categorizeColumn(column) : 'todo';
+        return { ...task, category };
+      });
+      
+      // Basic task categorization using actual column data
+      const doneTasks = tasksWithCategories.filter(task => task.category === 'done');
+      const inProgressTasks = tasksWithCategories.filter(task => task.category === 'inprogress');
+      const todoTasks = tasksWithCategories.filter(task => task.category === 'todo');
+      const backlogTasks = tasksWithCategories.filter(task => task.category === 'backlog');
+      const reviewTasks = tasksWithCategories.filter(task => task.category === 'review');
       const totalTasks = tasks.length;
       
       // Calculate completion rate
@@ -441,7 +471,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return false;
       }).length;
       
-      // Performance by status
+      // Build actual status distribution based on real columns
+      const actualStatusDistribution = columns.reduce((acc, column) => {
+        const tasksInColumn = tasks.filter(task => task.status === column.id).length;
+        acc[column.id] = {
+          name: column.title,
+          count: tasksInColumn,
+          category: categorizeColumn(column)
+        };
+        return acc;
+      }, {} as any);
+      
+      // Legacy status distribution for compatibility
       const statusDistribution = {
         backlog: backlogTasks.length,
         todo: todoTasks.length,
@@ -450,10 +491,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         done: doneTasks.length,
       };
       
-      // Calculate lead time (average time from todo to done)
-      const leadTimeTasks = doneTasks.filter(task => {
-        return task.createdAt && task.updatedAt;
-      });
+      // Calculate lead time (average time from first to last column)
+      const firstColumnTasks = tasksWithCategories.filter(task => task.category === 'backlog' || task.category === 'todo');
+      const leadTimeTasks = doneTasks.filter(task => task.createdAt && task.updatedAt);
       
       const averageLeadTime = leadTimeTasks.length > 0 ? 
         Math.round(
@@ -492,6 +532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Detailed breakdowns
         statusDistribution,
         priorityDistribution,
+        actualStatusDistribution, // Real column-based distribution
         
         // Legacy fields for compatibility
         efficiency: completionRate,

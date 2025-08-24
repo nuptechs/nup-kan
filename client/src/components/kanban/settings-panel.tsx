@@ -378,24 +378,36 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
                   {(analytics as any)?.completionRate || 0}%
                 </p>
                 <p className="text-xs text-blue-600">Taxa de Conclusão</p>
+                {((analytics as any)?.completionRate || 0) === 0 && (analytics as any)?.totalTasks > 0 && (
+                  <p className="text-[10px] text-blue-500 mt-1">Nenhuma tarefa concluída</p>
+                )}
               </div>
               <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg text-center">
                 <p className="text-xl font-bold text-green-800" data-testid="analytics-health-score">
                   {(analytics as any)?.healthScore || 0}
                 </p>
                 <p className="text-xs text-green-600">Score de Saúde</p>
+                {((analytics as any)?.healthScore || 0) === 0 && (analytics as any)?.totalTasks > 0 && (
+                  <p className="text-[10px] text-green-500 mt-1">Baseado na conclusão</p>
+                )}
               </div>
               <div className="p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg text-center">
                 <p className="text-xl font-bold text-purple-800" data-testid="analytics-cycle-time">
                   {(analytics as any)?.averageCycleTime || 0}d
                 </p>
                 <p className="text-xs text-purple-600">Tempo de Ciclo</p>
+                {((analytics as any)?.averageCycleTime || 0) === 0 && (analytics as any)?.totalTasks > 0 && (
+                  <p className="text-[10px] text-purple-500 mt-1">Sem dados históricos</p>
+                )}
               </div>
               <div className="p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg text-center">
                 <p className="text-xl font-bold text-orange-800" data-testid="analytics-throughput">
                   {(analytics as any)?.weeklyThroughput || 0}
                 </p>
                 <p className="text-xs text-orange-600">Cards/Semana</p>
+                {((analytics as any)?.weeklyThroughput || 0) === 0 && (analytics as any)?.totalTasks > 0 && (
+                  <p className="text-[10px] text-orange-500 mt-1">Última semana</p>
+                )}
               </div>
             </div>
 
@@ -443,26 +455,57 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
               </div>
             )}
 
-            {/* Status distribution */}
-            {(analytics as any)?.statusDistribution && (
+            {/* Real Column Distribution */}
+            {(analytics as any)?.actualStatusDistribution && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-gray-600">Distribuição por Coluna:</p>
+                <div className="space-y-1 text-xs max-h-32 overflow-y-auto">
+                  {Object.entries((analytics as any).actualStatusDistribution || {}).map(([columnId, data]: [string, any]) => (
+                    <div key={columnId} className="flex justify-between items-center p-1 rounded bg-gray-50">
+                      <span className="text-gray-700 truncate flex-1 mr-2" title={data.name}>
+                        {data.name}:
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-900">{data.count}</span>
+                        <div className={`w-2 h-2 rounded-full ${
+                          data.category === 'done' ? 'bg-green-500' :
+                          data.category === 'inprogress' ? 'bg-yellow-500' :
+                          data.category === 'review' ? 'bg-purple-500' :
+                          data.category === 'todo' ? 'bg-blue-500' :
+                          'bg-gray-500'
+                        }`}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Fallback: Legacy status distribution */}
+            {!(analytics as any)?.actualStatusDistribution && (analytics as any)?.statusDistribution && (
               <div className="space-y-2">
                 <p className="text-xs font-medium text-gray-600">Distribuição por Status:</p>
-                <div className="flex justify-between text-xs">
-                  <span className="text-gray-600">
-                    Backlog: <span className="font-semibold">{(analytics as any).statusDistribution.backlog || 0}</span>
-                  </span>
-                  <span className="text-blue-600">
-                    Todo: <span className="font-semibold">{(analytics as any).statusDistribution.todo || 0}</span>
-                  </span>
-                  <span className="text-yellow-600">
-                    Em Progresso: <span className="font-semibold">{(analytics as any).statusDistribution.inprogress || 0}</span>
-                  </span>
-                  <span className="text-purple-600">
-                    Review: <span className="font-semibold">{(analytics as any).statusDistribution.review || 0}</span>
-                  </span>
-                  <span className="text-green-600">
-                    Concluído: <span className="font-semibold">{(analytics as any).statusDistribution.done || 0}</span>
-                  </span>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Backlog:</span>
+                    <span className="font-semibold">{(analytics as any).statusDistribution.backlog || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-blue-600">Todo:</span>
+                    <span className="font-semibold">{(analytics as any).statusDistribution.todo || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-yellow-600">Progresso:</span>
+                    <span className="font-semibold">{(analytics as any).statusDistribution.inprogress || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-purple-600">Review:</span>
+                    <span className="font-semibold">{(analytics as any).statusDistribution.review || 0}</span>
+                  </div>
+                  <div className="flex justify-between col-span-2">
+                    <span className="text-green-600">Concluído:</span>
+                    <span className="font-semibold">{(analytics as any).statusDistribution.done || 0}</span>
+                  </div>
                 </div>
               </div>
             )}
