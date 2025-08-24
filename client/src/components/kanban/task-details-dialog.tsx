@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { updateTaskSchema } from "@shared/schema";
 import type { Task, TeamMember } from "@shared/schema";
 import { TagSelector } from "./tag-selector";
-import { UserSelector } from "./user-selector";
+import { MultiUserSelector } from "./multi-user-selector";
 import { z } from "zod";
 import { Edit, Trash2, User, Calendar, Clock, Flag, X, ChevronDown, ChevronRight, History } from "lucide-react";
 import { TaskTimeline } from "./task-timeline";
@@ -40,6 +40,7 @@ interface DeleteConfirmationProps {
 const formSchema = updateTaskSchema.extend({
   assigneeId: z.string().optional(),
   tags: z.array(z.string()).default([]),
+  assigneeIds: z.array(z.string()).default([]),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -81,6 +82,12 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId }: TaskDetail
     queryKey: ["/api/team-members"],
   });
 
+  // Get current assignees for the task
+  const { data: currentAssignees = [] } = useQuery({
+    queryKey: ["/api/tasks", task?.id, "assignees"],
+    enabled: !!task?.id,
+  });
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -91,12 +98,14 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId }: TaskDetail
       assigneeId: task?.assigneeId || "",
       progress: task?.progress || 0,
       tags: task?.tags || [],
+      assigneeIds: [],
     },
   });
 
   // Reset form when task changes
   useEffect(() => {
-    if (task) {
+    if (task && currentAssignees) {
+      const assigneeIds = currentAssignees.map((assignee: any) => assignee.user.id);
       form.reset({
         title: task.title,
         description: task.description || "",
@@ -105,29 +114,35 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId }: TaskDetail
         assigneeId: task.assigneeId || "",
         progress: task.progress || 0,
         tags: task.tags || [],
+        assigneeIds: assigneeIds,
       });
     }
-  }, [task, form]);
+  }, [task, currentAssignees, form]);
 
   const updateTaskMutation = useMutation({
     mutationFn: async (data: FormData) => {
       if (!task) return;
       
-      const isAssigneeNone = data.assigneeId === "none" || data.assigneeId === "";
-      const assignee = isAssigneeNone ? null : teamMembers.find(member => member.id === data.assigneeId);
-      const taskData = {
-        ...data,
-        assigneeId: isAssigneeNone ? "" : data.assigneeId,
-        assigneeName: assignee?.name || "",
-        assigneeAvatar: assignee?.avatar || "",
-      };
+      const { assigneeIds, ...taskData } = data;
       
+      // Update task data first
       const response = await apiRequest("PATCH", `/api/tasks/${task.id}`, taskData);
-      return response.json();
+      const updatedTask = await response.json();
+      
+      // Update assignees if they changed
+      if (assigneeIds && assigneeIds.length >= 0) {
+        await apiRequest("PUT", `/api/tasks/${task.id}/assignees`, {
+          userIds: assigneeIds,
+        });
+      }
+      
+      return updatedTask;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+      // Invalidate task assignees
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks", task?.id, "assignees"] });
       // Invalidate board-specific queries
       if (boardId) {
         queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/tasks`] });
@@ -367,12 +382,10 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId }: TaskDetail
                 />
               </div>
 
-              <UserSelector
-                selectedUserId={form.watch("assigneeId")}
-                onUserChange={(userId, userName, userAvatar) => {
-                  form.setValue("assigneeId", userId);
-                  form.setValue("assigneeName", userName);
-                  form.setValue("assigneeAvatar", userAvatar);
+              <MultiUserSelector
+                selectedUserIds={form.watch("assigneeIds") || []}
+                onUserSelectionChange={(userIds) => {
+                  form.setValue("assigneeIds", userIds);
                 }}
               />
 
