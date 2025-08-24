@@ -279,42 +279,44 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                               {field.required === "true" && <span className="text-red-500 ml-1">*</span>}
                             </FormLabel>
                             <FormControl>
-                              {field.type === "text" && (
-                                <Input
-                                  {...formField}
-                                  placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
-                                  data-testid={`input-custom-${field.name}`}
-                                />
-                              )}
-                              {field.type === "textarea" && (
-                                <Textarea
-                                  {...formField}
-                                  placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
-                                  data-testid={`textarea-custom-${field.name}`}
-                                />
-                              )}
-                              {field.type === "select" && field.options && field.options.length > 0 && (
-                                <Select onValueChange={formField.onChange} value={formField.value || ""}>
-                                  <SelectTrigger data-testid={`select-custom-${field.name}`}>
-                                    <SelectValue placeholder={field.placeholder || `Selecione ${field.label.toLowerCase()}`} />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {field.options.map((option: string) => (
-                                      <SelectItem key={option} value={option}>
-                                        {option}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              )}
-                              {field.type === "number" && (
-                                <Input
-                                  {...formField}
-                                  type="number"
-                                  placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
-                                  data-testid={`input-number-custom-${field.name}`}
-                                />
-                              )}
+                              <>
+                                {field.type === "text" && (
+                                  <Input
+                                    {...formField}
+                                    placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
+                                    data-testid={`input-custom-${field.name}`}
+                                  />
+                                )}
+                                {field.type === "textarea" && (
+                                  <Textarea
+                                    {...formField}
+                                    placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
+                                    data-testid={`textarea-custom-${field.name}`}
+                                  />
+                                )}
+                                {field.type === "select" && field.options && field.options.length > 0 && (
+                                  <Select onValueChange={formField.onChange} value={formField.value || ""}>
+                                    <SelectTrigger data-testid={`select-custom-${field.name}`}>
+                                      <SelectValue placeholder={field.placeholder || `Selecione ${field.label.toLowerCase()}`} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {field.options.map((option: string) => (
+                                        <SelectItem key={option} value={option}>
+                                          {option}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                )}
+                                {field.type === "number" && (
+                                  <Input
+                                    {...formField}
+                                    type="number"
+                                    placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
+                                    data-testid={`input-number-custom-${field.name}`}
+                                  />
+                                )}
+                              </>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
