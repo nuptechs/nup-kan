@@ -42,8 +42,8 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto" />
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Verificando autenticação...
+          <p className="mt-2 text-xs text-muted-foreground">
+            Verificando...
           </p>
         </div>
       </div>

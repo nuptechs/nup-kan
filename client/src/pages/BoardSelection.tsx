@@ -248,8 +248,8 @@ export default function BoardSelection() {
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Seus Boards Kanban
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Selecione um board para gerenciar suas tarefas ou crie um novo para organizar projetos diferentes.
+          <p className="text-xs text-muted-foreground">
+            Selecione um board ou crie um novo.
           </p>
         </div>
 
@@ -364,8 +364,8 @@ export default function BoardSelection() {
         <DialogContent className="sm:max-w-md" data-testid="dialog-create-board">
           <DialogHeader>
             <DialogTitle>Criar Novo Board</DialogTitle>
-            <DialogDescription>
-              Crie um novo board Kanban para organizar suas tarefas e projetos.
+            <DialogDescription className="text-xs text-muted-foreground">
+              Crie um board para organizar tarefas.
             </DialogDescription>
           </DialogHeader>
           
@@ -382,7 +382,7 @@ export default function BoardSelection() {
                     <FormLabel>Nome do Board</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ex: Desenvolvimento Mobile"
+                        placeholder="Nome do board"
                         {...field}
                         data-testid="input-board-name"
                       />
@@ -400,7 +400,7 @@ export default function BoardSelection() {
                     <FormLabel>Descrição (opcional)</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Descreva o propósito deste board..."
+                        placeholder="Descrição (opcional)"
                         rows={3}
                         {...field}
                         data-testid="textarea-board-description"

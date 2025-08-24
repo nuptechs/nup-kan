@@ -238,8 +238,8 @@ export default function CustomFieldsPage() {
             <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900">
               Campos Personalizados
             </CardTitle>
-            <CardDescription className="text-sm sm:text-base">
-              Crie campos personalizados para enriquecer suas tarefas com informações específicas do seu projeto.
+            <CardDescription className="text-xs text-muted-foreground">
+              Crie campos personalizados.
             </CardDescription>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant="outline">{fields.length} campos</Badge>
@@ -261,8 +261,7 @@ export default function CustomFieldsPage() {
           ) : fields.length === 0 ? (
             <div className="text-center py-8">
               <Type className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600">Nenhum campo personalizado criado ainda</p>
-              <p className="text-sm text-gray-500">Crie seu primeiro campo para personalizar suas tarefas</p>
+              <p className="text-sm text-muted-foreground">Nenhum campo personalizado.</p>
             </div>
           ) : (
             <>
@@ -462,10 +461,10 @@ export default function CustomFieldsPage() {
             <DialogTitle>
               {editingField ? "Editar Campo" : "Criar Novo Campo"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs text-muted-foreground">
               {editingField 
-                ? "Modifique as propriedades do campo personalizado."
-                : "Configure um novo campo personalizado para suas tarefas."}
+                ? "Editar campo personalizado."
+                : "Criar campo personalizado."}
             </DialogDescription>
           </DialogHeader>
 
@@ -484,7 +483,7 @@ export default function CustomFieldsPage() {
                       .toLowerCase(); // Converte para minúsculas
                     setFormData({ ...formData, name: maskedValue });
                   }}
-                  placeholder="ex: orcamento, cliente, sprint"
+                  placeholder="orcamento"
                   data-testid="input-field-name"
                 />
                 <p className="text-xs text-gray-500">
@@ -498,7 +497,7 @@ export default function CustomFieldsPage() {
                   id="label"
                   value={formData.label}
                   onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                  placeholder="ex: Orçamento, Cliente, Sprint"
+                  placeholder="Orçamento"
                   data-testid="input-field-label"
                 />
                 <p className="text-xs text-gray-500">
@@ -542,7 +541,7 @@ export default function CustomFieldsPage() {
                   <Input
                     value={optionInput}
                     onChange={(e) => setOptionInput(e.target.value)}
-                    placeholder="Digite uma opção"
+                    placeholder="Opção"
                     onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addOption())}
                     data-testid="input-option"
                   />
@@ -570,8 +569,8 @@ export default function CustomFieldsPage() {
             <div className="space-y-2">
               <Label>Boards Aplicáveis *</Label>
               <div className="border rounded-md p-3 space-y-2 max-h-40 overflow-y-auto">
-                <p className="text-sm text-gray-600 mb-2">
-                  Selecione os boards onde este campo será exibido:
+                <p className="text-xs text-muted-foreground mb-2">
+                  Selecione os boards:
                 </p>
                 {boards.map((board: any) => (
                   <div key={board.id} className="flex items-center space-x-2">
@@ -623,7 +622,7 @@ export default function CustomFieldsPage() {
                 id="placeholder"
                 value={formData.placeholder}
                 onChange={(e) => setFormData({ ...formData, placeholder: e.target.value })}
-                placeholder="Texto de ajuda para o usuário"
+                placeholder="Texto de ajuda (opcional)"
                 data-testid="input-placeholder"
               />
             </div>

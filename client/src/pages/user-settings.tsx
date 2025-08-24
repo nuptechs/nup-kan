@@ -125,7 +125,7 @@ export default function UserSettingsPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse mx-auto mb-4" />
-          <p className="text-gray-500">Carregando configurações...</p>
+          <p className="text-xs text-muted-foreground">Carregando...</p>
         </div>
       </div>
     );

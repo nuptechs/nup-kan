@@ -98,8 +98,8 @@ export function MultiUserSelector({
           >
             <UserPlus size={16} className="mr-2" />
             {selectedUsers.length === 0 
-              ? "Selecionar responsáveis..." 
-              : `${selectedUsers.length} responsável${selectedUsers.length > 1 ? 'is' : ''} selecionado${selectedUsers.length > 1 ? 's' : ''}`
+              ? "Responsáveis" 
+              : `${selectedUsers.length} selecionado${selectedUsers.length > 1 ? 's' : ''}`
             }
           </Button>
         </PopoverTrigger>
@@ -108,7 +108,7 @@ export function MultiUserSelector({
           <div className="p-3 border-b">
             <h4 className="font-medium text-sm">Selecionar Responsáveis</h4>
             <p className="text-xs text-muted-foreground">
-              Escolha um ou mais usuários para esta tarefa
+              Selecione usuários
             </p>
           </div>
           

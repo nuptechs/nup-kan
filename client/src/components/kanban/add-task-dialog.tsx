@@ -155,8 +155,8 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
       <DialogContent className="sm:max-w-[425px] z-[9999]" data-testid="add-task-dialog">
         <DialogHeader>
           <DialogTitle data-testid="dialog-title">Adicionar Nova Tarefa</DialogTitle>
-          <DialogDescription>
-            Preencha as informações abaixo para criar uma nova tarefa no sistema.
+          <DialogDescription className="text-xs text-muted-foreground">
+            Preencha os campos para criar uma nova tarefa.
           </DialogDescription>
         </DialogHeader>
 
@@ -170,7 +170,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                   <FormLabel>Título</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Digite o título da tarefa"
+                      placeholder="Título"
                       {...field}
                       data-testid="input-title"
                     />
@@ -188,7 +188,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                   <FormLabel>Descrição</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Descreva a tarefa em detalhes"
+                      placeholder="Descrição (opcional)"
                       {...field}
                       value={field.value || ""}
                       data-testid="input-description"
@@ -209,7 +209,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-priority">
-                          <SelectValue placeholder="Selecione a prioridade" />
+                          <SelectValue placeholder="Prioridade" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -232,7 +232,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-status">
-                          <SelectValue placeholder="Selecione a coluna" />
+                          <SelectValue placeholder="Coluna" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -283,21 +283,21 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                                 {field.type === "text" && (
                                   <Input
                                     {...formField}
-                                    placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
+                                    placeholder={field.placeholder || field.label}
                                     data-testid={`input-custom-${field.name}`}
                                   />
                                 )}
                                 {field.type === "textarea" && (
                                   <Textarea
                                     {...formField}
-                                    placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
+                                    placeholder={field.placeholder || field.label}
                                     data-testid={`textarea-custom-${field.name}`}
                                   />
                                 )}
                                 {field.type === "select" && field.options && field.options.length > 0 && (
                                   <Select onValueChange={formField.onChange} value={formField.value || ""}>
                                     <SelectTrigger data-testid={`select-custom-${field.name}`}>
-                                      <SelectValue placeholder={field.placeholder || `Selecione ${field.label.toLowerCase()}`} />
+                                      <SelectValue placeholder={field.placeholder || field.label} />
                                     </SelectTrigger>
                                     <SelectContent>
                                       {field.options.map((option: string) => (
@@ -312,7 +312,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                                   <Input
                                     {...formField}
                                     type="number"
-                                    placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
+                                    placeholder={field.placeholder || field.label}
                                     data-testid={`input-number-custom-${field.name}`}
                                   />
                                 )}

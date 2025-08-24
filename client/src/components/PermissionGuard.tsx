@@ -24,7 +24,7 @@ export function PermissionGuard({
 
   // Mostrar loading enquanto carrega as permissões
   if (isLoading) {
-    return <div className="text-sm text-muted-foreground">Carregando permissões...</div>;
+    return <div className="text-xs text-muted-foreground">Carregando...</div>;
   }
 
   let hasAccess = false;

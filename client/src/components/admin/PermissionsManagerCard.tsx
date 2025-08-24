@@ -49,8 +49,8 @@ export function PermissionsManagerCard() {
             Fluido
           </Badge>
         </CardTitle>
-        <CardDescription>
-          Configure permissões de forma visual e intuitiva para usuários, times e perfis
+        <CardDescription className="text-xs">
+          Configure permissões do sistema.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

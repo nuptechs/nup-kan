@@ -712,8 +712,8 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
             <Download className="w-5 h-5" />
             Exportação Avançada de Dados
           </DialogTitle>
-          <DialogDescription>
-            Configure e exporte seus dados do kanban em diferentes formatos com opções avançadas de personalização.
+          <DialogDescription className="text-xs text-muted-foreground">
+            Configure e exporte dados.
           </DialogDescription>
         </DialogHeader>
 

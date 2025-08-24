@@ -175,8 +175,8 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
             <Users className="w-5 h-5" />
             Gerenciar Usuários
           </DialogTitle>
-          <DialogDescription>
-            Crie, edite ou exclua usuários do sistema para atribuição em tarefas.
+          <DialogDescription className="text-xs text-muted-foreground">
+            Gerencie usuários do sistema.
           </DialogDescription>
         </DialogHeader>
 
@@ -195,7 +195,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                         <FormLabel>Nome Completo</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Nome do usuário"
+                            placeholder="Nome"
                             {...field}
                             data-testid="input-user-name"
                           />
@@ -214,7 +214,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                         <FormControl>
                           <Input
                             type="email"
-                            placeholder="email@exemplo.com"
+                            placeholder="Email"
                             {...field}
                             data-testid="input-user-email"
                           />
@@ -232,7 +232,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                         <FormLabel>Cargo</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="ex: Desenvolvedor, Designer, etc."
+                            placeholder="Cargo"
                             {...field}
                             value={field.value || ""}
                             data-testid="input-user-role"
@@ -252,7 +252,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                         <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
                           <FormControl>
                             <SelectTrigger data-testid="select-user-status">
-                              <SelectValue placeholder="Selecione o status" />
+                              <SelectValue placeholder="Status" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -294,9 +294,8 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                 Carregando usuários...
               </div>
             ) : users.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <p>Nenhum usuário cadastrado ainda.</p>
-                <p className="text-sm">Crie o primeiro usuário usando o formulário acima.</p>
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-sm">Nenhum usuário cadastrado.</p>
               </div>
             ) : (
               <div className="space-y-3">

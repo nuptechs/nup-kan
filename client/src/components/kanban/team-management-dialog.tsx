@@ -244,8 +244,8 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto" data-testid="dialog-team-management">
         <DialogHeader>
           <DialogTitle>Gerenciar Times</DialogTitle>
-          <DialogDescription>
-            Crie, edite e organize times com seus membros para melhor colaboração em seus projetos.
+          <DialogDescription className="text-xs text-muted-foreground">
+            Gerencie times e membros.
           </DialogDescription>
         </DialogHeader>
 
@@ -325,7 +325,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
                       <FormLabel>Nome do Time</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Nome do time..."
+                          placeholder="Nome"
                           {...field}
                           data-testid="input-team-name"
                         />
@@ -343,7 +343,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
                       <FormLabel>Descrição</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Descrição do time..."
+                          placeholder="Descrição (opcional)"
                           {...field}
                           value={field.value || ""}
                           data-testid="textarea-team-description"

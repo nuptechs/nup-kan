@@ -147,8 +147,8 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
           <DialogTitle className="text-xl font-semibold">
             Gerenciar Tags
           </DialogTitle>
-          <DialogDescription>
-            Crie, edite ou exclua tags para organizar suas tarefas.
+          <DialogDescription className="text-xs text-muted-foreground">
+            Gerencie tags para organizar tarefas.
           </DialogDescription>
         </DialogHeader>
 
@@ -167,7 +167,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
                         <FormLabel>Nome da Tag</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Digite o nome da tag"
+                            placeholder="Nome da tag"
                             {...field}
                             data-testid="input-tag-name"
                           />
@@ -227,9 +227,8 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
                 Carregando tags...
               </div>
             ) : tags.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <p>Nenhuma tag criada ainda.</p>
-                <p className="text-sm">Crie sua primeira tag usando o formulário acima.</p>
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-sm">Nenhuma tag criada.</p>
               </div>
             ) : (
               <div className="space-y-2">

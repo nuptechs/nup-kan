@@ -115,8 +115,8 @@ export function ExportHistoryDialog({ open, onOpenChange, userId }: ExportHistor
               <RefreshCw className="w-4 h-4" />
             </Button>
           </DialogTitle>
-          <DialogDescription>
-            Visualize o histórico completo de todas as suas exportações, incluindo status e detalhes dos arquivos gerados.
+          <DialogDescription className="text-xs text-muted-foreground">
+            Histórico de exportações.
           </DialogDescription>
         </DialogHeader>
 

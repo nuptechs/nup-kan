@@ -206,8 +206,8 @@ export function BoardSharingDialog({ board, open, onOpenChange }: BoardSharingDi
             <Share2 className="w-5 h-5" />
             Compartilhar Board: {board.name}
           </DialogTitle>
-          <DialogDescription>
-            Compartilhe este board com usuários ou times específicos e controle suas permissões.
+          <DialogDescription className="text-xs text-muted-foreground">
+            Compartilhe board com usuários e times.
           </DialogDescription>
         </DialogHeader>
 

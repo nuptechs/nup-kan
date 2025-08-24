@@ -256,8 +256,8 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
             <Columns className="w-5 h-5" />
             Colunas
           </DialogTitle>
-          <DialogDescription>
-            Crie, edite, exclua ou reordene as colunas do seu quadro Kanban.
+          <DialogDescription className="text-xs text-muted-foreground">
+            Gerencie colunas do quadro.
           </DialogDescription>
         </DialogHeader>
 
@@ -276,7 +276,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
                         <FormLabel>Título da Coluna</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Ex: Em Análise, Testing, etc."
+                            placeholder="Nome"
                             {...field}
                             data-testid="input-column-title"
                           />
@@ -315,7 +315,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
                           <Input
                             type="number"
                             min="1"
-                            placeholder="Ex: 3"
+                            placeholder="Limite"
                             {...field}
                             value={field.value || ""}
                             onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
@@ -350,9 +350,8 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
                 Carregando colunas...
               </div>
             ) : sortedColumns.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <p>Nenhuma coluna cadastrada ainda.</p>
-                <p className="text-sm">Crie a primeira coluna usando o formulário acima.</p>
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-sm">Nenhuma coluna cadastrada.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -377,7 +376,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
                                   <Input
                                     {...field}
                                     className="h-8"
-                                    placeholder="Título da coluna"
+                                    placeholder="Título"
                                     data-testid={`input-edit-column-title-${column.id}`}
                                   />
                                 </FormControl>
@@ -415,7 +414,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
                                     value={field.value || ""}
                                     onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
                                     className="h-8"
-                                    placeholder="WIP"
+                                    placeholder="3"
                                     data-testid={`input-edit-column-wip-${column.id}`}
                                   />
                                 </FormControl>

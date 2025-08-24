@@ -263,8 +263,8 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
             <UserCog className="h-5 w-5" />
             Perfis
           </DialogTitle>
-          <DialogDescription id="profile-management-description">
-            Gerencie perfis de usuário e suas permissões no sistema
+          <DialogDescription id="profile-management-description" className="text-xs text-muted-foreground">
+            Gerencie perfis e permissões.
           </DialogDescription>
         </DialogHeader>
 

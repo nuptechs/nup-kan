@@ -175,8 +175,8 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
             <FileText className="w-5 h-5" />
             Logs do Sistema
           </DialogTitle>
-          <DialogDescription>
-            Visualize e gerencie os logs de atividade do sistema e ações dos usuários.
+          <DialogDescription className="text-xs text-muted-foreground">
+            Visualize logs do sistema.
           </DialogDescription>
         </DialogHeader>
 
@@ -270,8 +270,8 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
           <ScrollArea className="h-96 w-full rounded-md border">
             <div className="p-4 space-y-3">
               {isLoading ? (
-                <div className="text-center text-gray-500 py-8">
-                  Carregando logs...
+                <div className="text-center py-8">
+                  <p className="text-xs text-muted-foreground">Carregando...</p>
                 </div>
               ) : logsData?.logs.length === 0 ? (
                 <div className="text-center text-gray-500 py-8">
