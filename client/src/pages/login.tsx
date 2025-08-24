@@ -109,6 +109,8 @@ export default function LoginPage() {
     // Reset forms when switching
     loginForm.reset();
     registerForm.reset();
+    console.log('Switched to register mode:', !isRegisterMode);
+    console.log('Register form default values:', registerForm.getValues());
   };
 
   return (
@@ -238,9 +240,14 @@ export default function LoginPage() {
                             type="text"
                             placeholder="Seu nome completo"
                             className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
-                            disabled={registerMutation.isPending}
+                            disabled={false}
                             {...field}
                             data-testid="input-name"
+                            onFocus={() => console.log('Name field focused', field)}
+                            onChange={(e) => {
+                              console.log('Name field change:', e.target.value);
+                              field.onChange(e);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -262,9 +269,14 @@ export default function LoginPage() {
                             type="email"
                             placeholder="seu@email.com"
                             className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
-                            disabled={registerMutation.isPending}
+                            disabled={false}
                             {...field}
                             data-testid="input-register-email"
+                            onFocus={() => console.log('Email field focused', field)}
+                            onChange={(e) => {
+                              console.log('Email field change:', e.target.value);
+                              field.onChange(e);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
