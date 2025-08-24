@@ -86,7 +86,7 @@ export default function KanbanPage({ params }: KanbanPageProps) {
               alt="Logo uP"
               className="w-8 h-8 object-contain"
             />
-            <h1 className="text-2xl font-semibold text-gray-900" data-testid="page-title">
+            <h1 className="text-2xl font-semibold text-gray-900 truncate max-w-[300px]" data-testid="page-title" title={board.name}>
               {board.name}
             </h1>
           </div>
