@@ -49,6 +49,7 @@ export default function LoginPage() {
       email: "",
       password: "",
     },
+    mode: "onChange",
   });
 
   const loginMutation = useMutation({
@@ -105,12 +106,21 @@ export default function LoginPage() {
   };
 
   const toggleMode = () => {
-    setIsRegisterMode(!isRegisterMode);
-    // Reset forms when switching
-    loginForm.reset();
-    registerForm.reset();
-    console.log('Switched to register mode:', !isRegisterMode);
-    console.log('Register form default values:', registerForm.getValues());
+    const newMode = !isRegisterMode;
+    setIsRegisterMode(newMode);
+    // Reset forms when switching with explicit values
+    if (newMode) {
+      registerForm.reset({
+        name: "",
+        email: "",
+        password: "",
+      });
+    } else {
+      loginForm.reset({
+        email: "",
+        password: "",
+      });
+    }
   };
 
   return (
@@ -239,15 +249,13 @@ export default function LoginPage() {
                           <Input
                             type="text"
                             placeholder="Seu nome completo"
-                            className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
-                            disabled={false}
-                            {...field}
+                            className="h-11"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
                             data-testid="input-name"
-                            onFocus={() => console.log('Name field focused', field)}
-                            onChange={(e) => {
-                              console.log('Name field change:', e.target.value);
-                              field.onChange(e);
-                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -268,15 +276,13 @@ export default function LoginPage() {
                           <Input
                             type="email"
                             placeholder="seu@email.com"
-                            className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
-                            disabled={false}
-                            {...field}
+                            className="h-11"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
                             data-testid="input-register-email"
-                            onFocus={() => console.log('Email field focused', field)}
-                            onChange={(e) => {
-                              console.log('Email field change:', e.target.value);
-                              field.onChange(e);
-                            }}
                           />
                         </FormControl>
                         <FormMessage />
@@ -297,9 +303,13 @@ export default function LoginPage() {
                           <Input
                             type="password"
                             placeholder="••••••••"
-                            className="h-11 border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:focus:border-green-400"
+                            className="h-11"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
                             disabled={registerMutation.isPending}
-                            {...field}
                             data-testid="input-register-password"
                           />
                         </FormControl>
