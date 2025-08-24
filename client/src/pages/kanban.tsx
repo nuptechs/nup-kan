@@ -7,16 +7,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Settings, Users, Shield, User, ArrowLeft, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/usePermissions";
-import { Link } from "wouter";
+import { Link, useParams } from "wouter";
 import logoImage from "@assets/generated_images/Modern_N_logo_transparent_background_dde0f619.png";
 import type { Board } from "@shared/schema";
 
-interface KanbanPageProps {
-  params: { boardId: string };
-}
-
-export default function KanbanPage({ params }: KanbanPageProps) {
-  const { boardId } = params;
+export default function KanbanPage() {
+  const params = useParams();
+  const boardId = params.boardId;
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSharingOpen, setIsSharingOpen] = useState(false);
   const { canManageProfiles } = usePermissions();
