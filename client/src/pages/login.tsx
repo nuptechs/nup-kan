@@ -46,7 +46,8 @@ export default function LoginPage() {
         title: "Login realizado!",
         description: `Bem-vindo(a), ${user.name}!`,
       });
-      setLocation("/boards");
+      // Use window.location to force full page navigation
+      window.location.href = "/";
     },
     onError: (error: any) => {
       toast({
