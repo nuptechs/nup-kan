@@ -569,22 +569,26 @@ export class MemStorage implements IStorage {
   async getUserPermissions(userId: string): Promise<Permission[]> {
     try {
       const user = await this.getUser(userId);
-      console.log("MemStorage User found:", user);
+      console.log("🔍 [SECURITY MemStorage] Buscando permissões para usuário:", user?.name || "Unknown");
       
-      if (!user || !user.profileId) {
-        console.log("MemStorage No user or profileId found");
+      if (!user) {
+        console.log("❌ [SECURITY MemStorage] Usuário não encontrado");
         return [];
       }
 
-      // Por enquanto, vamos retornar um conjunto padrão de permissões baseado no perfil
-      const allPermissions = await this.getPermissions();
-      console.log("MemStorage All permissions:", allPermissions.length);
+      if (!user.profileId) {
+        console.log("⚠️ [SECURITY MemStorage] Usuário sem perfil atribuído - acesso negado");
+        return [];
+      }
+
+      // Buscar permissões específicas do perfil do usuário
+      const profilePermissions = await this.getProfilePermissions(user.profileId);
+      console.log(`🔑 [SECURITY MemStorage] ${profilePermissions.length} permissões encontradas para perfil`);
       
-      // Por enquanto, vamos dar todas as permissões para qualquer usuário logado
-      return allPermissions;
+      return profilePermissions;
     } catch (error) {
-      console.error("MemStorage Error in getUserPermissions:", error);
-      throw error;
+      console.error("❌ [SECURITY MemStorage] Erro em getUserPermissions:", error);
+      return [];
     }
   }
 
@@ -1854,27 +1858,29 @@ export class DatabaseStorage implements IStorage {
   async getUserPermissions(userId: string): Promise<Permission[]> {
     try {
       const user = await this.getUser(userId);
-      console.log("User found:", user);
+      console.log("🔍 [SECURITY] Buscando permissões para usuário:", user?.name || "Unknown");
       
       // Se não encontrar o usuário, retorna array vazio
       if (!user) {
-        console.log("No user found");
+        console.log("❌ [SECURITY] Usuário não encontrado");
         return [];
       }
 
-      // Por enquanto, vamos retornar um conjunto padrão de permissões baseado no perfil
-      // Isso será substituído quando as tabelas de permissões estiverem configuradas
-      const allPermissions = await this.getPermissions();
-      console.log("All permissions:", allPermissions.length);
+      // Se usuário não tiver perfil, retorna array vazio
+      if (!user.profileId) {
+        console.log("⚠️ [SECURITY] Usuário sem perfil atribuído - acesso negado");
+        return [];
+      }
       
-      // Simular permissões baseadas no perfil do usuário ou dar todas se não tiver perfil
-      console.log("User profile ID:", user.profileId);
+      console.log("👤 [SECURITY] Usuário tem perfil ID:", user.profileId);
       
-      // Por enquanto, vamos dar todas as permissões para qualquer usuário logado
-      // para não bloquear a funcionalidade durante o desenvolvimento
-      return allPermissions;
+      // Buscar permissões específicas do perfil do usuário
+      const profilePermissions = await this.getProfilePermissions(user.profileId);
+      console.log(`🔑 [SECURITY] ${profilePermissions.length} permissões encontradas para perfil`);
+      
+      return profilePermissions;
     } catch (error) {
-      console.error("Error in getUserPermissions:", error);
+      console.error("❌ [SECURITY] Erro em getUserPermissions:", error);
       return [];
     }
   }

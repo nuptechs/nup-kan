@@ -1,37 +1,23 @@
 [
   {
-    "id": "action_1756053221190_dhasxpdyl",
-    "timestamp": "2025-08-24T16:33:41.190Z",
-    "level": "info",
-    "message": "Usuário desconhecido executou: Atualizar usuário \"Analista\" (teste@teste.com)",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "unknown",
-    "userName": "Usuário desconhecido",
-    "action": "Atualizar usuário \"Analista\" (teste@teste.com)",
-    "status": "success",
-    "errorDetails": null,
-    "duration": 314
-  },
-  {
-    "id": "log_1756053125998_txlqug9nj",
-    "timestamp": "2025-08-24T16:32:05.998Z",
+    "id": "log_1756053780791_cpzqobi0u",
+    "timestamp": "2025-08-24T16:43:00.791Z",
     "level": "warn",
-    "message": "🔐 [AUTH] Tentativa de acesso não autenticado na rota GET /api/boards de IP: 172.31.108.34",
+    "message": "🚫 [SECURITY] Acesso negado para usuário Analista (fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763) na rota GET /api/boards. Permissões requeridas: \"Listar Boards\"",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756053067465_ku0oy9ejf",
-    "timestamp": "2025-08-24T16:31:07.465Z",
+    "id": "log_1756053774119_myrv0l3va",
+    "timestamp": "2025-08-24T16:42:54.119Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756053066358_5fwlz3ax9",
-    "timestamp": "2025-08-24T16:31:06.358Z",
+    "id": "log_1756053773149_mtltxgwqb",
+    "timestamp": "2025-08-24T16:42:53.149Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",
