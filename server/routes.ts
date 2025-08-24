@@ -586,6 +586,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     duration?: number;
   }> = [];
 
+  // Interceptar logs existentes e adicionar ao sistema
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+  const originalConsoleWarn = console.warn;
+
   // Função para adicionar log do sistema
   const addLog = (level: 'info' | 'warn' | 'error' | 'debug', message: string, context?: string, details?: any) => {
     const log = {
@@ -605,7 +610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     const emoji = level === 'info' ? '🔵' : level === 'warn' ? '🟡' : level === 'error' ? '🔴' : '⚪';
-    console.log(`${emoji} [${context || 'SYSTEM'}] ${message}`, details ? details : '');
+    originalConsoleLog(`${emoji} [${context || 'SYSTEM'}] ${message}`, details ? details : '');
   };
 
   // Função para adicionar log de ação do usuário
@@ -640,7 +645,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     const emoji = status === 'success' ? '✅' : status === 'error' ? '❌' : '⏳';
     const statusEmoji = status === 'success' ? '🟢' : status === 'error' ? '🔴' : '🟡';
-    console.log(`${emoji} [USER_ACTION] ${userName} → ${action} ${statusEmoji}${duration ? ` (${duration}ms)` : ''}`, errorDetails ? errorDetails : '');
+    originalConsoleLog(`${emoji} [USER_ACTION] ${userName} → ${action} ${statusEmoji}${duration ? ` (${duration}ms)` : ''}`, errorDetails ? errorDetails : '');
   };
 
   // Endpoint para obter logs
@@ -682,11 +687,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Interceptar logs existentes e adicionar ao sistema
-  const originalConsoleLog = console.log;
-  const originalConsoleError = console.error;
-  const originalConsoleWarn = console.warn;
-  
   console.log = (...args) => {
     const message = args.join(' ');
     if (message.includes('🚀 API:') || message.includes('✅ API:') || message.includes('❌ API:')) {
