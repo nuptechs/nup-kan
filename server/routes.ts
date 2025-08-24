@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema } from "@shared/schema";
+import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema } from "@shared/schema";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1040,6 +1040,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating export history:", error);
       res.status(500).json({ message: "Failed to update export history" });
+    }
+  });
+
+  // Board Sharing routes
+  app.get("/api/boards/:boardId/shares", async (req, res) => {
+    try {
+      const shares = await storage.getBoardShares(req.params.boardId);
+      res.json(shares);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch board shares" });
+    }
+  });
+
+  app.get("/api/board-shares", async (req, res) => {
+    try {
+      const shares = await storage.getAllBoardShares();
+      res.json(shares);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch board shares" });
+    }
+  });
+
+  app.get("/api/users/:userId/shared-boards", async (req, res) => {
+    try {
+      const shares = await storage.getUserSharedBoards(req.params.userId);
+      res.json(shares);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user shared boards" });
+    }
+  });
+
+  app.get("/api/teams/:teamId/shared-boards", async (req, res) => {
+    try {
+      const shares = await storage.getTeamSharedBoards(req.params.teamId);
+      res.json(shares);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch team shared boards" });
+    }
+  });
+
+  app.post("/api/board-shares", async (req, res) => {
+    try {
+      const shareData = insertBoardShareSchema.parse(req.body);
+      const share = await storage.createBoardShare(shareData);
+      res.status(201).json(share);
+    } catch (error) {
+      console.error("Error creating board share:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ message: "Invalid share data", error: error.message });
+      } else {
+        res.status(400).json({ message: "Invalid share data" });
+      }
+    }
+  });
+
+  app.patch("/api/board-shares/:id", async (req, res) => {
+    try {
+      const shareData = updateBoardShareSchema.parse(req.body);
+      const share = await storage.updateBoardShare(req.params.id, shareData);
+      res.json(share);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Board share not found" });
+      }
+      res.status(400).json({ message: "Invalid share data" });
+    }
+  });
+
+  app.delete("/api/board-shares/:id", async (req, res) => {
+    try {
+      await storage.deleteBoardShare(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Board share not found" });
+      }
+      res.status(500).json({ message: "Failed to delete board share" });
+    }
+  });
+
+  app.get("/api/users/:userId/boards/:boardId/permission", async (req, res) => {
+    try {
+      const permission = await storage.getUserBoardPermission(req.params.userId, req.params.boardId);
+      res.json({ permission });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check user board permission" });
     }
   });
 

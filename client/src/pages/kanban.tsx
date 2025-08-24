@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { SettingsPanel } from "@/components/kanban/settings-panel";
+import { BoardSharingDialog } from "@/components/kanban/board-sharing-dialog";
 import { UserProfileIndicator } from "@/components/user-profile-indicator";
 import { useQuery } from "@tanstack/react-query";
-import { Settings, Users, Shield, User, ArrowLeft } from "lucide-react";
+import { Settings, Users, Shield, User, ArrowLeft, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Link } from "wouter";
@@ -17,6 +18,7 @@ interface KanbanPageProps {
 export default function KanbanPage({ params }: KanbanPageProps) {
   const { boardId } = params;
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSharingOpen, setIsSharingOpen] = useState(false);
   const { canManageProfiles } = usePermissions();
 
   // Load board data
@@ -98,6 +100,18 @@ export default function KanbanPage({ params }: KanbanPageProps) {
         
         <div className="flex items-center space-x-4">
           
+          {/* Share Board Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsSharingOpen(true)}
+            className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50"
+            data-testid="button-share-board"
+            title="Compartilhar Board"
+          >
+            <Share2 className="w-4 h-4" />
+          </Button>
+
           {/* Admin Permissions Button */}
           {canManageProfiles && (
             <Button
@@ -154,6 +168,15 @@ export default function KanbanPage({ params }: KanbanPageProps) {
         onClose={() => setIsSettingsOpen(false)}
         boardId={boardId}
       />
+
+      {/* Board Sharing Dialog */}
+      {board && (
+        <BoardSharingDialog
+          board={board}
+          open={isSharingOpen}
+          onOpenChange={setIsSharingOpen}
+        />
+      )}
 
     </div>
   );

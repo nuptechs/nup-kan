@@ -1,6 +1,6 @@
-import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory } from "@shared/schema";
+import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type BoardShare, type InsertBoardShare, type UpdateBoardShare, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory } from "@shared/schema";
 import { db } from "./db";
-import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, taskEvents, exportHistory } from "@shared/schema";
+import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -92,6 +92,16 @@ export interface IStorage {
 
   // User Permissions
   getUserPermissions(userId: string): Promise<Permission[]>;
+
+  // Board Shares
+  getBoardShares(boardId: string): Promise<BoardShare[]>;
+  getAllBoardShares(): Promise<BoardShare[]>;
+  getUserSharedBoards(userId: string): Promise<BoardShare[]>;
+  getTeamSharedBoards(teamId: string): Promise<BoardShare[]>;
+  createBoardShare(share: InsertBoardShare): Promise<BoardShare>;
+  updateBoardShare(id: string, share: UpdateBoardShare): Promise<BoardShare>;
+  deleteBoardShare(id: string): Promise<void>;
+  getUserBoardPermission(userId: string, boardId: string): Promise<string | null>;
 
   // Task Events  
   getTaskEvents(taskId: string): Promise<TaskEvent[]>;
@@ -966,6 +976,39 @@ export class MemStorage implements IStorage {
     this.teamMembers.set(id, updatedMember);
     return updatedMember;
   }
+
+  // Board Shares - placeholder implementations for MemStorage
+  async getBoardShares(boardId: string): Promise<BoardShare[]> {
+    return [];
+  }
+
+  async getAllBoardShares(): Promise<BoardShare[]> {
+    return [];
+  }
+
+  async getUserSharedBoards(userId: string): Promise<BoardShare[]> {
+    return [];
+  }
+
+  async getTeamSharedBoards(teamId: string): Promise<BoardShare[]> {
+    return [];
+  }
+
+  async createBoardShare(share: InsertBoardShare): Promise<BoardShare> {
+    throw new Error("Board sharing not implemented in MemStorage");
+  }
+
+  async updateBoardShare(id: string, share: UpdateBoardShare): Promise<BoardShare> {
+    throw new Error("Board sharing not implemented in MemStorage");
+  }
+
+  async deleteBoardShare(id: string): Promise<void> {
+    throw new Error("Board sharing not implemented in MemStorage");
+  }
+
+  async getUserBoardPermission(userId: string, boardId: string): Promise<string | null> {
+    return null;
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1665,6 +1708,91 @@ export class DatabaseStorage implements IStorage {
       console.error("Error removing permission from team:", error);
       throw error;
     }
+  }
+
+  // Board Shares methods
+  async getBoardShares(boardId: string): Promise<BoardShare[]> {
+    return await db.select().from(boardShares).where(eq(boardShares.boardId, boardId)).orderBy(desc(boardShares.createdAt));
+  }
+
+  async getAllBoardShares(): Promise<BoardShare[]> {
+    return await db.select().from(boardShares).orderBy(desc(boardShares.createdAt));
+  }
+
+  async getUserSharedBoards(userId: string): Promise<BoardShare[]> {
+    return await db.select().from(boardShares).where(eq(boardShares.shareWithId, userId)).where(eq(boardShares.shareType, "user"));
+  }
+
+  async getTeamSharedBoards(teamId: string): Promise<BoardShare[]> {
+    return await db.select().from(boardShares).where(eq(boardShares.shareWithId, teamId)).where(eq(boardShares.shareType, "team"));
+  }
+
+  async createBoardShare(share: InsertBoardShare): Promise<BoardShare> {
+    const [newShare] = await db
+      .insert(boardShares)
+      .values(share)
+      .returning();
+    return newShare;
+  }
+
+  async updateBoardShare(id: string, share: UpdateBoardShare): Promise<BoardShare> {
+    const [updatedShare] = await db
+      .update(boardShares)
+      .set(share)
+      .where(eq(boardShares.id, id))
+      .returning();
+
+    if (!updatedShare) {
+      throw new Error(`BoardShare with id ${id} not found`);
+    }
+
+    return updatedShare;
+  }
+
+  async deleteBoardShare(id: string): Promise<void> {
+    const result = await db.delete(boardShares).where(eq(boardShares.id, id));
+    if (result.rowCount === 0) {
+      throw new Error(`BoardShare with id ${id} not found`);
+    }
+  }
+
+  async getUserBoardPermission(userId: string, boardId: string): Promise<string | null> {
+    // Check direct user share
+    const [userShare] = await db
+      .select()
+      .from(boardShares)
+      .where(
+        and(
+          eq(boardShares.boardId, boardId),
+          eq(boardShares.shareWithId, userId),
+          eq(boardShares.shareType, "user")
+        )
+      );
+
+    if (userShare) {
+      return userShare.permission;
+    }
+
+    // Check team shares for user
+    const userTeams = await this.getUserTeams(userId);
+    for (const userTeam of userTeams) {
+      const [teamShare] = await db
+        .select()
+        .from(boardShares)
+        .where(
+          and(
+            eq(boardShares.boardId, boardId),
+            eq(boardShares.shareWithId, userTeam.teamId),
+            eq(boardShares.shareType, "team")
+          )
+        );
+
+      if (teamShare) {
+        return teamShare.permission;
+      }
+    }
+
+    return null;
   }
 
   // Task Events methods

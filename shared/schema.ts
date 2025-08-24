@@ -128,6 +128,17 @@ export const teamProfiles = pgTable("team_profiles", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Board sharing table - allows boards to be shared with users or teams
+export const boardShares = pgTable("board_shares", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  boardId: varchar("board_id").notNull().references(() => boards.id, { onDelete: "cascade" }),
+  shareType: text("share_type").notNull(), // "user" | "team"
+  shareWithId: varchar("share_with_id").notNull(), // userId or teamId
+  permission: text("permission").notNull().default("view"), // "view" | "edit" | "admin"
+  sharedByUserId: varchar("shared_by_user_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertBoardSchema = createInsertSchema(boards).omit({
   id: true,
   createdAt: true,
@@ -213,6 +224,16 @@ export const insertUserTeamSchema = createInsertSchema(userTeams).omit({
   createdAt: true,
 });
 
+export const insertBoardShareSchema = createInsertSchema(boardShares).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  shareType: z.enum(["user", "team"]),
+  permission: z.enum(["view", "edit", "admin"]).default("view"),
+});
+
+export const updateBoardShareSchema = insertBoardShareSchema.partial();
+
 export type Board = typeof boards.$inferSelect;
 export type InsertBoard = z.infer<typeof insertBoardSchema>;
 export type UpdateBoard = z.infer<typeof updateBoardSchema>;
@@ -243,6 +264,9 @@ export type TeamProfile = typeof teamProfiles.$inferSelect;
 export type InsertTeamProfile = z.infer<typeof insertTeamProfileSchema>;
 export type UserTeam = typeof userTeams.$inferSelect;
 export type InsertUserTeam = z.infer<typeof insertUserTeamSchema>;
+export type BoardShare = typeof boardShares.$inferSelect;
+export type InsertBoardShare = z.infer<typeof insertBoardShareSchema>;
+export type UpdateBoardShare = z.infer<typeof updateBoardShareSchema>;
 export type TaskEvent = typeof taskEvents.$inferSelect;
 export type InsertTaskEvent = typeof taskEvents.$inferInsert;
 
