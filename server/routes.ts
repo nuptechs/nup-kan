@@ -875,8 +875,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Clear cookies
-      res.clearCookie('session');
-      res.clearCookie('session.sig');
+      res.clearCookie('session', { path: '/' });
+      res.clearCookie('session.sig', { path: '/' });
       
       res.json({ message: "Logout realizado com sucesso" });
     } catch (error) {
@@ -898,13 +898,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentUser = users.find(u => u.id === userId);
       
       if (!currentUser) {
-        // Clear invalid session
         req.session = null;
         return res.status(401).json({ message: "User not found" });
       }
-      
       res.json(currentUser);
     } catch (error) {
+      console.error("Current user error:", error);
       res.status(500).json({ message: "Failed to fetch current user" });
     }
   });

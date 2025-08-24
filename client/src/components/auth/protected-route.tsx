@@ -14,6 +14,9 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
   const { data: currentUser, isLoading, error } = useQuery({
     queryKey: ["/api/auth/current-user"],
     retry: false,
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Don't cache data
+    refetchOnMount: "always",
   });
 
   // Handle redirects in useEffect to avoid setState during render
