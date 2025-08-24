@@ -361,12 +361,19 @@ export default function CustomFieldsPage() {
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => {
+                    // Aplicar máscara: substituir espaços por underscore, converter para minúsculas
+                    const maskedValue = e.target.value
+                      .replace(/\s+/g, '_') // Espaços vira underscore
+                      .replace(/[^a-zA-Z0-9_-]/g, '') // Remove caracteres especiais
+                      .toLowerCase(); // Converte para minúsculas
+                    setFormData({ ...formData, name: maskedValue });
+                  }}
                   placeholder="ex: orcamento, cliente, sprint"
                   data-testid="input-field-name"
                 />
                 <p className="text-xs text-gray-500">
-                  Usado internamente (apenas letras, números, traços e _)
+                  Usado internamente. Espaços serão convertidos automaticamente para underscore (_)
                 </p>
               </div>
 
