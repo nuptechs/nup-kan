@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -169,6 +170,9 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
             <FileText className="w-5 h-5" />
             Logs do Sistema
           </DialogTitle>
+          <DialogDescription>
+            Visualize e gerencie os logs de atividade do sistema e ações dos usuários.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -379,6 +383,9 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
             <DialogTitle className="flex items-center gap-2">
               🔴 Detalhes do Erro
             </DialogTitle>
+            <DialogDescription>
+              Informações detalhadas sobre o erro encontrado no sistema.
+            </DialogDescription>
           </DialogHeader>
           
           {selectedLogDetail && (

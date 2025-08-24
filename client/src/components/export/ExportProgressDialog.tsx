@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
@@ -186,6 +186,9 @@ export function ExportProgressDialog({ open, onOpenChange, onExportComplete }: E
             {getStatusIcon()}
             Exportação de Dados
           </DialogTitle>
+          <DialogDescription>
+            Acompanhe o progresso da exportação dos seus dados do Kanban.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
