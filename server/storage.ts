@@ -1,7 +1,7 @@
 import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type BoardShare, type InsertBoardShare, type UpdateBoardShare, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory } from "@shared/schema";
 import { db } from "./db";
 import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory } from "@shared/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, inArray, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -98,6 +98,8 @@ export interface IStorage {
   getAllBoardShares(): Promise<BoardShare[]>;
   getUserSharedBoards(userId: string): Promise<BoardShare[]>;
   getTeamSharedBoards(teamId: string): Promise<BoardShare[]>;
+  getBoardMembers(boardId: string): Promise<User[]>;
+  getBoardMemberCount(boardId: string): Promise<number>;
   createBoardShare(share: InsertBoardShare): Promise<BoardShare>;
   updateBoardShare(id: string, share: UpdateBoardShare): Promise<BoardShare>;
   deleteBoardShare(id: string): Promise<void>;
@@ -994,6 +996,14 @@ export class MemStorage implements IStorage {
     return [];
   }
 
+  async getBoardMembers(boardId: string): Promise<User[]> {
+    return [];
+  }
+
+  async getBoardMemberCount(boardId: string): Promise<number> {
+    return 0;
+  }
+
   async createBoardShare(share: InsertBoardShare): Promise<BoardShare> {
     throw new Error("Board sharing not implemented in MemStorage");
   }
@@ -1030,6 +1040,18 @@ export class DatabaseStorage implements IStorage {
         description: insertBoard.description || "",
       })
       .returning();
+    
+    // Automatically add creator as admin member
+    if (insertBoard.createdById && insertBoard.createdById !== "system") {
+      await this.createBoardShare({
+        boardId: board.id,
+        shareType: "user",
+        shareWithId: insertBoard.createdById,
+        permission: "admin",
+        sharedByUserId: insertBoard.createdById
+      });
+    }
+    
     return board;
   }
 
@@ -1720,11 +1742,71 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserSharedBoards(userId: string): Promise<BoardShare[]> {
-    return await db.select().from(boardShares).where(eq(boardShares.shareWithId, userId)).where(eq(boardShares.shareType, "user"));
+    return await db.select().from(boardShares).where(and(eq(boardShares.shareWithId, userId), eq(boardShares.shareType, "user")));
   }
 
   async getTeamSharedBoards(teamId: string): Promise<BoardShare[]> {
-    return await db.select().from(boardShares).where(eq(boardShares.shareWithId, teamId)).where(eq(boardShares.shareType, "team"));
+    return await db.select().from(boardShares).where(and(eq(boardShares.shareWithId, teamId), eq(boardShares.shareType, "team")));
+  }
+
+  async getBoardMembers(boardId: string): Promise<User[]> {
+    // Get user shares for this board
+    const userShares = await db
+      .select()
+      .from(boardShares)
+      .where(and(eq(boardShares.boardId, boardId), eq(boardShares.shareType, "user")));
+
+    // Get users directly shared with
+    const directUserIds = userShares.map(share => share.shareWithId);
+    
+    let directUsers: User[] = [];
+    if (directUserIds.length > 0) {
+      directUsers = await db
+        .select()
+        .from(users)
+        .where(inArray(users.id, directUserIds));
+    }
+
+    // Get team shares for this board
+    const teamShares = await db
+      .select()
+      .from(boardShares)
+      .where(and(eq(boardShares.boardId, boardId), eq(boardShares.shareType, "team")));
+
+    // Get users from teams
+    const teamIds = teamShares.map(share => share.shareWithId);
+    let teamUsers: User[] = [];
+    
+    if (teamIds.length > 0) {
+      teamUsers = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          role: users.role,
+          avatar: users.avatar,
+          status: users.status,
+          profileId: users.profileId,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+        })
+        .from(users)
+        .innerJoin(userTeams, eq(users.id, userTeams.userId))
+        .where(inArray(userTeams.teamId, teamIds));
+    }
+
+    // Combine and deduplicate users
+    const allUsers = [...directUsers, ...teamUsers];
+    const uniqueUsers = allUsers.filter((user, index, array) => 
+      array.findIndex(u => u.id === user.id) === index
+    );
+
+    return uniqueUsers;
+  }
+
+  async getBoardMemberCount(boardId: string): Promise<number> {
+    const members = await this.getBoardMembers(boardId);
+    return members.length;
   }
 
   async createBoardShare(share: InsertBoardShare): Promise<BoardShare> {

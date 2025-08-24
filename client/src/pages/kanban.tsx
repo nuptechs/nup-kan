@@ -31,8 +31,9 @@ export default function KanbanPage({ params }: KanbanPageProps) {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  const { data: teamMembers } = useQuery({
-    queryKey: ["/api/team-members"],
+  const { data: boardMemberCount } = useQuery<{ count: number }>({
+    queryKey: [`/api/boards/${boardId}/member-count`],
+    enabled: !!boardId,
   });
 
 
@@ -94,7 +95,7 @@ export default function KanbanPage({ params }: KanbanPageProps) {
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-500 flex-shrink-0 whitespace-nowrap">
             <Users className="w-4 h-4" />
-            <span data-testid="team-count">{(teamMembers as any)?.length || 0} membros</span>
+            <span data-testid="team-count">{boardMemberCount?.count || 0} membros</span>
           </div>
         </div>
         

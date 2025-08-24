@@ -1053,6 +1053,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/boards/:boardId/members", async (req, res) => {
+    try {
+      const members = await storage.getBoardMembers(req.params.boardId);
+      res.json(members);
+    } catch (error) {
+      console.error("Error fetching board members:", error);
+      res.status(500).json({ message: "Failed to fetch board members" });
+    }
+  });
+
+  app.get("/api/boards/:boardId/member-count", async (req, res) => {
+    try {
+      const count = await storage.getBoardMemberCount(req.params.boardId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching board member count:", error);
+      res.status(500).json({ message: "Failed to fetch board member count" });
+    }
+  });
+
   app.get("/api/board-shares", async (req, res) => {
     try {
       const shares = await storage.getAllBoardShares();
