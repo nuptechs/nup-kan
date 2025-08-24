@@ -8,7 +8,8 @@ export function usePermissions() {
     queryKey: ["/api/auth/current-user"],
     retry: 2,
     retryDelay: 1000,
-    staleTime: 30000, // Cache por 30 segundos para melhor performance
+    staleTime: 300000, // Cache por 5 minutos - dados de usuário mudam pouco
+    gcTime: 600000, // Manter em cache por 10 minutos
     refetchOnWindowFocus: false,
   });
 
@@ -16,7 +17,8 @@ export function usePermissions() {
   const { data: userPermissions = [], isLoading: permissionsLoading, error: permissionsError } = useQuery<Permission[]>({
     queryKey: ["/api/users", currentUser?.id, "permissions"],
     enabled: !!currentUser?.id, // Modificado para verificar ID do usuário em vez de profileId
-    staleTime: 60000, // Cache por 60 segundos
+    staleTime: 300000, // Cache por 5 minutos - permissões mudam raramente
+    gcTime: 600000, // Manter em cache por 10 minutos
     refetchOnWindowFocus: false,
   });
 

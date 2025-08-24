@@ -1,7 +1,7 @@
 import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type BoardShare, type InsertBoardShare, type UpdateBoardShare, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory, type TaskStatus, type InsertTaskStatus, type UpdateTaskStatus, type TaskPriority, type InsertTaskPriority, type UpdateTaskPriority, type TaskAssignee, type InsertTaskAssignee } from "@shared/schema";
 import { db } from "./db";
 import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory, taskStatuses, taskPriorities, taskAssignees } from "@shared/schema";
-import { eq, desc, and, inArray, sql } from "drizzle-orm";
+import { eq, desc, and, inArray, sql, or } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 
@@ -577,36 +577,42 @@ export class MemStorage implements IStorage {
   // User Permissions methods for MemStorage
   async getUserPermissions(userId: string): Promise<Permission[]> {
     try {
+      // Verificar cache primeiro
+      const cached = this.getCachedPermissions(userId);
+      if (cached) {
+        console.log("🚀 [SECURITY] Permissões servidas do cache para usuário:", userId);
+        return cached;
+      }
+
+      // Query otimizada: busca tudo em uma única consulta com JOINs
+      const result = await db
+        .select({
+          id: permissions.id,
+          name: permissions.name,
+          description: permissions.description,
+          category: permissions.category,
+          createdAt: permissions.createdAt,
+        })
+        .from(users)
+        .innerJoin(profiles, eq(users.profileId, profiles.id))
+        .innerJoin(profilePermissions, eq(profiles.id, profilePermissions.profileId))
+        .innerJoin(permissions, eq(profilePermissions.permissionId, permissions.id))
+        .where(eq(users.id, userId));
+
       const user = await this.getUser(userId);
-      console.log("🔍 [SECURITY MemStorage] Buscando permissões para usuário:", user?.name || "Unknown");
+      console.log("🔍 [SECURITY] Buscando permissões para usuário:", user?.name || "Unknown");
       
-      if (!user) {
-        console.log("❌ [SECURITY MemStorage] Usuário não encontrado");
+      if (result.length === 0) {
+        console.log("⚠️ [SECURITY] Usuário sem permissões ou não encontrado");
         return [];
       }
 
-      if (!user.profileId) {
-        console.log("⚠️ [SECURITY MemStorage] Usuário sem perfil atribuído - acesso negado");
-        return [];
-      }
-
-      // Buscar permissões específicas do perfil do usuário
-      const profilePermissions = await this.getProfilePermissions(user.profileId);
-      console.log(`🔑 [SECURITY MemStorage] ${profilePermissions.length} relações de permissão encontradas`);
-      
-      // Buscar os dados completos das permissões
-      const permissions: Permission[] = [];
-      for (const pp of profilePermissions) {
-        const permission = await this.getPermission(pp.permissionId);
-        if (permission) {
-          permissions.push(permission);
-        }
-      }
-      
-      console.log(`🔑 [SECURITY MemStorage] ${permissions.length} permissões completas carregadas:`, permissions.map(p => p.name));
-      return permissions;
+      // Cachear resultado
+      this.setCachedPermissions(userId, result);
+      console.log(`🔑 [SECURITY] ${result.length} permissões completas carregadas e cacheadas:`, result.map(p => p.name));
+      return result;
     } catch (error) {
-      console.error("❌ [SECURITY MemStorage] Erro em getUserPermissions:", error);
+      console.error("❌ [SECURITY] Erro em getUserPermissions:", error);
       return [];
     }
   }
@@ -1205,6 +1211,24 @@ export class MemStorage implements IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // Cache simples para permissões (dados raramente modificados)
+  private permissionsCache = new Map<string, { data: Permission[], timestamp: number }>();
+  private readonly CACHE_TTL = 300000; // 5 minutos
+
+  private getCachedPermissions(userId: string): Permission[] | null {
+    const cached = this.permissionsCache.get(userId);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+      return cached.data;
+    }
+    return null;
+  }
+
+  private setCachedPermissions(userId: string, permissions: Permission[]): void {
+    this.permissionsCache.set(userId, {
+      data: permissions,
+      timestamp: Date.now()
+    });
+  }
   // Board methods
   async getBoards(): Promise<Board[]> {
     return await db.select().from(boards).orderBy(desc(boards.createdAt));
@@ -2023,59 +2047,53 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBoardMembers(boardId: string): Promise<User[]> {
-    // Get user shares for this board
-    const userShares = await db
-      .select()
-      .from(boardShares)
-      .where(and(eq(boardShares.boardId, boardId), eq(boardShares.shareType, "user")));
+    // Query otimizada: busca todos os usuários em uma única consulta com UNION
+    const allUsers = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        password: users.password,
+        role: users.role,
+        avatar: users.avatar,
+        status: users.status,
+        profileId: users.profileId,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .where(
+        or(
+          // Usuários diretamente compartilhados
+          inArray(
+            users.id,
+            db.select({ userId: boardShares.shareWithId })
+              .from(boardShares)
+              .where(
+                and(
+                  eq(boardShares.boardId, boardId),
+                  eq(boardShares.shareType, "user")
+                )
+              )
+          ),
+          // Usuários de teams compartilhados
+          inArray(
+            users.id,
+            db.select({ userId: userTeams.userId })
+              .from(userTeams)
+              .innerJoin(
+                boardShares,
+                and(
+                  eq(userTeams.teamId, boardShares.shareWithId),
+                  eq(boardShares.boardId, boardId),
+                  eq(boardShares.shareType, "team")
+                )
+              )
+          )
+        )
+      );
 
-    // Get users directly shared with
-    const directUserIds = userShares.map(share => share.shareWithId);
-    
-    let directUsers: User[] = [];
-    if (directUserIds.length > 0) {
-      directUsers = await db
-        .select()
-        .from(users)
-        .where(inArray(users.id, directUserIds));
-    }
-
-    // Get team shares for this board
-    const teamShares = await db
-      .select()
-      .from(boardShares)
-      .where(and(eq(boardShares.boardId, boardId), eq(boardShares.shareType, "team")));
-
-    // Get users from teams
-    const teamIds = teamShares.map(share => share.shareWithId);
-    let teamUsers: User[] = [];
-    
-    if (teamIds.length > 0) {
-      teamUsers = await db
-        .select({
-          id: users.id,
-          name: users.name,
-          email: users.email,
-          password: users.password,
-          role: users.role,
-          avatar: users.avatar,
-          status: users.status,
-          profileId: users.profileId,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt,
-        })
-        .from(users)
-        .innerJoin(userTeams, eq(users.id, userTeams.userId))
-        .where(inArray(userTeams.teamId, teamIds));
-    }
-
-    // Combine and deduplicate users
-    const allUsers = [...directUsers, ...teamUsers];
-    const uniqueUsers = allUsers.filter((user, index, array) => 
-      array.findIndex(u => u.id === user.id) === index
-    );
-
-    return uniqueUsers;
+    return allUsers;
   }
 
   async getBoardMemberCount(boardId: string): Promise<number> {
