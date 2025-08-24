@@ -246,11 +246,11 @@ export class MemStorage implements IStorage {
   // Users methods for MemStorage
   async getUsers(): Promise<User[]> {
     return [
-      { id: "1", name: "Ana Maria", email: "ana.maria@example.com", role: "Designer UX/UI", avatar: "AM", status: "online", profileId: "profile-designer", createdAt: new Date(), updatedAt: new Date() },
-      { id: "2", name: "João Silva", email: "joao.silva@example.com", role: "Full Stack Developer", avatar: "JS", status: "busy", profileId: "profile-developer", createdAt: new Date(), updatedAt: new Date() },
-      { id: "3", name: "Maria Costa", email: "maria.costa@example.com", role: "Product Manager", avatar: "MC", status: "online", profileId: "profile-manager", createdAt: new Date(), updatedAt: new Date() },
-      { id: "4", name: "Rafael Santos", email: "rafael.santos@example.com", role: "Backend Developer", avatar: "RF", status: "offline", profileId: "profile-developer", createdAt: new Date(), updatedAt: new Date() },
-      { id: "5", name: "Lucas Oliveira", email: "lucas.oliveira@example.com", role: "DevOps Engineer", avatar: "LC", status: "online", profileId: "profile-devops", createdAt: new Date(), updatedAt: new Date() },
+      { id: "1", name: "Ana Maria", email: "ana.maria@example.com", password: null, role: "Designer UX/UI", avatar: "AM", status: "online", profileId: "profile-designer", createdAt: new Date(), updatedAt: new Date() },
+      { id: "2", name: "João Silva", email: "joao.silva@example.com", password: null, role: "Full Stack Developer", avatar: "JS", status: "busy", profileId: "profile-developer", createdAt: new Date(), updatedAt: new Date() },
+      { id: "3", name: "Maria Costa", email: "maria.costa@example.com", password: null, role: "Product Manager", avatar: "MC", status: "online", profileId: "profile-manager", createdAt: new Date(), updatedAt: new Date() },
+      { id: "4", name: "Rafael Santos", email: "rafael.santos@example.com", password: null, role: "Backend Developer", avatar: "RF", status: "offline", profileId: "profile-developer", createdAt: new Date(), updatedAt: new Date() },
+      { id: "5", name: "Lucas Oliveira", email: "lucas.oliveira@example.com", password: null, role: "DevOps Engineer", avatar: "LC", status: "online", profileId: "profile-devops", createdAt: new Date(), updatedAt: new Date() },
     ];
   }
 
@@ -263,6 +263,7 @@ export class MemStorage implements IStorage {
     const user: User = {
       id: randomUUID(),
       ...insertUser,
+      password: insertUser.password || null,
       role: insertUser.role || null,
       avatar: insertUser.avatar || insertUser.name.split(' ').map(n => n[0]).join('').toUpperCase(),
       status: insertUser.status || "offline",
@@ -279,6 +280,14 @@ export class MemStorage implements IStorage {
       throw new Error(`User with id ${id} not found`);
     }
     return { ...existingUser, ...updateData, updatedAt: new Date() };
+  }
+
+  async updateUserPassword(id: string, newPassword: string): Promise<void> {
+    const existingUser = await this.getUser(id);
+    if (!existingUser) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    // In memory storage simulation - password updated conceptually
   }
 
   async deleteUser(id: string): Promise<void> {
@@ -2047,6 +2056,7 @@ export class DatabaseStorage implements IStorage {
           id: users.id,
           name: users.name,
           email: users.email,
+          password: users.password,
           role: users.role,
           avatar: users.avatar,
           status: users.status,
