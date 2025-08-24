@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Shield, History, Grid } from "lucide-react";
+import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Shield, History, Grid, Database } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ColumnManagementDialog } from "./column-management-dialog";
@@ -197,6 +197,33 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
                 <Tags className="w-4 h-4 mr-2" />
                 Gerenciar Tags
               </Button>
+
+              {/* Auxiliary Data Section */}
+              <div className="pt-2 border-t">
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Dados Auxiliares
+                </Label>
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => setLocation("/admin/task-status")}
+                    variant="outline"
+                    className="w-full justify-start"
+                    data-testid="button-manage-status"
+                  >
+                    <Database className="w-4 h-4 mr-2" />
+                    Status das Tarefas
+                  </Button>
+                  <Button
+                    onClick={() => setLocation("/admin/task-priority")}
+                    variant="outline"
+                    className="w-full justify-start"
+                    data-testid="button-manage-priorities"
+                  >
+                    <Database className="w-4 h-4 mr-2" />
+                    Prioridades das Tarefas
+                  </Button>
+                </div>
+              </div>
               
               <Button
                 onClick={() => setIsEmailSettingsOpen(true)}

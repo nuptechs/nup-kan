@@ -1,6 +1,6 @@
-import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type BoardShare, type InsertBoardShare, type UpdateBoardShare, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory } from "@shared/schema";
+import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type BoardShare, type InsertBoardShare, type UpdateBoardShare, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory, type TaskStatus, type InsertTaskStatus, type UpdateTaskStatus, type TaskPriority, type InsertTaskPriority, type UpdateTaskPriority } from "@shared/schema";
 import { db } from "./db";
-import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory } from "@shared/schema";
+import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory, taskStatuses, taskPriorities } from "@shared/schema";
 import { eq, desc, and, inArray, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -113,6 +113,20 @@ export interface IStorage {
   getExportHistory(userId: string): Promise<ExportHistory[]>;
   createExportHistory(exportData: InsertExportHistory): Promise<ExportHistory>;
   updateExportHistory(id: string, updates: Partial<ExportHistory>): Promise<ExportHistory>;
+
+  // Task Statuses
+  getTaskStatuses(): Promise<TaskStatus[]>;
+  getTaskStatus(id: string): Promise<TaskStatus | undefined>;
+  createTaskStatus(status: InsertTaskStatus): Promise<TaskStatus>;
+  updateTaskStatus(id: string, status: UpdateTaskStatus): Promise<TaskStatus>;
+  deleteTaskStatus(id: string): Promise<void>;
+
+  // Task Priorities
+  getTaskPriorities(): Promise<TaskPriority[]>;
+  getTaskPriority(id: string): Promise<TaskPriority | undefined>;
+  createTaskPriority(priority: InsertTaskPriority): Promise<TaskPriority>;
+  updateTaskPriority(id: string, priority: UpdateTaskPriority): Promise<TaskPriority>;
+  deleteTaskPriority(id: string): Promise<void>;
 
   // Board initialization
   initializeBoardWithDefaults(boardId: string): Promise<void>;
@@ -1019,6 +1033,122 @@ export class MemStorage implements IStorage {
   async getUserBoardPermission(userId: string, boardId: string): Promise<string | null> {
     return null;
   }
+
+  // Task Status methods for MemStorage (basic implementation)
+  async getTaskStatuses(): Promise<TaskStatus[]> {
+    return [
+      { 
+        id: "1", 
+        name: "backlog", 
+        displayName: "Backlog", 
+        color: "#6b7280", 
+        isDefault: "true", 
+        position: 0, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      { 
+        id: "2", 
+        name: "todo", 
+        displayName: "To Do", 
+        color: "#3b82f6", 
+        isDefault: "false", 
+        position: 1, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      { 
+        id: "3", 
+        name: "inprogress", 
+        displayName: "In Progress", 
+        color: "#f59e0b", 
+        isDefault: "false", 
+        position: 2, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      { 
+        id: "4", 
+        name: "done", 
+        displayName: "Done", 
+        color: "#10b981", 
+        isDefault: "false", 
+        position: 3, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+  }
+
+  async getTaskStatus(id: string): Promise<TaskStatus | undefined> {
+    const statuses = await this.getTaskStatuses();
+    return statuses.find(status => status.id === id);
+  }
+
+  async createTaskStatus(status: InsertTaskStatus): Promise<TaskStatus> {
+    throw new Error("Task Status creation not implemented in MemStorage");
+  }
+
+  async updateTaskStatus(id: string, status: UpdateTaskStatus): Promise<TaskStatus> {
+    throw new Error("Task Status updates not implemented in MemStorage");
+  }
+
+  async deleteTaskStatus(id: string): Promise<void> {
+    throw new Error("Task Status deletion not implemented in MemStorage");
+  }
+
+  // Task Priority methods for MemStorage (basic implementation)
+  async getTaskPriorities(): Promise<TaskPriority[]> {
+    return [
+      { 
+        id: "1", 
+        name: "low", 
+        displayName: "Baixa", 
+        color: "#3b82f6", 
+        isDefault: "false", 
+        level: 1, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      { 
+        id: "2", 
+        name: "medium", 
+        displayName: "Média", 
+        color: "#f59e0b", 
+        isDefault: "true", 
+        level: 2, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      { 
+        id: "3", 
+        name: "high", 
+        displayName: "Alta", 
+        color: "#ef4444", 
+        isDefault: "false", 
+        level: 3, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+  }
+
+  async getTaskPriority(id: string): Promise<TaskPriority | undefined> {
+    const priorities = await this.getTaskPriorities();
+    return priorities.find(priority => priority.id === id);
+  }
+
+  async createTaskPriority(priority: InsertTaskPriority): Promise<TaskPriority> {
+    throw new Error("Task Priority creation not implemented in MemStorage");
+  }
+
+  async updateTaskPriority(id: string, priority: UpdateTaskPriority): Promise<TaskPriority> {
+    throw new Error("Task Priority updates not implemented in MemStorage");
+  }
+
+  async deleteTaskPriority(id: string): Promise<void> {
+    throw new Error("Task Priority deletion not implemented in MemStorage");
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1911,6 +2041,94 @@ export class DatabaseStorage implements IStorage {
       .where(eq(exportHistory.id, id))
       .returning();
     return updated;
+  }
+
+  // Task Status methods
+  async getTaskStatuses(): Promise<TaskStatus[]> {
+    return await db.select().from(taskStatuses).orderBy(taskStatuses.position);
+  }
+
+  async getTaskStatus(id: string): Promise<TaskStatus | undefined> {
+    const [status] = await db.select().from(taskStatuses).where(eq(taskStatuses.id, id));
+    return status || undefined;
+  }
+
+  async createTaskStatus(insertStatus: InsertTaskStatus): Promise<TaskStatus> {
+    const [status] = await db
+      .insert(taskStatuses)
+      .values({
+        ...insertStatus,
+      })
+      .returning();
+    return status;
+  }
+
+  async updateTaskStatus(id: string, updateData: UpdateTaskStatus): Promise<TaskStatus> {
+    const [status] = await db
+      .update(taskStatuses)
+      .set({
+        ...updateData,
+        updatedAt: new Date(),
+      })
+      .where(eq(taskStatuses.id, id))
+      .returning();
+    
+    if (!status) {
+      throw new Error(`TaskStatus with id ${id} not found`);
+    }
+    
+    return status;
+  }
+
+  async deleteTaskStatus(id: string): Promise<void> {
+    const result = await db.delete(taskStatuses).where(eq(taskStatuses.id, id));
+    if (result.rowCount === 0) {
+      throw new Error(`TaskStatus with id ${id} not found`);
+    }
+  }
+
+  // Task Priority methods
+  async getTaskPriorities(): Promise<TaskPriority[]> {
+    return await db.select().from(taskPriorities).orderBy(taskPriorities.level);
+  }
+
+  async getTaskPriority(id: string): Promise<TaskPriority | undefined> {
+    const [priority] = await db.select().from(taskPriorities).where(eq(taskPriorities.id, id));
+    return priority || undefined;
+  }
+
+  async createTaskPriority(insertPriority: InsertTaskPriority): Promise<TaskPriority> {
+    const [priority] = await db
+      .insert(taskPriorities)
+      .values({
+        ...insertPriority,
+      })
+      .returning();
+    return priority;
+  }
+
+  async updateTaskPriority(id: string, updateData: UpdateTaskPriority): Promise<TaskPriority> {
+    const [priority] = await db
+      .update(taskPriorities)
+      .set({
+        ...updateData,
+        updatedAt: new Date(),
+      })
+      .where(eq(taskPriorities.id, id))
+      .returning();
+    
+    if (!priority) {
+      throw new Error(`TaskPriority with id ${id} not found`);
+    }
+    
+    return priority;
+  }
+
+  async deleteTaskPriority(id: string): Promise<void> {
+    const result = await db.delete(taskPriorities).where(eq(taskPriorities.id, id));
+    if (result.rowCount === 0) {
+      throw new Error(`TaskPriority with id ${id} not found`);
+    }
   }
 }
 

@@ -7,6 +7,8 @@ import BoardSelection from "@/pages/BoardSelection";
 import KanbanPage from "@/pages/kanban";
 import UserSettingsPage from "@/pages/user-settings";
 import PermissionsHub from "@/pages/PermissionsHub";
+import TaskStatusPage from "@/pages/task-status";
+import TaskPriorityPage from "@/pages/task-priority";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +18,8 @@ function Router() {
       <Route path="/kanban/:boardId" component={KanbanPage} />
       <Route path="/settings" component={UserSettingsPage} />
       <Route path="/admin/permissions" component={PermissionsHub} />
+      <Route path="/admin/task-status" component={TaskStatusPage} />
+      <Route path="/admin/task-priority" component={TaskPriorityPage} />
       <Route component={NotFound} />
     </Switch>
   );

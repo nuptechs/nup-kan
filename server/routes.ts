@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema } from "@shared/schema";
+import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema } from "@shared/schema";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1146,6 +1146,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ permission });
     } catch (error) {
       res.status(500).json({ message: "Failed to check user board permission" });
+    }
+  });
+
+  // Task Status routes
+  app.get("/api/task-statuses", async (req, res) => {
+    try {
+      const statuses = await storage.getTaskStatuses();
+      res.json(statuses);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch task statuses" });
+    }
+  });
+
+  app.get("/api/task-statuses/:id", async (req, res) => {
+    try {
+      const status = await storage.getTaskStatus(req.params.id);
+      if (!status) {
+        return res.status(404).json({ message: "Task status not found" });
+      }
+      res.json(status);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch task status" });
+    }
+  });
+
+  app.post("/api/task-statuses", async (req, res) => {
+    try {
+      const statusData = insertTaskStatusSchema.parse(req.body);
+      const status = await storage.createTaskStatus(statusData);
+      res.status(201).json(status);
+    } catch (error) {
+      console.error("Error creating task status:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ 
+          message: "Invalid task status data", 
+          error: error.message 
+        });
+      } else {
+        res.status(400).json({ message: "Invalid task status data" });
+      }
+    }
+  });
+
+  app.patch("/api/task-statuses/:id", async (req, res) => {
+    try {
+      const statusData = updateTaskStatusSchema.parse(req.body);
+      const status = await storage.updateTaskStatus(req.params.id, statusData);
+      res.json(status);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Task status not found" });
+      }
+      res.status(400).json({ message: "Invalid task status data" });
+    }
+  });
+
+  app.delete("/api/task-statuses/:id", async (req, res) => {
+    try {
+      await storage.deleteTaskStatus(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Task status not found" });
+      }
+      res.status(500).json({ message: "Failed to delete task status" });
+    }
+  });
+
+  // Task Priority routes
+  app.get("/api/task-priorities", async (req, res) => {
+    try {
+      const priorities = await storage.getTaskPriorities();
+      res.json(priorities);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch task priorities" });
+    }
+  });
+
+  app.get("/api/task-priorities/:id", async (req, res) => {
+    try {
+      const priority = await storage.getTaskPriority(req.params.id);
+      if (!priority) {
+        return res.status(404).json({ message: "Task priority not found" });
+      }
+      res.json(priority);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch task priority" });
+    }
+  });
+
+  app.post("/api/task-priorities", async (req, res) => {
+    try {
+      const priorityData = insertTaskPrioritySchema.parse(req.body);
+      const priority = await storage.createTaskPriority(priorityData);
+      res.status(201).json(priority);
+    } catch (error) {
+      console.error("Error creating task priority:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ 
+          message: "Invalid task priority data", 
+          error: error.message 
+        });
+      } else {
+        res.status(400).json({ message: "Invalid task priority data" });
+      }
+    }
+  });
+
+  app.patch("/api/task-priorities/:id", async (req, res) => {
+    try {
+      const priorityData = updateTaskPrioritySchema.parse(req.body);
+      const priority = await storage.updateTaskPriority(req.params.id, priorityData);
+      res.json(priority);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Task priority not found" });
+      }
+      res.status(400).json({ message: "Invalid task priority data" });
+    }
+  });
+
+  app.delete("/api/task-priorities/:id", async (req, res) => {
+    try {
+      await storage.deleteTaskPriority(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Task priority not found" });
+      }
+      res.status(500).json({ message: "Failed to delete task priority" });
     }
   });
 

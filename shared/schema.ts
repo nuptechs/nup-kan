@@ -121,6 +121,29 @@ export const taskEvents = pgTable("task_events", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Task auxiliary data tables
+export const taskStatuses = pgTable("task_statuses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  displayName: text("display_name").notNull(),
+  color: text("color").notNull().default("#3b82f6"),
+  isDefault: text("is_default").default("false"),
+  position: integer("position").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const taskPriorities = pgTable("task_priorities", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  displayName: text("display_name").notNull(),
+  color: text("color").notNull().default("#3b82f6"),
+  isDefault: text("is_default").default("false"),
+  level: integer("level").notNull().default(0), // 0=lowest, higher numbers = higher priority
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const teamProfiles = pgTable("team_profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   teamId: varchar("team_id").notNull().references(() => teams.id, { onDelete: "cascade" }),
@@ -291,3 +314,34 @@ export const insertTaskEventSchema = createInsertSchema(taskEvents).omit({
   id: true,
   createdAt: true,
 });
+
+// Task auxiliary data schemas
+export const insertTaskStatusSchema = createInsertSchema(taskStatuses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  name: z.string().min(1, "Nome obrigatório").trim(),
+  displayName: z.string().min(1, "Nome de exibição obrigatório").trim(),
+});
+
+export const updateTaskStatusSchema = insertTaskStatusSchema.partial();
+
+export const insertTaskPrioritySchema = createInsertSchema(taskPriorities).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  name: z.string().min(1, "Nome obrigatório").trim(),
+  displayName: z.string().min(1, "Nome de exibição obrigatório").trim(),
+});
+
+export const updateTaskPrioritySchema = insertTaskPrioritySchema.partial();
+
+// Task auxiliary data types
+export type TaskStatus = typeof taskStatuses.$inferSelect;
+export type InsertTaskStatus = z.infer<typeof insertTaskStatusSchema>;
+export type UpdateTaskStatus = z.infer<typeof updateTaskStatusSchema>;
+export type TaskPriority = typeof taskPriorities.$inferSelect;
+export type InsertTaskPriority = z.infer<typeof insertTaskPrioritySchema>;
+export type UpdateTaskPriority = z.infer<typeof updateTaskPrioritySchema>;
