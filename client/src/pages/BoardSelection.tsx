@@ -39,7 +39,7 @@ export default function BoardSelection() {
   });
 
   const { data: currentUser } = useQuery<{ id: string; name: string; email: string }>({
-    queryKey: ["/api/users/me"],
+    queryKey: ["/api/auth/current-user"],
   });
 
   const createForm = useForm<BoardFormData>({
