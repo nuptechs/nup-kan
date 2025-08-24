@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Grid, Settings, Edit, Trash2, MoreVertical, User } from "lucide-react";
+import { Plus, Grid, Settings, Edit, Trash2, MoreVertical, User, Eye } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
