@@ -2774,6 +2774,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Nova funcionalidade de teste para demonstrar a atribuição automática
+  app.get("/api/notifications", async (req, res) => {
+    try {
+      res.json({
+        notifications: [
+          { id: "1", message: "Sistema de permissões atualizado", type: "info" },
+          { id: "2", message: "Nova funcionalidade detectada", type: "success" }
+        ]
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get notifications" });
+    }
+  });
+
+  app.post("/api/notifications", async (req, res) => {
+    try {
+      const { message, type } = req.body;
+      const notification = {
+        id: Date.now().toString(),
+        message,
+        type: type || "info",
+        createdAt: new Date()
+      };
+      res.json(notification);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create notification" });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Sincronizar permissões automaticamente na inicialização
