@@ -30,13 +30,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/tasks", async (req, res) => {
     try {
-      console.log("Creating task with data:", req.body);
+      console.log("🚀 API: Creating task with data:", req.body);
       const taskData = insertTaskSchema.parse(req.body);
-      console.log("Parsed task data:", taskData);
+      console.log("✅ API: Parsed task data:", taskData);
       const task = await storage.createTask(taskData);
+      console.log("✅ API: Task created successfully, returning:", task);
       res.status(201).json(task);
     } catch (error) {
-      console.error("Error creating task:", error);
+      console.error("❌ API: Error creating task:", error);
       if (error instanceof Error) {
         res.status(400).json({ 
           message: "Invalid task data", 

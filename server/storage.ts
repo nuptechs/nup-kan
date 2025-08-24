@@ -1273,29 +1273,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTask(insertTask: InsertTask): Promise<Task> {
-    const [task] = await db
-      .insert(tasks)
-      .values({
-        ...insertTask,
-        description: insertTask.description || "",
-        assigneeId: insertTask.assigneeId || "",
-        assigneeName: insertTask.assigneeName || "",
-        assigneeAvatar: insertTask.assigneeAvatar || "",
-        tags: insertTask.tags || [],
-      })
-      .returning();
+    console.log("🔄 DatabaseStorage: Starting createTask with data:", insertTask);
     
-    // Create initial event for task creation
-    await this.createTaskEvent({
-      taskId: task.id,
-      eventType: "created",
-      description: "Task criada",
-      userName: "Sistema",
-      userAvatar: "S",
-      metadata: ""
-    });
-    
-    return task;
+    try {
+      const [task] = await db
+        .insert(tasks)
+        .values({
+          ...insertTask,
+          description: insertTask.description || "",
+          assigneeId: insertTask.assigneeId || "",
+          assigneeName: insertTask.assigneeName || "",
+          assigneeAvatar: insertTask.assigneeAvatar || "",
+          tags: insertTask.tags || [],
+        })
+        .returning();
+      
+      console.log("✅ DatabaseStorage: Task inserted successfully:", task.id);
+      
+      // Create initial event for task creation (with error handling)
+      try {
+        await this.createTaskEvent({
+          taskId: task.id,
+          eventType: "created",
+          description: "Task criada",
+          userName: "Sistema",
+          userAvatar: "S",
+          metadata: ""
+        });
+        console.log("✅ DatabaseStorage: Task event created successfully");
+      } catch (eventError) {
+        console.error("⚠️  DatabaseStorage: Event creation failed, but task was created:", eventError);
+        // Continue without failing - task is already created
+      }
+      
+      return task;
+    } catch (error) {
+      console.error("❌ DatabaseStorage: Task creation failed:", error);
+      throw error;
+    }
   }
 
   async updateTask(id: string, updateData: UpdateTask): Promise<Task> {
