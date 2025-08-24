@@ -123,7 +123,7 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
   return (
     <div
       className={cn(
-        "bg-white rounded-xl p-3 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group border border-gray-100",
+        "bg-white rounded-xl p-2 sm:p-3 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group border border-gray-100 min-w-0",
         (isInProgress || isReview) && `border-l-4 ${getColumnBorderClasses(columnColor)}`,
         isDone && "opacity-80"
       )}
@@ -133,7 +133,7 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
       {/* Title and Priority */}
       <div className="flex items-start justify-between mb-2">
         <h3 className={cn(
-          "font-medium text-gray-900 text-sm leading-tight group-hover:text-indigo-600 transition-colors flex-1 mr-2",
+          "font-medium text-gray-900 text-xs sm:text-sm leading-tight group-hover:text-indigo-600 transition-colors flex-1 mr-2 break-words",
           isDone && "line-through decoration-green-500 text-gray-600"
         )}>
           {task.title}

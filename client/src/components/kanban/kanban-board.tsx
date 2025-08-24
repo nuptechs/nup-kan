@@ -284,7 +284,7 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
                       <div
                         ref={columnProvided.innerRef}
                         {...columnProvided.draggableProps}
-                        className={`flex-shrink-0 w-72 transition-all duration-200 ${
+                        className={`flex-shrink-0 w-72 sm:w-80 md:w-72 lg:w-80 transition-all duration-200 ${
                           columnSnapshot.isDragging ? 'rotate-1 scale-105 shadow-xl' : ''
                         }`}
                       >
@@ -317,7 +317,7 @@ export function KanbanBoard({ boardId }: KanbanBoardProps) {
                 ))}
                 
                 {/* Add Column Button */}
-                <div className="flex-shrink-0 w-72">
+                <div className="flex-shrink-0 w-72 sm:w-80 md:w-72 lg:w-80">
                   <button
                     onClick={handleManageColumns}
                     className="w-full h-12 border border-dashed border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50/30 transition-all duration-200 flex items-center justify-center group bg-white/50 backdrop-blur-sm"

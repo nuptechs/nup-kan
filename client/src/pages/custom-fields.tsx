@@ -233,12 +233,12 @@ export default function CustomFieldsPage() {
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-2xl font-bold text-gray-900">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
+          <div className="w-full sm:w-auto">
+            <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900">
               Campos Personalizados
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm sm:text-base">
               Crie campos personalizados para enriquecer suas tarefas com informações específicas do seu projeto.
             </CardDescription>
             <div className="flex items-center gap-2 mt-2">
@@ -247,7 +247,7 @@ export default function CustomFieldsPage() {
           </div>
           <Button 
             onClick={openCreateDialog}
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto"
             data-testid="button-create-field"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -265,17 +265,19 @@ export default function CustomFieldsPage() {
               <p className="text-sm text-gray-500">Crie seu primeiro campo para personalizar suas tarefas</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Campo</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Obrigatório</TableHead>
-                  <TableHead>Boards</TableHead>
-                  <TableHead>Opções</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
+            <>
+            <div className="hidden sm:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Campo</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Obrigatório</TableHead>
+                    <TableHead>Boards</TableHead>
+                    <TableHead>Opções</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
               <TableBody>
                 {fields.map((field) => {
                   const Icon = getFieldTypeIcon(field.type);
@@ -305,7 +307,7 @@ export default function CustomFieldsPage() {
                         {field.boardIds && field.boardIds.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
                             {field.boardIds.slice(0, 2).map((boardId, i) => {
-                              const board = boards.find((b: any) => b.id === boardId);
+                              const board = (boards as any[]).find((b: any) => b.id === boardId);
                               return board ? (
                                 <Badge key={i} variant="outline" className="text-xs">
                                   {board.name}
@@ -362,10 +364,93 @@ export default function CustomFieldsPage() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 })}
               </TableBody>
-            </Table>
+              </Table>
+            </div>
+            
+            {/* Mobile Cards */}
+            <div className="block sm:hidden space-y-4">
+              {fields.map((field) => (
+                <Card key={field.id} className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-gray-900 truncate">{field.label}</h3>
+                      <p className="text-sm text-gray-500">Nome: {field.name}</p>
+                    </div>
+                    <div className="flex space-x-1 ml-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditDialog(field)}
+                        data-testid={`button-edit-${field.id}`}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(field)}
+                        data-testid={`button-delete-${field.id}`}
+                      >
+                        <Trash className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Tipo:</span>
+                      <div className="flex items-center space-x-1">
+                        {(() => {
+                          const Icon = getFieldTypeIcon(field.type);
+                          return <Icon className="w-4 h-4 text-gray-500" />;
+                        })()}
+                        <span>{getFieldTypeLabel(field.type)}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Obrigatório:</span>
+                      <Badge variant={field.required === "true" ? "destructive" : "secondary"}>
+                        {field.required === "true" ? "Sim" : "Não"}
+                      </Badge>
+                    </div>
+                    
+                    {field.boardIds && field.boardIds.length > 0 && (
+                      <div>
+                        <span className="text-gray-600 block mb-1">Boards:</span>
+                        <div className="flex flex-wrap gap-1">
+                          {field.boardIds.map((boardId, i) => {
+                            const board = (boards as any[]).find((b: any) => b.id === boardId);
+                            return board ? (
+                              <Badge key={i} variant="outline" className="text-xs">
+                                {board.name}
+                              </Badge>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {field.type === "select" && field.options && field.options.length > 0 && (
+                      <div>
+                        <span className="text-gray-600 block mb-1">Opções:</span>
+                        <div className="flex flex-wrap gap-1">
+                          {field.options.map((option, i) => (
+                            <Badge key={i} variant="outline" className="text-xs">
+                              {option}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+            </>
           )}
         </CardContent>
       </Card>
