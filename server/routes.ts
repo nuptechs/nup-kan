@@ -112,34 +112,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     RouteHandlers.boardRoutes.getBoardById
   );
   
-  // ✅ Task routes - Microserviço de tasks
-  app.get("/api/boards/:boardId/tasks",
-    APIGateway.monitoringMiddleware('task'),
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Listar Tasks"),
-    RouteHandlers.taskRoutes.getBoardTasks  
-  );
-  
-  app.post("/api/tasks",
-    APIGateway.monitoringMiddleware('task'),
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Criar Tasks"),
-    RouteHandlers.taskRoutes.createTask
-  );
-  
-  app.patch("/api/tasks/:id", 
-    APIGateway.monitoringMiddleware('task'),
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Editar Tasks"),
-    RouteHandlers.taskRoutes.updateTask
-  );
-  
-  app.delete("/api/tasks/:id",
-    APIGateway.monitoringMiddleware('task'), 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Excluir Tasks"),
-    RouteHandlers.taskRoutes.deleteTask
-  );
+  // ✅ Task routes - SIMPLIFICADOS (sem microserviços complexos)
+  // ROTAS REMOVIDAS - Usando apenas as versões simples abaixo
   
   // 📊 System routes - Monitoramento e métricas
   app.get("/api/system/health",
@@ -369,14 +343,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Board-specific tasks and columns routes
-  app.get("/api/boards/:boardId/tasks", async (req, res) => {
+  // ✅ ROTAS DE TASKS SIMPLIFICADAS (PostgreSQL direto, sem CQRS)
+  
+  // Buscar tasks de um board
+  app.get("/api/boards/:boardId/tasks", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Listar Tasks"),
+    async (req, res) => {
     try {
       const tasks = await storage.getBoardTasks(req.params.boardId);
       res.json(tasks);
     } catch (error) {
       console.error("Error fetching board tasks:", error);
       res.status(500).json({ message: "Failed to fetch board tasks" });
+    }
+  });
+
+  // Criar nova task
+  app.post("/api/tasks",
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Criar Tasks"),
+    async (req, res) => {
+    try {
+      const taskData = insertTaskSchema.parse(req.body);
+      const task = await storage.createTask(taskData);
+      res.status(201).json(task);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      res.status(400).json({ message: "Invalid task data" });
+    }
+  });
+
+  // Atualizar task
+  app.patch("/api/tasks/:id",
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Editar Tasks"),
+    async (req, res) => {
+    try {
+      const taskData = updateTaskSchema.parse(req.body);
+      const task = await storage.updateTask(req.params.id, taskData);
+      res.json(task);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      console.error("Error updating task:", error);
+      res.status(400).json({ message: "Invalid task data" });
+    }
+  });
+
+  // Deletar task
+  app.delete("/api/tasks/:id",
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Excluir Tasks"),
+    async (req, res) => {
+    try {
+      await storage.deleteTask(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      console.error("Error deleting task:", error);
+      res.status(500).json({ message: "Failed to delete task" });
     }
   });
 
