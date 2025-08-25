@@ -58,22 +58,22 @@ export function UserProfileIndicator() {
           variant="ghost" 
           className="flex items-center justify-center h-10 w-10 p-1 hover:bg-gray-100 transition-colors rounded-full"
           data-testid="user-profile-indicator"
-          title={`${currentUser.name} - ${currentUser.role || 'Usuário'}`}
+          title={`${currentUser?.name || 'Usuário'} - ${currentUser?.role || 'Usuário'}`}
         >
           <div className="relative">
             <Avatar className="w-8 h-8">
               <AvatarImage 
-                src={currentUser.profileImageUrl || undefined} 
-                alt={currentUser.name}
+                src={currentUser?.profileImageUrl || undefined} 
+                alt={currentUser?.name || 'Usuário'}
               />
               <AvatarFallback className="bg-indigo-500 text-white text-sm font-medium">
-                {currentUser.avatar || currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                {currentUser?.avatar || (currentUser?.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U')}
               </AvatarFallback>
             </Avatar>
             {/* Status indicator */}
             <div 
-              className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${getStatusColor(currentUser.status || 'offline')}`}
-              title={getStatusText(currentUser.status || 'offline')}
+              className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${getStatusColor(currentUser?.status || 'offline')}`}
+              title={getStatusText(currentUser?.status || 'offline')}
             />
           </div>
         </Button>
@@ -84,22 +84,22 @@ export function UserProfileIndicator() {
           <div className="flex items-center space-x-3">
             <Avatar className="w-12 h-12">
               <AvatarImage 
-                src={currentUser.profileImageUrl || undefined} 
-                alt={currentUser.name}
+                src={currentUser?.profileImageUrl || undefined} 
+                alt={currentUser?.name || 'Usuário'}
               />
               <AvatarFallback className="bg-indigo-500 text-white font-medium">
-                {currentUser.avatar || currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                {currentUser?.avatar || (currentUser?.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U')}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
-                {currentUser.name}
+                {currentUser?.name || 'Usuário'}
               </p>
               <p className="text-sm text-gray-500 truncate">
-                {currentUser.email}
+                {currentUser?.email || 'email@exemplo.com'}
               </p>
               <p className="text-xs text-gray-400">
-                {currentUser.role || 'Usuário'}
+                {currentUser?.role || 'Usuário'}
               </p>
             </div>
           </div>
