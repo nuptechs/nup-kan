@@ -67,7 +67,7 @@ export class AuthService {
 
       // 🔍 CACHE MISS: Buscar dados completos do usuário
       console.log('🔍 [AUTH-SERVICE] Cache miss, buscando dados do usuário');
-      const userData = await QueryHandlers.getUserWithPermissions(userId);
+      const userData = await QueryHandlers.getUserWithPermissions(userId) as any;
       
       if (!userData) {
         console.log('❌ [AUTH-SERVICE] Usuário não encontrado');
@@ -84,7 +84,7 @@ export class AuthService {
         profileId: userData.profileId,
         profileName: userData.profileName || 'Usuário',
         teams: userData.teams || [],
-        sessionId: req.sessionID || 'no-session',
+        sessionId: (req as any).sessionID || 'no-session',
         isAuthenticated: true,
         lastActivity: new Date(),
       };

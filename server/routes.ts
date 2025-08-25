@@ -15,7 +15,7 @@ import { cache } from "./cache";
 
 // 🚀 NÍVEL 3: MICROSERVIÇOS IMPORTADOS
 import { APIGateway, RouteHandlers } from './microservices/apiGateway';
-import { AuthMiddleware } from './microservices/authService';
+import { AuthMiddleware, AuthService } from './microservices/authService';
 import { BoardService } from './microservices/boardService';
 import { mongoStore } from './mongodb';
 import { QueryHandlers } from './cqrs/queries';
@@ -1907,17 +1907,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // 🚀 USAR AUTHSERVICE PARA VERIFICAR USUÁRIO
       try {
-        const authContext = await AuthService.verifyAuth(userId);
+        const authContext = await AuthService.verifyAuth({ session: { user: { id: userId } } } as any);
         
         // Retornar dados completos do usuário
+        if (!authContext) {
+          return res.status(401).json({ error: "Not authenticated" });
+        }
+        
         res.json({
-          userId: authContext.user.id,
-          name: authContext.user.name,
-          email: authContext.user.email,
-          role: authContext.user.role,
-          avatar: authContext.user.avatar,
-          profileId: authContext.user.profileId,
-          permissions: authContext.permissions.map(p => p.name)
+          userId: authContext.userId,
+          name: authContext.userName,
+          email: authContext.userEmail,
+          role: '', // Add role if needed in AuthContext
+          avatar: '', // Add avatar if needed in AuthContext  
+          profileId: authContext.profileId,
+          permissions: authContext.permissions
         });
       } catch (authError) {
         console.log('❌ [AUTH] Usuário não válido no AuthService:', authError);

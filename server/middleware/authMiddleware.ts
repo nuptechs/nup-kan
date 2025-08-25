@@ -134,7 +134,7 @@ export async function requireAdmin(req: AuthenticatedRequest, res: Response, nex
     }
 
     // Verificar se o usuário tem perfil de administrador
-    const profile = await storage.getProfile(user.profileId);
+    const profile = user.profileId ? await storage.getProfile(user.profileId) : null;
     const isAdmin = profile?.name.toLowerCase().includes('admin') || 
                    profile?.name.toLowerCase().includes('administrador') ||
                    user.role?.toLowerCase().includes('admin') ||

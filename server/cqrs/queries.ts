@@ -55,7 +55,7 @@ export class QueryHandlers {
 
       // 🥈 FALLBACK: PostgreSQL (Write Model) - Com cache
       console.log('🟡 [QUERY] MongoDB vazio, usando PostgreSQL com cache');
-      const boards = await OptimizedQueries.getBoardsWithStatsOptimized(limit, offset);
+      const boards = await OptimizedQueries.getBoardsWithStatsOptimized(limit, offset) as any[];
       
       const duration = Date.now() - startTime;
       console.log(`🔄 [QUERY-PG] ${boards.length} boards em ${duration}ms (PostgreSQL)`);
@@ -109,7 +109,7 @@ export class QueryHandlers {
 
       // 🥈 FALLBACK: PostgreSQL
       console.log('🟡 [QUERY] MongoDB vazio, usando PostgreSQL');
-      const tasks = await OptimizedQueries.getBoardTasksOptimized(boardId);
+      const tasks = await OptimizedQueries.getBoardTasksOptimized(boardId) as any[];
       
       const duration = Date.now() - startTime;
       console.log(`🔄 [QUERY-PG] ${tasks.length} tasks em ${duration}ms (PostgreSQL)`);
@@ -165,12 +165,12 @@ export class QueryHandlers {
       const [user, permissions] = await Promise.all([
         OptimizedQueries.getUserWithProfileOptimized(userId),
         OptimizedQueries.getUserPermissionsOptimized(userId),
-      ]);
+      ]) as [any, any[]];
 
       const result = {
         ...user,
         permissions: permissions.map(p => p.name),
-        permissionCategories: [...new Set(permissions.map(p => p.category))],
+        permissionCategories: Array.from(new Set(permissions.map((p: any) => p.category))),
         teams: [], // Será preenchido se necessário
         stats: {
           activeTasks: 0,
