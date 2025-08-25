@@ -551,6 +551,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
     let exportHistoryId: string | null = null;
     
     try {
+      console.log('🚀 [EXPORT] Iniciando exportação', { format: exportOptions.format, user: user?.id });
       setStatus('preparing');
       setStartTime(new Date());
       
@@ -611,6 +612,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
       const fileName = `uP-Kan-Export-${timestamp}.${formatExtension}`;
 
       // Generate file based on format
+      console.log('📦 [EXPORT] Gerando arquivo', { format: exportOptions.format, recordsCount: exportData.metadata.totalRecords });
       switch (exportOptions.format) {
         case 'excel':
           generateExcelFile(exportData);
@@ -626,6 +628,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
           break;
       }
 
+      console.log('✅ [EXPORT] Exportação concluída com sucesso', { fileName, recordsCount: exportData.metadata.totalRecords });
       setStatus('completed');
       setCurrentStep('Concluído!');
       setProgress(100);
