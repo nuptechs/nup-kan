@@ -1,5 +1,37 @@
 [
   {
+    "id": "log_1756165184833_ahwpz0pva",
+    "timestamp": "2025-08-25T23:39:44.833Z",
+    "level": "error",
+    "message": "AUTH-SERVICE: Erro verificando autenticação: error: The endpoint has been disabled. Enable it using Neon API and retry.",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756165184832_07vtrsetj",
+    "timestamp": "2025-08-25T23:39:44.832Z",
+    "level": "error",
+    "message": "❌ [QUERY] Erro em getUserWithPermissions após 318ms: error: The endpoint has been disabled. Enable it using Neon API and retry.",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756164803680_lcf6bx5l6",
+    "timestamp": "2025-08-25T23:33:23.680Z",
+    "level": "error",
+    "message": "AUTH-SERVICE: Erro verificando autenticação: error: The endpoint has been disabled. Enable it using Neon API and retry.",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756164803672_nzs8u385v",
+    "timestamp": "2025-08-25T23:33:23.672Z",
+    "level": "error",
+    "message": "❌ [QUERY] Erro em getUserWithPermissions após 2298ms: error: The endpoint has been disabled. Enable it using Neon API and retry.",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756164744708_pg23ktpbe",
     "timestamp": "2025-08-25T23:32:24.708Z",
     "level": "error",
