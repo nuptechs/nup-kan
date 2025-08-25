@@ -1,7 +1,15 @@
 [
   {
-    "id": "log_1756144034229_fyfv7icaf",
-    "timestamp": "2025-08-25T17:47:14.229Z",
+    "id": "log_1756145021825_i0ez2r5r3",
+    "timestamp": "2025-08-25T18:03:41.825Z",
+    "level": "warn",
+    "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756145018735_x1n1hcryr",
+    "timestamp": "2025-08-25T18:03:38.735Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

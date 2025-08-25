@@ -4,89 +4,98 @@ import "./index.css";
 
 // Configurar logs de desenvolvimento para melhor debugging
 if (import.meta.env.DEV) {
-  // Suprimir avisos conhecidos de bibliotecas externas que causam spam no console
+  // Função para verificar se uma mensagem deve ser suprimida
+  const shouldSuppressMessage = (message) => {
+    if (typeof message !== 'string') return false;
+    
+    // Browser/iframe feature warnings (principais causadores do spam)
+    if (message.includes('Unrecognized feature:')) return true;
+    if (message.includes('Allow attribute will take precedence')) return true;
+    
+    // Permissions Policy warnings específicos
+    if (message.includes('ambient-light-sensor')) return true;
+    if (message.includes('battery')) return true;
+    if (message.includes('execution-while-not-rendered')) return true;
+    if (message.includes('execution-while-out-of-viewport')) return true;
+    if (message.includes('layout-animations')) return true;
+    if (message.includes('legacy-image-formats')) return true;
+    if (message.includes('navigation-override')) return true;
+    if (message.includes('oversized-images')) return true;
+    if (message.includes('publickey-credentials')) return true;
+    if (message.includes('speaker-selection')) return true;
+    if (message.includes('unoptimized-images')) return true;
+    if (message.includes('unsized-media')) return true;
+    if (message.includes('pointer-lock')) return true;
+    
+    // react-beautiful-dnd warnings
+    if (message.includes('defaultProps will be removed from memo components')) return true;
+    if (message.includes('React does not recognize the `isDragging` prop')) return true;
+    if (message.includes('React does not recognize the `isDropDisabled` prop')) return true;
+    if (message.includes('React does not recognize the `isDragDisabled` prop')) return true;
+    
+    // TanStack Query warnings
+    if (message.includes('Query data cannot be undefined')) return true;
+    if (message.includes('QueryClient has not been set')) return true;
+    
+    // Outras fontes comuns de spam
+    if (message.includes('Failed to load resource')) return true;
+    if (message.includes('ERR_BLOCKED_BY_CLIENT')) return true;
+    if (message.includes('The resource was blocked by a content blocker')) return true;
+    if (message.includes('Failed to register ServiceWorker')) return true;
+    if (message.includes('Cannot read properties of null')) return true;
+    if (message.includes('Non-serializable values')) return true;
+    if (message.includes('Webpack DevServer')) return true;
+    if (message.includes('HMR')) return true;
+    if (message.includes('sockjs-node')) return true;
+    if (message.includes('WebSocket connection')) return true;
+    if (message.includes('ResizeObserver loop limit exceeded')) return true;
+    
+    return false;
+  };
+
+  // Interceptar TODOS os métodos do console
+  const originalLog = console.log;
   const originalWarn = console.warn;
+  const originalError = console.error;
+  const originalInfo = console.info;
+  const originalDebug = console.debug;
+  
+  console.log = (...args) => {
+    const message = args[0];
+    if (shouldSuppressMessage(message)) return;
+    
+    // Aplicar estilo aos logs importantes
+    if (typeof message === 'string' && (message.includes('🚀') || message.includes('📦') || message.includes('✅') || message.includes('🔄'))) {
+      originalLog('%c' + message, 'color: #10b981; font-weight: bold;', ...args.slice(1));
+    } else {
+      // Suprimir logs excessivos de HMR/Vite
+      if (typeof message === 'string' && message.includes('[vite] hot updated')) return;
+      originalLog.apply(console, args);
+    }
+  };
+  
   console.warn = (...args) => {
     const message = args[0];
-    
-    // Suprimir avisos conhecidos de bibliotecas e navegador que causam spam
-    if (typeof message === 'string') {
-      // react-beautiful-dnd warnings
-      if (message.includes('defaultProps will be removed from memo components')) return;
-      if (message.includes('React does not recognize the `isDragging` prop')) return;
-      if (message.includes('React does not recognize the `isDropDisabled` prop')) return;
-      if (message.includes('React does not recognize the `isDragDisabled` prop')) return;
-      
-      // TanStack Query warnings já resolvidos
-      if (message.includes('Query data cannot be undefined')) return;
-      if (message.includes('QueryClient has not been set')) return;
-      
-      // Browser/iframe feature warnings (principais causadores do spam)
-      if (message.includes('Unrecognized feature:')) return;
-      if (message.includes('Allow attribute will take precedence')) return;
-      
-      // Permissions Policy warnings específicos
-      if (message.includes('ambient-light-sensor')) return;
-      if (message.includes('battery')) return;
-      if (message.includes('execution-while-not-rendered')) return;
-      if (message.includes('execution-while-out-of-viewport')) return;
-      if (message.includes('layout-animations')) return;
-      if (message.includes('legacy-image-formats')) return;
-      if (message.includes('navigation-override')) return;
-      if (message.includes('oversized-images')) return;
-      if (message.includes('publickey-credentials')) return;
-      if (message.includes('speaker-selection')) return;
-      if (message.includes('unoptimized-images')) return;
-      if (message.includes('unsized-media')) return;
-      if (message.includes('pointer-lock')) return;
-      
-      // Outras fontes comuns de spam
-      if (message.includes('Failed to load resource')) return;
-      if (message.includes('ERR_BLOCKED_BY_CLIENT')) return;
-      if (message.includes('The resource was blocked by a content blocker')) return;
-      if (message.includes('Failed to register ServiceWorker')) return;
-      if (message.includes('Cannot read properties of null')) return;
-      if (message.includes('Non-serializable values')) return;
-      if (message.includes('Webpack DevServer')) return;
-      if (message.includes('HMR')) return;
-      if (message.includes('sockjs-node')) return;
-      if (message.includes('WebSocket connection')) return;
-    }
-    
+    if (shouldSuppressMessage(message)) return;
     originalWarn.apply(console, args);
   };
   
-  // Também interceptar console.error para suprimir erros conhecidos
-  const originalError = console.error;
   console.error = (...args) => {
     const message = args[0];
-    
-    if (typeof message === 'string') {
-      // Suprimir erros conhecidos que são spam
-      if (message.includes('Failed to load resource')) return;
-      if (message.includes('ERR_BLOCKED_BY_CLIENT')) return;
-      if (message.includes('The resource was blocked by a content blocker')) return;
-      if (message.includes('Failed to register ServiceWorker')) return;
-      if (message.includes('ResizeObserver loop limit exceeded')) return;
-      if (message.includes('Non-serializable values were found')) return;
-      if (message.includes('Warning: Each child in a list should have a unique "key" prop')) return;
-    }
-    
+    if (shouldSuppressMessage(message)) return;
     originalError.apply(console, args);
   };
   
-  // Adicionar estilo aos logs de debug da aplicação e reduzir spam
-  const originalLog = console.log;
-  console.log = (...args) => {
-    if (typeof args[0] === 'string' && (args[0].includes('🚀') || args[0].includes('📦') || args[0].includes('✅') || args[0].includes('🔄'))) {
-      originalLog('%c' + args[0], 'color: #10b981; font-weight: bold;', ...args.slice(1));
-    } else {
-      // Suprimir logs excessivos de HMR/Vite para reduzir spam no console
-      if (typeof args[0] === 'string' && args[0].includes('[vite] hot updated')) {
-        return; // Não mostrar logs de hot reload excessivos
-      }
-      originalLog.apply(console, args);
-    }
+  console.info = (...args) => {
+    const message = args[0];
+    if (shouldSuppressMessage(message)) return;
+    originalInfo.apply(console, args);
+  };
+  
+  console.debug = (...args) => {
+    const message = args[0];
+    if (shouldSuppressMessage(message)) return;
+    originalDebug.apply(console, args);
   };
 
   // Função global para limpar console facilmente
