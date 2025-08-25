@@ -512,7 +512,7 @@ export default function CustomFieldsPage() {
                 value={formData.type} 
                 onValueChange={(value: any) => setFormData({ ...formData, type: value, options: value !== 'select' ? [] : formData.options })}
               >
-                <SelectTrigger data-testid="select-field-type">
+                <SelectTrigger id="type" data-testid="select-field-type">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
