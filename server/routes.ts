@@ -9,7 +9,7 @@ import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchem
 import { eq, sql, and } from "drizzle-orm";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 import { PermissionSyncService } from "./permissionSync";
-import { authenticateUser, requirePermissions, requireAdmin, optionalAuth, type AuthenticatedRequest } from "./middleware/authMiddleware";
+// Sistema de auth antigo removido - usando apenas o novo AuthMiddleware
 import { OptimizedQueries, PerformanceStats } from "./optimizedQueries";
 import { cache } from "./cache";
 
@@ -171,7 +171,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ❌ REMOVIDA - Rota duplicada DELETE /api/tasks/:id (agora usando TaskService Level 3)
 
   // 🚀 ENDPOINT DE PERFORMANCE STATISTICS
-  app.get("/api/performance-stats", requireAdmin, async (req, res) => {
+  app.get("/api/performance-stats", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Visualizar Analytics"), 
+    async (req, res) => {
     try {
       const stats = PerformanceStats.getQueryStats();
       const cacheStats = await cache.getStats();
@@ -240,7 +243,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Board routes - Protegidas com permissões
-  app.get("/api/boards", authenticateUser, requirePermissions("Listar Boards"), async (req, res) => {
+  app.get("/api/boards", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Listar Boards"), 
+    async (req, res) => {
     try {
       // 🚀 PAGINAÇÃO ULTRA-RÁPIDA: Parâmetros otimizados
       const page = parseInt(req.query.page as string);
@@ -280,7 +286,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/boards/:id", authenticateUser, requirePermissions("Visualizar Boards"), async (req, res) => {
+  app.get("/api/boards/:id", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Visualizar Boards"), 
+    async (req, res) => {
     try {
       const board = await storage.getBoard(req.params.id);
       if (!board) {
@@ -292,7 +301,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/boards", authenticateUser, requirePermissions("Criar Boards"), async (req, res) => {
+  app.post("/api/boards", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Criar Boards"), 
+    async (req, res) => {
     try {
       const boardData = insertBoardSchema.parse({
         ...req.body,
@@ -307,7 +319,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/boards/:id", authenticateUser, requirePermissions("Editar Boards"), async (req, res) => {
+  app.patch("/api/boards/:id", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Editar Boards"), 
+    async (req, res) => {
     try {
       const boardData = updateBoardSchema.parse(req.body);
       const board = await storage.updateBoard(req.params.id, boardData);
@@ -320,7 +335,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/boards/:id", authenticateUser, requirePermissions("Excluir Boards"), async (req, res) => {
+  app.delete("/api/boards/:id", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Excluir Boards"), 
+    async (req, res) => {
     try {
       await storage.deleteBoard(req.params.id);
       res.status(204).send();
@@ -362,7 +380,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Column routes - Protegidas com permissões
-  app.get("/api/columns", authenticateUser, requirePermissions("Listar Columns"), async (req, res) => {
+  app.get("/api/columns", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Listar Columns"), 
+    async (req, res) => {
     try {
       const columns = await storage.getColumns();
       res.json(columns);
@@ -383,7 +404,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/columns", authenticateUser, requirePermissions("Criar Columns"), async (req, res) => {
+  app.post("/api/columns", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Criar Columns"), 
+    async (req, res) => {
     const startTime = Date.now();
     const userId = req.body.createdBy || "system";
     const userName = req.body.createdByName || "Sistema";
@@ -418,7 +442,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/columns/:id", authenticateUser, requirePermissions("Editar Columns"), async (req, res) => {
+  app.patch("/api/columns/:id", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Editar Columns"), 
+    async (req, res) => {
     try {
       const columnData = updateColumnSchema.parse(req.body);
       const column = await storage.updateColumn(req.params.id, columnData);
@@ -431,7 +458,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/columns/:id", authenticateUser, requirePermissions("Excluir Columns"), async (req, res) => {
+  app.delete("/api/columns/:id", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Excluir Columns"), 
+    async (req, res) => {
     try {
       await storage.deleteColumn(req.params.id);
       res.status(204).send();
@@ -2608,7 +2638,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Rota para sincronização manual de permissões (admin) - Protegida
-  app.post("/api/permissions/sync", authenticateUser, requireAdmin, async (req, res) => {
+  app.post("/api/permissions/sync", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Gerenciar Permissões"), 
+    async (req, res) => {
     try {
       const permissionSyncService = PermissionSyncService.getInstance();
       await permissionSyncService.syncPermissions(app);
