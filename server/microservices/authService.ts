@@ -51,22 +51,14 @@ export class AuthService {
         return null;
       }
 
-      // 🚀 CACHE ULTRA-RÁPIDO: Contexto de autenticação
-      const cacheKey = `auth_context:${userId}`;
-      const cached = await cache.get<AuthContext>(cacheKey);
+      // ❌ CACHE DESABILITADO TEMPORARIAMENTE - Bug causava troca de usuários
+      // const cacheKey = `auth_context:${userId}`;
+      // const cached = await cache.get<AuthContext>(cacheKey);
       
-      if (cached && cached.isAuthenticated) {
-        // Atualizar última atividade
-        cached.lastActivity = new Date();
-        await cache.set(cacheKey, cached, TTL.SHORT); // Renovar cache
-        
-        const duration = Date.now() - startTime;
-        console.log(`🚀 [AUTH-SERVICE] Auth verificado em ${duration}ms (Cache Hit)`);
-        return cached;
-      }
+      // Sempre buscar dados frescos para garantir usuario correto
+      console.log('🔍 [AUTH-SERVICE] Cache desabilitado, buscando dados frescos do usuário');
 
-      // 🔍 CACHE MISS: Buscar dados completos do usuário
-      console.log('🔍 [AUTH-SERVICE] Cache miss, buscando dados do usuário');
+      // 🔍 Buscar dados completos do usuário (sempre fresco)
       const userData = await QueryHandlers.getUserWithPermissions(userId) as any;
       
       if (!userData) {
@@ -89,8 +81,8 @@ export class AuthService {
         lastActivity: new Date(),
       };
 
-      // 🚀 CACHEAR contexto por 5 minutos
-      await cache.set(cacheKey, authContext, TTL.MEDIUM);
+      // ❌ CACHE DESABILITADO - Evita confusão entre usuários
+      // await cache.set(cacheKey, authContext, TTL.MEDIUM);
 
       const duration = Date.now() - startTime;
       console.log(`✅ [AUTH-SERVICE] Auth verificado em ${duration}ms (Dados completos)`);
