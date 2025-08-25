@@ -38,6 +38,20 @@ if (import.meta.env.DEV) {
       originalLog.apply(console, args);
     }
   };
+
+  // Função global para limpar console facilmente
+  (window as any).clearConsole = () => {
+    console.clear();
+    console.log('%c🧹 Console limpo!', 'color: #22c55e; font-weight: bold; font-size: 14px;');
+  };
+  
+  // Atalho de teclado para limpar console (Ctrl+L)
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'l') {
+      e.preventDefault();
+      (window as any).clearConsole();
+    }
+  });
 }
 
 createRoot(document.getElementById("root")!).render(<App />);
