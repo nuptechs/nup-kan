@@ -143,8 +143,13 @@ export default function BoardSelection() {
       const response = await apiRequest("PATCH", `/api/boards/${selectedBoard.id}`, data);
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
+    onSuccess: async () => {
+      // 🔄 FORÇAR INVALIDAÇÃO COMPLETA - Corrigir problema de cache
+      await queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
+      
+      // 🚀 FORÇAR REFETCH IMEDIATO dos boards
+      await queryClient.refetchQueries({ queryKey: ["/api/boards"] });
+      
       setIsEditOpen(false);
       setSelectedBoard(null);
       editForm.reset();
@@ -173,8 +178,15 @@ export default function BoardSelection() {
       }
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
+    onSuccess: async () => {
+      // 🔄 FORÇAR INVALIDAÇÃO COMPLETA - Corrigir problema de cache
+      await queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
+      
+      // 🚀 FORÇAR REFETCH IMEDIATO dos boards
+      await queryClient.refetchQueries({ queryKey: ["/api/boards"] });
+      
+      console.log("🔄 [CACHE] Cache de boards invalidado e refeito");
+      
       setIsDeleteOpen(false);
       setSelectedBoard(null);
       toast({
