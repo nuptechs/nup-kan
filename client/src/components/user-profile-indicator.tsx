@@ -60,7 +60,7 @@ export function UserProfileIndicator() {
           <div className="relative">
             <Avatar className="w-8 h-8">
               <AvatarImage 
-                src={currentUser?.profileImageUrl || undefined} 
+                src={currentUser?.avatar || undefined} 
                 alt={currentUser?.name || 'Usuário'}
               />
               <AvatarFallback className="bg-indigo-500 text-white text-sm font-medium">
@@ -81,7 +81,7 @@ export function UserProfileIndicator() {
           <div className="flex items-center space-x-3">
             <Avatar className="w-12 h-12">
               <AvatarImage 
-                src={currentUser?.profileImageUrl || undefined} 
+                src={currentUser?.avatar || undefined} 
                 alt={currentUser?.name || 'Usuário'}
               />
               <AvatarFallback className="bg-indigo-500 text-white font-medium">
