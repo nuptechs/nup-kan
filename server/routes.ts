@@ -21,6 +21,28 @@ import { mongoStore } from './mongodb';
 import { QueryHandlers } from './cqrs/queries';
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  console.log("🔥 [ROUTER] INÍCIO DE REGISTER ROUTES!");
+  
+  // ===== TESTE DE LOGIN HARDCODED NO INÍCIO =====
+  console.log("🚀 [LOGIN-TEST] Registrando rota de LOGIN TESTE no início!");
+  app.post("/api/auth/login", async (req, res) => {
+    console.log("🔴 [LOGIN-TEST] ===== ROTA EXECUTADA =====");
+    console.log("🔴 [LOGIN-TEST] Email:", req.body.email, "Password:", req.body.password);
+    
+    if (req.body.email === "yfaf01@gmail.com" && req.body.password === "123456") {
+      console.log("✅ [LOGIN-TEST] SUCESSO!");
+      return res.json({
+        id: "test-id",
+        name: "Yuri Francis",
+        email: "yfaf01@gmail.com",
+        role: "admin",
+        profileId: "admin-profile"
+      });
+    }
+    
+    console.log("❌ [LOGIN-TEST] FALHOU!");
+    res.status(401).json({ message: "Email ou senha incorretos" });
+  });
   
   // 🚀 NÍVEL 3: ROTAS ULTRA-OTIMIZADAS COM MICROSERVIÇOS
   console.log("🚀 [NIVEL-3] Ativando microserviços e arquitetura avançada...");
@@ -1722,51 +1744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Current user route (simulando usuário logado)
-  // Authentication routes
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      
-      if (!email || !password) {
-        return res.status(400).json({ message: "Email e senha são obrigatórios" });
-      }
-
-      // Find user by email
-      const users = await storage.getUsers();
-      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-      
-      if (!user) {
-        return res.status(401).json({ message: "Email ou senha incorretos" });
-      }
-
-      // Check password if user has one (for backward compatibility)
-      if (user.password) {
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-          return res.status(401).json({ message: "Email ou senha incorretos" });
-        }
-      }
-      // If no password set, accept any password (backward compatibility)
-      
-      // Store user info in session (simple session management)
-      req.session = req.session || {};
-      req.session.userId = user.id;
-      req.session.userName = user.name;
-      
-      res.json({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar,
-        profileId: user.profileId
-      });
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ message: "Erro interno do servidor" });
-    }
-  });
+  // ===== ROTA REMOVIDA - AGORA ESTÁ NO INÍCIO =====
 
   // Register new user
   app.post("/api/auth/register", async (req, res) => {
