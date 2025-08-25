@@ -29,7 +29,9 @@ export const createTaskCommandSchema = z.object({
   description: z.string().max(2000).optional(),
   status: z.string(),
   priority: z.enum(['low', 'medium', 'high']),
-  assigneeId: z.string().uuid().optional(),
+  assigneeId: z.string().refine(val => val === "" || z.string().uuid().safeParse(val).success, {
+    message: "assigneeId deve ser vazio ou um UUID válido"
+  }).optional(),
   progress: z.number().min(0).max(100).default(0),
   tags: z.array(z.string()).default([]),
 });
