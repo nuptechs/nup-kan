@@ -32,18 +32,25 @@ export function ExportProgressDialog({ open, onOpenChange, onExportComplete }: E
     { label: 'Concluído!', progress: 100 }
   ];
 
-  // Timer for elapsed time
+  // Timer for elapsed time - OTIMIZADO para evitar vazamentos
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (status === 'preparing' || status === 'exporting') {
+    let timer: NodeJS.Timeout | null = null;
+    
+    // Apenas rodar timer se o dialog estiver aberto E status for ativo
+    if (open && (status === 'preparing' || status === 'exporting') && startTime) {
       timer = setInterval(() => {
-        if (startTime) {
-          setElapsedTime(Date.now() - startTime.getTime());
-        }
-      }, 100);
+        setElapsedTime(Date.now() - startTime.getTime());
+      }, 500); // Reduzido de 100ms para 500ms para diminuir carga
     }
-    return () => clearInterval(timer);
-  }, [status, startTime]);
+    
+    // Cleanup sempre que dependências mudarem
+    return () => {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    };
+  }, [open, status, startTime]); // Incluir 'open' nas dependências
 
   const startExport = async () => {
     try {

@@ -4,13 +4,24 @@ import "./index.css";
 
 // Configurar logs de desenvolvimento para melhor debugging
 if (import.meta.env.DEV) {
-  // Suprimir apenas avisos específicos de bibliotecas externas
+  // Suprimir avisos conhecidos de bibliotecas externas que causam spam no console
   const originalWarn = console.warn;
   console.warn = (...args) => {
-    // Filtrar avisos sobre defaultProps do react-beautiful-dnd
-    if (args[0]?.includes?.('defaultProps will be removed from memo components')) {
-      return;
+    const message = args[0];
+    
+    // Suprimir avisos conhecidos de bibliotecas que causam spam
+    if (typeof message === 'string') {
+      // react-beautiful-dnd warnings
+      if (message.includes('defaultProps will be removed from memo components')) return;
+      if (message.includes('React does not recognize the `isDragging` prop')) return;
+      if (message.includes('React does not recognize the `isDropDisabled` prop')) return;
+      if (message.includes('React does not recognize the `isDragDisabled` prop')) return;
+      
+      // TanStack Query warnings já resolvidos
+      if (message.includes('Query data cannot be undefined')) return;
+      if (message.includes('QueryClient has not been set')) return;
     }
+    
     originalWarn.apply(console, args);
   };
   
