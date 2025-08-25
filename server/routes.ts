@@ -110,110 +110,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.log("🔄 [NIVEL-3] Ativando rotas de fallback...");
 
   // Task routes - Protegidas com permissões
-  app.get("/api/tasks", authenticateUser, requirePermissions("Listar Tasks"), async (req, res) => {
-    try {
-      const tasks = await storage.getTasks();
-      res.json(tasks);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch tasks" });
-    }
-  });
+  // ❌ REMOVIDA - Rota duplicada GET /api/tasks (agora usando TaskService Level 3)
 
-  app.get("/api/tasks/:id", authenticateUser, requirePermissions("Visualizar Tasks"), async (req, res) => {
-    try {
-      const task = await storage.getTask(req.params.id);
-      if (!task) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-      res.json(task);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch task" });
-    }
-  });
+  // ❌ REMOVIDA - Rota duplicada GET /api/tasks/:id (agora usando TaskService Level 3)
 
-  app.post("/api/tasks", authenticateUser, requirePermissions("Criar Tasks"), async (req, res) => {
-    const startTime = Date.now();
-    const userId = req.body.createdBy || "system";
-    const userName = req.body.createdByName || "Sistema";
-    
-    try {
-      console.log("🚀 API: Creating task with data:", req.body);
-      const taskData = insertTaskSchema.parse(req.body);
-      console.log("✅ API: Parsed task data:", taskData);
-      
-      const task = await storage.createTask(taskData);
-      console.log("✅ API: Task created successfully, returning:", task);
-      
-      const duration = Date.now() - startTime;
-      addUserActionLog(userId, userName, `Criar tarefa "${task.title}"`, 'success', null, duration);
-      
-      res.status(201).json(task);
-    } catch (error) {
-      console.error("❌ API: Error creating task:", error);
-      
-      const duration = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
-      addUserActionLog(userId, userName, `Criar tarefa "${req.body.title || 'sem título'}"`, 'error', { error: errorMessage, details: error }, duration);
-      
-      if (error instanceof Error) {
-        res.status(400).json({ 
-          message: "Invalid task data", 
-          error: error.message 
-        });
-      } else {
-        res.status(400).json({ message: "Invalid task data" });
-      }
-    }
-  });
+  // ❌ REMOVIDA - Rota duplicada POST /api/tasks (agora usando TaskService Level 3)
 
-  app.patch("/api/tasks/:id", authenticateUser, requirePermissions("Editar Tasks"), async (req, res) => {
-    const startTime = Date.now();
-    const userId = req.body.updatedBy || "system";
-    const userName = req.body.updatedByName || "Sistema";
-    
-    try {
-      const taskData = updateTaskSchema.parse(req.body);
-      const task = await storage.updateTask(req.params.id, taskData);
-      
-      const duration = Date.now() - startTime;
-      addUserActionLog(userId, userName, `Atualizar tarefa "${task.title}"`, 'success', null, duration);
-      
-      res.json(task);
-    } catch (error) {
-      const duration = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
-      addUserActionLog(userId, userName, `Atualizar tarefa (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
-      
-      if (error instanceof Error && error.message.includes("not found")) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-      res.status(400).json({ message: "Invalid task data" });
-    }
-  });
+  // ❌ REMOVIDA - Rota duplicada PATCH /api/tasks/:id (agora usando TaskService Level 3)
 
-  app.delete("/api/tasks/:id", authenticateUser, requirePermissions("Excluir Tasks"), async (req, res) => {
-    const startTime = Date.now();
-    const userId = req.query.deletedBy as string || "system";
-    const userName = req.query.deletedByName as string || "Sistema";
-    
-    try {
-      await storage.deleteTask(req.params.id);
-      
-      const duration = Date.now() - startTime;
-      addUserActionLog(userId, userName, `Deletar tarefa (ID: ${req.params.id})`, 'success', null, duration);
-      
-      res.status(204).send();
-    } catch (error) {
-      const duration = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
-      addUserActionLog(userId, userName, `Deletar tarefa (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
-      
-      if (error instanceof Error && error.message.includes("not found")) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-      res.status(500).json({ message: "Failed to delete task" });
-    }
-  });
+  // ❌ REMOVIDA - Rota duplicada DELETE /api/tasks/:id (agora usando TaskService Level 3)
 
   // 🚀 ENDPOINT DE PERFORMANCE STATISTICS
   app.get("/api/performance-stats", requireAdmin, async (req, res) => {
