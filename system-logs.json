@@ -1,5 +1,19 @@
 [
   {
+    "id": "action_1756080382692_htkezmoa8",
+    "timestamp": "2025-08-25T00:06:22.692Z",
+    "level": "info",
+    "message": "Sistema executou: Criar coluna \"sdfsd\"",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "system",
+    "userName": "Sistema",
+    "action": "Criar coluna \"sdfsd\"",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 79
+  },
+  {
     "id": "log_1756080286914_anbztejtz",
     "timestamp": "2025-08-25T00:04:46.914Z",
     "level": "warn",
