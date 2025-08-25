@@ -35,11 +35,14 @@ export function usePermissions() {
 
   const permissionMap = useMemo(() => {
     const map = new Map<string, Permission>();
-    userPermissions.forEach(permission => {
-      map.set(permission.name, permission);
-      // Também indexar por categoria:nome para facilitar verificações
-      map.set(`${permission.category}:${permission.name}`, permission);
-    });
+    // Garantir que userPermissions é um array antes de fazer forEach
+    if (Array.isArray(userPermissions)) {
+      userPermissions.forEach(permission => {
+        map.set(permission.name, permission);
+        // Também indexar por categoria:nome para facilitar verificações
+        map.set(`${permission.category}:${permission.name}`, permission);
+      });
+    }
     return map;
   }, [userPermissions]);
 
@@ -81,11 +84,11 @@ export function usePermissions() {
   };
 
   const hasPermissionInCategory = (category: string): boolean => {
-    return userPermissions.some(permission => permission.category === category);
+    return Array.isArray(userPermissions) ? userPermissions.some(permission => permission.category === category) : false;
   };
 
   const getPermissionsInCategory = (category: string): Permission[] => {
-    return userPermissions.filter(permission => permission.category === category);
+    return Array.isArray(userPermissions) ? userPermissions.filter(permission => permission.category === category) : [];
   };
 
   return {
