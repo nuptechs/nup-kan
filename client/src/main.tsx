@@ -9,7 +9,7 @@ if (import.meta.env.DEV) {
   console.warn = (...args) => {
     const message = args[0];
     
-    // Suprimir avisos conhecidos de bibliotecas que causam spam
+    // Suprimir avisos conhecidos de bibliotecas e navegador que causam spam
     if (typeof message === 'string') {
       // react-beautiful-dnd warnings
       if (message.includes('defaultProps will be removed from memo components')) return;
@@ -20,6 +20,25 @@ if (import.meta.env.DEV) {
       // TanStack Query warnings já resolvidos
       if (message.includes('Query data cannot be undefined')) return;
       if (message.includes('QueryClient has not been set')) return;
+      
+      // Browser/iframe feature warnings (principais causadores do spam)
+      if (message.includes('Unrecognized feature:')) return;
+      if (message.includes('Allow attribute will take precedence')) return;
+      
+      // Permissions Policy warnings específicos
+      if (message.includes('ambient-light-sensor')) return;
+      if (message.includes('battery')) return;
+      if (message.includes('execution-while-not-rendered')) return;
+      if (message.includes('execution-while-out-of-viewport')) return;
+      if (message.includes('layout-animations')) return;
+      if (message.includes('legacy-image-formats')) return;
+      if (message.includes('navigation-override')) return;
+      if (message.includes('oversized-images')) return;
+      if (message.includes('publickey-credentials')) return;
+      if (message.includes('speaker-selection')) return;
+      if (message.includes('unoptimized-images')) return;
+      if (message.includes('unsized-media')) return;
+      if (message.includes('pointer-lock')) return;
     }
     
     originalWarn.apply(console, args);
@@ -42,7 +61,7 @@ if (import.meta.env.DEV) {
   // Função global para limpar console facilmente
   (window as any).clearConsole = () => {
     console.clear();
-    console.log('%c🧹 Console limpo!', 'color: #22c55e; font-weight: bold; font-size: 14px;');
+    console.log('%c🧹 Console limpo! Issues do navegador/iframe suprimidos.', 'color: #22c55e; font-weight: bold; font-size: 14px;');
   };
   
   // Atalho de teclado para limpar console (Ctrl+L)

@@ -1,0 +1,29 @@
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Unrecognized feature: 'battery'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar4r8%3A:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+NuP-Kan:1 Unrecognized feature: 'ambient-light-sensor'.
+NuP-Kan:1 Unrecognized feature: 'battery'.
+NuP-Kan:1 Unrecognized feature: 'execution-while-not-rendered'.
+NuP-Kan:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+NuP-Kan:1 Unrecognized feature: 'layout-animations'.
+NuP-Kan:1 Unrecognized feature: 'legacy-image-formats'.
+NuP-Kan:1 Unrecognized feature: 'navigation-override'.
+NuP-Kan:1 Unrecognized feature: 'oversized-images'.
+NuP-Kan:1 Unrecognized feature: 'publickey-credentials'.
+NuP-Kan:1 Unrecognized feature: 'speaker-selection'.
+NuP-Kan:1 Unrecognized feature: 'unoptimized-images'.
+NuP-Kan:1 Unrecognized feature: 'unsized-media'.
+NuP-Kan:1 Unrecognized feature: 'pointer-lock'.
+NuP-Kan:1 Allow attribute will take precedence over 'allowfullscreen'.
+NuP-Kan:1 Allow attribute will take precedence over 'allowpaymentrequest'.
