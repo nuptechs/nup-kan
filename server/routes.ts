@@ -134,7 +134,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.log("🔄 [NIVEL-3] Ativando rotas de fallback...");
 
   // Task routes - Protegidas com permissões
-  // ❌ REMOVIDA - Rota duplicada GET /api/tasks (agora usando TaskService Level 3)
+  // ✅ RESTAURADA - Rota GET /api/tasks necessária para funcionalidades de export
+  app.get("/api/tasks", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Listar Tasks"),
+    async (req, res) => {
+    try {
+      // Paginação opcional
+      const page = parseInt(req.query.page as string);
+      const limit = parseInt(req.query.limit as string);
+      
+      if (page && limit) {
+        const validPage = Math.max(1, page);
+        const validLimit = Math.min(100, Math.max(1, limit));
+        const offset = (validPage - 1) * validLimit;
+        
+        // Buscar tasks paginadas (sem suporte ainda, retornando todas)
+        const allTasks = await storage.getTasks();
+        const tasks = allTasks.slice(offset, offset + validLimit);
+        const total = allTasks.length;
+        
+        res.json({
+          data: tasks,
+          pagination: {
+            page: validPage,
+            limit: validLimit,
+            total,
+            pages: Math.ceil(total / validLimit),
+            hasNext: validPage < Math.ceil(total / validLimit),
+            hasPrev: validPage > 1
+          }
+        });
+      } else {
+        // Retornar todas as tasks (sem paginação)
+        const tasks = await storage.getTasks();
+        res.json(tasks);
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      res.status(500).json({ message: "Failed to fetch tasks" });
+    }
+  });
 
   // ❌ REMOVIDA - Rota duplicada GET /api/tasks/:id (agora usando TaskService Level 3)
 
