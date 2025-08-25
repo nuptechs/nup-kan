@@ -16,6 +16,7 @@ import { cache } from "./cache";
 // 🚀 NÍVEL 3: MICROSERVIÇOS IMPORTADOS
 import { APIGateway, RouteHandlers } from './microservices/apiGateway';
 import { AuthMiddleware } from './microservices/authService';
+import { BoardService } from './microservices/boardService';
 import { mongoStore } from './mongodb';
 import { QueryHandlers } from './cqrs/queries';
 
