@@ -41,7 +41,7 @@ export interface TaskDeletedEvent extends DomainEvent {
 }
 
 class EventBus {
-  private eventQueue: Queue;
+  private eventQueue: Queue | null = null;
   private worker: Worker | null = null;
 
   constructor() {
@@ -114,6 +114,16 @@ class EventBus {
   // 📈 Métricas do Event Bus
   async getMetrics() {
     try {
+      if (!this.eventQueue) {
+        return {
+          waiting: 0,
+          active: 0,
+          completed: 0,
+          failed: 0,
+          health: 'local',
+        };
+      }
+
       const waiting = await this.eventQueue.getWaiting();
       const active = await this.eventQueue.getActive();
       const completed = await this.eventQueue.getCompleted();

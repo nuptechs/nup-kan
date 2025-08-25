@@ -92,8 +92,6 @@ export class BoardService {
         cache.del('boards_count_db'),
       ]);
 
-      const duration = Date.now() - startTime;
-      console.log(`✅ [BOARD-SERVICE] Board criado em ${duration}ms`);
 
       // Retornar resposta otimizada
       return {
@@ -128,8 +126,7 @@ export class BoardService {
       };
 
     } catch (error) {
-      const duration = Date.now() - startTime;
-      console.error(`❌ [BOARD-SERVICE] Erro criando board em ${duration}ms:`, error);
+      console.error('BOARD-SERVICE: Erro criando board:', error);
       throw error;
     }
   }

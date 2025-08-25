@@ -35,6 +35,7 @@ export const updateTaskCommandSchema = createTaskCommandSchema.partial().extend(
 export class CommandHandlers {
   
   static async createBoard(command: z.infer<typeof createBoardCommandSchema>) {
+    const startTime = Date.now();
     
     try {
       const validData = createBoardCommandSchema.parse(command);
@@ -68,13 +69,10 @@ export class CommandHandlers {
         timestamp: new Date(),
       });
 
-      const duration = Date.now() - startTime;
-      console.log(`✅ [COMMAND] Board criado e membro adicionado em ${duration}ms`);
       
       return board;
     } catch (error) {
-      const duration = Date.now() - startTime;
-      console.error(`❌ [COMMAND] Erro criando board em ${duration}ms:`, error);
+      console.error('COMMAND: Erro criando board:', error);
       throw error;
     }
   }
