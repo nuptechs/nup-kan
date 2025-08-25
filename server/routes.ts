@@ -1894,26 +1894,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ⚡ USAR SISTEMA UNIFICADO DE AUTENTICAÇÃO - CORRIGIR PROBLEMA DE SESSÃO
   app.get("/api/auth/current-user", async (req, res) => {
     try {
-      // Check if user is logged in via session
+      // 🔍 VERIFICAR SESSÃO COM NOVO SISTEMA
       const userId = req.session?.user?.id;
       
       if (!userId) {
-        return res.status(401).json({ message: "Not authenticated" });
+        console.log('❌ [AUTH] Sessão não encontrada:', req.session);
+        return res.status(401).json({ error: "Not authenticated" });
       }
 
-      const users = await storage.getUsers();
-      const currentUser = users.find(u => u.id === userId);
-      
-      if (!currentUser) {
+      // 🚀 USAR AUTHSERVICE PARA VERIFICAR USUÁRIO
+      try {
+        const authContext = await AuthService.verifyAuth(userId);
+        
+        // Retornar dados completos do usuário
+        res.json({
+          userId: authContext.user.id,
+          name: authContext.user.name,
+          email: authContext.user.email,
+          role: authContext.user.role,
+          avatar: authContext.user.avatar,
+          profileId: authContext.user.profileId,
+          permissions: authContext.permissions.map(p => p.name)
+        });
+      } catch (authError) {
+        console.log('❌ [AUTH] Usuário não válido no AuthService:', authError);
         req.session = null;
-        return res.status(401).json({ message: "User not found" });
+        return res.status(401).json({ error: "Not authenticated" });
       }
-      res.json(currentUser);
+      
     } catch (error) {
-      console.error("Current user error:", error);
-      res.status(500).json({ message: "Failed to fetch current user" });
+      console.error("❌ [AUTH] Current user error:", error);
+      res.status(500).json({ error: "Authentication error" });
     }
   });
 
