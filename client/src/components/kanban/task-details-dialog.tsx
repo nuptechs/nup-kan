@@ -22,6 +22,7 @@ import { MultiUserSelector } from "./multi-user-selector";
 import { z } from "zod";
 import { Edit, Trash2, User, Calendar, Clock, Flag, X, ChevronDown, ChevronRight, History } from "lucide-react";
 import { TaskTimeline } from "./task-timeline";
+import TaskCustomFields from "./task-custom-fields";
 
 interface TaskDetailsDialogProps {
   task: Task | null;
@@ -106,7 +107,9 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
   // Reset form when task changes
   useEffect(() => {
     if (task && currentAssignees) {
-      const assigneeIds = currentAssignees.map((assignee: any) => assignee.user.id);
+      const assigneeIds = Array.isArray(currentAssignees) 
+        ? currentAssignees.map((assignee: any) => assignee.user.id)
+        : [];
       form.reset({
         title: task.title,
         description: task.description || "",
@@ -508,6 +511,14 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                     ))}
                   </div>
                 </div>
+              </>
+            )}
+
+            {/* Custom Fields Section */}
+            {boardId && (
+              <>
+                <Separator />
+                <TaskCustomFields taskId={task.id} boardId={boardId} />
               </>
             )}
 
