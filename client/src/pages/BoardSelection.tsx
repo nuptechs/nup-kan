@@ -39,9 +39,23 @@ export default function BoardSelection() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: boards, isLoading } = useQuery<Board[]>({
+  const { data: boardsResponse, isLoading } = useQuery<{
+    data: Board[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  }>({
     queryKey: ["/api/boards"],
+    retry: false,
   });
+
+  // Extrair boards da resposta e garantir que seja um array
+  const boards = boardsResponse?.data || [];
 
   const { data: currentUser } = useQuery<{ id: string; name: string; email: string }>({
     queryKey: ["/api/auth/current-user"],
