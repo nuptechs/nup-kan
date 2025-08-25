@@ -326,6 +326,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const boardData = updateBoardSchema.parse(req.body);
       const board = await storage.updateBoard(req.params.id, boardData);
+      
+      // 🔄 INVALIDAR CACHE - CORRIGIR PROBLEMA DE 304 NOT MODIFIED
+      await Promise.all([
+        cache.invalidatePattern(`board_*:${req.params.id}:*`), // Invalida cache específico do board
+        cache.invalidatePattern('boards_*'), // Invalida todas as listagens de boards
+      ]);
+      
+      console.log(`🔄 [CACHE] Cache invalidado após editar board ${req.params.id}`);
+      
       res.json(board);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -341,6 +350,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
     try {
       await storage.deleteBoard(req.params.id);
+      
+      // 🔄 INVALIDAR CACHE - CORRIGIR PROBLEMA DE 304 NOT MODIFIED
+      await Promise.all([
+        cache.invalidatePattern(`board_*:${req.params.id}:*`), // Invalida cache específico do board
+        cache.invalidatePattern('boards_*'), // Invalida todas as listagens de boards  
+        cache.del('boards_count_db') // Invalida o contador de boards
+      ]);
+      
+      console.log(`🔄 [CACHE] Cache invalidado após excluir board ${req.params.id}`);
+      
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
