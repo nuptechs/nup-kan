@@ -72,7 +72,8 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false, // Desabilita refresh automático ao focar janela
-      staleTime: 10 * 60 * 1000, // 10 minutos - aumentado para reduzir requests
+      staleTime: 15 * 60 * 1000, // 15 minutos - aumentado para reduzir requests excessivos
+      gcTime: 30 * 60 * 1000, // 30 minutos na memória - aumentado para evitar re-fetching
       retry: false,
     },
     mutations: {

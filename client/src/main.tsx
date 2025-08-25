@@ -14,12 +14,16 @@ if (import.meta.env.DEV) {
     originalWarn.apply(console, args);
   };
   
-  // Adicionar estilo aos logs de debug da aplicação
+  // Adicionar estilo aos logs de debug da aplicação e reduzir spam
   const originalLog = console.log;
   console.log = (...args) => {
     if (typeof args[0] === 'string' && (args[0].includes('🚀') || args[0].includes('📦') || args[0].includes('✅') || args[0].includes('🔄'))) {
       originalLog('%c' + args[0], 'color: #10b981; font-weight: bold;', ...args.slice(1));
     } else {
+      // Suprimir logs excessivos de HMR/Vite para reduzir spam no console
+      if (typeof args[0] === 'string' && args[0].includes('[vite] hot updated')) {
+        return; // Não mostrar logs de hot reload excessivos
+      }
       originalLog.apply(console, args);
     }
   };

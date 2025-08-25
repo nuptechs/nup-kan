@@ -158,14 +158,49 @@ export default function PermissionsHub() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Dados
-  const { data: users = [] } = useQuery<UserType[]>({ queryKey: ["/api/users"] });
-  const { data: teams = [] } = useQuery<Team[]>({ queryKey: ["/api/teams"] });
-  const { data: profiles = [] } = useQuery<Profile[]>({ queryKey: ["/api/profiles"] });
-  const { data: permissions = [] } = useQuery<Permission[]>({ queryKey: ["/api/permissions"] });
-  const { data: userTeams = [] } = useQuery<UserTeam[]>({ queryKey: ["/api/user-teams"] });
-  const { data: teamProfiles = [] } = useQuery<TeamProfile[]>({ queryKey: ["/api/team-profiles"] });
-  const { data: profilePermissions = [] } = useQuery<ProfilePermission[]>({ queryKey: ["/api/profile-permissions"] });
+  // Dados com configuração de cache otimizada para reduzir re-fetching
+  const { data: users = [] } = useQuery<UserType[]>({ 
+    queryKey: ["/api/users"],
+    staleTime: 10 * 60 * 1000, // 10 minutos
+    gcTime: 15 * 60 * 1000,
+    refetchOnWindowFocus: false
+  });
+  const { data: teams = [] } = useQuery<Team[]>({ 
+    queryKey: ["/api/teams"],
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+    refetchOnWindowFocus: false
+  });
+  const { data: profiles = [] } = useQuery<Profile[]>({ 
+    queryKey: ["/api/profiles"],
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+    refetchOnWindowFocus: false
+  });
+  const { data: permissions = [] } = useQuery<Permission[]>({ 
+    queryKey: ["/api/permissions"],
+    staleTime: 15 * 60 * 1000, // Permissões mudam menos
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false
+  });
+  const { data: userTeams = [] } = useQuery<UserTeam[]>({ 
+    queryKey: ["/api/user-teams"],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false
+  });
+  const { data: teamProfiles = [] } = useQuery<TeamProfile[]>({ 
+    queryKey: ["/api/team-profiles"],
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+    refetchOnWindowFocus: false
+  });
+  const { data: profilePermissions = [] } = useQuery<ProfilePermission[]>({ 
+    queryKey: ["/api/profile-permissions"],
+    staleTime: 15 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false
+  });
 
   // Para edição de times - obter membros atuais
   const getCurrentTeamMembers = (teamId: string) => {
