@@ -21,10 +21,6 @@ import { mongoStore } from './mongodb';
 import { QueryHandlers } from './cqrs/queries';
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  console.log("🔥 [ROUTER] INÍCIO DE REGISTER ROUTES!");
-  
-  // ===== ROTA DE LOGIN CORRIGIDA COM DADOS REAIS =====
-  console.log("🚀 [LOGIN] Registrando rota de LOGIN com dados reais");
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -67,16 +63,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileId: user.profileId // ✅ PROFILE ID REAL
       });
     } catch (error) {
-      console.error("Login error:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
   
-  // 🚀 NÍVEL 3: ROTAS ULTRA-OTIMIZADAS COM MICROSERVIÇOS
-  console.log("🚀 [NIVEL-3] Ativando microserviços e arquitetura avançada...");
-  
-  // ⚡ Rate limiting apenas em rotas específicas (removido global)
-  // app.use(APIGateway.rateLimitingMiddleware);
+  // Auth routes
   
   // 🔐 Auth routes - Microserviço de autenticação
   app.get("/api/auth/current-user", 
@@ -121,10 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     RouteHandlers.systemRoutes.metrics
   );
 
-  console.log("🎉 [NIVEL-3] Microserviços ativados! Performance 50-100x superior!");
-
-  // 🔄 FALLBACK: Manter rotas legadas para funcionalidades não migradas
-  console.log("🔄 [NIVEL-3] Ativando rotas de fallback...");
+  // Legacy routes fallback
 
   // Task routes - Protegidas com permissões
   // ✅ RESTAURADA - Rota GET /api/tasks necessária para funcionalidades de export
@@ -340,7 +328,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cache.invalidatePattern('boards_*'), // Invalida todas as listagens de boards
       ]);
       
-      console.log(`🔄 [CACHE] Cache invalidado após editar board ${req.params.id}`);
       
       res.json(board);
     } catch (error) {
@@ -365,7 +352,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cache.del('boards_count_db') // Invalida o contador de boards
       ]);
       
-      console.log(`🔄 [CACHE] Cache invalidado após excluir board ${req.params.id}`);
       
       res.status(204).send();
     } catch (error) {
@@ -606,7 +592,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { boardId } = req.query;
       const authContext = (req as any).authContext;
       
-      console.log("🚀 [ANALYTICS] Usando NÍVEL 3 - QueryHandlers");
       const startTime = Date.now();
       
       // 🔥 ANALYTICS SIMPLIFICADOS E ULTRA-RÁPIDOS

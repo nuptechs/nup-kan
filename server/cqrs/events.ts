@@ -1,18 +1,10 @@
-/**
- * 📡 EVENT-DRIVEN SYSTEM - Sistema de Eventos Ultra-Rápido
- * 
- * RESPONSABILIDADES:
- * - Event Bus com Redis para escalabilidade
- * - Sincronização automática PostgreSQL → MongoDB
- * - Event Handlers para atualizar Read Models
- * - Garantir eventual consistency
- */
+// Event-driven system for CQRS synchronization
 
 import { Queue, Worker, Job } from 'bullmq';
 import Redis from 'ioredis';
 import { mongoStore } from '../mongodb';
 
-// REDIS DESABILITADO - Sistema de eventos funcionando localmente
+// Local event system (Redis disabled)
 const redis = null;
 
 // Event Types
@@ -48,9 +40,6 @@ export interface TaskDeletedEvent extends DomainEvent {
   task: any;
 }
 
-/**
- * 🚀 EVENT BUS - Hub Central de Eventos
- */
 class EventBus {
   private eventQueue: Queue;
   private worker: Worker | null = null;

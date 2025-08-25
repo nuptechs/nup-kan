@@ -1,14 +1,6 @@
 import { MongoClient, Db, Collection } from 'mongodb';
 
-/**
- * 🔥 MONGODB ULTRA-RÁPIDO - READ MODEL PARA CQRS
- * 
- * Este é o lado "Read" da arquitetura CQRS:
- * - PostgreSQL = Commands (Write Model) - Consistência ACID
- * - MongoDB = Queries (Read Model) - Performance Ultra-Rápida
- * 
- * Performance esperada: 10-50x mais rápido que PostgreSQL para reads
- */
+// MongoDB Read Model for CQRS architecture
 
 interface ReadModels {
   // Boards desnormalizados com todas as informações

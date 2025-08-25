@@ -584,13 +584,11 @@ export class MemStorage implements IStorage {
       const result = await OptimizedQueries.getUserPermissionsOptimized(userId);
       
       if (!result || !Array.isArray(result) || result.length === 0) {
-        console.log("⚠️ [SECURITY] Usuário sem permissões ou não encontrado");
         return [];
       }
 
       const duration = Date.now() - startTime;
       PerformanceStats.trackQuery('getUserPermissions', duration);
-      console.log(`🔑 [PERF] ${result.length} permissões em ${duration}ms:`, result.map(p => p.name).slice(0, 5), '...');
       return result;
     } catch (error) {
       const duration = Date.now() - startTime;
@@ -1217,7 +1215,6 @@ export class DatabaseStorage implements IStorage {
     // 🚀 CACHE: Verificar cache primeiro
     const cached = await cache.get<Board[]>(CacheKeys.ALL_BOARDS);
     if (cached) {
-      console.log("🚀 [CACHE HIT] Boards servidos do cache");
       return cached;
     }
 
@@ -1352,7 +1349,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTask(insertTask: InsertTask): Promise<Task> {
-    console.log("🔄 DatabaseStorage: Starting createTask with data:", insertTask);
     
     try {
       const [task] = await db
@@ -1367,7 +1363,6 @@ export class DatabaseStorage implements IStorage {
         })
         .returning();
       
-      console.log("✅ DatabaseStorage: Task inserted successfully:", task.id);
       
       // Create initial event for task creation (with error handling)
       try {
@@ -1379,7 +1374,6 @@ export class DatabaseStorage implements IStorage {
           userAvatar: "S",
           metadata: ""
         });
-        console.log("✅ DatabaseStorage: Task event created successfully");
       } catch (eventError) {
         console.error("⚠️  DatabaseStorage: Event creation failed, but task was created:", eventError);
         // Continue without failing - task is already created

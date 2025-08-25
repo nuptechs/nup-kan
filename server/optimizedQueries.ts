@@ -15,16 +15,12 @@ import { cache, CacheKeys, TTL } from "./cache";
 
 export class OptimizedQueries {
   
-  // 🚀 QUERY 1: Buscar permissões de usuário (mais usada!)
   static async getUserPermissionsOptimized(userId: string) {
     const cacheKey = CacheKeys.USER_PERMISSIONS(userId);
     const cached = await cache.get(cacheKey);
     if (cached) {
-      console.log("🚀 [OPT-QUERY] Permissões do cache ultra-rápido");
       return cached;
     }
-
-    console.log("🔍 [OPT-QUERY] Executando query otimizada de permissões");
     
     // Query ultra-otimizada: todos JOINs em uma só consulta
     const result = await db
@@ -45,13 +41,10 @@ export class OptimizedQueries {
     return result;
   }
 
-  // 🚀 QUERY 2: Buscar dados completos de usuário
   static async getUserWithProfileOptimized(userId: string) {
     const cacheKey = `user_with_profile:${userId}`;
     const cached = await cache.get(cacheKey);
     if (cached) return cached;
-
-    console.log("🔍 [OPT-QUERY] Executando query otimizada de usuário+perfil");
     
     const result = await db
       .select({
@@ -74,16 +67,12 @@ export class OptimizedQueries {
     return user;
   }
 
-  // 🚀 QUERY 3: Listar boards com informações essenciais
   static async getBoardsWithStatsOptimized(limit?: number, offset?: number) {
     const cacheKey = `boards_with_stats:${limit || 'all'}:${offset || 0}`;
     const cached = await cache.get(cacheKey);
     if (cached) {
-      console.log("🚀 [OPT-QUERY] Boards+estatísticas do cache");
       return cached;
     }
-
-    console.log("🔍 [OPT-QUERY] Executando query otimizada de boards");
     
     const baseQuery = db
       .select({
@@ -115,16 +104,12 @@ export class OptimizedQueries {
     return result;
   }
 
-  // 🚀 QUERY 4: Buscar tasks de um board com assignees
   static async getBoardTasksOptimized(boardId: string) {
     const cacheKey = `board_tasks_optimized:${boardId}`;
     const cached = await cache.get(cacheKey);
     if (cached) {
-      console.log("🚀 [OPT-QUERY] Tasks+assignees do cache");
       return cached;
     }
-
-    console.log("🔍 [OPT-QUERY] Executando query otimizada de tasks+assignees");
     
     // Query otimizada: buscar tasks com dados dos assignees em uma consulta
     const result = await db
@@ -153,13 +138,10 @@ export class OptimizedQueries {
     return result;
   }
 
-  // 🚀 QUERY 5: Buscar colunas de um board
   static async getBoardColumnsOptimized(boardId: string) {
     const cacheKey = CacheKeys.BOARD_COLUMNS(boardId);
     const cached = await cache.get(cacheKey);
     if (cached) return cached;
-
-    console.log("🔍 [OPT-QUERY] Executando query otimizada de colunas");
     
     // Simplificada: buscar colunas diretamente 
     const result = await db
@@ -179,15 +161,11 @@ export class OptimizedQueries {
     return result;
   }
 
-  // 🚀 QUERY 6: Analytics rápidos
   static async getAnalyticsOptimized() {
     const cached = await cache.get(CacheKeys.ANALYTICS);
     if (cached) {
-      console.log("🚀 [OPT-QUERY] Analytics do cache");
       return cached;
     }
-
-    console.log("🔍 [OPT-QUERY] Executando query otimizada de analytics");
     
     // Uma única query para todos os analytics básicos
     const result = await db
@@ -206,13 +184,10 @@ export class OptimizedQueries {
     return analytics;
   }
 
-  // 🚀 QUERY 7: Buscar teams do usuário otimizada
   static async getUserTeamsOptimized(userId: string) {
     const cacheKey = `user_teams:${userId}`;
     const cached = await cache.get(cacheKey);
     if (cached) return cached;
-
-    console.log("🔍 [OPT-QUERY] Executando query otimizada de user teams");
     
     const result = await db
       .select({
@@ -231,7 +206,7 @@ export class OptimizedQueries {
     return result;
   }
 
-  // 🚀 UTILITY: Invalidar cache relacionado
+  // Cache invalidation utilities
   static async invalidateUserCache(userId: string) {
     await Promise.all([
       cache.del(CacheKeys.USER_PERMISSIONS(userId)),

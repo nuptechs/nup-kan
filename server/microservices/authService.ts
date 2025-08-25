@@ -37,41 +37,28 @@ export interface AuthContext {
  */
 export class AuthService {
   
-  // 🔐 Verificar autenticação (ultra-rápido)
   static async verifyAuth(req: Request): Promise<AuthContext | null> {
-    console.log('🔐 [AUTH-SERVICE] Verificando autenticação');
-    const startTime = Date.now();
-
     try {
-      // Buscar userId da sessão/token (COMPATIBILIDADE TOTAL - ANTIGO E NOVO)
       const userId = req.session?.user?.id || req.session?.userId || req.headers['x-user-id'] as string;
       
       if (!userId) {
-        console.log('❌ [AUTH-SERVICE] Usuário não autenticado');
         return null;
       }
 
-      // ✅ CACHE REABILITADO - Bug corrigido usando sessionId na chave
       const sessionId = (req as any).sessionID || req.session?.id || 'no-session';
       const cacheKey = `auth_context:${userId}:${sessionId}`;
       const cached = await cache.get<AuthContext>(cacheKey);
       
       if (cached && cached.userId === userId) {
-        console.log('🚀 [AUTH-CACHE] Auth verificado pelo cache em < 1ms');
         return cached;
       }
-      
-      console.log('🔍 [AUTH-SERVICE] Cache miss, buscando dados frescos do usuário');
 
-      // 🔍 Buscar dados completos do usuário (sempre fresco)
       const userData = await QueryHandlers.getUserWithPermissions(userId) as any;
       
       if (!userData) {
-        console.log('❌ [AUTH-SERVICE] Usuário não encontrado');
         return null;
       }
 
-      // Criar contexto de autenticação
       const authContext: AuthContext = {
         userId: userData.id,
         userName: userData.name,
@@ -86,21 +73,15 @@ export class AuthService {
         lastActivity: new Date(),
       };
 
-      // ✅ CACHE REABILITADO - Chave única por usuário+sessão
-      await cache.set(cacheKey, authContext, TTL.SHORT); // TTL menor para maior segurança
-
-      const duration = Date.now() - startTime;
-      console.log(`✅ [AUTH-SERVICE] Auth verificado em ${duration}ms (Dados completos)`);
+      await cache.set(cacheKey, authContext, TTL.SHORT);
       return authContext;
 
     } catch (error) {
-      const duration = Date.now() - startTime;
-      console.error(`❌ [AUTH-SERVICE] Erro verificando auth em ${duration}ms:`, error);
+      console.error('AUTH-SERVICE: Erro verificando autenticação:', error);
       return null;
     }
   }
 
-  // 🛡️ Verificar permissões específicas (nano-segundos)
   static async hasPermission(authContext: AuthContext, requiredPermissions: string | string[]): Promise<boolean> {
     if (!authContext.isAuthenticated) {
       return false;
@@ -108,16 +89,11 @@ export class AuthService {
 
     const permissions = Array.isArray(requiredPermissions) ? requiredPermissions : [requiredPermissions];
     
-    // Verificação ultra-rápida em memória
-    const hasAllPermissions = permissions.every(permission => 
+    return permissions.every(permission => 
       authContext.permissions.includes(permission)
     );
-
-    console.log(`🛡️ [AUTH-SERVICE] Permissão ${permissions.join(', ')}: ${hasAllPermissions ? '✅' : '❌'}`);
-    return hasAllPermissions;
   }
 
-  // 👥 Verificar acesso a team
   static async hasTeamAccess(authContext: AuthContext, teamId: string, requiredRole?: string): Promise<boolean> {
     if (!authContext.isAuthenticated) {
       return false;
@@ -126,24 +102,19 @@ export class AuthService {
     const teamAccess = authContext.teams.find(team => team.id === teamId);
     
     if (!teamAccess) {
-      console.log(`❌ [AUTH-SERVICE] Sem acesso ao team ${teamId}`);
       return false;
     }
 
     if (requiredRole && teamAccess.role !== requiredRole) {
-      console.log(`❌ [AUTH-SERVICE] Role insuficiente para team ${teamId}. Requerido: ${requiredRole}, Atual: ${teamAccess.role}`);
       return false;
     }
 
-    console.log(`✅ [AUTH-SERVICE] Acesso autorizado ao team ${teamId}`);
     return true;
   }
 
-  // 🔄 Invalidar cache de autenticação
   static async invalidateUserAuth(userId: string): Promise<void> {
     const cacheKey = `auth_context:${userId}`;
     await cache.del(cacheKey);
-    console.log(`🔄 [AUTH-SERVICE] Cache de auth invalidado para usuário ${userId}`);
   }
 
   // 📊 Estatísticas do serviço

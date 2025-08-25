@@ -1,12 +1,4 @@
-/**
- * 🎯 CQRS COMMAND SIDE - Operações de Escrita
- * 
- * RESPONSABILIDADES:
- * - Validação de regras de negócio
- * - Persistência no PostgreSQL (Write Model)
- * - Emissão de eventos para sincronização
- * - Garantia de consistência ACID
- */
+// CQRS Command handlers for write operations
 
 import { db } from "../db";
 import { eventBus } from "./events";
@@ -40,18 +32,11 @@ export const updateTaskCommandSchema = createTaskCommandSchema.partial().extend(
   id: z.string().uuid(),
 });
 
-/**
- * 🚀 COMMAND HANDLERS - Ultra-Rápidos e Confiáveis
- */
 export class CommandHandlers {
   
-  // 📝 COMANDO: Criar Board
   static async createBoard(command: z.infer<typeof createBoardCommandSchema>) {
-    console.log('🎯 [COMMAND] Criando board:', command.name);
-    const startTime = Date.now();
     
     try {
-      // Validar comando
       const validData = createBoardCommandSchema.parse(command);
       
       // Executar no PostgreSQL (Write Model)

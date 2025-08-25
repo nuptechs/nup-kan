@@ -1,14 +1,4 @@
-/**
- * 📋 BOARD MICROSERVICE - Gerenciamento Ultra-Otimizado de Boards
- * 
- * RESPONSABILIDADES:
- * - CRUD de boards com performance extrema
- * - Gerenciamento de colunas e configurações
- * - Analytics e métricas pré-calculadas
- * - Sincronização automática CQRS
- * 
- * PERFORMANCE TARGET: < 50ms para operações de board
- */
+// Board Service - Manages board operations
 
 import { CommandHandlers } from '../cqrs/commands';
 import { QueryHandlers } from '../cqrs/queries';
@@ -79,10 +69,7 @@ export interface BoardResponse {
  */
 export class BoardService {
   
-  // 📋 Criar Board (CQRS Command)
   static async createBoard(authContext: AuthContext, request: BoardCreateRequest): Promise<BoardResponse> {
-    console.log('📋 [BOARD-SERVICE] Criando board:', request.name);
-    const startTime = Date.now();
 
     try {
       // Validar permissões (bypass temporário para debug)

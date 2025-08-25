@@ -19,11 +19,7 @@ export class QueryHandlers {
   
   // 📊 QUERY: Buscar Boards com Estatísticas (MongoDB First)
   static async getBoardsWithStats(limit: number = 20, offset: number = 0) {
-    console.log('🔍 [QUERY] Buscando boards com stats');
-    const startTime = Date.now();
-
     try {
-      // 🥇 PRIMEIRA TENTATIVA: MongoDB (Read Model) - 10x mais rápido
       if (mongoStore.collections?.boardsWithStats) {
         const boardsData = await mongoStore.collections.boardsWithStats
           .find({})
@@ -33,8 +29,6 @@ export class QueryHandlers {
           .toArray();
 
         if (boardsData.length > 0) {
-          const duration = Date.now() - startTime;
-          console.log(`🚀 [QUERY-MONGO] ${boardsData.length} boards em ${duration}ms (MongoDB)`);
           return boardsData.map(board => ({
             id: board._id,
             name: board.name,
@@ -53,28 +47,17 @@ export class QueryHandlers {
         }
       }
 
-      // 🥈 FALLBACK: PostgreSQL (Write Model) - Com cache
-      console.log('🟡 [QUERY] MongoDB vazio, usando PostgreSQL com cache');
-      const boards = await OptimizedQueries.getBoardsWithStatsOptimized(limit, offset) as any[];
-      
-      const duration = Date.now() - startTime;
-      console.log(`🔄 [QUERY-PG] ${boards.length} boards em ${duration}ms (PostgreSQL)`);
-      return boards;
+      return await OptimizedQueries.getBoardsWithStatsOptimized(limit, offset) as any[];
 
     } catch (error) {
-      const duration = Date.now() - startTime;
-      console.error(`❌ [QUERY] Erro em getBoardsWithStats após ${duration}ms:`, error);
+      console.error('QUERY: Erro em getBoardsWithStats:', error);
       throw error;
     }
   }
 
   // 📋 QUERY: Buscar Tasks de um Board (MongoDB First)
   static async getBoardTasks(boardId: string, limit: number = 100, offset: number = 0) {
-    console.log('🔍 [QUERY] Buscando tasks do board:', boardId);
-    const startTime = Date.now();
-
     try {
-      // 🥇 PRIMEIRA TENTATIVA: MongoDB (Read Model)
       if (mongoStore.collections?.tasksOptimized) {
         const tasksData = await mongoStore.collections.tasksOptimized
           .find({ boardId })
@@ -84,8 +67,6 @@ export class QueryHandlers {
           .toArray();
 
         if (tasksData.length > 0) {
-          const duration = Date.now() - startTime;
-          console.log(`🚀 [QUERY-MONGO] ${tasksData.length} tasks em ${duration}ms (MongoDB)`);
           return tasksData.map(task => ({
             id: task._id,
             boardId: task.boardId,
@@ -107,8 +88,6 @@ export class QueryHandlers {
         }
       }
 
-      // 🥈 FALLBACK: PostgreSQL
-      console.log('🟡 [QUERY] MongoDB vazio, usando PostgreSQL');
       const tasks = await OptimizedQueries.getBoardTasksOptimized(boardId) as any[];
       
       const duration = Date.now() - startTime;

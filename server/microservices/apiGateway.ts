@@ -1,15 +1,4 @@
-/**
- * 🌐 API GATEWAY - Roteamento Inteligente para Microserviços
- * 
- * RESPONSABILIDADES:
- * - Roteamento automático para microserviços apropriados
- * - Load balancing e circuit breaker patterns
- * - Rate limiting e throttling
- * - Logging e monitoramento centralizados
- * - Cache distribuído em múltiplas camadas
- * 
- * PERFORMANCE TARGET: < 5ms overhead por request
- */
+// API Gateway for microservices routing
 
 import { Request, Response, NextFunction } from 'express';
 import { AuthService, AuthMiddleware } from './authService';

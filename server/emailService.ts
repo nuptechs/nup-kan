@@ -20,7 +20,6 @@ export function reinitializeMailService(apiKey: string) {
   if (apiKey && apiKey.startsWith('SG.')) {
     mailService = new MailService();
     mailService.setApiKey(apiKey);
-    console.log('Mail service reinitialized with new API key');
   }
 }
 
@@ -33,7 +32,6 @@ interface WelcomeEmailParams {
 export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<boolean> {
   // Check if SendGrid is properly configured
   if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_API_KEY.startsWith('SG.')) {
-    console.warn("SendGrid not configured. Skipping welcome email.");
     return false;
   }
 
