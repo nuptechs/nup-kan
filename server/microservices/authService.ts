@@ -43,8 +43,8 @@ export class AuthService {
     const startTime = Date.now();
 
     try {
-      // Buscar userId da sessão/token (múltiplos formatos para compatibilidade)
-      const userId = req.session?.user?.id || req.session?.userId || req.headers['x-user-id'] as string;
+      // Buscar userId da sessão/token (ESTRUTURA PADRONIZADA)
+      const userId = req.session?.user?.id || req.headers['x-user-id'] as string;
       
       if (!userId) {
         console.log('❌ [AUTH-SERVICE] Usuário não autenticado');

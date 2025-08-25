@@ -14,7 +14,7 @@ export async function authenticateUser(req: AuthenticatedRequest, res: Response,
   try {
     // Verificar se existe session ou token de autenticação
     // Por enquanto, vamos usar uma implementação simples baseada em session
-    const userId = req.session?.userId;
+    const userId = req.session?.user?.id;
     
     if (!userId) {
       console.warn(`🔐 [AUTH] Tentativa de acesso não autenticado na rota ${req.method} ${req.path} de IP: ${req.ip}`);
@@ -164,7 +164,7 @@ export async function requireAdmin(req: AuthenticatedRequest, res: Response, nex
  */
 export async function optionalAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = req.session?.userId;
+    const userId = req.session?.user?.id;
     
     if (userId) {
       const user = await storage.getUser(userId);

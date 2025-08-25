@@ -49,10 +49,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Store user info in session (simple session management)
+      // Store user info in session (ESTRUTURA PADRONIZADA)
       req.session = req.session || {};
-      req.session.userId = user.id;
-      req.session.userName = user.name;
+      req.session.user = {
+        id: user.id,
+        name: user.name,
+        email: user.email
+      };
       
       // Retornar dados reais do usuário
       res.json({
@@ -611,8 +614,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/users", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.userId || 'system';
-    const userName = req.session?.userName || 'Sistema';
+    const userId = req.session?.user?.id || 'system';
+    const userName = req.session?.user?.name || 'Sistema';
     
     try {
       const userData = insertUserSchema.parse(req.body);
@@ -661,8 +664,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/users/:id", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.userId || 'unknown';
-    const userName = req.session?.userName || 'Usuário desconhecido';
+    const userId = req.session?.user?.id || 'unknown';
+    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
       const userData = req.body;
@@ -688,8 +691,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/users/:id", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.userId || 'unknown';
-    const userName = req.session?.userName || 'Usuário desconhecido';
+    const userId = req.session?.user?.id || 'unknown';
+    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
       await storage.deleteUser(req.params.id);
@@ -1469,8 +1472,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/teams", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.userId || 'unknown';
-    const userName = req.session?.userName || 'Usuário desconhecido';
+    const userId = req.session?.user?.id || 'unknown';
+    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
       const teamData = insertTeamSchema.parse(req.body);
@@ -1504,8 +1507,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/teams/:id", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.userId || 'unknown';
-    const userName = req.session?.userName || 'Usuário desconhecido';
+    const userId = req.session?.user?.id || 'unknown';
+    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
       const teamData = req.body;
@@ -1531,8 +1534,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/teams/:id", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.userId || 'unknown';
-    const userName = req.session?.userName || 'Usuário desconhecido';
+    const userId = req.session?.user?.id || 'unknown';
+    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
       await storage.deleteTeam(req.params.id);
@@ -1579,8 +1582,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/profiles", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.userId || 'unknown';
-    const userName = req.session?.userName || 'Usuário desconhecido';
+    const userId = req.session?.user?.id || 'unknown';
+    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
       const profileData = insertProfileSchema.parse(req.body);
@@ -1601,8 +1604,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/profiles/:id", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.userId || 'unknown';
-    const userName = req.session?.userName || 'Usuário desconhecido';
+    const userId = req.session?.user?.id || 'unknown';
+    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
       const profileData = updateProfileSchema.parse(req.body);
@@ -1628,8 +1631,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/profiles/:id", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.userId || 'unknown';
-    const userName = req.session?.userName || 'Usuário desconhecido';
+    const userId = req.session?.user?.id || 'unknown';
+    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
       await storage.deleteProfile(req.params.id);
@@ -1845,7 +1848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/current-user", async (req, res) => {
     try {
       // Check if user is logged in via session
-      const userId = req.session?.userId;
+      const userId = req.session?.user?.id;
       
       if (!userId) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -2092,8 +2095,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/exports", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.userId || 'unknown';
-    const userName = req.session?.userName || 'Usuário desconhecido';
+    const userId = req.session?.user?.id || 'unknown';
+    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
       const exportData = req.body;
@@ -2115,8 +2118,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/exports/:id", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.userId || 'unknown';
-    const userName = req.session?.userName || 'Usuário desconhecido';
+    const userId = req.session?.user?.id || 'unknown';
+    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
       const { id } = req.params;
