@@ -12,13 +12,8 @@ import { Queue, Worker, Job } from 'bullmq';
 import Redis from 'ioredis';
 import { mongoStore } from '../mongodb';
 
-// Configuração Redis para Event Bus - CORRIGIDA PARA BULLMQ
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-  maxRetriesPerRequest: null, // OBRIGATÓRIO para BullMQ
-  retryDelayOnFailover: 100,
-  connectTimeout: 5000,
-  lazyConnect: true, // Conectar apenas quando necessário
-});
+// REDIS DESABILITADO - Sistema de eventos funcionando localmente
+const redis = null;
 
 // Event Types
 export interface DomainEvent {
@@ -61,21 +56,13 @@ class EventBus {
   private worker: Worker | null = null;
 
   constructor() {
-    // Fila de eventos ultra-rápida
-    this.eventQueue = new Queue('domain-events', {
-      connection: redis,
-      defaultJobOptions: {
-        removeOnComplete: 100,
-        removeOnFail: 50,
-        attempts: 3,
-        backoff: 'exponential',
-      },
-    });
+    // Sistema de eventos local (sem Redis)
+    this.eventQueue = null;
 
     this.startEventWorker();
   }
 
-  // 📡 Emitir evento
+  // 📡 Emitir evento (modo local)
   async emit(eventType: string, eventData: any): Promise<void> {
     const event: DomainEvent = {
       type: eventType,
@@ -85,59 +72,17 @@ class EventBus {
     };
 
     try {
-      await this.eventQueue.add(eventType, event, {
-        priority: this.getEventPriority(eventType),
-      });
-      
-      console.log(`📡 [EVENT] ${eventType} emitido:`, event.aggregateId);
+      console.log(`🟡 [EVENT] ${eventType} processado localmente`);
+      await this.handleEvent(event);
     } catch (error) {
-      console.warn(`🟡 [EVENT] Redis não disponível, evento processado localmente:`, eventType);
-      // Fallback: processar evento localmente se Redis não disponível
-      try {
-        await this.handleEvent(event);
-      } catch (localError) {
-        console.error(`❌ [EVENT] Erro processando evento localmente:`, localError);
-      }
+      console.error(`❌ [EVENT] Erro processando evento ${eventType}:`, error);
     }
   }
 
-  // 🎯 Worker para processar eventos
+  // 🎯 Worker desabilitado (modo local)
   private startEventWorker(): void {
-    try {
-      this.worker = new Worker('domain-events', async (job: Job) => {
-        const event = job.data as DomainEvent;
-        
-        console.log(`🔄 [EVENT-WORKER] Processando ${event.type}`);
-        const startTime = Date.now();
-
-        try {
-          await this.handleEvent(event);
-          
-          const duration = Date.now() - startTime;
-          console.log(`✅ [EVENT-WORKER] ${event.type} processado em ${duration}ms`);
-        } catch (error) {
-          const duration = Date.now() - startTime;
-          console.error(`❌ [EVENT-WORKER] Erro em ${event.type} após ${duration}ms:`, error);
-          throw error;
-        }
-      }, {
-        connection: redis,
-        concurrency: 5, // Reduzir concorrência
-      });
-      
-      console.log('🎪 [EVENT-WORKER] Worker iniciado com sucesso');
-    } catch (error) {
-      console.error('❌ [EVENT-WORKER] Erro iniciando worker:', error);
-      console.log('🟡 [EVENT-WORKER] Sistema funcionará sem events (fallback mode)');
-    }
-
-    this.worker.on('completed', (job) => {
-      console.log(`🎯 [EVENT-WORKER] Job ${job.id} completed`);
-    });
-
-    this.worker.on('failed', (job, err) => {
-      console.error(`💥 [EVENT-WORKER] Job ${job?.id} failed:`, err);
-    });
+    this.worker = null;
+    console.log('🎪 [EVENT-WORKER] Sistema funcionando em modo local (sem Redis)');
   }
 
   // 🎪 Router de eventos para handlers
