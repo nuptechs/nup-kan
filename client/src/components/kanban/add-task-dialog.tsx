@@ -121,15 +121,15 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
       return task;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      // Use same endpoint logic as KanbanBoard
+      const tasksEndpoint = boardId ? `/api/boards/${boardId}/tasks` : "/api/tasks";
+      const columnsEndpoint = boardId ? `/api/boards/${boardId}/columns` : "/api/columns";
+      
+      // Invalidate with exact same queryKeys as KanbanBoard uses
+      queryClient.invalidateQueries({ queryKey: [tasksEndpoint] });
+      queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
       queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
-      // Invalidate board-specific queries
-      if (boardId) {
-        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/tasks`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
-      }
-      // Invalidate assignees queries for new task
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      
       toast({
         title: "Sucesso",
         description: "Tarefa criada com sucesso!",
