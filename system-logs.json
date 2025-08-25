@@ -1,242 +1,666 @@
 [
   {
-    "id": "log_1756087679218_6el5jwga1",
-    "timestamp": "2025-08-25T02:07:59.218Z",
+    "id": "log_1756087851123_fq6whfl53",
+    "timestamp": "2025-08-25T02:10:51.123Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087679217_lcdyyzejs",
-    "timestamp": "2025-08-25T02:07:59.217Z",
+    "id": "log_1756087851121_t5ul7i5w8",
+    "timestamp": "2025-08-25T02:10:51.121Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087678704_r5jorz65i",
-    "timestamp": "2025-08-25T02:07:58.704Z",
+    "id": "log_1756087851119_yelbve8v0",
+    "timestamp": "2025-08-25T02:10:51.119Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087678665_o1378tzlk",
-    "timestamp": "2025-08-25T02:07:58.665Z",
+    "id": "log_1756087849710_60ztewcus",
+    "timestamp": "2025-08-25T02:10:49.710Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087678665_794gx5b92",
-    "timestamp": "2025-08-25T02:07:58.665Z",
+    "id": "log_1756087849709_6r2v7o84x",
+    "timestamp": "2025-08-25T02:10:49.709Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087678202_0hhozch7q",
-    "timestamp": "2025-08-25T02:07:58.202Z",
+    "id": "log_1756087849708_8c4aswwyb",
+    "timestamp": "2025-08-25T02:10:49.709Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087678164_2xvpqohs2",
-    "timestamp": "2025-08-25T02:07:58.164Z",
+    "id": "log_1756087848358_ftlgdnfuw",
+    "timestamp": "2025-08-25T02:10:48.358Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087678163_0whtpt9ot",
-    "timestamp": "2025-08-25T02:07:58.163Z",
+    "id": "log_1756087848358_rzui3w9v3",
+    "timestamp": "2025-08-25T02:10:48.358Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087677750_t1j4453cq",
-    "timestamp": "2025-08-25T02:07:57.750Z",
+    "id": "log_1756087848357_cwtic64r0",
+    "timestamp": "2025-08-25T02:10:48.357Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087677705_v8e3n6jl9",
-    "timestamp": "2025-08-25T02:07:57.705Z",
+    "id": "log_1756087847056_38pr5frq9",
+    "timestamp": "2025-08-25T02:10:47.056Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087677704_82tu07lyd",
-    "timestamp": "2025-08-25T02:07:57.704Z",
+    "id": "log_1756087847055_6yvhe58gq",
+    "timestamp": "2025-08-25T02:10:47.055Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087677138_l3rqmbtpo",
-    "timestamp": "2025-08-25T02:07:57.138Z",
+    "id": "log_1756087847054_mhjez7kdk",
+    "timestamp": "2025-08-25T02:10:47.055Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087677070_udstgsodq",
-    "timestamp": "2025-08-25T02:07:57.070Z",
+    "id": "log_1756087845803_s4fkl5n81",
+    "timestamp": "2025-08-25T02:10:45.803Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087677069_heq8l2mhy",
-    "timestamp": "2025-08-25T02:07:57.069Z",
+    "id": "log_1756087845803_3mil834v6",
+    "timestamp": "2025-08-25T02:10:45.803Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087676570_i61833h9d",
-    "timestamp": "2025-08-25T02:07:56.570Z",
+    "id": "log_1756087845802_oshjyv4tb",
+    "timestamp": "2025-08-25T02:10:45.802Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087676408_lj9x5a401",
-    "timestamp": "2025-08-25T02:07:56.408Z",
+    "id": "log_1756087844601_kad7bdrkr",
+    "timestamp": "2025-08-25T02:10:44.601Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087676408_ar3we3psd",
-    "timestamp": "2025-08-25T02:07:56.408Z",
+    "id": "log_1756087844601_uf19k30mi",
+    "timestamp": "2025-08-25T02:10:44.601Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087674164_zhby6d5lu",
-    "timestamp": "2025-08-25T02:07:54.164Z",
+    "id": "log_1756087844600_vf9egikwl",
+    "timestamp": "2025-08-25T02:10:44.600Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087674164_9hr35kz8f",
-    "timestamp": "2025-08-25T02:07:54.164Z",
+    "id": "log_1756087843450_l8827q0qo",
+    "timestamp": "2025-08-25T02:10:43.450Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087674163_xdb967sxw",
-    "timestamp": "2025-08-25T02:07:54.163Z",
+    "id": "log_1756087843449_0v4x162o2",
+    "timestamp": "2025-08-25T02:10:43.449Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087673397_ft5smqfy0",
-    "timestamp": "2025-08-25T02:07:53.397Z",
+    "id": "log_1756087843448_765ewa48t",
+    "timestamp": "2025-08-25T02:10:43.449Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087842347_o8be6t0dl",
+    "timestamp": "2025-08-25T02:10:42.347Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087842344_dfl99uf7w",
+    "timestamp": "2025-08-25T02:10:42.344Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087842343_jskbhamkr",
+    "timestamp": "2025-08-25T02:10:42.343Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087841292_5rmifg0rx",
+    "timestamp": "2025-08-25T02:10:41.292Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087841291_51jjdmnsx",
+    "timestamp": "2025-08-25T02:10:41.291Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087841290_n8p6uzc0z",
+    "timestamp": "2025-08-25T02:10:41.290Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087840281_jbur4yteb",
+    "timestamp": "2025-08-25T02:10:40.281Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087840281_0vefaqutm",
+    "timestamp": "2025-08-25T02:10:40.281Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087840280_hzm07oe26",
+    "timestamp": "2025-08-25T02:10:40.280Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087839329_j03cpavrs",
+    "timestamp": "2025-08-25T02:10:39.329Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087839328_2bman563d",
+    "timestamp": "2025-08-25T02:10:39.328Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087839324_6nf3dg0k6",
+    "timestamp": "2025-08-25T02:10:39.324Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087838425_6g1xzmho0",
+    "timestamp": "2025-08-25T02:10:38.425Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087838425_1kwvwxqup",
+    "timestamp": "2025-08-25T02:10:38.425Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087838422_tu45lsp5b",
+    "timestamp": "2025-08-25T02:10:38.422Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087837573_9ascqv1y1",
+    "timestamp": "2025-08-25T02:10:37.573Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087837573_5bed3h8ar",
+    "timestamp": "2025-08-25T02:10:37.573Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087837570_intpi11i4",
+    "timestamp": "2025-08-25T02:10:37.570Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087836772_8jdro5l4o",
+    "timestamp": "2025-08-25T02:10:36.772Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087836772_wl4nvvgi8",
+    "timestamp": "2025-08-25T02:10:36.772Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087836770_30msrs73f",
+    "timestamp": "2025-08-25T02:10:36.770Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087836020_iiz7qkmdo",
+    "timestamp": "2025-08-25T02:10:36.020Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087836020_g81zw4eh9",
+    "timestamp": "2025-08-25T02:10:36.020Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087836019_1rayrpdnh",
+    "timestamp": "2025-08-25T02:10:36.019Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087835319_ow1rc9erq",
+    "timestamp": "2025-08-25T02:10:35.319Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087835319_kero13034",
+    "timestamp": "2025-08-25T02:10:35.319Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087835318_xa2tqtayv",
+    "timestamp": "2025-08-25T02:10:35.318Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087834667_i06ydlff0",
+    "timestamp": "2025-08-25T02:10:34.667Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087834667_19yjbrtal",
+    "timestamp": "2025-08-25T02:10:34.667Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087834667_xvv8pm6am",
+    "timestamp": "2025-08-25T02:10:34.667Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087834066_miuyyv5ho",
+    "timestamp": "2025-08-25T02:10:34.066Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087834066_phu2nc17x",
+    "timestamp": "2025-08-25T02:10:34.066Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087834065_lgjb9liwp",
+    "timestamp": "2025-08-25T02:10:34.065Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087833514_6ynpvhdh2",
+    "timestamp": "2025-08-25T02:10:33.514Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087833514_jj6oco74w",
+    "timestamp": "2025-08-25T02:10:33.514Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087833513_vcrr4ejkl",
+    "timestamp": "2025-08-25T02:10:33.513Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087833012_85e73wx26",
+    "timestamp": "2025-08-25T02:10:33.012Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087833012_77e6ekb7c",
+    "timestamp": "2025-08-25T02:10:33.012Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087833011_6t1qqo073",
+    "timestamp": "2025-08-25T02:10:33.011Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087832561_7tk2bx0b8",
+    "timestamp": "2025-08-25T02:10:32.561Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087832560_qi3qz9tnt",
+    "timestamp": "2025-08-25T02:10:32.560Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087832554_bgqr0wk6w",
+    "timestamp": "2025-08-25T02:10:32.554Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087832153_czzc3z6o0",
+    "timestamp": "2025-08-25T02:10:32.153Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087832152_iqax2kywh",
+    "timestamp": "2025-08-25T02:10:32.152Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087832152_wjdl6f6ah",
+    "timestamp": "2025-08-25T02:10:32.152Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087831799_hhhkbccuo",
+    "timestamp": "2025-08-25T02:10:31.799Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087831798_6eo4dmsqx",
+    "timestamp": "2025-08-25T02:10:31.798Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087831794_k189guq7g",
+    "timestamp": "2025-08-25T02:10:31.794Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087830944_mre8czabk",
+    "timestamp": "2025-08-25T02:10:30.944Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087830944_20g0a475c",
+    "timestamp": "2025-08-25T02:10:30.944Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087830943_juoy0264p",
+    "timestamp": "2025-08-25T02:10:30.943Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087829141_571inkjvb",
+    "timestamp": "2025-08-25T02:10:29.141Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087829141_gz3zy4yyv",
+    "timestamp": "2025-08-25T02:10:29.141Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087829135_e074v24sv",
+    "timestamp": "2025-08-25T02:10:29.135Z",
+    "level": "error",
+    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756087828733_41rym77h7",
+    "timestamp": "2025-08-25T02:10:28.733Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756087673003_nrcjb0zbq",
-    "timestamp": "2025-08-25T02:07:53.003Z",
+    "id": "log_1756087828002_nyhgz6vg3",
+    "timestamp": "2025-08-25T02:10:28.002Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087673003_iryfk19ws",
-    "timestamp": "2025-08-25T02:07:53.003Z",
+    "id": "log_1756087828001_2hynxxeik",
+    "timestamp": "2025-08-25T02:10:28.001Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087673001_7j2mbk95j",
-    "timestamp": "2025-08-25T02:07:53.001Z",
+    "id": "log_1756087827995_xwiz4houp",
+    "timestamp": "2025-08-25T02:10:27.995Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087672704_rs3f81np0",
-    "timestamp": "2025-08-25T02:07:52.704Z",
+    "id": "log_1756087827665_tumjofzxj",
+    "timestamp": "2025-08-25T02:10:27.665Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087672701_mb0caza0k",
-    "timestamp": "2025-08-25T02:07:52.701Z",
+    "id": "log_1756087827664_4e1u91kh7",
+    "timestamp": "2025-08-25T02:10:27.664Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087672698_m1nkqphgl",
-    "timestamp": "2025-08-25T02:07:52.698Z",
+    "id": "log_1756087827663_m4yss0dn9",
+    "timestamp": "2025-08-25T02:10:27.663Z",
     "level": "error",
     "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756087672215_mhfu4p1af",
-    "timestamp": "2025-08-25T02:07:52.215Z",
-    "level": "error",
-    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756087672215_5pqza40x4",
-    "timestamp": "2025-08-25T02:07:52.215Z",
-    "level": "error",
-    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756087672214_1cklctgw2",
-    "timestamp": "2025-08-25T02:07:52.214Z",
-    "level": "error",
-    "message": "Error: connect ECONNREFUSED 127.0.0.1:6379",
-    "context": "ERROR",
+    "id": "log_1756087827328_is6hrmi5j",
+    "timestamp": "2025-08-25T02:10:27.328Z",
+    "level": "info",
+    "message": "Sistema de logs iniciado",
+    "context": "SYSTEM",
     "actionType": "system"
   }
 ]

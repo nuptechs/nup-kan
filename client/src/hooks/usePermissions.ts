@@ -25,7 +25,7 @@ export function usePermissions() {
   });
 
   // Converter array de strings para array de objetos Permission
-  const userPermissions: Permission[] = React.useMemo(() => {
+  const userPermissions: Permission[] = useMemo(() => {
     if (!userPermissionsData?.permissions) return [];
     
     return userPermissionsData.permissions.map(permissionName => ({

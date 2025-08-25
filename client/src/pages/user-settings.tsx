@@ -185,7 +185,7 @@ export default function UserSettingsPage() {
                 <div className="relative">
                   <Avatar className="w-20 h-20">
                     <AvatarImage 
-                      src={currentUser.profileImageUrl || undefined} 
+                      src={currentUser.avatar || undefined} 
                       alt={currentUser.name}
                     />
                     <AvatarFallback className="bg-indigo-500 text-white text-lg font-medium">
