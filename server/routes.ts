@@ -10,6 +10,7 @@ import { eq, sql, and } from "drizzle-orm";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 import { PermissionSyncService } from "./permissionSync";
 import { authenticateUser, requirePermissions, requireAdmin, optionalAuth, type AuthenticatedRequest } from "./middleware/authMiddleware";
+import { OptimizedQueries, PerformanceStats } from "./optimizedQueries";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes - Protegidas com permissões
@@ -118,6 +119,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🚀 ENDPOINT DE PERFORMANCE STATISTICS
+  app.get("/api/performance-stats", requireAdmin, async (req, res) => {
+    try {
+      const stats = PerformanceStats.getQueryStats();
+      const cacheStats = await cache.getStats();
+      
+      res.json({
+        queryPerformance: stats,
+        cachePerformance: cacheStats,
+        systemInfo: {
+          uptime: process.uptime(),
+          memoryUsage: process.memoryUsage(),
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching performance stats:', error);
+      res.status(500).json({ error: 'Failed to fetch performance stats' });
+    }
+  });
+
   // Task Assignee routes
   app.get("/api/tasks/:taskId/assignees", async (req, res) => {
     try {
@@ -169,9 +191,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Board routes - Protegidas com permissões
   app.get("/api/boards", authenticateUser, requirePermissions("Listar Boards"), async (req, res) => {
     try {
-      const boards = await storage.getBoards();
-      res.json(boards);
+      // 🚀 PAGINAÇÃO ULTRA-RÁPIDA: Parâmetros otimizados
+      const page = parseInt(req.query.page as string);
+      const limit = parseInt(req.query.limit as string);
+      
+      // Se não usar paginação, retorna todos (compatibilidade)
+      if (!page && !limit) {
+        const boards = await storage.getBoards();
+        return res.json(boards);
+      }
+      
+      // Paginação otimizada com cache
+      const validPage = Math.max(1, page || 1);
+      const validLimit = Math.min(100, Math.max(1, limit || 20));
+      const offset = (validPage - 1) * validLimit;
+      
+      // 🔥 PARALLEL QUERIES para performance máxima
+      const [boards, total] = await Promise.all([
+        storage.getBoardsPaginated(validLimit, offset),
+        storage.getBoardsCount()
+      ]);
+      
+      res.json({
+        data: boards,
+        pagination: {
+          page: validPage,
+          limit: validLimit,
+          total,
+          pages: Math.ceil(total / validLimit),
+          hasNext: validPage < Math.ceil(total / validLimit),
+          hasPrev: validPage > 1
+        }
+      });
     } catch (error) {
+      console.error('Error fetching boards:', error);
       res.status(500).json({ message: "Failed to fetch boards" });
     }
   });
@@ -383,14 +436,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Analytics endpoint
-  app.get("/api/analytics", async (req, res) => {
+  app.get("/api/analytics", authenticateUser, requirePermissions("Listar Analytics"), async (req, res) => {
     try {
       const { boardId } = req.query;
       
-      // Get all tasks and columns, filter by boardId if provided
-      let tasks = await storage.getTasks();
-      let columns = await storage.getColumns();
-      const users = await storage.getUsers();
+      // 🚀 USAR ANALYTICS ULTRA-OTIMIZADOS
+      const analytics = await OptimizedQueries.getAnalyticsOptimized();
+      
+      // Dados adicionais se necessário
+      let tasks = [];
+      let columns = [];
+      let users = [];
+      
+      // Só buscar dados detalhados se pedidos
+      if (req.query.detailed === 'true') {
+        [tasks, columns, users] = await Promise.all([
+          storage.getTasks(),
+          storage.getColumns(), 
+          storage.getUsers()
+        ]);
+      }
       
       // Filter by boardId if provided
       if (boardId && typeof boardId === 'string') {

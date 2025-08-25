@@ -4,6 +4,8 @@ import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, perm
 import { eq, desc, and, inArray, sql, or } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
+import { cache, CacheKeys, TTL } from "./cache";
+import { OptimizedQueries, PerformanceStats } from "./optimizedQueries";
 
 export interface IStorage {
   // Boards
@@ -576,42 +578,23 @@ export class MemStorage implements IStorage {
 
   // User Permissions methods for MemStorage
   async getUserPermissions(userId: string): Promise<Permission[]> {
+    const startTime = Date.now();
     try {
-      // Verificar cache primeiro
-      const cached = this.getCachedPermissions(userId);
-      if (cached) {
-        console.log("🚀 [SECURITY] Permissões servidas do cache para usuário:", userId);
-        return cached;
-      }
-
-      // Query otimizada: busca tudo em uma única consulta com JOINs
-      const result = await db
-        .select({
-          id: permissions.id,
-          name: permissions.name,
-          description: permissions.description,
-          category: permissions.category,
-          createdAt: permissions.createdAt,
-        })
-        .from(users)
-        .innerJoin(profiles, eq(users.profileId, profiles.id))
-        .innerJoin(profilePermissions, eq(profiles.id, profilePermissions.profileId))
-        .innerJoin(permissions, eq(profilePermissions.permissionId, permissions.id))
-        .where(eq(users.id, userId));
-
-      const user = await this.getUser(userId);
-      console.log("🔍 [SECURITY] Buscando permissões para usuário:", user?.name || "Unknown");
+      // 🚀 USAR QUERY ULTRA-OTIMIZADA
+      const result = await OptimizedQueries.getUserPermissionsOptimized(userId);
       
       if (result.length === 0) {
         console.log("⚠️ [SECURITY] Usuário sem permissões ou não encontrado");
         return [];
       }
 
-      // Cachear resultado
-      this.setCachedPermissions(userId, result);
-      console.log(`🔑 [SECURITY] ${result.length} permissões completas carregadas e cacheadas:`, result.map(p => p.name));
+      const duration = Date.now() - startTime;
+      PerformanceStats.trackQuery('getUserPermissions', duration);
+      console.log(`🔑 [PERF] ${result.length} permissões em ${duration}ms:`, result.map(p => p.name).slice(0, 5), '...');
       return result;
     } catch (error) {
+      const duration = Date.now() - startTime;
+      PerformanceStats.trackQuery('getUserPermissions_error', duration);
       console.error("❌ [SECURITY] Erro em getUserPermissions:", error);
       return [];
     }
@@ -1231,7 +1214,56 @@ export class DatabaseStorage implements IStorage {
   }
   // Board methods
   async getBoards(): Promise<Board[]> {
-    return await db.select().from(boards).orderBy(desc(boards.createdAt));
+    // 🚀 CACHE: Verificar cache primeiro
+    const cached = await cache.get<Board[]>(CacheKeys.ALL_BOARDS);
+    if (cached) {
+      console.log("🚀 [CACHE HIT] Boards servidos do cache");
+      return cached;
+    }
+
+    console.log("🔍 [CACHE MISS] Buscando boards no banco");
+    const result = await db.select().from(boards).orderBy(desc(boards.createdAt));
+    
+    // Cache por 1 minuto (boards podem mudar mais frequentemente)
+    await cache.set(CacheKeys.ALL_BOARDS, result, TTL.SHORT);
+    return result;
+  }
+
+  // 🚀 NOVA: Paginação para boards
+  async getBoardsPaginated(limit: number, offset: number): Promise<Board[]> {
+    const cacheKey = `boards_paginated:${limit}:${offset}`;
+    const cached = await cache.get<Board[]>(cacheKey);
+    if (cached) {
+      console.log("🚀 [CACHE HIT] Boards paginados servidos do cache");
+      return cached;
+    }
+
+    console.log("🔍 [CACHE MISS] Buscando boards paginados no banco");
+    const result = await db
+      .select()
+      .from(boards)
+      .orderBy(desc(boards.createdAt))
+      .limit(limit)
+      .offset(offset);
+    
+    // Cache por 30 segundos (dados paginados mudam mais)
+    await cache.set(cacheKey, result, TTL.SHORT / 2);
+    return result;
+  }
+
+  // 🚀 NOVA: Contar total de boards
+  async getBoardsCount(): Promise<number> {
+    const cached = await cache.get<number>('boards_count');
+    if (cached !== null) {
+      return cached;
+    }
+
+    const result = await db.select({ count: sql<number>`count(*)` }).from(boards);
+    const count = result[0]?.count || 0;
+    
+    // Cache por 2 minutos
+    await cache.set('boards_count', count, TTL.MEDIUM / 2);
+    return count;
   }
 
   async getBoard(id: string): Promise<Board | undefined> {

@@ -11,5 +11,16 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Connection Pool Otimizado para Performance Máxima
+export const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  // Pool otimizado para performance
+  max: 20,              // Máx 20 conexões simultâneas
+  idleTimeoutMillis: 20000, // 20s timeout para conexões idle
+  connectionTimeoutMillis: 10000, // 10s timeout para novas conexões
+  
+  // Otimizações específicas do Neon
+  allowExitOnIdle: false,
+});
+
 export const db = drizzle({ client: pool, schema });
