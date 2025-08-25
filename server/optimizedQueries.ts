@@ -131,11 +131,9 @@ export class OptimizedQueries {
         status: tasks.status,
         priority: tasks.priority,
         progress: tasks.progress,
-        status: tasks.status,
         boardId: tasks.boardId,
         createdAt: tasks.createdAt,
         updatedAt: tasks.updatedAt,
-        createdAt: tasks.createdAt,
         tags: tasks.tags,
         // Assignee info (se existir)
         assigneeId: tasks.assigneeId,
