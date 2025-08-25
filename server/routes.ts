@@ -34,7 +34,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Find user by email no banco
-      const storage = DatabaseStorage.getInstance();
       const users = await storage.getUsers();
       const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
       
