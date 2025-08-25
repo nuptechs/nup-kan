@@ -39,7 +39,11 @@ export function useProfileMode(): {
   // Funções de verificação por ação
   const canCreate = (resource: string) => {
     if (isReadOnly) return false;
-    return hasPermission(`Criar ${resource}`);
+    // Verificar múltiplas variações de permissão para garantir compatibilidade
+    return hasPermission(`Criar ${resource}`) || 
+           hasPermission(`Create ${resource}`) ||
+           (resource === "Boards" && hasPermission("Criar Boards")) ||
+           (resource === "Tasks" && hasPermission("Criar Tarefas"));
   };
 
   const canEdit = (resource: string) => {

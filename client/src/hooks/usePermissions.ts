@@ -20,6 +20,8 @@ export function usePermissions() {
     staleTime: 300000, // Cache por 5 minutos - permissões mudam raramente
     gcTime: 600000, // Manter em cache por 10 minutos
     refetchOnWindowFocus: false,
+    retry: 3, // Aumentar tentativas
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   // Log de segurança - detectar tentativas de acesso sem permissão
@@ -48,7 +50,12 @@ export function usePermissions() {
 
   const hasPermission = (permissionName: string): boolean => {
     if (!currentUser || !permissionName) return false;
-    return permissionMap.has(permissionName);
+    
+    // Verificar ambas as versões (português e inglês) para compatibilidade
+    return permissionMap.has(permissionName) || 
+           permissionMap.has(permissionName.replace("Boards", "Boards")) || 
+           permissionMap.has(permissionName.replace("Tarefas", "Tasks")) ||
+           permissionMap.has(permissionName.replace("Tasks", "Tarefas"));
   };
 
   const hasAnyPermission = (permissionNames: string[]): boolean => {
