@@ -11,6 +11,9 @@
 import { db } from "../db";
 import { eventBus } from "./events";
 import { z } from "zod";
+import { boards, tasks, userTeams } from "@shared/schema";
+import { randomUUID } from "crypto";
+import { eq } from "drizzle-orm";
 
 // Schemas para validação de commands
 export const createBoardCommandSchema = z.object({
@@ -54,11 +57,20 @@ export class CommandHandlers {
         .insert(boards)
         .values({
           ...validData,
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           createdAt: new Date(),
           updatedAt: new Date(),
         })
         .returning();
+
+      // 🔗 Adicionar criador como membro automaticamente
+      await db.insert(userTeams).values({
+        id: randomUUID(),
+        userId: validData.createdById,
+        teamId: board.id, // usar boardId como teamId para boards
+        role: 'owner',
+        createdAt: new Date(),
+      });
 
       // 📡 Emitir evento para sincronização
       await eventBus.emit('board.created', {
@@ -68,7 +80,7 @@ export class CommandHandlers {
       });
 
       const duration = Date.now() - startTime;
-      console.log(`✅ [COMMAND] Board criado em ${duration}ms`);
+      console.log(`✅ [COMMAND] Board criado e membro adicionado em ${duration}ms`);
       
       return board;
     } catch (error) {
@@ -92,7 +104,7 @@ export class CommandHandlers {
         .insert(tasks)
         .values({
           ...validData,
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           createdAt: new Date(),
           updatedAt: new Date(),
         })
@@ -198,6 +210,4 @@ export class CommandHandlers {
   }
 }
 
-// Importações necessárias (serão ajustadas conforme schema)
-import { boards, tasks } from "@shared/schema";
-import { eq } from "drizzle-orm";
+// Importações já incluídas no topo do arquivo

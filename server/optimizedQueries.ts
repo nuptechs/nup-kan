@@ -21,7 +21,7 @@ export class OptimizedQueries {
     const cached = await cache.get(cacheKey);
     if (cached) {
       console.log("🚀 [OPT-QUERY] Permissões do cache ultra-rápido");
-      return cached;
+      return cached || [];
     }
 
     console.log("🔍 [OPT-QUERY] Executando query otimizada de permissões");

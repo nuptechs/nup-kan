@@ -583,7 +583,7 @@ export class MemStorage implements IStorage {
       // 🚀 USAR QUERY ULTRA-OTIMIZADA
       const result = await OptimizedQueries.getUserPermissionsOptimized(userId);
       
-      if (result.length === 0) {
+      if (!result || !Array.isArray(result) || result.length === 0) {
         console.log("⚠️ [SECURITY] Usuário sem permissões ou não encontrado");
         return [];
       }

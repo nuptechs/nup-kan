@@ -10,26 +10,9 @@ class CacheManager {
   }
 
   private async initRedis() {
-    try {
-      // Tentar conectar Redis se disponível
-      this.redis = createClient({
-        url: process.env.REDIS_URL || 'redis://localhost:6379',
-        socket: {
-          connectTimeout: 1000,
-        },
-        isolationPoolOptions: {
-          min: 1,
-          max: 10,
-        },
-      });
-      
-      await this.redis.connect();
-      await this.redis.ping();
-      console.log('🟢 [CACHE] Redis conectado com sucesso');
-    } catch (error) {
-      console.log('🟡 [CACHE] Redis não disponível, usando cache em memória');
-      this.redis = null;
-    }
+    // Redis temporariamente desabilitado para estabilidade
+    console.log('🟡 [CACHE] Redis desabilitado, usando cache em memória');
+    this.redis = null;
   }
 
   async get<T>(key: string): Promise<T | null> {
