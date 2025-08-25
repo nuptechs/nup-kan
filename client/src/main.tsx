@@ -39,9 +39,40 @@ if (import.meta.env.DEV) {
       if (message.includes('unoptimized-images')) return;
       if (message.includes('unsized-media')) return;
       if (message.includes('pointer-lock')) return;
+      
+      // Outras fontes comuns de spam
+      if (message.includes('Failed to load resource')) return;
+      if (message.includes('ERR_BLOCKED_BY_CLIENT')) return;
+      if (message.includes('The resource was blocked by a content blocker')) return;
+      if (message.includes('Failed to register ServiceWorker')) return;
+      if (message.includes('Cannot read properties of null')) return;
+      if (message.includes('Non-serializable values')) return;
+      if (message.includes('Webpack DevServer')) return;
+      if (message.includes('HMR')) return;
+      if (message.includes('sockjs-node')) return;
+      if (message.includes('WebSocket connection')) return;
     }
     
     originalWarn.apply(console, args);
+  };
+  
+  // Também interceptar console.error para suprimir erros conhecidos
+  const originalError = console.error;
+  console.error = (...args) => {
+    const message = args[0];
+    
+    if (typeof message === 'string') {
+      // Suprimir erros conhecidos que são spam
+      if (message.includes('Failed to load resource')) return;
+      if (message.includes('ERR_BLOCKED_BY_CLIENT')) return;
+      if (message.includes('The resource was blocked by a content blocker')) return;
+      if (message.includes('Failed to register ServiceWorker')) return;
+      if (message.includes('ResizeObserver loop limit exceeded')) return;
+      if (message.includes('Non-serializable values were found')) return;
+      if (message.includes('Warning: Each child in a list should have a unique "key" prop')) return;
+    }
+    
+    originalError.apply(console, args);
   };
   
   // Adicionar estilo aos logs de debug da aplicação e reduzir spam
