@@ -116,6 +116,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
       });
       setEditingColumn(null);
       editForm.reset();
+      onClose(); // Fecha a modal automaticamente
     },
     onError: () => {
       toast({

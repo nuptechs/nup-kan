@@ -96,6 +96,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       });
       setEditingUser(null);
       editForm.reset();
+      onClose(); // Fecha a modal automaticamente
     },
     onError: () => {
       toast({

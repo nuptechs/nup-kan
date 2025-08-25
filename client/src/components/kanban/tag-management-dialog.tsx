@@ -82,6 +82,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
       });
       setEditingTag(null);
       editForm.reset();
+      onClose(); // Fecha a modal automaticamente
     },
     onError: () => {
       toast({
