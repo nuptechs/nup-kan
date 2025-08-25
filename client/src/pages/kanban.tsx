@@ -26,7 +26,9 @@ export default function KanbanPage() {
 
   const { data: analytics } = useQuery({
     queryKey: ["/api/analytics"],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    staleTime: 5 * 60 * 1000, // 5 minutos antes de considerar stale
+    refetchInterval: 5 * 60 * 1000, // Refresh apenas a cada 5 minutos
+    refetchOnWindowFocus: false, // Evitar requests desnecessários
   });
 
   const { data: boardMemberCount } = useQuery<{ count: number }>({

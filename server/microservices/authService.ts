@@ -51,12 +51,17 @@ export class AuthService {
         return null;
       }
 
-      // ❌ CACHE DESABILITADO TEMPORARIAMENTE - Bug causava troca de usuários
-      // const cacheKey = `auth_context:${userId}`;
-      // const cached = await cache.get<AuthContext>(cacheKey);
+      // ✅ CACHE REABILITADO - Bug corrigido usando sessionId na chave
+      const sessionId = (req as any).sessionID || req.session?.id || 'no-session';
+      const cacheKey = `auth_context:${userId}:${sessionId}`;
+      const cached = await cache.get<AuthContext>(cacheKey);
       
-      // Sempre buscar dados frescos para garantir usuario correto
-      console.log('🔍 [AUTH-SERVICE] Cache desabilitado, buscando dados frescos do usuário');
+      if (cached && cached.userId === userId) {
+        console.log('🚀 [AUTH-CACHE] Auth verificado pelo cache em < 1ms');
+        return cached;
+      }
+      
+      console.log('🔍 [AUTH-SERVICE] Cache miss, buscando dados frescos do usuário');
 
       // 🔍 Buscar dados completos do usuário (sempre fresco)
       const userData = await QueryHandlers.getUserWithPermissions(userId) as any;
@@ -81,8 +86,8 @@ export class AuthService {
         lastActivity: new Date(),
       };
 
-      // ❌ CACHE DESABILITADO - Evita confusão entre usuários
-      // await cache.set(cacheKey, authContext, TTL.MEDIUM);
+      // ✅ CACHE REABILITADO - Chave única por usuário+sessão
+      await cache.set(cacheKey, authContext, TTL.SHORT); // TTL menor para maior segurança
 
       const duration = Date.now() - startTime;
       console.log(`✅ [AUTH-SERVICE] Auth verificado em ${duration}ms (Dados completos)`);

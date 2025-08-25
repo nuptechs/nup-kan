@@ -75,38 +75,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🚀 NÍVEL 3: ROTAS ULTRA-OTIMIZADAS COM MICROSERVIÇOS
   console.log("🚀 [NIVEL-3] Ativando microserviços e arquitetura avançada...");
   
-  // ⚡ Ativar middlewares do API Gateway globalmente
-  app.use(APIGateway.rateLimitingMiddleware);
+  // ⚡ Rate limiting apenas em rotas específicas (removido global)
+  // app.use(APIGateway.rateLimitingMiddleware);
   
   // 🔐 Auth routes - Microserviço de autenticação
   app.get("/api/auth/current-user", 
-    APIGateway.monitoringMiddleware('auth'),
     RouteHandlers.authRoutes.currentUser
   );
   
   app.get("/api/users/:userId/permissions", 
-    APIGateway.monitoringMiddleware('auth'),
     AuthMiddleware.requireAuth,
     RouteHandlers.authRoutes.userPermissions
   );
   
   // 📋 Board routes - Microserviço de boards  
   app.get("/api/boards",
-    APIGateway.monitoringMiddleware('board'), 
     AuthMiddleware.requireAuth,
     AuthMiddleware.requirePermissions("Listar Boards"),
     RouteHandlers.boardRoutes.getBoards
   );
   
   app.post("/api/boards",
-    APIGateway.monitoringMiddleware('board'),
     AuthMiddleware.requireAuth, 
     AuthMiddleware.requirePermissions("Criar Boards"),
     RouteHandlers.boardRoutes.createBoard
   );
   
   app.get("/api/boards/:id",
-    APIGateway.monitoringMiddleware('board'),
     AuthMiddleware.requireAuth,
     AuthMiddleware.requirePermissions("Listar Boards"), 
     RouteHandlers.boardRoutes.getBoardById
@@ -117,12 +112,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // 📊 System routes - Monitoramento e métricas
   app.get("/api/system/health",
-    APIGateway.monitoringMiddleware('system'),
     RouteHandlers.systemRoutes.health
   );
   
   app.get("/api/system/metrics",
-    APIGateway.monitoringMiddleware('system'), 
     AuthMiddleware.requireAuth,
     AuthMiddleware.requirePermissions("Visualizar Analytics"),
     RouteHandlers.systemRoutes.metrics
@@ -606,7 +599,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Analytics endpoint - MIGRADO PARA NÍVEL 3
   app.get("/api/analytics", 
-    APIGateway.monitoringMiddleware('analytics'),
     AuthMiddleware.requireAuth,
     AuthMiddleware.requirePermissions("Listar Analytics"), 
     async (req, res) => {
@@ -617,13 +609,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🚀 [ANALYTICS] Usando NÍVEL 3 - QueryHandlers");
       const startTime = Date.now();
       
-      // 🔥 NÍVEL 3: ANALYTICS ULTRA-RÁPIDOS (MongoDB First + Cache)
-      const analyticsData = await APIGateway.executeWithCircuitBreaker('analytics', async () => {
-        return await QueryHandlers.getAnalytics(
-          boardId ? 'board' : 'global',
-          boardId as string || 'global'
-        );
-      });
+      // 🔥 ANALYTICS SIMPLIFICADOS E ULTRA-RÁPIDOS
+      const analyticsData = await QueryHandlers.getAnalytics(
+        boardId ? 'board' : 'global',
+        boardId as string || 'global'
+      );
       
       const duration = Date.now() - startTime;
       console.log(`🚀 [ANALYTICS] Processado em ${duration}ms (NÍVEL 3)`);
