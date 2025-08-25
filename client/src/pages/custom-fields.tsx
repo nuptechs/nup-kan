@@ -61,9 +61,10 @@ export default function CustomFieldsPage() {
     queryKey: ["/api/custom-fields"],
   });
 
-  const { data: boards = [] } = useQuery<any[]>({
+  const { data: boardsResponse = { data: [] } } = useQuery<{data: any[]}>({
     queryKey: ["/api/boards"],
   });
+  const boards = boardsResponse.data || [];
 
   // Mutations
   const createMutation = useMutation({
