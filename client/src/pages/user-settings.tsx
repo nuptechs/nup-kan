@@ -189,7 +189,7 @@ export default function UserSettingsPage() {
                       alt={currentUser.name}
                     />
                     <AvatarFallback className="bg-indigo-500 text-white text-lg font-medium">
-                      {currentUser.avatar || currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      {currentUser.avatar || (currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U')}
                     </AvatarFallback>
                   </Avatar>
                   <div 

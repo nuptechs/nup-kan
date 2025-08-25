@@ -13,16 +13,37 @@ export function usePermissions() {
     refetchOnWindowFocus: false,
   });
 
-  // Buscar permissões do usuário baseado no seu perfil
-  const { data: userPermissions = [], isLoading: permissionsLoading, error: permissionsError } = useQuery<Permission[]>({
+  // Buscar permissões do usuário baseado no seu perfil - usando endpoint correto que funciona
+  const { data: userPermissionsData, isLoading: permissionsLoading, error: permissionsError } = useQuery<{permissions: string[]}>({
     queryKey: ["/api/users", currentUser?.id, "permissions"],
-    enabled: !!currentUser?.id, // Modificado para verificar ID do usuário em vez de profileId
+    enabled: !!currentUser?.id,
     staleTime: 300000, // Cache por 5 minutos - permissões mudam raramente
     gcTime: 600000, // Manter em cache por 10 minutos
     refetchOnWindowFocus: false,
     retry: 3, // Aumentar tentativas
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
+
+  // Converter array de strings para array de objetos Permission
+  const userPermissions: Permission[] = React.useMemo(() => {
+    if (!userPermissionsData?.permissions) return [];
+    
+    return userPermissionsData.permissions.map(permissionName => ({
+      id: permissionName.toLowerCase().replace(/\s+/g, '-'),
+      name: permissionName,
+      category: permissionName.includes('Board') ? 'boards' : 
+                permissionName.includes('Task') || permissionName.includes('Tarefa') ? 'tasks' :
+                permissionName.includes('User') || permissionName.includes('Usuário') ? 'users' :
+                permissionName.includes('Team') || permissionName.includes('Time') ? 'teams' :
+                permissionName.includes('Profile') || permissionName.includes('Perfil') ? 'profiles' :
+                permissionName.includes('Permission') || permissionName.includes('Permissão') ? 'permissions' :
+                permissionName.includes('Analytics') ? 'analytics' :
+                permissionName.includes('Column') || permissionName.includes('Coluna') ? 'columns' :
+                'general',
+      description: `Permissão para ${permissionName}`,
+      createdAt: new Date(),
+    }));
+  }, [userPermissionsData]);
 
   // Log de segurança - detectar tentativas de acesso sem permissão
   useEffect(() => {
@@ -52,10 +73,20 @@ export function usePermissions() {
     if (!currentUser || !permissionName) return false;
     
     // Verificar ambas as versões (português e inglês) para compatibilidade
-    return permissionMap.has(permissionName) || 
+    const hasPermissionResult = permissionMap.has(permissionName) || 
            permissionMap.has(permissionName.replace("Boards", "Boards")) || 
            permissionMap.has(permissionName.replace("Tarefas", "Tasks")) ||
            permissionMap.has(permissionName.replace("Tasks", "Tarefas"));
+    
+    // Debug log para verificar permissões
+    if (permissionName && permissionName.includes("Criar")) {
+      console.log(`🔍 [PERMISSIONS] Verificando permissão "${permissionName}": ${hasPermissionResult}`, {
+        userPermissions: Array.isArray(userPermissions) ? userPermissions.map(p => p.name) : [],
+        currentUser: currentUser?.name
+      });
+    }
+    
+    return hasPermissionResult;
   };
 
   const hasAnyPermission = (permissionNames: string[]): boolean => {
