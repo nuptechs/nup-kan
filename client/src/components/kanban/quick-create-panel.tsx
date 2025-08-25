@@ -436,7 +436,7 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                           value={userForm.profileId}
                           onValueChange={(value) => setUserForm(prev => ({ ...prev, profileId: value }))}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger id="user-profile">
                             <SelectValue placeholder="Selecione um perfil" />
                           </SelectTrigger>
                           <SelectContent>
