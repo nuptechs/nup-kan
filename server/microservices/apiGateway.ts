@@ -57,8 +57,8 @@ export class APIGateway {
     },
     circuitBreaker: {
       enabled: true,
-      errorThreshold: 0.5, // 50% error rate
-      timeoutMs: 10000, // 10 segundos
+      errorThreshold: 0.8, // 80% error rate (mais tolerante)
+      timeoutMs: 15000, // 15 segundos (mais tempo)
     },
     monitoring: {
       enabled: true,
