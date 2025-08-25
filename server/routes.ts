@@ -23,25 +23,51 @@ import { QueryHandlers } from './cqrs/queries';
 export async function registerRoutes(app: Express): Promise<Server> {
   console.log("🔥 [ROUTER] INÍCIO DE REGISTER ROUTES!");
   
-  // ===== TESTE DE LOGIN HARDCODED NO INÍCIO =====
-  console.log("🚀 [LOGIN-TEST] Registrando rota de LOGIN TESTE no início!");
+  // ===== ROTA DE LOGIN CORRIGIDA COM DADOS REAIS =====
+  console.log("🚀 [LOGIN] Registrando rota de LOGIN com dados reais");
   app.post("/api/auth/login", async (req, res) => {
-    console.log("🔴 [LOGIN-TEST] ===== ROTA EXECUTADA =====");
-    console.log("🔴 [LOGIN-TEST] Email:", req.body.email, "Password:", req.body.password);
-    
-    if (req.body.email === "yfaf01@gmail.com" && req.body.password === "123456") {
-      console.log("✅ [LOGIN-TEST] SUCESSO!");
-      return res.json({
-        id: "test-id",
-        name: "Yuri Francis",
-        email: "yfaf01@gmail.com",
-        role: "admin",
-        profileId: "admin-profile"
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email e senha são obrigatórios" });
+      }
+
+      // Find user by email no banco
+      const storage = DatabaseStorage.getInstance();
+      const users = await storage.getUsers();
+      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      
+      if (!user) {
+        return res.status(401).json({ message: "Email ou senha incorretos" });
+      }
+
+      // Check password
+      if (user.password) {
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+          return res.status(401).json({ message: "Email ou senha incorretos" });
+        }
+      }
+      
+      // Store user info in session (simple session management)
+      req.session = req.session || {};
+      req.session.userId = user.id;
+      req.session.userName = user.name;
+      
+      // Retornar dados reais do usuário
+      res.json({
+        id: user.id, // ✅ ID REAL
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+        profileId: user.profileId // ✅ PROFILE ID REAL
       });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
     }
-    
-    console.log("❌ [LOGIN-TEST] FALHOU!");
-    res.status(401).json({ message: "Email ou senha incorretos" });
   });
   
   // 🚀 NÍVEL 3: ROTAS ULTRA-OTIMIZADAS COM MICROSERVIÇOS
