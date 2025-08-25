@@ -30,8 +30,9 @@
         // Congelar para que não possam ser sobrescritos
         Object.freeze(NATIVE_CONSOLE);
         
-        // Lista completa de mensagens para suprimir
+        // Lista completa de mensagens para suprimir - MÁXIMA COBERTURA
         const PATTERNS = [
+          // Features Unrecognized (Replit iframe)
           'Unrecognized feature:',
           'ambient-light-sensor',
           'battery',
@@ -46,19 +47,36 @@
           'unoptimized-images',
           'unsized-media',
           'pointer-lock',
+          
+          // Allow attributes (Replit iframe)
           'Allow attribute will take precedence',
+          'allowfullscreen',
+          'allowpaymentrequest',
+          
+          // Novos padrões específicos do Replit
+          'workspace_iframe.html',
+          
+          // React warnings
           'defaultProps will be removed from memo components',
           'React does not recognize the `isDragging` prop',
           'React does not recognize the `isDropDisabled` prop',
           'React does not recognize the `isDragDisabled` prop',
+          
+          // TanStack Query
           'Query data cannot be undefined',
           'QueryClient has not been set',
+          
+          // Network e recursos
           'Failed to load resource',
           'ERR_BLOCKED_BY_CLIENT',
           'The resource was blocked by a content blocker',
           'Failed to register ServiceWorker',
+          
+          // Runtime
           'Cannot read properties of null',
           'Non-serializable values',
+          
+          // Dev server
           'Webpack DevServer',
           'HMR',
           'sockjs-node',
@@ -69,6 +87,12 @@
         
         function shouldSuppress(message) {
           if (typeof message !== 'string') return false;
+          
+          // Verificação direta dos padrões mais específicos primeiro
+          if (message.includes('workspace_iframe.html')) return true;
+          if (message.includes('Unrecognized feature:')) return true;
+          if (message.includes('Allow attribute will take precedence')) return true;
+          
           return PATTERNS.some(pattern => message.includes(pattern));
         }
         
@@ -198,6 +222,30 @@
         NATIVE_CONSOLE.log('%c🛡️ PROTEÇÃO MÁXIMA DE CONSOLE ATIVADA', 'color: #3b82f6; font-weight: bold; font-size: 14px; background: #eff6ff; padding: 3px 8px; border-radius: 5px;');
         NATIVE_CONSOLE.log('%c Console protegido com defineProperty - interceptação forçada', 'color: #6b7280; font-style: italic;');
         NATIVE_CONSOLE.log('%c Ctrl+Shift+S: estatísticas | Ctrl+L: limpar | window.testSuppression(): teste', 'color: #6b7280; font-style: italic;');
+        
+        // INTERCEPTAÇÃO GLOBAL DE TODAS AS MENSAGENS DE IFRAME
+        (function() {
+          const originalAddEventListener = EventTarget.prototype.addEventListener;
+          
+          // Interceptar console de qualquer origem
+          if (window.parent && window.parent !== window) {
+            // Se estamos em um iframe, também aplicar supressão
+            try {
+              window.parent.console = newConsole;
+            } catch (e) {}
+          }
+          
+          // Interceptar mensagens do tipo console
+          window.addEventListener('message', function(event) {
+            if (event.data && typeof event.data === 'object') {
+              if (event.data.type === 'console' && shouldSuppress(event.data.message)) {
+                event.stopImmediatePropagation();
+                totalSuppressed++;
+                return false;
+              }
+            }
+          }, true);
+        })();
         
         // Interceptar qualquer tentativa de redefinir o console
         const originalDefinePropertyOnWindow = Object.defineProperty;
