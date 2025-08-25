@@ -72,14 +72,6 @@ export function usePermissions() {
            permissionMap.has(permissionName.replace("Tarefas", "Tasks")) ||
            permissionMap.has(permissionName.replace("Tasks", "Tarefas"));
     
-    // Debug log para verificar permissões
-    if (permissionName && permissionName.includes("Criar")) {
-      console.log(`🔍 [PERMISSIONS] Verificando permissão "${permissionName}": ${hasPermissionResult}`, {
-        userPermissions: Array.isArray(userPermissions) ? userPermissions.map(p => p.name) : [],
-        currentUser: currentUser?.name
-      });
-    }
-    
     return hasPermissionResult;
   };
 
@@ -123,6 +115,37 @@ export function usePermissions() {
     return Array.isArray(userPermissions) ? userPermissions.filter(permission => permission.category === category) : [];
   };
 
+  // Memoizar verificações de permissão para melhor performance
+  const permissionChecks = useMemo(() => {
+    if (!currentUser || !permissionMap.size) {
+      return {
+        canCreateTasks: false,
+        canEditTasks: false,
+        canDeleteTasks: false,
+        canViewTasks: false,
+        canManageColumns: false,
+        canManageTeams: false,
+        canManageUsers: false,
+        canManageProfiles: false,
+        canViewAnalytics: false,
+        canExportData: false,
+      };
+    }
+    
+    return {
+      canCreateTasks: hasPermission("Criar Tarefas"),
+      canEditTasks: hasPermission("Editar Tarefas"),
+      canDeleteTasks: hasPermission("Excluir Tarefas"),
+      canViewTasks: hasPermission("Visualizar Tarefas"),
+      canManageColumns: hasAnyPermission(["Criar Colunas", "Editar Colunas", "Excluir Colunas"]),
+      canManageTeams: hasPermission("Gerenciar Times"),
+      canManageUsers: hasAnyPermission(["Criar Usuários", "Editar Usuários", "Excluir Usuários"]),
+      canManageProfiles: hasAnyPermission(["Criar Perfis", "Editar Perfis", "Excluir Perfis"]),
+      canViewAnalytics: hasPermission("Visualizar Analytics"),
+      canExportData: hasPermission("Exportar Dados"),
+    };
+  }, [permissionMap, currentUser]);
+
   return {
     currentUser,
     userPermissions,
@@ -134,17 +157,7 @@ export function usePermissions() {
     getPermissionsInCategory,
     isAdmin,
     logSecurityAttempt,
-    // Utilitários para verificações comuns - melhorados com logs
-    canCreateTasks: hasPermission("Criar Tarefas"),
-    canEditTasks: hasPermission("Editar Tarefas"),
-    canDeleteTasks: hasPermission("Excluir Tarefas"),
-    canViewTasks: hasPermission("Visualizar Tarefas"),
-    canManageColumns: hasAnyPermission(["Criar Colunas", "Editar Colunas", "Excluir Colunas"]),
-    canManageTeams: hasPermission("Gerenciar Times"),
-    canManageUsers: hasAnyPermission(["Criar Usuários", "Editar Usuários", "Excluir Usuários"]),
-    canManageProfiles: hasAnyPermission(["Criar Perfis", "Editar Perfis", "Excluir Perfis"]),
-    canViewAnalytics: hasPermission("Visualizar Analytics"),
-    canExportData: hasPermission("Exportar Dados"),
+    ...permissionChecks,
     // Nova funcionalidade - verificar permissões com logs
     checkPermissionWithLog: (permission: string, resource: string = "Unknown") => {
       const hasAccess = hasPermission(permission);
