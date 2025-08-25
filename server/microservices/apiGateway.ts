@@ -303,7 +303,16 @@ export class RouteHandlers {
           return res.status(401).json({ error: 'Not authenticated' });
         }
 
-        res.json(authContext);
+        // Retornar no formato esperado pelo frontend
+        res.json({
+          id: authContext.userId,
+          name: authContext.userName,
+          email: authContext.userEmail,
+          role: authContext.profileName || 'Usuário',
+          avatar: '', // Adicionar se disponível no futuro
+          profileId: authContext.profileId,
+          permissions: authContext.permissions || []
+        });
       } catch (error) {
         console.error('❌ [GATEWAY] Erro em currentUser:', error);
         res.status(500).json({ error: 'Authentication service unavailable' });

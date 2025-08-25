@@ -1923,46 +1923,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ⚡ USAR SISTEMA UNIFICADO DE AUTENTICAÇÃO - CORRIGIR PROBLEMA DE SESSÃO
-  app.get("/api/auth/current-user", async (req, res) => {
-    try {
-      // 🔍 VERIFICAR SESSÃO COM NOVO SISTEMA
-      const userId = req.session?.user?.id;
-      
-      if (!userId) {
-        console.log('❌ [AUTH] Sessão não encontrada:', req.session);
-        return res.status(401).json({ error: "Not authenticated" });
-      }
-
-      // 🚀 USAR AUTHSERVICE PARA VERIFICAR USUÁRIO
-      try {
-        const authContext = await AuthService.verifyAuth({ session: { user: { id: userId } } } as any);
-        
-        // Retornar dados completos do usuário
-        if (!authContext) {
-          return res.status(401).json({ error: "Not authenticated" });
-        }
-        
-        res.json({
-          userId: authContext.userId,
-          name: authContext.userName,
-          email: authContext.userEmail,
-          role: '', // Add role if needed in AuthContext
-          avatar: '', // Add avatar if needed in AuthContext  
-          profileId: authContext.profileId,
-          permissions: authContext.permissions
-        });
-      } catch (authError) {
-        console.log('❌ [AUTH] Usuário não válido no AuthService:', authError);
-        req.session = null;
-        return res.status(401).json({ error: "Not authenticated" });
-      }
-      
-    } catch (error) {
-      console.error("❌ [AUTH] Current user error:", error);
-      res.status(500).json({ error: "Authentication error" });
-    }
-  });
+  // ✅ ROTA REMOVIDA - Estava duplicada e causando conflito de sessão
+  // A rota correta está definida na linha 82 usando RouteHandlers.authRoutes.currentUser
 
   // Team Profiles routes
   app.get("/api/team-profiles", async (req, res) => {
