@@ -11,7 +11,7 @@
 import { db } from "../db";
 import { eventBus } from "./events";
 import { z } from "zod";
-import { boards, tasks, userTeams } from "@shared/schema";
+import { boards, tasks, boardShares } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 
@@ -63,12 +63,14 @@ export class CommandHandlers {
         })
         .returning();
 
-      // 🔗 Adicionar criador como membro automaticamente
-      await db.insert(userTeams).values({
+      // 🔗 Adicionar criador como admin do board automaticamente
+      await db.insert(boardShares).values({
         id: randomUUID(),
-        userId: validData.createdById,
-        teamId: board.id, // usar boardId como teamId para boards
-        role: 'owner',
+        boardId: board.id,
+        shareType: 'user',
+        shareWithId: validData.createdById,
+        permission: 'admin',
+        sharedByUserId: validData.createdById,
         createdAt: new Date(),
       });
 
