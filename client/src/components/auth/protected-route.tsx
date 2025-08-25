@@ -1,7 +1,7 @@
 import { ReactNode, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth"; // ✅ Usar hook centralizado
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -11,12 +11,8 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteProps) {
   const [, setLocation] = useLocation();
   
-  const { data: currentUser, isLoading, error } = useQuery({
-    queryKey: ["/api/auth/current-user"],
-    retry: false,
-    refetchOnMount: true, // ✅ SEMPRE buscar dados frescos ao recarregar
-    refetchOnWindowFocus: false, // Não buscar ao focar janela
-  });
+  // ✅ USAR HOOK CENTRALIZADO - Evita request duplicado
+  const { user: currentUser, isLoading, error } = useAuth();
 
   // Handle redirects in useEffect to avoid setState during render
   useEffect(() => {

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,10 +25,7 @@ export default function UserSettingsPage() {
     email: "",
   });
 
-  const { data: currentUser, isLoading } = useQuery<UserType>({
-    queryKey: ["/api/auth/current-user"],
-    retry: false,
-  });
+  const { user: currentUser, isLoading } = useAuth();
 
   const updateUserMutation = useMutation({
     mutationFn: async (userData: { name: string; email: string }) => {

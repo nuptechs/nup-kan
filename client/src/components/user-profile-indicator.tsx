@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,7 @@ import type { User as UserType } from "@shared/schema";
 
 export function UserProfileIndicator() {
   const [, setLocation] = useLocation();
-  const { data: currentUser, isLoading } = useQuery<UserType>({
-    queryKey: ["/api/auth/current-user"],
-    retry: false,
-  });
+  const { user: currentUser, isLoading } = useAuth();
 
   if (isLoading) {
     return (

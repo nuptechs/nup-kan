@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus, Grid, Settings, Edit, Trash2, MoreVertical, User, Eye } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -57,9 +58,7 @@ export default function BoardSelection() {
   // Extrair boards da resposta e garantir que seja um array
   const boards = boardsResponse?.data || [];
 
-  const { data: currentUser } = useQuery<{ id: string; name: string; email: string }>({
-    queryKey: ["/api/auth/current-user"],
-  });
+  const { user: currentUser } = useAuth();
 
   const createForm = useForm<BoardFormData>({
     resolver: zodResolver(boardSchema),

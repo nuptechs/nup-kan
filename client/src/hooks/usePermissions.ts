@@ -1,17 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useEffect } from "react";
 import type { User, Permission } from "@shared/schema";
+import { useAuth } from "./useAuth"; // ✅ Usar hook centralizado
 
 export function usePermissions() {
-  // Buscar usuário atual com estratégia de cache melhorada
-  const { data: currentUser, isLoading: userLoading, error: userError } = useQuery<User>({
-    queryKey: ["/api/auth/current-user"],
-    retry: 2,
-    retryDelay: 1000,
-    staleTime: 300000, // Cache por 5 minutos - dados de usuário mudam pouco
-    gcTime: 600000, // Manter em cache por 10 minutos
-    refetchOnWindowFocus: false,
-  });
+  // ✅ USAR DADOS CENTRALIZADOS - Evita request duplicado
+  const { user: currentUser, isLoading: userLoading, error: userError } = useAuth();
 
   // Buscar permissões do usuário baseado no seu perfil - usando endpoint correto que funciona
   const { data: userPermissionsData, isLoading: permissionsLoading, error: permissionsError } = useQuery<{permissions: string[]}>({

@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Clock, User, Settings, Play, CheckCircle, ArrowRight, GitCommit, MessageCircle, Send } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,9 +61,7 @@ export function TaskTimeline({ taskId, className }: TaskTimelineProps) {
     enabled: !!taskId
   });
 
-  const { data: currentUser } = useQuery<{ name: string; avatar: string }>({
-    queryKey: ["/api/auth/current-user"]
-  });
+  const { user: currentUser } = useAuth();
 
   const addCommentMutation = useMutation({
     mutationFn: async (comment: string) => {
