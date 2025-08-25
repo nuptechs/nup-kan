@@ -1936,15 +1936,18 @@ export class DatabaseStorage implements IStorage {
       // 🚀 USAR QUERY ULTRA-OTIMIZADA COM CACHE
       const result = await OptimizedQueries.getUserPermissionsOptimized(userId);
       
-      if (result.length === 0) {
+      // Ensure result is an array
+      const permissions = Array.isArray(result) ? result : [];
+      
+      if (permissions.length === 0) {
         console.log("⚠️ [SECURITY] Usuário sem permissões ou não encontrado");
         return [];
       }
 
       const duration = Date.now() - startTime;
       PerformanceStats.trackQuery('getUserPermissions_DB', duration);
-      console.log(`🚀 [DB-PERF] ${result.length} permissões em ${duration}ms (OTIMIZADO)`);
-      return result;
+      console.log(`🚀 [DB-PERF] ${permissions.length} permissões em ${duration}ms (OTIMIZADO)`);
+      return permissions;
     } catch (error) {
       const duration = Date.now() - startTime;
       PerformanceStats.trackQuery('getUserPermissions_DB_error', duration);

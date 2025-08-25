@@ -1,43 +1,15 @@
 [
   {
-    "id": "action_1756145413883_kv1rz6p4j",
-    "timestamp": "2025-08-25T18:10:13.883Z",
-    "level": "info",
-    "message": "Yuri Francis executou: Concluir exportação (uP-Kan-Export-2025-08-25.xlsx)",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
-    "userName": "Yuri Francis",
-    "action": "Concluir exportação (uP-Kan-Export-2025-08-25.xlsx)",
-    "status": "success",
-    "errorDetails": null,
-    "duration": 86
-  },
-  {
-    "id": "action_1756145409692_j6oc27r2b",
-    "timestamp": "2025-08-25T18:10:09.692Z",
-    "level": "info",
-    "message": "Yuri Francis executou: Iniciar exportação (excel_export)",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
-    "userName": "Yuri Francis",
-    "action": "Iniciar exportação (excel_export)",
-    "status": "success",
-    "errorDetails": null,
-    "duration": 97
-  },
-  {
-    "id": "log_1756145021825_i0ez2r5r3",
-    "timestamp": "2025-08-25T18:03:41.825Z",
+    "id": "log_1756147003103_eswf5o2wv",
+    "timestamp": "2025-08-25T18:36:43.103Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756145018735_x1n1hcryr",
-    "timestamp": "2025-08-25T18:03:38.735Z",
+    "id": "log_1756147001917_9g7wjvf15",
+    "timestamp": "2025-08-25T18:36:41.917Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

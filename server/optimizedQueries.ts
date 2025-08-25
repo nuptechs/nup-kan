@@ -21,7 +21,7 @@ export class OptimizedQueries {
     const cached = await cache.get(cacheKey);
     if (cached) {
       console.log("🚀 [OPT-QUERY] Permissões do cache ultra-rápido");
-      return cached || [];
+      return cached;
     }
 
     console.log("🔍 [OPT-QUERY] Executando query otimizada de permissões");
@@ -85,7 +85,7 @@ export class OptimizedQueries {
 
     console.log("🔍 [OPT-QUERY] Executando query otimizada de boards");
     
-    let query = db
+    const baseQuery = db
       .select({
         id: boards.id,
         name: boards.name,
@@ -99,14 +99,18 @@ export class OptimizedQueries {
       .from(boards)
       .orderBy(desc(boards.createdAt));
 
-    if (limit) {
-      query = query.limit(limit);
-    }
-    if (offset) {
-      query = query.offset(offset);
+    let finalQuery;
+    if (limit && offset) {
+      finalQuery = baseQuery.limit(limit).offset(offset);
+    } else if (limit) {
+      finalQuery = baseQuery.limit(limit);
+    } else if (offset) {
+      finalQuery = baseQuery.offset(offset);
+    } else {
+      finalQuery = baseQuery;
     }
 
-    const result = await query;
+    const result = await finalQuery;
     await cache.set(cacheKey, result, TTL.SHORT);
     return result;
   }
