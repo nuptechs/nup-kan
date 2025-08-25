@@ -41,6 +41,12 @@ function Router() {
         </ProtectedRoute>
       </Route>
       
+      <Route path="/dashboard">
+        <ProtectedRoute>
+          <BoardSelection />
+        </ProtectedRoute>
+      </Route>
+      
       <Route path="/kanban/:boardId">
         <ProtectedRoute>
           <KanbanPage />
