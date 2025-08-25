@@ -8,10 +8,27 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fira+Code:wght@300..700&family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400..700;1,400..700&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Outfit:wght@100..900&family=Oxanium:wght@200..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     
-    <!-- INTERCEPTAÇÃO SUPREMA DO CONSOLE - EXECUTA ANTES DE TUDO -->
+    <!-- INTERCEPTAÇÃO TOTAL E MÁXIMA DO CONSOLE - NÍVEL MÁXIMO -->
     <script>
+      // INTERCEPTAÇÃO NO NÍVEL MAIS BAIXO POSSÍVEL
       (function() {
         'use strict';
+        
+        // Interceptar IMEDIATAMENTE ao carregar - ANTES DE QUALQUER COISA
+        const originalDefineProperty = Object.defineProperty;
+        const originalConsole = window.console;
+        
+        // Fazer backup dos métodos nativos IMEDIATAMENTE
+        const NATIVE_CONSOLE = {
+          log: originalConsole.log.bind(originalConsole),
+          warn: originalConsole.warn.bind(originalConsole),
+          error: originalConsole.error.bind(originalConsole),
+          info: originalConsole.info.bind(originalConsole),
+          debug: originalConsole.debug.bind(originalConsole)
+        };
+        
+        // Congelar para que não possam ser sobrescritos
+        Object.freeze(NATIVE_CONSOLE);
         
         // Lista completa de mensagens para suprimir
         const PATTERNS = [
@@ -65,45 +82,86 @@
         };
         
         let totalSuppressed = 0;
+        let lastWarningTime = 0;
+        const WARNING_THROTTLE = 100; // ms
         
         function createSuppressor(methodName, originalFn) {
           return function(...args) {
             const message = args[0];
+            const now = Date.now();
+            
             if (shouldSuppress(message)) {
               totalSuppressed++;
-              // Log a cada 50 supressões
-              if (totalSuppressed % 50 === 0 && totalSuppressed > 0) {
-                nativeConsole.log('%c🔇 ' + totalSuppressed + ' warnings de iframe/browser suprimidos', 'color: #ef4444; font-weight: bold; background: #fef2f2; padding: 2px 6px; border-radius: 4px;');
+              
+              // Throttle os logs de progresso para não spammar
+              if (now - lastWarningTime > WARNING_THROTTLE) {
+                if (totalSuppressed % 25 === 0 && totalSuppressed > 0) {
+                  NATIVE_CONSOLE.log('%c🔇 ' + totalSuppressed + ' warnings iframe suprimidos', 'color: #ef4444; font-weight: bold; background: #fef2f2; padding: 2px 6px; border-radius: 4px;');
+                  lastWarningTime = now;
+                }
               }
               return;
             }
             
             // Aplicar estilo aos logs importantes da aplicação
             if (typeof message === 'string' && (message.includes('🚀') || message.includes('📦') || message.includes('✅') || message.includes('🔄') || message.includes('🔐') || message.includes('🌐'))) {
-              nativeConsole.log('%c' + message, 'color: #10b981; font-weight: bold;', ...args.slice(1));
+              NATIVE_CONSOLE.log('%c' + message, 'color: #10b981; font-weight: bold;', ...args.slice(1));
             } else {
               originalFn.apply(console, args);
             }
           };
         }
         
-        // Substituir TODOS os métodos do console IMEDIATAMENTE
-        console.log = createSuppressor('log', nativeConsole.log);
-        console.warn = createSuppressor('warn', nativeConsole.warn);
-        console.error = createSuppressor('error', nativeConsole.error);
-        console.info = createSuppressor('info', nativeConsole.info);
-        console.debug = createSuppressor('debug', nativeConsole.debug);
+        // Substituir TODOS os métodos do console IMEDIATAMENTE E FORÇAR
+        const newConsole = {
+          log: createSuppressor('log', NATIVE_CONSOLE.log),
+          warn: createSuppressor('warn', NATIVE_CONSOLE.warn),
+          error: createSuppressor('error', NATIVE_CONSOLE.error),
+          info: createSuppressor('info', NATIVE_CONSOLE.info),
+          debug: createSuppressor('debug', NATIVE_CONSOLE.debug),
+          clear: originalConsole.clear.bind(originalConsole),
+          group: originalConsole.group.bind(originalConsole),
+          groupEnd: originalConsole.groupEnd.bind(originalConsole),
+          time: originalConsole.time.bind(originalConsole),
+          timeEnd: originalConsole.timeEnd.bind(originalConsole)
+        };
+        
+        // FORÇAR substituição usando defineProperty para que não possa ser sobrescrito
+        try {
+          Object.defineProperty(window, 'console', {
+            value: newConsole,
+            writable: false,
+            configurable: false
+          });
+        } catch (e) {
+          // Fallback se defineProperty falhar
+          window.console = newConsole;
+        }
+        
+        // Também aplicar ao console global
+        if (typeof global !== 'undefined') {
+          global.console = newConsole;
+        }
         
         // Funções globais úteis
         window.getSuppressionStats = function() {
-          nativeConsole.log('%c📊 ESTATÍSTICAS DE SUPRESSÃO', 'color: #3b82f6; font-weight: bold; font-size: 16px; background: #eff6ff; padding: 4px 8px; border-radius: 6px;');
-          nativeConsole.log('%c Total de warnings suprimidos: ' + totalSuppressed, 'color: #059669; font-weight: bold; font-size: 14px;');
+          NATIVE_CONSOLE.log('%c📊 ESTATÍSTICAS DE SUPRESSÃO', 'color: #3b82f6; font-weight: bold; font-size: 16px; background: #eff6ff; padding: 4px 8px; border-radius: 6px;');
+          NATIVE_CONSOLE.log('%c Total de warnings suprimidos: ' + totalSuppressed, 'color: #059669; font-weight: bold; font-size: 14px;');
+          NATIVE_CONSOLE.log('%c Taxa de supressão ativa desde o carregamento', 'color: #6b7280; font-style: italic;');
           return totalSuppressed;
         };
         
         window.clearConsole = function() {
           console.clear();
-          nativeConsole.log('%c🧹 Console limpo! Suprimidos: ' + totalSuppressed, 'color: #22c55e; font-weight: bold; font-size: 14px; background: #f0fdf4; padding: 3px 8px; border-radius: 5px;');
+          NATIVE_CONSOLE.log('%c🧹 Console limpo! Suprimidos: ' + totalSuppressed, 'color: #22c55e; font-weight: bold; font-size: 14px; background: #f0fdf4; padding: 3px 8px; border-radius: 5px;');
+        };
+        
+        // Função para testar se a supressão está funcionando
+        window.testSuppression = function() {
+          NATIVE_CONSOLE.log('%c🧪 TESTE DE SUPRESSÃO', 'color: #8b5cf6; font-weight: bold; font-size: 14px;');
+          console.warn('Unrecognized feature: ambient-light-sensor'); // Deve ser suprimido
+          console.warn('Este warning deve aparecer'); // Deve aparecer
+          NATIVE_CONSOLE.log('%c Se você vê apenas este teste e não o warning anterior, a supressão está funcionando!', 'color: #059669;');
         };
         
         // Interceptar erros de baixo nível
@@ -137,11 +195,61 @@
         });
         
         // Log inicial
-        nativeConsole.log('%c🛡️ PROTEÇÃO DE CONSOLE ATIVADA', 'color: #3b82f6; font-weight: bold; font-size: 14px; background: #eff6ff; padding: 3px 8px; border-radius: 5px;');
-        nativeConsole.log('%c Warnings de iframe/browser serão automaticamente suprimidos', 'color: #6b7280; font-style: italic;');
-        nativeConsole.log('%c Use Ctrl+Shift+S para ver estatísticas | Ctrl+L para limpar', 'color: #6b7280; font-style: italic;');
+        NATIVE_CONSOLE.log('%c🛡️ PROTEÇÃO MÁXIMA DE CONSOLE ATIVADA', 'color: #3b82f6; font-weight: bold; font-size: 14px; background: #eff6ff; padding: 3px 8px; border-radius: 5px;');
+        NATIVE_CONSOLE.log('%c Console protegido com defineProperty - interceptação forçada', 'color: #6b7280; font-style: italic;');
+        NATIVE_CONSOLE.log('%c Ctrl+Shift+S: estatísticas | Ctrl+L: limpar | window.testSuppression(): teste', 'color: #6b7280; font-style: italic;');
+        
+        // Interceptar qualquer tentativa de redefinir o console
+        const originalDefinePropertyOnWindow = Object.defineProperty;
+        Object.defineProperty = function(obj, prop, descriptor) {
+          if (obj === window && prop === 'console') {
+            NATIVE_CONSOLE.log('%c⚠️ Tentativa de redefinir console bloqueada!', 'color: #f59e0b; font-weight: bold;');
+            return; // Bloquear redefinições do console
+          }
+          return originalDefinePropertyOnWindow.call(this, obj, prop, descriptor);
+        };
+        
+        // Auto-teste inicial
+        setTimeout(() => {
+          window.testSuppression();
+        }, 1000);
         
       })();
+      
+      // CAMADA EXTRA: Interceptar no nível do document também
+      document.addEventListener('DOMContentLoaded', function() {
+        // Verificar se algum iframe está sendo criado e aplicar a mesma proteção
+        const observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            mutation.addedNodes.forEach(function(node) {
+              if (node.tagName === 'IFRAME') {
+                try {
+                  // Tentar aplicar a mesma proteção ao iframe
+                  const iframeWindow = node.contentWindow;
+                  if (iframeWindow && iframeWindow.console) {
+                    // Aplicar mesma interceptação se possível
+                    const originalIframeWarn = iframeWindow.console.warn;
+                    iframeWindow.console.warn = function(...args) {
+                      const message = args[0];
+                      if (typeof message === 'string' && message.includes('Unrecognized feature:')) {
+                        return; // Suprimir
+                      }
+                      originalIframeWarn.apply(iframeWindow.console, args);
+                    };
+                  }
+                } catch (e) {
+                  // Ignorar se não conseguir acessar o iframe (cross-origin)
+                }
+              }
+            });
+          });
+        });
+        
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+      });
     </script>
   </head>
   <body>

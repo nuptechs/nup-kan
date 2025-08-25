@@ -1,5 +1,33 @@
 [
   {
+    "id": "action_1756145413883_kv1rz6p4j",
+    "timestamp": "2025-08-25T18:10:13.883Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Concluir exportação (uP-Kan-Export-2025-08-25.xlsx)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Concluir exportação (uP-Kan-Export-2025-08-25.xlsx)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 86
+  },
+  {
+    "id": "action_1756145409692_j6oc27r2b",
+    "timestamp": "2025-08-25T18:10:09.692Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Iniciar exportação (excel_export)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Iniciar exportação (excel_export)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 97
+  },
+  {
     "id": "log_1756145021825_i0ez2r5r3",
     "timestamp": "2025-08-25T18:03:41.825Z",
     "level": "warn",
