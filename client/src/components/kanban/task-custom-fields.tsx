@@ -98,13 +98,13 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
       if (existingValue) {
         // Atualizar valor existente
         return apiRequest("PATCH", `/api/tasks/${taskId}/custom-values/${existingValue.id}`, {
-          value: value || '',
+          value: value === 'none' ? '' : (value || ''),
         });
       } else {
         // Criar novo valor
         return apiRequest("POST", `/api/tasks/${taskId}/custom-values`, {
           customFieldId: fieldId,
-          value: value || '',
+          value: value === 'none' ? '' : (value || ''),
         });
       }
     },
@@ -131,13 +131,16 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
   const handleFieldBlur = (fieldId: string, value: string) => {
     // Auto-salvar quando o campo perde foco
     const currentValue = existingValues.find(v => v.customFieldId === fieldId)?.value || '';
-    if (value !== currentValue) {
+    const normalizedValue = value === 'none' ? '' : value;
+    if (normalizedValue !== currentValue) {
       saveValueMutation.mutate({ fieldId, value });
     }
   };
 
   const renderFieldInput = (field: CustomField) => {
-    const value = fieldValues[field.id] || '';
+    const storedValue = fieldValues[field.id] || (existingValues.find(v => v.customFieldId === field.id)?.value || '');
+    // Para campos select, converter string vazia para 'none' para evitar erro do SelectItem
+    const value = field.type === 'select' && storedValue === '' ? 'none' : storedValue;
     const Icon = FIELD_TYPE_ICONS[field.type] || Type;
     const isRequired = field.required === "true";
 
@@ -236,7 +239,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
                 <SelectValue placeholder={`Selecione ${field.label.toLowerCase()}`} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nenhum</SelectItem>
+                <SelectItem value="none">Nenhum</SelectItem>
                 {field.options?.map((option) => (
                   <SelectItem key={option} value={option}>
                     {option}
