@@ -11,6 +11,7 @@ import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 import { PermissionSyncService } from "./permissionSync";
 import { authenticateUser, requirePermissions, requireAdmin, optionalAuth, type AuthenticatedRequest } from "./middleware/authMiddleware";
 import { OptimizedQueries, PerformanceStats } from "./optimizedQueries";
+import { cache } from "./cache";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes - Protegidas com permissões
@@ -440,22 +441,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { boardId } = req.query;
       
-      // 🚀 USAR ANALYTICS ULTRA-OTIMIZADOS
+      console.log("🚀 [ANALYTICS] Usando queries ultra-otimizadas");
+      const startTime = Date.now();
+      
+      // 🔥 ANALYTICS DIRETO DO CACHE
       const analytics = await OptimizedQueries.getAnalyticsOptimized();
       
-      // Dados adicionais se necessário
-      let tasks = [];
-      let columns = [];
-      let users = [];
-      
-      // Só buscar dados detalhados se pedidos
-      if (req.query.detailed === 'true') {
-        [tasks, columns, users] = await Promise.all([
-          storage.getTasks(),
-          storage.getColumns(), 
-          storage.getUsers()
-        ]);
-      }
+      const duration = Date.now() - startTime;
+      console.log(`🚀 [ANALYTICS] Processado em ${duration}ms (otimizado)`);
       
       // Filter by boardId if provided
       if (boardId && typeof boardId === 'string') {

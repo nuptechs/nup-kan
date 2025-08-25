@@ -1929,42 +1929,25 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // User Permissions methods for DatabaseStorage
+  // 🚀 OPTIMIZED: User Permissions para DatabaseStorage
   async getUserPermissions(userId: string): Promise<Permission[]> {
+    const startTime = Date.now();
     try {
-      const user = await this.getUser(userId);
-      console.log("🔍 [SECURITY] Buscando permissões para usuário:", user?.name || "Unknown");
+      // 🚀 USAR QUERY ULTRA-OTIMIZADA COM CACHE
+      const result = await OptimizedQueries.getUserPermissionsOptimized(userId);
       
-      // Se não encontrar o usuário, retorna array vazio
-      if (!user) {
-        console.log("❌ [SECURITY] Usuário não encontrado");
+      if (result.length === 0) {
+        console.log("⚠️ [SECURITY] Usuário sem permissões ou não encontrado");
         return [];
       }
 
-      // Se usuário não tiver perfil, retorna array vazio
-      if (!user.profileId) {
-        console.log("⚠️ [SECURITY] Usuário sem perfil atribuído - acesso negado");
-        return [];
-      }
-      
-      console.log("👤 [SECURITY] Usuário tem perfil ID:", user.profileId);
-      
-      // Buscar permissões específicas do perfil do usuário
-      const profilePermissions = await this.getProfilePermissions(user.profileId);
-      console.log(`🔑 [SECURITY] ${profilePermissions.length} relações de permissão encontradas`);
-      
-      // Buscar os dados completos das permissões
-      const permissions: Permission[] = [];
-      for (const pp of profilePermissions) {
-        const permission = await this.getPermission(pp.permissionId);
-        if (permission) {
-          permissions.push(permission);
-        }
-      }
-      
-      console.log(`🔑 [SECURITY] ${permissions.length} permissões completas carregadas:`, permissions.map(p => p.name));
-      return permissions;
+      const duration = Date.now() - startTime;
+      PerformanceStats.trackQuery('getUserPermissions_DB', duration);
+      console.log(`🚀 [DB-PERF] ${result.length} permissões em ${duration}ms (OTIMIZADO)`);
+      return result;
     } catch (error) {
+      const duration = Date.now() - startTime;
+      PerformanceStats.trackQuery('getUserPermissions_DB_error', duration);
       console.error("❌ [SECURITY] Erro em getUserPermissions:", error);
       return [];
     }
