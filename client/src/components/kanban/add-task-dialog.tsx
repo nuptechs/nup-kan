@@ -120,15 +120,20 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
       
       return task;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       // Use same endpoint logic as KanbanBoard
       const tasksEndpoint = boardId ? `/api/boards/${boardId}/tasks` : "/api/tasks";
       const columnsEndpoint = boardId ? `/api/boards/${boardId}/columns` : "/api/columns";
       
-      // Invalidate with exact same queryKeys as KanbanBoard uses
-      queryClient.invalidateQueries({ queryKey: [tasksEndpoint] });
-      queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
-      queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+      // 🔄 FORÇAR INVALIDAÇÃO COMPLETA - Corrigir problema de cache
+      await queryClient.invalidateQueries({ queryKey: [tasksEndpoint] });
+      await queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
+      
+      // 🚀 FORÇAR REFETCH IMEDIATO das tasks
+      await queryClient.refetchQueries({ queryKey: [tasksEndpoint] });
+      
+      console.log("🔄 [CACHE] Cache invalidado para:", { tasksEndpoint, columnsEndpoint });
       
       toast({
         title: "Sucesso",
