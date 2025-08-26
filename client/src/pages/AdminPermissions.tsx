@@ -1,4 +1,4 @@
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { PermissionsManager } from "@/components/admin/PermissionsManager";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Shield } from "lucide-react";
@@ -8,6 +8,7 @@ import type { User, Team, Profile } from "@shared/schema";
 
 export default function AdminPermissions() {
   const params = useParams();
+  const [, setLocation] = useLocation();
   const targetType = params.type as "user" | "team" | "profile";
   const targetId = params.id;
 
@@ -45,7 +46,19 @@ export default function AdminPermissions() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" onClick={() => window.history.back()}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => {
+              // Try browser back first, fallback to dashboard
+              if (window.history.length > 1) {
+                window.history.back();
+              } else {
+                setLocation("/dashboard");
+              }
+            }}
+            data-testid="button-back-permissions"
+          >
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div>

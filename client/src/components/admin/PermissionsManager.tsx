@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Shield, Users, User, Search, Settings2, Eye, FileText, Columns, UserCheck, Settings, RefreshCw, Activity, Tags, Grid, Download, Key, Database } from "lucide-react";
-import type { Permission, Profile, User as UserType, Team } from "@shared/schema";
+import type { Permission, Profile, User as UserType, Team, UserTeam, TeamProfile, ProfilePermission } from "@shared/schema";
 import { TeamManagementDialog } from "@/components/kanban/team-management-dialog";
 
 interface PermissionsByCategory {
