@@ -56,7 +56,14 @@ export default function SecurityDemoPage() {
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={() => window.history.back()}
+            onClick={() => {
+              // CONSISTÊNCIA: Usar a mesma lógica robusta
+              if (document.referrer && !document.referrer.includes('/security-demo')) {
+                window.history.back();
+              } else {
+                window.location.href = '/dashboard';
+              }
+            }}
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>

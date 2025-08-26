@@ -429,7 +429,14 @@ export default function PermissionsHub() {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => window.history.back()}
+            onClick={() => {
+              // CONSISTÊNCIA: Usar a mesma lógica robusta
+              if (document.referrer && !document.referrer.includes('/admin/permissions')) {
+                window.history.back();
+              } else {
+                window.location.href = '/dashboard';
+              }
+            }}
             className="mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />

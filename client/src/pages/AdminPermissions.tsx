@@ -50,19 +50,14 @@ export default function AdminPermissions() {
             variant="ghost" 
             size="icon" 
             onClick={() => {
-              // Smart navigation with timeout fallback
-              const initialLocation = window.location.href;
-              
-              // Try browser back
-              window.history.back();
-              
-              // If we're still on the same page after 100ms, redirect manually
-              setTimeout(() => {
-                if (window.location.href === initialLocation) {
-                  // No navigation occurred, redirect to dashboard
-                  setLocation("/dashboard");
-                }
-              }, 100);
+              // SOLUÇÃO ROBUSTA: Verificar documento.referrer para histórico real
+              if (document.referrer && !document.referrer.includes('/admin/permissions')) {
+                // Há uma página anterior válida
+                window.history.back();
+              } else {
+                // Sem histórico válido (refresh/acesso direto), ir para dashboard
+                setLocation("/dashboard");
+              }
             }}
             data-testid="button-back-permissions"
           >
