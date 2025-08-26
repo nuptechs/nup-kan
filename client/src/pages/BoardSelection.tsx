@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Grid, Settings, Edit, Trash2, MoreVertical, User, Eye } from "lucide-react";
+import { Plus, Grid, Edit, Trash2, MoreVertical, User, Eye } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
@@ -399,7 +399,6 @@ export default function BoardSelection() {
                       <span>
                         Criado em {new Date(board.createdAt || new Date()).toLocaleDateString("pt-BR")}
                       </span>
-                      <Settings className="w-4 h-4" />
                     </div>
                   </div>
                 </Link>
