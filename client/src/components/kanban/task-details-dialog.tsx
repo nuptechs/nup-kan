@@ -242,7 +242,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-semibold" data-testid="dialog-title">
-              {isEditing ? "Editar Tarefa" : "Detalhes da Tarefa"}
+              {isEditing ? "Editar Tarefa" : task.title}
             </DialogTitle>
             <div className="flex items-center space-x-2">
               {!isEditing && (
@@ -273,9 +273,11 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
               </Button>
             </div>
           </div>
-          <DialogDescription>
-            {isEditing ? "Modifique as informações da tarefa conforme necessário." : "Visualize os detalhes completos desta tarefa."}
-          </DialogDescription>
+          {isEditing && (
+            <DialogDescription>
+              Modifique as informações da tarefa conforme necessário.
+            </DialogDescription>
+          )}
         </DialogHeader>
 
         {isEditing ? (
