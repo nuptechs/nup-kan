@@ -264,10 +264,11 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Formulário para criar nova coluna */}
-          <div className="border rounded-lg p-4 space-y-4">
-            <h3 className="text-lg font-medium">Nova Coluna</h3>
-            <Form {...form}>
+          {/* Formulário para criar nova coluna - só mostra se não estiver editando uma coluna específica */}
+          {!externalEditingColumn && (
+            <div className="border rounded-lg p-4 space-y-4">
+              <h3 className="text-lg font-medium">Nova Coluna</h3>
+              <Form {...form}>
               <form onSubmit={form.handleSubmit(onCreateSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -341,11 +342,15 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
                 </Button>
               </form>
             </Form>
-          </div>
+            </div>
+          )}
 
           {/* Lista de colunas existentes */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Colunas Existentes</h3>
+            <h3 className="text-lg font-medium flex items-center gap-2">
+              <GripVertical className="w-4 h-4 text-gray-400" />
+              {externalEditingColumn ? 'Editando Coluna' : `Colunas Existentes (${columns.length})`}
+            </h3>
             
             {isLoading ? (
               <div className="text-center py-4 text-gray-500">
@@ -357,7 +362,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
               </div>
             ) : (
               <div className="space-y-3">
-                {sortedColumns.map((column, index) => (
+                {(externalEditingColumn ? [externalEditingColumn] : sortedColumns).map((column, index) => (
                   <div
                     key={column.id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
