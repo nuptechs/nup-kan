@@ -85,9 +85,32 @@ export function KanbanColumn({
         {/* Header */}
         <div className="p-4 pb-2 group">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-medium text-gray-800 flex items-center" data-testid={`column-title-${column.id}`}>
+            <h2 className="font-medium text-gray-800 flex items-center relative" data-testid={`column-title-${column.id}`}>
               <span className={cn("w-2 h-2 rounded-full mr-2", getColumnColorClasses(column.color))}></span>
               {column.title}
+              
+              {/* Linha L saindo do título */}
+              {!isReadOnly && (
+                <>
+                  {/* Linha vertical saindo de baixo do título */}
+                  <div className="absolute left-3 top-full w-px h-6 bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  
+                  {/* Linha horizontal do L */}
+                  <div className="absolute left-3 top-full translate-y-6 w-12 h-px bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  
+                  {/* Botão + no final da linha */}
+                  <button
+                    onClick={() => {
+                      onAddTask?.(column.id);
+                    }}
+                    className="absolute left-14 top-full translate-y-5 w-5 h-5 bg-white border border-gray-200 hover:border-gray-300 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center group/add opacity-60 hover:opacity-100 shadow-sm z-10"
+                    data-testid={`button-add-task-column-${column.id}`}
+                    title="Adicionar nova tarefa"
+                  >
+                    <Plus className="w-2.5 h-2.5 group-hover/add:scale-110 transition-transform duration-200" />
+                  </button>
+                </>
+              )}
             </h2>
             <div className="flex items-center space-x-1">
               <span
@@ -131,28 +154,6 @@ export function KanbanColumn({
             </div>
           </div>
           
-          {/* Botão sutil com linha L */}
-          {!isReadOnly && (
-            <div className="relative flex justify-end items-center mb-2 pr-4">
-              {/* Linha horizontal saindo da coluna */}
-              <div className="absolute right-0 top-1/2 w-8 h-px bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-              
-              {/* Linha vertical do L */}
-              <div className="absolute right-8 top-1/2 w-px h-4 bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200 transform -translate-y-2"></div>
-              
-              {/* Botão + pequeno */}
-              <button
-                onClick={() => {
-                  onAddTask?.(column.id);
-                }}
-                className="relative z-10 w-6 h-6 bg-white border border-gray-200 hover:border-gray-300 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center group/add opacity-60 hover:opacity-100 shadow-sm"
-                data-testid={`button-add-task-column-${column.id}`}
-                title="Adicionar nova tarefa"
-              >
-                <Plus className="w-3 h-3 group-hover/add:scale-110 transition-transform duration-200" />
-              </button>
-            </div>
-          )}
           
           {/* WIP Progress */}
           {column.wipLimit && (
