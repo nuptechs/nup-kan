@@ -238,20 +238,17 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
-        className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto scrollbar-hide relative [&>button]:hidden" 
-        data-testid="task-details-dialog"
-      >
-        {/* Botões de ação posicionados no canto superior direito */}
-        <div className="absolute -top-2 -right-2 z-[60] flex flex-col gap-1">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden [&>button]:hidden" data-testid="task-details-dialog">
+        {/* Botões de ação fixos no canto superior esquerdo */}
+        <div className="absolute top-4 left-4 z-50 flex flex-col gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="w-8 h-8 p-0 text-gray-500 hover:text-gray-700 bg-white/90 hover:bg-white shadow-sm border border-gray-200 rounded-full"
+            className="w-7 h-7 p-0 text-gray-400 hover:text-gray-600 bg-white/80 hover:bg-white shadow-sm rounded-full transition-all opacity-75 hover:opacity-100"
             data-testid="button-close-task"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </Button>
           {!isEditing && (
             <Button
@@ -261,25 +258,28 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                 e.stopPropagation();
                 setIsEditing(true);
               }}
-              className="w-8 h-8 p-0 text-gray-500 hover:text-blue-600 bg-white/90 hover:bg-white shadow-sm border border-gray-200 rounded-full"
+              className="w-7 h-7 p-0 text-gray-400 hover:text-blue-500 bg-white/80 hover:bg-white shadow-sm rounded-full transition-all opacity-75 hover:opacity-100"
               data-testid="button-edit-task"
             >
-              <Edit className="w-4 h-4" />
+              <Edit className="w-3.5 h-3.5" />
             </Button>
           )}
           <Button
             variant="ghost"
             size="sm"
-            className="w-8 h-8 p-0 text-gray-500 hover:text-red-600 bg-white/90 hover:bg-white shadow-sm border border-gray-200 rounded-full"
+            className="w-7 h-7 p-0 text-gray-400 hover:text-red-500 bg-white/80 hover:bg-white shadow-sm rounded-full transition-all opacity-75 hover:opacity-100"
             data-testid="button-delete-task"
             onClick={(e) => {
               e.stopPropagation();
               setIsDeleteDialogOpen(true);
             }}
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           </Button>
         </div>
+
+        {/* Conteúdo scrollável */}
+        <div className="overflow-y-auto max-h-[calc(80vh-2rem)] scrollbar-hide">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold pr-16" data-testid="dialog-title">
               {isEditing ? "Editar Tarefa" : task.title}
@@ -572,6 +572,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
             </div>
           </div>
         )}
+        </div>
       </DialogContent>
 
       {/* Delete Confirmation Dialog - Outside the main dialog */}
