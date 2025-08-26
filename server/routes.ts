@@ -547,8 +547,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.patch("/api/tasks/reorder", 
+    (req, res, next) => {
+      console.log("🔍 [MIDDLEWARE-1] Request received at /api/tasks/reorder");
+      console.log("🔍 [MIDDLEWARE-1] Method:", req.method);
+      console.log("🔍 [MIDDLEWARE-1] Headers:", req.headers);
+      console.log("🔍 [MIDDLEWARE-1] Body:", req.body);
+      next();
+    },
     AuthMiddleware.requireAuth,
+    (req, res, next) => {
+      console.log("🔍 [MIDDLEWARE-2] After requireAuth");
+      next();
+    },
     AuthMiddleware.requirePermissions("Editar Tarefas"), 
+    (req, res, next) => {
+      console.log("🔍 [MIDDLEWARE-3] After requirePermissions");
+      next();
+    },
     async (req, res) => {
     try {
       console.log("🔍 [ROUTE] Received reorder request - full body:", JSON.stringify(req.body, null, 2));
