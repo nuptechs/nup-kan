@@ -183,9 +183,11 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
   const reorderTasksMutation = useMutation({
     mutationFn: async (reorderedTasks: { id: string; position: number }[]) => {
+      console.log("🔄 [FRONTEND] Sending reorder request:", reorderedTasks);
       const response = await apiRequest("PATCH", "/api/tasks/reorder", {
         tasks: reorderedTasks
       });
+      console.log("✅ [FRONTEND] Reorder response:", response);
       return response;
     },
     onMutate: async (reorderedTasks: { id: string; position: number }[]) => {

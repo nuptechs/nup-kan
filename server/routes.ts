@@ -551,20 +551,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requirePermissions("Editar Tarefas"), 
     async (req, res) => {
     try {
+      console.log("🔍 [ROUTE] Received reorder request - full body:", JSON.stringify(req.body, null, 2));
+      
       const reorderedTasks = req.body.tasks;
+      console.log("🔍 [ROUTE] Extracted tasks:", reorderedTasks);
+      
       // Validate that tasks array exists and is not empty
       if (!reorderedTasks || !Array.isArray(reorderedTasks) || reorderedTasks.length === 0) {
+        console.log("❌ [ROUTE] Invalid tasks array validation failed");
         return res.status(400).json({ message: "Invalid tasks array" });
       }
       
       // Validate each task has required fields
       for (const task of reorderedTasks) {
         if (!task.id || typeof task.position !== 'number') {
+          console.log("❌ [ROUTE] Invalid task data:", task);
           return res.status(400).json({ message: "Invalid task data" });
         }
       }
       
+      console.log("✅ [ROUTE] All validations passed, calling storage.reorderTasks");
+      
       await storage.reorderTasks(reorderedTasks);
+      
+      console.log("✅ [ROUTE] Storage reorder completed successfully");
       
       // Force cache invalidation to ensure fresh data
       cache.delete(CacheKeys.TASKS);
