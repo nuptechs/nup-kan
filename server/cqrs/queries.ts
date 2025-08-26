@@ -57,6 +57,8 @@ export class QueryHandlers {
 
   // 📋 QUERY: Buscar Tasks de um Board (MongoDB First)
   static async getBoardTasks(boardId: string, limit: number = 100, offset: number = 0) {
+    const startTime = Date.now();
+    
     try {
       if (mongoStore.collections?.tasksOptimized) {
         const tasksData = await mongoStore.collections.tasksOptimized

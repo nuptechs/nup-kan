@@ -134,10 +134,10 @@ export const CacheKeys = {
   ALL_BOARDS: 'boards:all',
 } as const;
 
-// TTL constants (Time To Live em segundos)
+// TTL constants (Time To Live em segundos) - OTIMIZADO PARA PERFORMANCE
 export const TTL = {
-  SHORT: 60,      // 1 minuto - dados que mudam frequentemente
-  MEDIUM: 300,    // 5 minutos - dados moderadamente estáveis  
-  LONG: 1800,     // 30 minutos - dados muito estáveis
-  VERY_LONG: 7200 // 2 horas - dados quase estáticos
+  SHORT: 300,     // 5 minutos - dados que mudam frequentemente
+  MEDIUM: 1800,   // 30 minutos - dados moderadamente estáveis  
+  LONG: 7200,     // 2 horas - dados muito estáveis
+  VERY_LONG: 14400 // 4 horas - dados quase estáticos
 } as const;

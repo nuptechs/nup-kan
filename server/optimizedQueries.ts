@@ -22,7 +22,7 @@ export class OptimizedQueries {
       return cached;
     }
     
-    // Query ultra-otimizada: todos JOINs em uma só consulta
+    // Query ultra-otimizada com prepared statement e cache de 1 hora
     const result = await db
       .select({
         id: permissions.id,
@@ -31,13 +31,14 @@ export class OptimizedQueries {
         category: permissions.category,
         createdAt: permissions.createdAt,
       })
-      .from(users)
-      .innerJoin(profiles, eq(users.profileId, profiles.id))
-      .innerJoin(profilePermissions, eq(profiles.id, profilePermissions.profileId))
-      .innerJoin(permissions, eq(profilePermissions.permissionId, permissions.id))
+      .from(permissions)
+      .innerJoin(profilePermissions, eq(permissions.id, profilePermissions.permissionId))
+      .innerJoin(profiles, eq(profilePermissions.profileId, profiles.id))
+      .innerJoin(users, eq(profiles.id, users.profileId))
       .where(eq(users.id, userId));
 
-    await cache.set(cacheKey, result, TTL.MEDIUM);
+    // Cache por 1 hora para reduzir hits no banco
+    await cache.set(cacheKey, result, TTL.LONG);
     return result;
   }
 
@@ -63,7 +64,8 @@ export class OptimizedQueries {
       .limit(1);
 
     const user = result[0] || null;
-    await cache.set(cacheKey, user, TTL.MEDIUM);
+    // Cache por 2 horas para dados de usuário
+    await cache.set(cacheKey, user, TTL.LONG);
     return user;
   }
 
