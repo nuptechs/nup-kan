@@ -334,25 +334,44 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
   // Enhanced search function - title and assignee names (both legacy and new structure)
   const filteredTasks = useMemo(() => {
+    console.log('🔍 [SEARCH] Filtering tasks...', {
+      searchQuery, 
+      tasksCount: tasks.length,
+      allAssignees: Object.keys(allAssignees).length
+    });
+    
     if (!searchQuery.trim()) return tasks;
     
     const query = searchQuery.toLowerCase().trim();
+    console.log('🔍 [SEARCH] Query:', query);
     
-    return tasks.filter((task) => {
+    const filtered = tasks.filter((task) => {
       // Search in title
-      if (task.title?.toLowerCase().includes(query)) return true;
+      if (task.title?.toLowerCase().includes(query)) {
+        console.log('✅ [SEARCH] Found match in title:', task.title);
+        return true;
+      }
       
       // Search in legacy assignee name field
-      if (task.assigneeName?.toLowerCase().includes(query)) return true;
+      if (task.assigneeName?.toLowerCase().includes(query)) {
+        console.log('✅ [SEARCH] Found match in assigneeName:', task.assigneeName);
+        return true;
+      }
       
       // Search in new assignees structure
       const taskAssignees = allAssignees[task.id] || [];
       if (taskAssignees.some(assignee => 
         assignee.user.name?.toLowerCase().includes(query)
-      )) return true;
+      )) {
+        console.log('✅ [SEARCH] Found match in assignees:', taskAssignees.map(a => a.user.name));
+        return true;
+      }
       
       return false;
     });
+    
+    console.log('🔍 [SEARCH] Filtered results:', filtered.length, 'from', tasks.length);
+    return filtered;
   }, [tasks, searchQuery, allAssignees]);
 
   const getTasksByColumn = (columnId: string) => {
