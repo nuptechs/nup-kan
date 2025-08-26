@@ -43,6 +43,7 @@ export function TagSelector({ selectedTags, onTagsChange }: TagSelectorProps) {
       toast({
         title: "Sucesso",
         description: "Tag criada com sucesso!",
+        duration: 1000,
       });
     },
     onError: () => {

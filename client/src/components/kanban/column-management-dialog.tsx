@@ -88,7 +88,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
       toast({
         title: "Sucesso",
         description: "Coluna criada com sucesso!",
-        duration: 3000,
+        duration: 1000,
       });
       form.reset();
       onClose(); // Fecha a modal automaticamente
@@ -98,6 +98,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
         title: "Erro",
         description: "Falha ao criar coluna. Tente novamente.",
         variant: "destructive",
+        duration: 1000,
       });
     },
   });
@@ -112,7 +113,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
       toast({
         title: "Sucesso",
         description: "Coluna atualizada com sucesso!",
-        duration: 3000,
+        duration: 1000,
       });
       setEditingColumn(null);
       editForm.reset();

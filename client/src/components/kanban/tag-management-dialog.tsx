@@ -57,6 +57,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
       toast({
         title: "Sucesso",
         description: "Tag criada com sucesso!",
+        duration: 1000,
       });
       form.reset();
     },
@@ -79,6 +80,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
       toast({
         title: "Sucesso",
         description: "Tag atualizada com sucesso!",
+        duration: 1000,
       });
       setEditingTag(null);
       editForm.reset();
