@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
   const [editingColumn, setEditingColumn] = useState<Column | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const { data: columns = [], isLoading } = useQuery<Column[]>({
     queryKey: [`/api/boards/${boardId}/columns`],
@@ -67,6 +68,11 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
         color: externalEditingColumn.color,
         boardId: externalEditingColumn.boardId,
       });
+      // Focus no campo title após um pequeno delay para garantir que o DOM foi atualizado
+      setTimeout(() => {
+        titleInputRef.current?.focus();
+        titleInputRef.current?.select();
+      }, 100);
     } else if (!isOpen) {
       setEditingColumn(null);
       editForm.reset();
@@ -253,15 +259,17 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto" data-testid="column-management-dialog">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold flex items-center gap-2">
-            <Columns className="w-5 h-5" />
-            Colunas
-          </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Gerencie colunas do quadro.
-          </DialogDescription>
-        </DialogHeader>
+        {!externalEditingColumn && (
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+              <Columns className="w-5 h-5" />
+              Colunas
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Gerencie colunas do quadro.
+            </DialogDescription>
+          </DialogHeader>
+        )}
 
         <div className="space-y-6">
           {/* Formulário para criar nova coluna - só mostra se não estiver editando uma coluna específica */}
@@ -382,6 +390,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
                                 <FormControl>
                                   <Input
                                     {...field}
+                                    ref={titleInputRef}
                                     className="h-8"
                                     placeholder="Título"
                                     data-testid={`input-edit-column-title-${column.id}`}
