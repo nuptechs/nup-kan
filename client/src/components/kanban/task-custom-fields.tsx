@@ -324,13 +324,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
   }
 
   if (customFields.length === 0) {
-    return (
-      <div className="space-y-4">
-        <div className="text-sm text-gray-500">
-          Nenhum campo personalizado configurado para este board.
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
