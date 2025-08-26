@@ -169,32 +169,20 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
 
         {/* Cabeçalho fixo */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 pb-3 mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {form.watch("title") || "Nova Tarefa"}
-          </h2>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700">Título</label>
+            <Input
+              {...form.register("title")}
+              className="text-xl font-semibold border-none p-0 focus:ring-0 focus:border-none shadow-none bg-blue-50/40 hover:bg-blue-50/60 rounded-md px-2 transition-colors"
+              placeholder="Digite o título da tarefa"
+              data-testid="input-header-title"
+            />
+          </div>
         </div>
 
         <div className="flex-1 overflow-auto">
           <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">Título</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Título"
-                      {...field}
-                      className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
-                      data-testid="input-title"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}
