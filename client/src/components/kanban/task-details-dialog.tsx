@@ -248,7 +248,10 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setIsEditing(true)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditing(true);
+                  }}
                   className="p-2 text-gray-400 hover:text-gray-600"
                   data-testid="button-edit-task"
                 >
@@ -260,7 +263,10 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                 size="sm"
                 className="p-2 text-red-400 hover:text-red-600"
                 data-testid="button-delete-task"
-                onClick={() => setIsDeleteDialogOpen(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsDeleteDialogOpen(true);
+                }}
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
