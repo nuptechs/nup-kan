@@ -237,48 +237,58 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
   if (!task) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto scrollbar-hide" data-testid="task-details-dialog">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-semibold" data-testid="dialog-title">
+    <div className="relative">
+      {/* Botões de ação posicionados fora do modal */}
+      <div className="absolute top-4 right-4 z-50 flex flex-col space-y-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+          className="p-2 text-gray-400 hover:text-gray-600 bg-white shadow-md rounded-full"
+          data-testid="button-close-task"
+        >
+          <X className="w-4 h-4" />
+        </Button>
+        {!isEditing && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditing(true);
+            }}
+            className="p-2 text-gray-400 hover:text-gray-600 bg-white shadow-md rounded-full"
+            data-testid="button-edit-task"
+          >
+            <Edit className="w-4 h-4" />
+          </Button>
+        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="p-2 text-red-400 hover:text-red-600 bg-white shadow-md rounded-full"
+          data-testid="button-delete-task"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsDeleteDialogOpen(true);
+          }}
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto scrollbar-hide" data-testid="task-details-dialog">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold pr-16" data-testid="dialog-title">
               {isEditing ? "Editar Tarefa" : task.title}
             </DialogTitle>
-            <div className="flex items-center space-x-2">
-              {!isEditing && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsEditing(true);
-                  }}
-                  className="p-2 text-gray-400 hover:text-gray-600"
-                  data-testid="button-edit-task"
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="p-2 text-red-400 hover:text-red-600"
-                data-testid="button-delete-task"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsDeleteDialogOpen(true);
-                }}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-          {isEditing && (
-            <DialogDescription>
-              Modifique as informações da tarefa conforme necessário.
-            </DialogDescription>
-          )}
-        </DialogHeader>
+            {isEditing && (
+              <DialogDescription>
+                Modifique as informações da tarefa conforme necessário.
+              </DialogDescription>
+            )}
+          </DialogHeader>
 
         {isEditing ? (
           <Form {...form}>
@@ -563,6 +573,8 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         )}
       </DialogContent>
 
+      </Dialog>
+
       {/* Delete Confirmation Dialog - Outside the main dialog */}
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}
@@ -573,6 +585,6 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         }}
         isLoading={deleteTaskMutation.isPending}
       />
-    </Dialog>
+    </div>
   );
 }
