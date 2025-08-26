@@ -249,16 +249,27 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
           <div className="flex items-center justify-between">
             <div className="flex-1 pr-4">
               {isEditing ? (
-                <Input
-                  {...form.register("title")}
-                  className="text-xl font-semibold border-none p-0 focus:ring-0 focus:border-none shadow-none bg-transparent"
-                  placeholder="Digite o título da tarefa"
-                  data-testid="input-header-title"
-                />
+                <>
+                  <DialogTitle className="sr-only">Editar Tarefa</DialogTitle>
+                  <DialogDescription className="sr-only">
+                    Edite as informações da tarefa
+                  </DialogDescription>
+                  <Input
+                    {...form.register("title")}
+                    className="text-xl font-semibold border-none p-0 focus:ring-0 focus:border-none shadow-none bg-transparent"
+                    placeholder="Digite o título da tarefa"
+                    data-testid="input-header-title"
+                  />
+                </>
               ) : (
-                <DialogTitle className="text-xl font-semibold text-gray-900" data-testid="dialog-title">
-                  {task.title}
-                </DialogTitle>
+                <>
+                  <DialogTitle className="text-xl font-semibold text-gray-900" data-testid="dialog-title">
+                    {task.title}
+                  </DialogTitle>
+                  <DialogDescription className="sr-only">
+                    Detalhes da tarefa
+                  </DialogDescription>
+                </>
               )}
             </div>
             
@@ -309,6 +320,24 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         {isEditing ? (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Título</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Digite o título da tarefa"
+                        {...field}
+                        data-testid="input-edit-title"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="description"
