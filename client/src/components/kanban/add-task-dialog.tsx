@@ -159,8 +159,14 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] z-[9999]" data-testid="add-task-dialog">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[425px] z-[9999] relative" data-testid="add-task-dialog">
+        {/* Indicador de criação */}
+        <div className="absolute -top-1 left-2">
+          <span className="text-xs text-slate-500 font-medium">
+            Criando nova tarefa
+          </span>
+        </div>
+        <DialogHeader className="sr-only">
           <DialogTitle data-testid="dialog-title">Adicionar Nova Tarefa</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
             Preencha os campos para criar uma nova tarefa.
@@ -174,11 +180,12 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Título</FormLabel>
+                  <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">Título</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Título"
                       {...field}
+                      className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
                       data-testid="input-title"
                     />
                   </FormControl>
@@ -192,12 +199,13 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descrição</FormLabel>
+                  <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">Descrição</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Descrição (opcional)"
                       {...field}
                       value={field.value || ""}
+                      className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors resize-none"
                       data-testid="input-description"
                     />
                   </FormControl>
@@ -212,10 +220,13 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prioridade</FormLabel>
+                    <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">Prioridade</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger data-testid="select-priority">
+                        <SelectTrigger 
+                          className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                          data-testid="select-priority"
+                        >
                           <SelectValue placeholder="Prioridade" />
                         </SelectTrigger>
                       </FormControl>
@@ -235,10 +246,13 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Coluna</FormLabel>
+                    <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">Coluna</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger data-testid="select-status">
+                        <SelectTrigger 
+                          className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                          data-testid="select-status"
+                        >
                           <SelectValue placeholder="Coluna" />
                         </SelectTrigger>
                       </FormControl>
@@ -256,17 +270,21 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
               />
             </div>
 
-            <MultiUserSelector
-              selectedUserIds={form.watch("assigneeIds")}
-              onUserSelectionChange={(userIds) => {
-                form.setValue("assigneeIds", userIds);
-              }}
-            />
+            <div className="p-3 border border-blue-200 rounded-lg bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+              <MultiUserSelector
+                selectedUserIds={form.watch("assigneeIds")}
+                onUserSelectionChange={(userIds) => {
+                  form.setValue("assigneeIds", userIds);
+                }}
+              />
+            </div>
 
-            <TagSelector
-              selectedTags={form.watch("tags")}
-              onTagsChange={(tags) => form.setValue("tags", tags)}
-            />
+            <div className="p-3 border border-blue-200 rounded-lg bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+              <TagSelector
+                selectedTags={form.watch("tags")}
+                onTagsChange={(tags) => form.setValue("tags", tags)}
+              />
+            </div>
 
             {/* Custom Fields */}
             {customFields.length > 0 && (
@@ -340,6 +358,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                 type="button"
                 variant="outline"
                 onClick={onClose}
+                className="border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-colors"
                 data-testid="button-cancel"
               >
                 Cancelar
@@ -347,7 +366,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
               <Button
                 type="submit"
                 disabled={createTaskMutation.isPending}
-                className="bg-indigo-500 hover:bg-indigo-600"
+                className="bg-indigo-500 hover:bg-indigo-600 shadow-md hover:shadow-lg transition-all ring-2 ring-indigo-200"
                 data-testid="button-create-task"
               >
                 {createTaskMutation.isPending ? "Criando..." : "Criar Tarefa"}
