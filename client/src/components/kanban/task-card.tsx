@@ -8,8 +8,13 @@ import type { Task, TaskAssignee, User, Tag } from "@shared/schema";
 
 interface TaskCardProps {
   task: Task;
-  columnColor: string;
+  columnColor?: string;
   onTaskClick?: (task: Task) => void;
+  isDragging?: boolean;
+  onDragStart?: (e: React.DragEvent, task: Task) => void;
+  onDragEnd?: () => void;
+  isReadOnly?: boolean;
+  assignees?: (TaskAssignee & { user: User })[];
 }
 
 const getPriorityClasses = (priority: string) => {
@@ -109,7 +114,7 @@ function TaskAssignees({ taskId }: { taskId: string }) {
   );
 }
 
-export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
+export function TaskCard({ task, columnColor, onTaskClick, isDragging = false, onDragStart, onDragEnd, isReadOnly = false, assignees = [] }: TaskCardProps) {
   const isInProgress = task.status === "inprogress";
   const isReview = task.status === "review";
   const isDone = task.status === "done";
@@ -133,10 +138,23 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
       className={cn(
         "bg-white rounded-xl p-2 sm:p-3 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group border border-gray-100 min-w-0",
         (isInProgress || isReview) && `border-l-4 ${getColumnBorderClasses(columnColor)}`,
-        isDone && "opacity-80"
+        isDone && "opacity-80",
+        isDragging && "opacity-50 rotate-1 scale-105 shadow-xl",
+        !isReadOnly && "cursor-grab active:cursor-grabbing"
       )}
       data-testid={`card-${task.id}`}
       onClick={handleClick}
+      draggable={!isReadOnly}
+      onDragStart={(e) => {
+        if (!isReadOnly && onDragStart) {
+          onDragStart(e, task);
+        }
+      }}
+      onDragEnd={() => {
+        if (!isReadOnly && onDragEnd) {
+          onDragEnd();
+        }
+      }}
     >
       {/* Title and Priority */}
       <div className="flex items-start justify-between mb-2">

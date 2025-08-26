@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 import { KanbanColumn } from "./kanban-column";
 import { TaskDetailsDialog } from "./task-details-dialog";
 import { AddTaskDialog } from "./add-task-dialog";
@@ -22,8 +21,6 @@ interface KanbanBoardProps {
   searchQuery?: string;
 }
 
-// Status is now the column ID directly - no more hardcoded mapping needed
-
 export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-access", searchQuery = "" }: KanbanBoardProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskDetailsOpen, setIsTaskDetailsOpen] = useState(false);
@@ -31,6 +28,11 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
   const [editingColumn, setEditingColumn] = useState<Column | null>(null);
   const [columnToDelete, setColumnToDelete] = useState<string | null>(null);
+  
+  // Native drag and drop state
+  const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
+  
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { canCreateTasks, canEditTasks, canManageColumns } = usePermissions();
@@ -67,6 +69,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
             assigneesData[task.id] = [];
           }
         } catch (error) {
+          console.error(`Failed to fetch assignees for task ${task.id}:`, error);
           assigneesData[task.id] = [];
         }
       });
@@ -78,258 +81,112 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
   const updateTaskMutation = useMutation({
     mutationFn: async ({ taskId, updates }: { taskId: string; updates: Partial<Task> }) => {
-      const response = await apiRequest("PATCH", `/api/tasks/${taskId}`, updates);
-      return response.json();
+      console.log("🔄 [FRONTEND] Updating task:", taskId, updates);
+      return await apiRequest("PATCH", `/api/tasks/${taskId}`, updates);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
-      // Invalidate board-specific queries
-      if (boardId) {
-        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/tasks`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
-      }
+      console.log("✅ [FRONTEND] Task updated successfully");
+      queryClient.invalidateQueries({ queryKey: [tasksEndpoint] });
+    },
+    onError: (error) => {
+      console.error("❌ [FRONTEND] Task update failed:", error);
+      toast({
+        title: "Erro",
+        description: "Falha ao atualizar tarefa. Tente novamente.",
+        variant: "destructive",
+      });
     },
   });
 
   const deleteColumnMutation = useMutation({
     mutationFn: async (columnId: string) => {
-      const response = await apiRequest("DELETE", `/api/columns/${columnId}`);
-      // DELETE returns 204 No Content, so don't try to parse JSON
-      if (response.ok) {
-        return { success: true };
-      }
-      throw new Error(`Failed to delete column: ${response.status}`);
+      return await apiRequest("DELETE", `/api/columns/${columnId}`);
     },
     onSuccess: () => {
-      // Just show success message - UI already updated optimistically
-      toast({
-        title: "Coluna excluída",
-        description: "A coluna foi removida com sucesso.",
-        duration: 2500,
-      });
-      
-      // Refresh data in background to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
-      queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
-      if (boardId) {
-        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
-      }
-    },
-    onError: (error: any, columnId) => {
-      // Revert optimistic update on error
-      queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
-      
-      if (error?.message?.includes('404') || error?.message?.includes('not found')) {
-        toast({
-          title: "Coluna já foi excluída",
-          description: "A coluna já não existe mais.",
-          duration: 2500,
-        });
-      } else {
-        toast({
-          title: "Erro ao excluir coluna",
-          description: "Não foi possível excluir a coluna. Tente novamente.",
-          variant: "destructive",
-          duration: 2500,
-        });
-      }
-    },
-  });
-
-  const reorderColumnsMutation = useMutation({
-    mutationFn: async (reorderedColumns: Column[]) => {
-      const columnsToReorder = reorderedColumns.map((column, index) => ({
-        id: column.id,
-        position: index
-      }));
-      
-      const response = await apiRequest("POST", "/api/columns/reorder", {
-        columns: columnsToReorder
-      });
-      return reorderedColumns;
-    },
-    onMutate: async (reorderedColumns) => {
-      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      await queryClient.cancelQueries({ queryKey: [columnsEndpoint] });
-
-      // Snapshot the previous value
-      const previousColumns = queryClient.getQueryData([columnsEndpoint]);
-
-      // Optimistically update to the new value
-      queryClient.setQueryData([columnsEndpoint], reorderedColumns);
-
-      // Return a context object with the snapshotted value
-      return { previousColumns };
-    },
-    onError: (err, newColumns, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      queryClient.setQueryData([columnsEndpoint], context?.previousColumns);
-      
-      toast({
-        title: "Erro",
-        description: "Falha ao reordenar colunas. Tente novamente.",
-        variant: "destructive",
-      });
-    },
-    onSettled: () => {
-      // Always refetch after error or success to ensure we have the latest data
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
       if (boardId) {
         queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
       }
     },
-  });
-
-  const reorderTasksMutation = useMutation({
-    mutationFn: async (reorderedTasks: { id: string; position: number }[]) => {
-      console.log("🔄 [FRONTEND] Sending reorder request:", reorderedTasks);
-      const response = await apiRequest("PATCH", "/api/tasks/reorder", {
-        tasks: reorderedTasks
-      });
-      console.log("✅ [FRONTEND] Reorder response:", response);
-      return response;
-    },
-    onMutate: async (reorderedTasks: { id: string; position: number }[]) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: [tasksEndpoint] });
-
-      // Snapshot the previous value
-      const previousTasks = queryClient.getQueryData([tasksEndpoint]);
-
-      // Optimistically update task positions
-      queryClient.setQueryData([tasksEndpoint], (oldTasks: Task[] | undefined) => {
-        if (!oldTasks) return oldTasks;
-        return oldTasks.map(task => {
-          const reorderedTask = reorderedTasks.find(rt => rt.id === task.id);
-          return reorderedTask ? { ...task, position: reorderedTask.position } : task;
-        });
-      });
-
-      // Return a context object with the snapshotted value
-      return { previousTasks };
-    },
-    onError: (err, newTasks, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      queryClient.setQueryData([tasksEndpoint], context?.previousTasks);
-      
+    onError: () => {
       toast({
         title: "Erro",
-        description: "Falha ao reordenar tarefas. Tente novamente.",
+        description: "Falha ao excluir coluna. Tente novamente.",
         variant: "destructive",
       });
     },
-    onSettled: () => {
-      // Always refetch after error or success to ensure we have the latest data
-      queryClient.invalidateQueries({ queryKey: [tasksEndpoint] });
-    },
   });
 
-  const handleDragEnd = (result: DropResult) => {
-    // Block drag and drop in read-only mode
-    if (isReadOnly) return;
+  // Native drag and drop handlers
+  const handleTaskDragStart = (e: React.DragEvent, task: Task) => {
+    if (isReadOnly) {
+      e.preventDefault();
+      return;
+    }
+    console.log("🔄 [DRAG] Starting drag for task:", task.id);
+    setDraggedTask(task);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", task.id);
+  };
+
+  const handleTaskDragEnd = () => {
+    console.log("🔄 [DRAG] Ending drag");
+    setDraggedTask(null);
+    setDragOverColumn(null);
+  };
+
+  const handleColumnDragOver = (e: React.DragEvent, columnId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverColumn(columnId);
+  };
+
+  const handleColumnDragLeave = () => {
+    setDragOverColumn(null);
+  };
+
+  const handleTaskDrop = (e: React.DragEvent, targetColumnId: string) => {
+    e.preventDefault();
     
-    const { destination, source, draggableId, type } = result;
-
-    if (!destination) return;
-
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }
-
-    // Handle column reordering
-    if (type === 'COLUMN') {
-      const sortedColumns = [...columns].sort((a, b) => a.position - b.position);
-      const reorderedColumns = Array.from(sortedColumns);
-      const [reorderedColumn] = reorderedColumns.splice(source.index, 1);
-      reorderedColumns.splice(destination.index, 0, reorderedColumn);
-      
-      // Update positions
-      const columnsWithNewPositions = reorderedColumns.map((column, index) => ({
-        ...column,
-        position: index,
-      }));
-      
-      reorderColumnsMutation.mutate(columnsWithNewPositions);
-      return;
-    }
-
-    // Handle task movement
-    const task = tasks.find((t) => t.id === draggableId);
-    if (!task) return;
-
-    const sourceColumn = columns.find(col => col.id === source.droppableId);
-    const destColumn = columns.find(col => col.id === destination.droppableId);
+    if (!draggedTask || isReadOnly) return;
     
-    if (!sourceColumn || !destColumn) return;
-
-    // Check if reordering within the same column
-    if (source.droppableId === destination.droppableId) {
-      // Reordering within the same column - use column ID directly
-      
-      const columnTasks = getTasksByColumn(source.droppableId);
-      const reorderedTasks = Array.from(columnTasks);
-      const [movedTask] = reorderedTasks.splice(source.index, 1);
-      reorderedTasks.splice(destination.index, 0, movedTask);
-      
-      // Update positions
-      const tasksWithNewPositions = reorderedTasks.map((t, index) => ({
-        id: t.id,
-        position: index,
-      }));
-      
-      
-      reorderTasksMutation.mutate(tasksWithNewPositions);
-      return;
-    }
-
-    // Moving between different columns - check WIP limits
-    if (destColumn?.wipLimit) {
-      // Use column ID directly for WIP limits check
-      const tasksInDestination = tasks.filter((t) => t.status === destColumn.id && t.id !== draggableId);
-      if (tasksInDestination.length >= destColumn.wipLimit) {
+    console.log("🔄 [DRAG] Dropping task", draggedTask.id, "into column", targetColumnId);
+    
+    const sourceColumnId = draggedTask.status;
+    const targetColumn = columns.find(col => col.id === targetColumnId);
+    
+    if (!targetColumn) return;
+    
+    // Check WIP limits for different columns
+    if (sourceColumnId !== targetColumnId && targetColumn.wipLimit) {
+      const tasksInTarget = tasks.filter(t => t.status === targetColumnId && t.id !== draggedTask.id);
+      if (tasksInTarget.length >= targetColumn.wipLimit) {
         toast({
           title: "Limite WIP Excedido",
-          description: `A coluna ${destColumn.title} já atingiu o limite de ${destColumn.wipLimit} tarefas.`,
+          description: `A coluna ${targetColumn.title} já atingiu o limite de ${targetColumn.wipLimit} tarefas.`,
           variant: "destructive",
         });
+        handleTaskDragEnd();
         return;
       }
     }
-
-    // Update task status - use destination column ID directly
-    const newStatus = destColumn.id;
     
-    // Get tasks in destination column to set proper position
-    const destColumnTasks = getTasksByColumn(destination.droppableId);
-    const newPosition = destination.index;
+    // If moving to same column, do nothing
+    if (sourceColumnId === targetColumnId) {
+      handleTaskDragEnd();
+      return;
+    }
     
-    // Update both status and position when moving between columns
+    // Update task status to new column
     updateTaskMutation.mutate({
-      taskId: draggableId,
+      taskId: draggedTask.id,
       updates: { 
-        status: newStatus,
-        position: newPosition,
+        status: targetColumnId,
+        position: 0, // Add to top of new column
       },
     });
     
-    // Also need to reorder remaining tasks in destination column
-    const updatedDestTasks = [...destColumnTasks];
-    updatedDestTasks.splice(destination.index, 0, task);
-    
-    const tasksToReorder = updatedDestTasks.map((t, index) => ({
-      id: t.id,
-      position: index,
-    }));
-    
-    
-    // Only reorder if there are other tasks to reorder
-    if (tasksToReorder.length > 1) {
-      setTimeout(() => reorderTasksMutation.mutate(tasksToReorder), 100);
-    }
+    handleTaskDragEnd();
   };
 
   // Enhanced search function - title and assignee names (both legacy and new structure)
@@ -402,165 +259,135 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     }
   };
 
-
   if (tasksLoading || columnsLoading) {
     return (
-      <div className="flex h-full">
-        <div className="flex-1 overflow-x-auto overflow-y-hidden">
-          <div className="flex h-full p-6 space-x-6 min-w-max">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex-shrink-0 w-80">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-full flex flex-col animate-pulse">
-                  <div className="p-4 border-b border-gray-100">
-                    <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-16"></div>
-                  </div>
-                  <div className="flex-1 p-4 space-y-3">
-                    {[1, 2, 3].map((j) => (
-                      <div key={j} className="h-24 bg-gray-100 rounded-lg"></div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg">Carregando board...</div>
       </div>
     );
   }
 
-  const validColumns = columns
-    .filter(column => column.id && column.id.trim() !== '')
-    .sort((a, b) => a.position - b.position);
-
-
   return (
-    <div className="flex h-full bg-gradient-to-br from-gray-50 to-white" data-testid="kanban-board">
-      <div className="flex-1 overflow-x-auto overflow-y-hidden">
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="columns" direction="horizontal" type="COLUMN">
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="flex h-full p-4 space-x-4 min-w-max"
+    <>
+      <div className="flex flex-col gap-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold">Board Kanban</h1>
+            {!isReadOnly && (
+              <PermissionGuard 
+                requiredPermissions={["Criar Tarefas"]} 
+                fallback={null}
               >
-                {validColumns.map((column, index) => (
-                  <Draggable key={column.id} draggableId={column.id} index={index}>
-                    {(columnProvided, columnSnapshot) => (
-                      <div
-                        ref={columnProvided.innerRef}
-                        {...columnProvided.draggableProps}
-                        className={`flex-shrink-0 w-72 sm:w-80 md:w-72 lg:w-80 transition-all duration-200 ${
-                          columnSnapshot.isDragging ? 'rotate-1 scale-105 shadow-xl' : ''
-                        }`}
-                      >
-                        <div {...columnProvided.dragHandleProps}>
-                          <Droppable droppableId={column.id} type="TASK">
-                            {(taskProvided, taskSnapshot) => (
-                              <div
-                                ref={taskProvided.innerRef}
-                                {...taskProvided.droppableProps}
-                                className="h-full"
-                              >
-                                <KanbanColumn
-                                  column={column}
-                                  tasks={getTasksByColumn(column.id)}
-                                  isDragOver={taskSnapshot.isDraggingOver}
-                                  onTaskClick={handleTaskClick}
-                                  onAddTask={handleAddTask}
-                                  onManageColumns={handleManageColumns}
-                                  onEditColumn={handleEditColumn}
-                                  onDeleteColumn={handleDeleteColumn}
-                                  isReadOnly={isReadOnly}
-                                  profileMode={profileMode}
-                                />
-                                {taskProvided.placeholder}
-                              </div>
-                            )}
-                          </Droppable>
-                        </div>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                
-                {/* Add Column Button - só para quem não é read-only */}
-                {!isReadOnly && (
-                  <div className="flex-shrink-0 w-72 sm:w-80 md:w-72 lg:w-80">
-                    <button
-                      onClick={handleManageColumns}
-                      className="w-full h-12 border border-dashed border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50/30 transition-all duration-200 flex items-center justify-center group bg-white/50 backdrop-blur-sm"
-                      data-testid="button-add-column"
-                    >
-                      <Plus className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 mr-2" />
-                      <span className="text-sm text-gray-500 group-hover:text-indigo-600">
-                        Adicionar Coluna
-                      </span>
-                    </button>
-                  </div>
-                )}
-                
-                {provided.placeholder}
-              </div>
+                <Button 
+                  onClick={handleAddTask}
+                  className="flex items-center gap-2"
+                  data-testid="button-add-task"
+                >
+                  <Plus className="h-4 w-4" />
+                  Nova Tarefa
+                </Button>
+              </PermissionGuard>
             )}
-          </Droppable>
-        </DragDropContext>
+          </div>
+          
+          {!isReadOnly && (
+            <PermissionGuard 
+              requiredPermissions={["Editar Colunas"]} 
+              fallback={null}
+            >
+              <Button 
+                variant="outline" 
+                onClick={handleManageColumns}
+                data-testid="button-manage-columns"
+              >
+                Gerenciar Colunas
+              </Button>
+            </PermissionGuard>
+          )}
+        </div>
+
+        {/* Kanban Board */}
+        <div className="overflow-x-auto">
+          <div className="flex gap-6 min-w-max p-4">
+            {columns
+              .sort((a, b) => a.position - b.position)
+              .map((column) => {
+                const columnTasks = getTasksByColumn(column.id);
+                const isWipLimitExceeded = column.wipLimit && columnTasks.length > column.wipLimit;
+                const isDragOver = dragOverColumn === column.id;
+
+                return (
+                  <div
+                    key={column.id}
+                    className={`min-w-80 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border-2 transition-colors ${
+                      isDragOver 
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                        : 'border-transparent'
+                    }`}
+                    onDragOver={(e) => handleColumnDragOver(e, column.id)}
+                    onDragLeave={handleColumnDragLeave}
+                    onDrop={(e) => handleTaskDrop(e, column.id)}
+                    data-testid={`column-${column.id}`}
+                  >
+                    <KanbanColumn
+                      column={column}
+                      tasks={columnTasks}
+                      onTaskClick={handleTaskClick}
+                      onEditColumn={handleEditColumn}
+                      onDeleteColumn={handleDeleteColumn}
+                      isReadOnly={isReadOnly}
+                      onTaskDragStart={handleTaskDragStart}
+                      onTaskDragEnd={handleTaskDragEnd}
+                      allAssignees={allAssignees}
+                    />
+                  </div>
+                );
+              })}
+          </div>
+        </div>
       </div>
 
-      {/* Task Details Dialog */}
+      {/* Dialogs */}
       <TaskDetailsDialog
         task={selectedTask}
         isOpen={isTaskDetailsOpen}
         onClose={handleCloseTaskDetails}
         boardId={boardId}
-        isReadOnly={isReadOnly}
       />
 
-      {/* Add Task Dialog - só para quem não é read-only */}
-      {!isReadOnly && (
-        <AddTaskDialog
-          isOpen={isAddTaskOpen}
-          onClose={() => setIsAddTaskOpen(false)}
-          boardId={boardId}
-        />
-      )}
-      
-      {/* Column Management Dialog - só para quem não é read-only */}
-      {boardId && !isReadOnly && (
-        <ColumnManagementDialog
-          isOpen={isColumnManagementOpen}
-          onClose={() => {
-            setIsColumnManagementOpen(false);
-            setEditingColumn(null);
-          }}
-          boardId={boardId}
-          editingColumn={editingColumn}
-        />
-      )}
+      <AddTaskDialog
+        isOpen={isAddTaskOpen}
+        onClose={() => setIsAddTaskOpen(false)}
+        boardId={boardId}
+      />
 
-      {/* Delete Column Confirmation Dialog */}
+      <ColumnManagementDialog
+        isOpen={isColumnManagementOpen}
+        onClose={() => {
+          setIsColumnManagementOpen(false);
+          setEditingColumn(null);
+        }}
+        editingColumn={editingColumn}
+        boardId={boardId}
+      />
+
       <AlertDialog open={!!columnToDelete} onOpenChange={() => setColumnToDelete(null)}>
-        <AlertDialogContent data-testid="dialog-delete-column-confirmation">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+            <AlertDialogTitle>Excluir Coluna</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. A coluna e todas as suas tarefas serão permanentemente excluídas.
+              Tem certeza que deseja excluir esta coluna? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete-column">Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDeleteColumn}
-              disabled={deleteColumnMutation.isPending}
-              className="bg-red-600 hover:bg-red-700"
-              data-testid="button-confirm-delete-column"
-            >
-              {deleteColumnMutation.isPending ? "Excluindo..." : "Excluir"}
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteColumn}>
+              Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }
