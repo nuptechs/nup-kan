@@ -42,31 +42,28 @@ export class CommandHandlers {
       const boardId = randomUUID();
       const now = new Date();
       
-      // 🔥 TRANSAÇÃO ÚNICA: board + boardShare em uma operação
-      const [board] = await db.transaction(async (tx) => {
-        // Inserir board
-        const [newBoard] = await tx
-          .insert(boards)
-          .values({
-            ...validData,
-            id: boardId,
-            createdAt: now,
-            updatedAt: now,
-          })
-          .returning();
-
-        // Inserir creator como admin (mesma transação)
-        await tx.insert(boardShares).values({
-          id: randomUUID(),
-          boardId: boardId,
-          shareType: 'user',
-          shareWithId: validData.createdById,
-          permission: 'admin',
-          sharedByUserId: validData.createdById,
+      // 🚀 OPERAÇÃO MÍNIMA: apenas criar board (ultra-rápido)
+      const [board] = await db
+        .insert(boards)
+        .values({
+          ...validData,
+          id: boardId,
           createdAt: now,
-        });
+          updatedAt: now,
+        })
+        .returning();
 
-        return [newBoard];
+      // 🔄 CRIAR SHARE ASSÍNCRONO (não bloqueia resposta)
+      db.insert(boardShares).values({
+        id: randomUUID(),
+        boardId: boardId,
+        shareType: 'user',
+        shareWithId: validData.createdById,
+        permission: 'admin',
+        sharedByUserId: validData.createdById,
+        createdAt: now,
+      }).catch(error => {
+        console.error('⚠️ [BOARD-SHARE] Erro assíncrono criando share:', error);
       });
 
       // 📡 Emitir evento ASSÍNCRONO (não bloqueia resposta)
