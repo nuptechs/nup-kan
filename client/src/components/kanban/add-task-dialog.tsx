@@ -186,7 +186,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] z-[99999] max-h-[90vh] flex flex-col [&>button]:hidden" data-testid="add-task-dialog">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden [&>button]:hidden p-0" data-testid="add-task-dialog">
         <DialogHeader className="sr-only">
           <DialogTitle data-testid="dialog-title">Adicionar Nova Tarefa</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
@@ -194,33 +194,40 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
           </DialogDescription>
         </DialogHeader>
 
-        {/* Cabeçalho fixo */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 pb-3 mb-4">
-          <div className="flex items-start justify-between">
-            <div className="flex-1 pr-4 space-y-1">
-              <label className="text-sm font-medium text-slate-700">Título</label>
-              <Input
-                {...form.register("title")}
-                className="text-xl font-semibold border-none p-0 focus:ring-0 focus:border-none shadow-none bg-blue-50/40 hover:bg-blue-50/60 rounded-md px-2 transition-colors"
-                placeholder="Digite o título da tarefa"
-                data-testid="input-header-title"
-              />
+        {/* Cabeçalho fixo com título e botões */}
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 pr-4">
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-slate-700">Título</label>
+                <Input
+                  {...form.register("title")}
+                  className="text-xl font-semibold border-none p-0 focus:ring-0 focus:border-none shadow-none bg-blue-50/40 hover:bg-blue-50/60 rounded-md px-2 transition-colors"
+                  placeholder="Digite o título da tarefa"
+                  data-testid="input-header-title"
+                />
+              </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="w-8 h-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all flex-shrink-0"
-              data-testid="button-close-task"
-            >
-              <X className="w-4 h-4" />
-            </Button>
+            
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="w-8 h-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+                data-testid="button-close-task"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto px-6">
-          <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Conteúdo principal com overflow */}
+        <div className="flex-1 overflow-auto">
+          <div className="p-6 pt-4">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 
             <FormField
               control={form.control}
@@ -433,8 +440,9 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                 {createTaskMutation.isPending ? "Criando..." : "Criar Tarefa"}
               </Button>
             </div>
-          </form>
-        </Form>
+              </form>
+            </Form>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
