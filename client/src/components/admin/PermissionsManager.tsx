@@ -46,23 +46,12 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
     queryKey: ["/api/profiles"],
   });
 
-  // AGGRESSIVE LAZY LOADING - absolutely nothing loads unless clicked
-  const [loadUsers, setLoadUsers] = useState(false);
-  const [loadTeams, setLoadTeams] = useState(false);
-  const [loadUserTeams, setLoadUserTeams] = useState(false);
-  const [loadTeamProfiles, setLoadTeamProfiles] = useState(false);
-  const [loadProfilePermissions, setLoadProfilePermissions] = useState(false);
-
-  // ALL secondary queries disabled by default
-  const { data: users = [] } = useQuery<UserType[]>({
-    queryKey: ["/api/users"],
-    enabled: loadUsers && activeTab === "quick-assign",
-  });
-
-  const { data: teams = [] } = useQuery<Team[]>({
-    queryKey: ["/api/teams"],
-    enabled: loadTeams && activeTab === "quick-assign",
-  });
+  // NO REACTIVE QUERIES - everything manual
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [userTeams, setUserTeams] = useState<UserTeam[]>([]);
+  const [teamProfiles, setTeamProfiles] = useState<TeamProfile[]>([]);
+  const [profilePermissions, setProfilePermissions] = useState<ProfilePermission[]>([]);
 
   // Target-specific permissions
   const { data: targetPermissions = [] } = useQuery<Permission[]>({
@@ -169,21 +158,33 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
     },
   });
 
-  // ALL tertiary queries disabled by default
-  const { data: userTeams = [] } = useQuery<UserTeam[]>({
-    queryKey: ["/api/user-teams"],
-    enabled: loadUserTeams && activeTab === "quick-assign",
-  });
+  // Manual data loading functions
+  const loadQuickAssignData = async () => {
+    try {
+      const [usersRes, teamsRes, userTeamsRes, teamProfilesRes] = await Promise.all([
+        fetch("/api/users").then(r => r.json()),
+        fetch("/api/teams").then(r => r.json()),
+        fetch("/api/user-teams").then(r => r.json()),
+        fetch("/api/team-profiles").then(r => r.json())
+      ]);
+      setUsers(usersRes);
+      setTeams(teamsRes);
+      setUserTeams(userTeamsRes);
+      setTeamProfiles(teamProfilesRes);
+    } catch (error) {
+      console.error('Error loading quick assign data:', error);
+    }
+  };
 
-  const { data: teamProfiles = [] } = useQuery<TeamProfile[]>({
-    queryKey: ["/api/team-profiles"],
-    enabled: loadTeamProfiles && activeTab === "quick-assign",
-  });
-
-  const { data: profilePermissions = [] } = useQuery<ProfilePermission[]>({
-    queryKey: ["/api/profile-permissions"],
-    enabled: loadProfilePermissions && activeTab === "sync",
-  });
+  const loadSyncData = async () => {
+    try {
+      const response = await fetch("/api/profile-permissions");
+      const data = await response.json();
+      setProfilePermissions(data);
+    } catch (error) {
+      console.error('Error loading sync data:', error);
+    }
+  };
 
   // Query para relatório de funcionalidades
   const { data: functionalityReport, refetch: refetchReport } = useQuery({
@@ -307,11 +308,7 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
           <TabsTrigger 
             value="quick-assign"
             onClick={() => {
-              // Load data only when tab is clicked
-              setLoadUsers(true);
-              setLoadTeams(true);
-              setLoadUserTeams(true);
-              setLoadTeamProfiles(true);
+              if (users.length === 0) loadQuickAssignData();
             }}
           >
             Atribuição Rápida
@@ -319,8 +316,7 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
           <TabsTrigger 
             value="sync"
             onClick={() => {
-              // Load data only when tab is clicked
-              setLoadProfilePermissions(true);
+              if (profilePermissions.length === 0) loadSyncData();
             }}
           >
             Sincronização
