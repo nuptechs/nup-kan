@@ -112,7 +112,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const { assigneeIds, customFields, ...restTaskData } = data;
+      const { assigneeIds, customFields: customFieldsData, ...restTaskData } = data;
       
       // Create the task first
       const response = await apiRequest("POST", "/api/tasks", restTaskData);
@@ -126,8 +126,8 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
       }
       
       // Save custom fields if any were filled
-      if (customFields && Object.keys(customFields).length > 0) {
-        const customFieldPromises = Object.entries(customFields)
+      if (customFieldsData && Object.keys(customFieldsData).length > 0) {
+        const customFieldPromises = Object.entries(customFieldsData)
           .filter(([_, value]) => value && value.toString().trim() !== '')
           .map(([fieldName, value]) => {
             const field = customFields.find((f: any) => f.name === fieldName);
