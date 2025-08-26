@@ -237,7 +237,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto" data-testid="task-details-dialog">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto scrollbar-hide" data-testid="task-details-dialog">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-semibold" data-testid="dialog-title">
