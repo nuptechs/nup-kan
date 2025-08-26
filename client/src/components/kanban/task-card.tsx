@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MessageCircle, Paperclip, Clock, Flag, Eye, FileText, Code, Server, Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import type { Task, TaskAssignee, User } from "@shared/schema";
+import type { Task, TaskAssignee, User, Tag } from "@shared/schema";
 
 interface TaskCardProps {
   task: Task;
@@ -115,6 +115,14 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
   const isDone = task.status === "done";
   const Icon = getRandomIcon();
 
+  // Fetch tags data to get colors
+  const { data: allTags = [] } = useQuery<Tag[]>({
+    queryKey: ["/api/tags"],
+  });
+
+  // Filter tags for this task
+  const taskTags = allTags.filter(tag => task.tags?.includes(tag.name));
+
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onTaskClick?.(task);
@@ -195,6 +203,27 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
           </div>
         </div>
       )}
+
+      {/* Tags Section */}
+      {taskTags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-2">
+          {taskTags.map((tag) => (
+            <Badge
+              key={tag.id}
+              variant="secondary"
+              className="text-xs px-2 py-0.5 rounded-md font-medium"
+              style={{
+                backgroundColor: `${tag.color}20`,
+                color: tag.color,
+                borderColor: `${tag.color}40`,
+              }}
+              data-testid={`tag-${tag.name}-${task.id}`}
+            >
+              {tag.name}
+            </Badge>
+          ))}
+        </div>
+      )}
       
       {/* Bottom Row - Assignee and Meta */}
       <div className="flex items-center justify-between mt-3">
@@ -204,7 +233,7 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
         <div className="flex items-center space-x-1.5 text-xs text-gray-400">
           <Icon className="w-3 h-3" />
           <span data-testid={`task-meta-${task.id}`}>
-            {isDone ? "Deploy" : task.tags?.[0] || getTaskTimeInfo(task)}
+            {isDone ? "Deploy" : getTaskTimeInfo(task)}
           </span>
         </div>
       </div>
