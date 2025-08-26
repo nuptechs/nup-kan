@@ -169,7 +169,10 @@ class MongoReadStore {
       console.log('🟢 [MONGO] MongoDB Read Store conectado com sucesso');
     } catch (error) {
       console.log('🟡 [MONGO] MongoDB não disponível, usando PostgreSQL apenas');
-      console.log('Erro:', error);
+      // Graceful fallback - don't throw error, just continue without MongoDB
+      this.client = null;
+      this.db = null;
+      this.collections = null;
     }
   }
 
@@ -207,7 +210,7 @@ class MongoReadStore {
   async health(): Promise<boolean> {
     try {
       if (!this.client) return false;
-      await this.client.db('admin').ping();
+      await this.client.db('admin').command({ ping: 1 });
       return true;
     } catch {
       return false;
