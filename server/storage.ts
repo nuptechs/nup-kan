@@ -1,6 +1,6 @@
-import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type BoardShare, type InsertBoardShare, type UpdateBoardShare, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory, type TaskStatus, type InsertTaskStatus, type UpdateTaskStatus, type TaskPriority, type InsertTaskPriority, type UpdateTaskPriority, type TaskAssignee, type InsertTaskAssignee, type PermissionsManagementData } from "@shared/schema";
+import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type BoardShare, type InsertBoardShare, type UpdateBoardShare, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory, type TaskStatus, type InsertTaskStatus, type UpdateTaskStatus, type TaskPriority, type InsertTaskPriority, type UpdateTaskPriority, type TaskAssignee, type InsertTaskAssignee } from "@shared/schema";
 import { db } from "./db";
-import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory, taskStatuses, taskPriorities, taskAssignees, permissionsManagementView } from "@shared/schema";
+import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory, taskStatuses, taskPriorities, taskAssignees } from "@shared/schema";
 import { eq, desc, and, inArray, sql, or } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
@@ -103,9 +103,6 @@ export interface IStorage {
 
   // User Permissions
   getUserPermissions(userId: string): Promise<Permission[]>;
-
-  // 🚀 PERMISSIONS MANAGEMENT VIEW - Ultra-fast consolidated data
-  getPermissionsManagementData(): Promise<PermissionsManagementData[]>;
 
   // Board Shares
   getBoardShares(boardId: string): Promise<BoardShare[]>;
@@ -1348,24 +1345,6 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // 🚀 PERMISSIONS MANAGEMENT VIEW - Ultra-fast consolidated data
-  async getPermissionsManagementData(): Promise<PermissionsManagementData[]> {
-    console.log('🚀 [STORAGE] Querying permissions management view');
-    const startTime = Date.now();
-    
-    try {
-      const result = await db.select().from(permissionsManagementView);
-      
-      const duration = Date.now() - startTime;
-      console.log(`⚡ [STORAGE] Permissions view query completed in ${duration}ms (${result.length} records)`);
-      
-      return result;
-    } catch (error) {
-      const duration = Date.now() - startTime;
-      console.error(`❌ [STORAGE] Permissions view query failed after ${duration}ms:`, error);
-      throw error;
-    }
-  }
 }
 
 export const storage = new DatabaseStorage();

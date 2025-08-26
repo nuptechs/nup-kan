@@ -412,40 +412,6 @@ export const insertTaskCustomValueSchema = createInsertSchema(taskCustomValues).
 
 export const updateTaskCustomValueSchema = insertTaskCustomValueSchema.partial();
 
-// 🚀 PERMISSIONS MANAGEMENT VIEW - Materialized view for ultra-fast permission lookups
-export const permissionsManagementView = pgTable("permissions_management_view", {
-  // User info
-  userId: varchar("user_id"),
-  userName: text("user_name"),
-  userEmail: text("user_email"),  
-  userStatus: text("user_status"),
-  userProfileId: varchar("user_profile_id"),
-  userProfileName: text("user_profile_name"),
-  
-  // Team info
-  teamId: varchar("team_id"),
-  teamName: text("team_name"),
-  userTeamRole: text("user_team_role"),
-  
-  // Team profile info
-  teamProfileId: varchar("team_profile_id"),
-  teamProfileName: text("team_profile_name"),
-  
-  // Permission info
-  permissionId: varchar("permission_id"),
-  permissionName: text("permission_name"),
-  permissionCategory: text("permission_category"),
-  permissionSource: text("permission_source"), // 'user_profile' or 'team_profile'
-  
-  // Profile info
-  profileId: varchar("profile_id"),
-  profileName: text("profile_name"),
-  profileDescription: text("profile_description"),
-  
-  // Metadata
-  lastUpdated: timestamp("last_updated").defaultNow(),
-});
-
 // Task auxiliary data types
 export type TaskStatus = typeof taskStatuses.$inferSelect;
 export type InsertTaskStatus = z.infer<typeof insertTaskStatusSchema>;
@@ -461,6 +427,3 @@ export type UpdateCustomField = z.infer<typeof updateCustomFieldSchema>;
 export type TaskCustomValue = typeof taskCustomValues.$inferSelect;
 export type InsertTaskCustomValue = z.infer<typeof insertTaskCustomValueSchema>;
 export type UpdateTaskCustomValue = z.infer<typeof updateTaskCustomValueSchema>;
-
-// 🚀 Permissions Management View types
-export type PermissionsManagementData = typeof permissionsManagementView.$inferSelect;
