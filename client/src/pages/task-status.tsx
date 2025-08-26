@@ -50,6 +50,7 @@ interface StatusFormData {
 export default function TaskStatusPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingStatus, setEditingStatus] = useState<TaskStatus | null>(null);
+  const [, setLocation] = useLocation();
   const [formData, setFormData] = useState<StatusFormData>({
     name: "",
     displayName: "",
@@ -60,7 +61,6 @@ export default function TaskStatusPage() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [location, setLocation] = useLocation();
 
   // Queries
   const { data: statuses = [], isLoading } = useQuery<TaskStatus[]>({
@@ -192,7 +192,15 @@ export default function TaskStatusPage() {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => setLocation("/kanban")}
+            onClick={() => {
+              // Se viemos de um board específico, voltar para ele
+              const boardId = new URLSearchParams(window.location.search).get('from');
+              if (boardId) {
+                setLocation(`/kanban/${boardId}`);
+              } else {
+                setLocation("/kanban");
+              }
+            }}
             data-testid="button-back-to-kanban"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

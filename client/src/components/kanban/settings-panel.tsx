@@ -227,7 +227,13 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
                 <div className="space-y-2">
                   <Button
                     onClick={() => {
-                      setLocation("/admin/task-status");
+                      // Passar o boardId atual como parâmetro para voltar corretamente
+                      const currentBoardId = window.location.pathname.split('/').pop();
+                      if (currentBoardId && currentBoardId !== 'kanban') {
+                        setLocation(`/admin/task-status?from=${currentBoardId}`);
+                      } else {
+                        setLocation("/admin/task-status");
+                      }
                       onClose();
                     }}
                     variant="outline"
@@ -239,7 +245,13 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
                   </Button>
                   <Button
                     onClick={() => {
-                      setLocation("/admin/task-priority");
+                      // Passar o boardId atual como parâmetro para voltar corretamente
+                      const currentBoardId = window.location.pathname.split('/').pop();
+                      if (currentBoardId && currentBoardId !== 'kanban') {
+                        setLocation(`/admin/task-priority?from=${currentBoardId}`);
+                      } else {
+                        setLocation("/admin/task-priority");
+                      }
                       onClose();
                     }}
                     variant="outline"

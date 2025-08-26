@@ -50,6 +50,7 @@ interface PriorityFormData {
 export default function TaskPriorityPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPriority, setEditingPriority] = useState<TaskPriority | null>(null);
+  const [, setLocation] = useLocation();
   const [formData, setFormData] = useState<PriorityFormData>({
     name: "",
     displayName: "",
@@ -60,7 +61,6 @@ export default function TaskPriorityPage() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [location, setLocation] = useLocation();
 
   // Queries
   const { data: priorities = [], isLoading } = useQuery<TaskPriority[]>({
@@ -190,7 +190,15 @@ export default function TaskPriorityPage() {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => setLocation("/kanban")}
+            onClick={() => {
+              // Se viemos de um board específico, voltar para ele
+              const boardId = new URLSearchParams(window.location.search).get('from');
+              if (boardId) {
+                setLocation(`/kanban/${boardId}`);
+              } else {
+                setLocation("/kanban");
+              }
+            }}
             data-testid="button-back-to-kanban"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
