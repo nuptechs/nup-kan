@@ -257,14 +257,6 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden [&>button]:hidden p-0" data-testid="task-details-dialog">
         {/* Cabeçalho fixo com título e botões */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 pb-3">
-          {/* Indicador de edição */}
-          {isEditing && (
-            <div className="absolute -top-1 left-2">
-              <span className="text-xs text-slate-500 font-medium">
-                Editando dados da tarefa
-              </span>
-            </div>
-          )}
           <div className="flex items-center justify-between">
             <div className="flex-1 pr-4">
               {isEditing ? (

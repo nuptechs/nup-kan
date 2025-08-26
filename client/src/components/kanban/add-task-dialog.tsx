@@ -159,13 +159,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] z-[9999] relative" data-testid="add-task-dialog">
-        {/* Indicador de criação */}
-        <div className="absolute -top-1 left-2">
-          <span className="text-xs text-slate-500 font-medium">
-            Criando nova tarefa
-          </span>
-        </div>
+      <DialogContent className="sm:max-w-[425px] z-[99999]" data-testid="add-task-dialog">
         <DialogHeader className="sr-only">
           <DialogTitle data-testid="dialog-title">Adicionar Nova Tarefa</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
