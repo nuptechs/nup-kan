@@ -37,6 +37,7 @@ export interface IStorage {
   updateColumn(id: string, data: UpdateColumn): Promise<Column>;
   deleteColumn(id: string): Promise<void>;
   reorderColumns(reorderedColumns: { id: string; position: number }[]): Promise<void>;
+  reorderTasks(reorderedTasks: { id: string; position: number }[]): Promise<void>;
   
   // Team Members
   getTeamMembers(): Promise<TeamMember[]>;
@@ -566,10 +567,14 @@ export class DatabaseStorage implements IStorage {
 
   async reorderTasks(reorderedTasks: { id: string; position: number }[]): Promise<void> {
     for (const { id, position } of reorderedTasks) {
-      await db
+      const result = await db
         .update(tasks)
         .set({ position })
         .where(eq(tasks.id, id));
+      
+      if (result.rowCount === 0) {
+        throw new Error(`Task with id ${id} not found`);
+      }
     }
   }
 
