@@ -26,7 +26,18 @@ const getColumnColorClasses = (color: string) => {
     purple: "bg-purple-500",
     green: "bg-green-500",
   };
-  return colorMap[color as keyof typeof colorMap] || "bg-gray-400";
+  
+  // Se for um código hex, mapear para a cor correspondente
+  const hexToColorMap: Record<string, string> = {
+    "#6b7280": "gray",
+    "#3b82f6": "blue", 
+    "#eab308": "yellow",
+    "#a855f7": "purple",
+    "#22c55e": "green",
+  };
+  
+  const colorName = hexToColorMap[color] || color;
+  return colorMap[colorName as keyof typeof colorMap] || "bg-gray-400";
 };
 
 const getColumnProgressClasses = (color: string) => {
@@ -37,7 +48,18 @@ const getColumnProgressClasses = (color: string) => {
     purple: "bg-purple-500",
     green: "bg-green-500",
   };
-  return colorMap[color as keyof typeof colorMap] || "bg-gray-400";
+  
+  // Se for um código hex, mapear para a cor correspondente
+  const hexToColorMap: Record<string, string> = {
+    "#6b7280": "gray",
+    "#3b82f6": "blue", 
+    "#eab308": "yellow",
+    "#a855f7": "purple",
+    "#22c55e": "green",
+  };
+  
+  const colorName = hexToColorMap[color] || color;
+  return colorMap[colorName as keyof typeof colorMap] || "bg-gray-400";
 };
 
 const getColumnCountClasses = (color: string) => {

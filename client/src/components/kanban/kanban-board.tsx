@@ -162,24 +162,44 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
         position: index
       }));
       
+      console.log('🚀 Enviando reordenação para API:', columnsToReorder);
+      
       const response = await apiRequest("POST", "/api/columns/reorder", {
         columns: columnsToReorder
       });
+      
+      console.log('✅ Resposta da API:', response.status);
       return reorderedColumns;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
-      // Invalidate board-specific queries
-      if (boardId) {
-        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
-      }
+    onMutate: async (reorderedColumns) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: [columnsEndpoint] });
+
+      // Snapshot the previous value
+      const previousColumns = queryClient.getQueryData([columnsEndpoint]);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData([columnsEndpoint], reorderedColumns);
+
+      // Return a context object with the snapshotted value
+      return { previousColumns };
     },
-    onError: () => {
+    onError: (err, newColumns, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      queryClient.setQueryData([columnsEndpoint], context?.previousColumns);
+      
       toast({
         title: "Erro",
         description: "Falha ao reordenar colunas. Tente novamente.",
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
+      if (boardId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
+      }
     },
   });
 
@@ -200,6 +220,8 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
     // Handle column reordering
     if (type === 'COLUMN') {
+      console.log('🔄 Reordenando colunas - Source:', source.index, 'Destination:', destination.index);
+      
       const sortedColumns = [...columns].sort((a, b) => a.position - b.position);
       const reorderedColumns = Array.from(sortedColumns);
       const [reorderedColumn] = reorderedColumns.splice(source.index, 1);
@@ -210,6 +232,8 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
         ...column,
         position: index,
       }));
+      
+      console.log('📋 Colunas reordenadas:', columnsWithNewPositions.map(c => ({ id: c.id, title: c.title, position: c.position })));
       
       reorderColumnsMutation.mutate(columnsWithNewPositions);
       return;
