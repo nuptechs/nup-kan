@@ -185,8 +185,8 @@ export default function TaskPriorityPage() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="space-y-4">
+        <div>
           <Button 
             variant="ghost" 
             size="sm" 
@@ -204,14 +204,15 @@ export default function TaskPriorityPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
           </Button>
+        </div>
+        <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Prioridades das Tarefas</h1>
             <p className="text-muted-foreground">
               Gerencie as prioridades das tarefas
             </p>
           </div>
-        </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openCreateDialog} data-testid="button-create-priority">
               <Plus className="h-4 w-4 mr-2" />
