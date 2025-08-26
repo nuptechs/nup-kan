@@ -131,20 +131,25 @@ export function KanbanColumn({
             </div>
           </div>
           
-          {/* Botão sutil para adicionar tarefa */}
+          {/* Botão sutil com linha L */}
           {!isReadOnly && (
-            <div className="flex justify-center mb-2">
+            <div className="relative flex justify-end items-center mb-2 pr-4">
+              {/* Linha horizontal saindo da coluna */}
+              <div className="absolute right-0 top-1/2 w-8 h-px bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+              
+              {/* Linha vertical do L */}
+              <div className="absolute right-8 top-1/2 w-px h-4 bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200 transform -translate-y-2"></div>
+              
+              {/* Botão + pequeno */}
               <button
                 onClick={() => {
                   onAddTask?.(column.id);
                 }}
-                className="w-full py-2 border-2 border-dashed border-gray-200 hover:border-gray-300 rounded-lg text-gray-400 hover:text-gray-500 transition-all duration-200 group/add"
+                className="relative z-10 w-6 h-6 bg-white border border-gray-200 hover:border-gray-300 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center group/add opacity-60 hover:opacity-100 shadow-sm"
                 data-testid={`button-add-task-column-${column.id}`}
                 title="Adicionar nova tarefa"
               >
-                <div className="flex items-center justify-center">
-                  <Plus className="w-4 h-4 group-hover/add:scale-110 transition-transform duration-200" />
-                </div>
+                <Plus className="w-3 h-3 group-hover/add:scale-110 transition-transform duration-200" />
               </button>
             </div>
           )}
