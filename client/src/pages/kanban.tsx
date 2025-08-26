@@ -99,7 +99,7 @@ export default function KanbanPage() {
                 placeholder="tarefa ou responsável..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-7 h-8 text-sm border-gray-200 focus:border-blue-300 focus:ring-blue-200 focus:ring-1"
+                className="pl-8 pr-7 h-8 text-sm border-gray-200 focus:border-blue-300 focus:ring-blue-200 focus:ring-1 placeholder:text-xs"
                 data-testid="header-search-input"
               />
               {searchQuery && (
