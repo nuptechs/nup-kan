@@ -510,7 +510,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
               {/* Botão + para adicionar nova coluna */}
               {!isReadOnly && (
                 <PermissionGuard permissions={["Criar Colunas"]}>
-                  <div className="min-w-64 flex items-center justify-center">
+                  <div className="min-w-80 flex items-center justify-center">
                     <button
                       onClick={handleManageColumns}
                       className="flex flex-col items-center justify-center h-20 w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all duration-200 group"
