@@ -1,15 +1,31 @@
 [
   {
-    "id": "log_1756248638507_bpxv4cpwm",
-    "timestamp": "2025-08-26T22:50:38.507Z",
+    "id": "log_1756248911544_zx9urauil",
+    "timestamp": "2025-08-26T22:55:11.544Z",
+    "level": "error",
+    "message": "Error fetching board columns: error: terminating connection due to administrator command",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756248911520_586ipjtl1",
+    "timestamp": "2025-08-26T22:55:11.520Z",
+    "level": "error",
+    "message": "Error fetching board tasks: error: terminating connection due to administrator command",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756248903286_skzx913vu",
+    "timestamp": "2025-08-26T22:55:03.286Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756248637467_un3oe3hed",
-    "timestamp": "2025-08-26T22:50:37.467Z",
+    "id": "log_1756248902182_pchpbpp44",
+    "timestamp": "2025-08-26T22:55:02.182Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

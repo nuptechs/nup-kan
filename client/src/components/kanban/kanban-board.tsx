@@ -8,7 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, X, Columns } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -417,64 +417,97 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
         {/* Kanban Board */}
         <div className="overflow-x-auto">
-          <div className="flex gap-6 min-w-max p-4">
-            {columns
-              .sort((a, b) => a.position - b.position)
-              .map((column, index) => {
-                const columnTasks = getTasksByColumn(column.id);
-                const isWipLimitExceeded = column.wipLimit && columnTasks.length > column.wipLimit;
-                const isDragOver = dragOverColumn === column.id;
-                const isColumnDragOver = dragOverColumnIndex === index;
-                const isDraggingColumn = draggedColumn?.id === column.id;
-
-                return (
-                  <div
-                    key={column.id}
-                    className={`min-w-80 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border-2 transition-all duration-200 ${
-                      isDragOver 
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                        : isColumnDragOver 
-                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                        : 'border-transparent'
-                    } ${isDraggingColumn ? 'opacity-50 scale-95' : ''}`}
-                    draggable={!isReadOnly}
-                    onDragStart={(e) => handleColumnDragStart(e, column)}
-                    onDragEnd={handleColumnDragEnd}
-                    onDragOver={(e) => {
-                      // Handle task drops
-                      handleColumnDragOver(e, column.id);
-                      // Handle column reordering
-                      handleColumnReorderDragOver(e, index);
-                    }}
-                    onDragLeave={handleColumnDragLeave}
-                    onDrop={(e) => {
-                      // Check if it's a column being dropped
-                      if (draggedColumn) {
-                        handleColumnDrop(e, index);
-                      } else {
-                        // Handle task drop
-                        handleTaskDrop(e, column.id);
-                      }
-                    }}
-                    data-testid={`column-${column.id}`}
-                  >
-                    <KanbanColumn
-                      column={column}
-                      tasks={columnTasks}
-                      onTaskClick={handleTaskClick}
-                      onEditColumn={handleEditColumn}
-                      onDeleteColumn={handleDeleteColumn}
-                      onAddTask={handleAddTask}
-                      isReadOnly={isReadOnly}
-                      onTaskDragStart={handleTaskDragStart}
-                      onTaskDragEnd={handleTaskDragEnd}
-                      onTaskDrop={handleTaskDrop}
-                      allAssignees={allAssignees}
-                    />
+          {columns.length === 0 ? (
+            /* Empty Board State */
+            <div className="flex items-center justify-center min-h-96 p-8">
+              <div className="text-center space-y-6 max-w-md">
+                <div className="space-y-3">
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto">
+                    <Columns className="w-8 h-8 text-gray-400" />
                   </div>
-                );
-              })}
-          </div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                    Board sem colunas
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                    Este board ainda não possui colunas. Crie suas primeiras colunas para começar a organizar suas tarefas.
+                  </p>
+                </div>
+                
+                {!isReadOnly && (
+                  <PermissionGuard permissions={["Criar Colunas"]}>
+                    <Button
+                      onClick={handleManageColumns}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      data-testid="button-create-first-columns"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Criar Primeiras Colunas
+                    </Button>
+                  </PermissionGuard>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* Normal Board with Columns */
+            <div className="flex gap-6 min-w-max p-4">
+              {columns
+                .sort((a, b) => a.position - b.position)
+                .map((column, index) => {
+                  const columnTasks = getTasksByColumn(column.id);
+                  const isWipLimitExceeded = column.wipLimit && columnTasks.length > column.wipLimit;
+                  const isDragOver = dragOverColumn === column.id;
+                  const isColumnDragOver = dragOverColumnIndex === index;
+                  const isDraggingColumn = draggedColumn?.id === column.id;
+
+                  return (
+                    <div
+                      key={column.id}
+                      className={`min-w-80 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border-2 transition-all duration-200 ${
+                        isDragOver 
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                          : isColumnDragOver 
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                          : 'border-transparent'
+                      } ${isDraggingColumn ? 'opacity-50 scale-95' : ''}`}
+                      draggable={!isReadOnly}
+                      onDragStart={(e) => handleColumnDragStart(e, column)}
+                      onDragEnd={handleColumnDragEnd}
+                      onDragOver={(e) => {
+                        // Handle task drops
+                        handleColumnDragOver(e, column.id);
+                        // Handle column reordering
+                        handleColumnReorderDragOver(e, index);
+                      }}
+                      onDragLeave={handleColumnDragLeave}
+                      onDrop={(e) => {
+                        // Check if it's a column being dropped
+                        if (draggedColumn) {
+                          handleColumnDrop(e, index);
+                        } else {
+                          // Handle task drop
+                          handleTaskDrop(e, column.id);
+                        }
+                      }}
+                      data-testid={`column-${column.id}`}
+                    >
+                      <KanbanColumn
+                        column={column}
+                        tasks={columnTasks}
+                        onTaskClick={handleTaskClick}
+                        onEditColumn={handleEditColumn}
+                        onDeleteColumn={handleDeleteColumn}
+                        onAddTask={handleAddTask}
+                        isReadOnly={isReadOnly}
+                        onTaskDragStart={handleTaskDragStart}
+                        onTaskDragEnd={handleTaskDragEnd}
+                        onTaskDrop={handleTaskDrop}
+                        allAssignees={allAssignees}
+                      />
+                    </div>
+                  );
+                })}
+            </div>
+          )}
         </div>
       </div>
 
