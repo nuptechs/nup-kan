@@ -148,7 +148,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
       case 'text':
         return (
           <div className="space-y-2" data-testid={`field-${field.name}`}>
-            <Label className="flex items-center gap-2">
+            <Label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
               <Icon className="w-4 h-4" />
               {field.label}
               {isRequired && <span className="text-red-500">*</span>}
@@ -158,6 +158,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
               placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
               onChange={(e) => handleValueChange(field.id, e.target.value)}
               onBlur={(e) => handleFieldBlur(field.id, e.target.value)}
+              className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
               data-testid={`input-${field.name}`}
             />
           </div>
@@ -166,7 +167,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
       case 'number':
         return (
           <div className="space-y-2" data-testid={`field-${field.name}`}>
-            <Label className="flex items-center gap-2">
+            <Label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
               <Icon className="w-4 h-4" />
               {field.label}
               {isRequired && <span className="text-red-500">*</span>}
@@ -177,6 +178,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
               placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
               onChange={(e) => handleValueChange(field.id, e.target.value)}
               onBlur={(e) => handleFieldBlur(field.id, e.target.value)}
+              className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
               data-testid={`input-${field.name}`}
             />
           </div>
@@ -185,7 +187,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
       case 'date':
         return (
           <div className="space-y-2" data-testid={`field-${field.name}`}>
-            <Label className="flex items-center gap-2">
+            <Label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
               <Icon className="w-4 h-4" />
               {field.label}
               {isRequired && <span className="text-red-500">*</span>}
@@ -195,7 +197,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal",
+                    "w-full justify-start text-left font-normal border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors",
                     !value && "text-muted-foreground"
                   )}
                   data-testid={`button-date-${field.name}`}
@@ -223,7 +225,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
       case 'select':
         return (
           <div className="space-y-2" data-testid={`field-${field.name}`}>
-            <Label className="flex items-center gap-2">
+            <Label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
               <Icon className="w-4 h-4" />
               {field.label}
               {isRequired && <span className="text-red-500">*</span>}
@@ -235,7 +237,10 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
                 handleFieldBlur(field.id, newValue);
               }}
             >
-              <SelectTrigger data-testid={`select-${field.name}`}>
+              <SelectTrigger 
+                className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                data-testid={`select-${field.name}`}
+              >
                 <SelectValue placeholder={`Selecione ${field.label.toLowerCase()}`} />
               </SelectTrigger>
               <SelectContent>
@@ -275,7 +280,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
       case 'url':
         return (
           <div className="space-y-2" data-testid={`field-${field.name}`}>
-            <Label className="flex items-center gap-2">
+            <Label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
               <Icon className="w-4 h-4" />
               {field.label}
               {isRequired && <span className="text-red-500">*</span>}
@@ -286,6 +291,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
               placeholder={field.placeholder || "https://..."}
               onChange={(e) => handleValueChange(field.id, e.target.value)}
               onBlur={(e) => handleFieldBlur(field.id, e.target.value)}
+              className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
               data-testid={`input-${field.name}`}
             />
           </div>
@@ -294,7 +300,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
       case 'email':
         return (
           <div className="space-y-2" data-testid={`field-${field.name}`}>
-            <Label className="flex items-center gap-2">
+            <Label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
               <Icon className="w-4 h-4" />
               {field.label}
               {isRequired && <span className="text-red-500">*</span>}
@@ -305,6 +311,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
               placeholder={field.placeholder || "email@exemplo.com"}
               onChange={(e) => handleValueChange(field.id, e.target.value)}
               onBlur={(e) => handleFieldBlur(field.id, e.target.value)}
+              className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
               data-testid={`input-${field.name}`}
             />
           </div>
@@ -328,17 +335,9 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
   }
 
   return (
-    <Card data-testid="task-custom-fields">
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Type className="w-5 h-5" />
-          Campos Personalizados
-        </CardTitle>
-        <CardDescription>
-          Preencha os campos personalizados desta tarefa
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4" data-testid="task-custom-fields">
+      <h4 className="text-sm font-medium text-slate-700 mb-3">Campos Personalizados</h4>
+      <div className="space-y-3">
         {customFields.map((field) => (
           <div key={field.id}>
             {renderFieldInput(field)}
@@ -351,11 +350,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
             Salvando...
           </div>
         )}
-
-        <div className="text-xs text-gray-500">
-          Os valores são salvos automaticamente ao sair de cada campo
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
