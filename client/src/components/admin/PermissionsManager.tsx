@@ -45,15 +45,15 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
     queryKey: ["/api/profiles"],
   });
 
-  // Secondary queries - load only when relevant tab is active
-  const { data: users = [] } = useQuery<UserType[]>({
+  // Secondary queries - completely disabled for performance
+  const { data: users = [], refetch: refetchUsers } = useQuery<UserType[]>({
     queryKey: ["/api/users"],
-    enabled: activeTab === "quick-assign", // Only load when quick-assign tab is active
+    enabled: false, // Disabled completely
   });
 
-  const { data: teams = [] } = useQuery<Team[]>({
+  const { data: teams = [], refetch: refetchTeams } = useQuery<Team[]>({
     queryKey: ["/api/teams"],
-    enabled: activeTab === "quick-assign", // Only load when quick-assign tab is active
+    enabled: false, // Disabled completely
   });
 
   // Target-specific permissions
@@ -159,6 +159,22 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
     onSettled: () => {
       setIsSyncing(false);
     },
+  });
+
+  // Tertiary queries - all disabled for performance
+  const { data: userTeams = [], refetch: refetchUserTeams } = useQuery<UserTeam[]>({
+    queryKey: ["/api/user-teams"],
+    enabled: false,
+  });
+
+  const { data: teamProfiles = [], refetch: refetchTeamProfiles } = useQuery<TeamProfile[]>({
+    queryKey: ["/api/team-profiles"],
+    enabled: false,
+  });
+
+  const { data: profilePermissions = [], refetch: refetchProfilePermissions } = useQuery<ProfilePermission[]>({
+    queryKey: ["/api/profile-permissions"],
+    enabled: false,
   });
 
   // Query para relatório de funcionalidades
@@ -280,8 +296,27 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="permissions">Permissões Detalhadas</TabsTrigger>
           <TabsTrigger value="profiles">Perfis</TabsTrigger>
-          <TabsTrigger value="quick-assign">Atribuição Rápida</TabsTrigger>
-          <TabsTrigger value="sync">Sincronização</TabsTrigger>
+          <TabsTrigger 
+            value="quick-assign"
+            onClick={() => {
+              // Load data only when tab is clicked
+              refetchUsers();
+              refetchTeams();
+              refetchUserTeams();
+              refetchTeamProfiles();
+            }}
+          >
+            Atribuição Rápida
+          </TabsTrigger>
+          <TabsTrigger 
+            value="sync"
+            onClick={() => {
+              // Load data only when tab is clicked
+              refetchProfilePermissions();
+            }}
+          >
+            Sincronização
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="permissions" className="space-y-4">
