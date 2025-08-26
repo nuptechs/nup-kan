@@ -85,7 +85,10 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
                   {/* Botões de edição - aparecem no hover */}
                   <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <button
-                      onClick={() => onEditColumn?.(column)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditColumn?.(column);
+                      }}
                       className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-blue-100 flex items-center justify-center transition-all duration-200"
                       data-testid={`button-edit-column-${column.id}`}
                       title="Editar coluna"
@@ -94,7 +97,10 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
                     </button>
                     
                     <button
-                      onClick={() => onDeleteColumn?.(column.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteColumn?.(column.id);
+                      }}
                       className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-red-100 flex items-center justify-center transition-all duration-200"
                       data-testid={`button-delete-column-${column.id}`}
                       title="Excluir coluna"
@@ -104,7 +110,10 @@ export function KanbanColumn({ column, tasks, isDragOver, onTaskClick, onAddTask
                   </div>
                   
                   <button
-                    onClick={() => onAddTask?.()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddTask?.();
+                    }}
                     className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-indigo-100 flex items-center justify-center group transition-all duration-200 opacity-50 hover:opacity-100"
                     data-testid={`button-add-task-${column.id}`}
                   >
