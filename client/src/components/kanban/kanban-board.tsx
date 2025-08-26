@@ -84,12 +84,21 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
       return response.json();
     },
     onSuccess: () => {
+      // Force refresh all column-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
       queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      
       // Invalidate board-specific queries  
       if (boardId) {
         queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/tasks`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}`] });
       }
+      
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: [columnsEndpoint] });
+      
       toast({
         title: "Coluna excluída",
         description: "A coluna foi removida com sucesso.",
