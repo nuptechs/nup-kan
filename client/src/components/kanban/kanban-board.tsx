@@ -506,6 +506,24 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
                     </div>
                   );
                 })}
+              
+              {/* Botão + para adicionar nova coluna */}
+              {!isReadOnly && (
+                <PermissionGuard permissions={["Criar Colunas"]}>
+                  <div className="min-w-64 flex items-center justify-center">
+                    <button
+                      onClick={handleManageColumns}
+                      className="flex flex-col items-center justify-center h-20 w-full rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all duration-200 group"
+                      data-testid="button-add-column"
+                    >
+                      <Plus className="w-5 h-5 text-gray-400 group-hover:text-blue-500 mb-1" />
+                      <span className="text-sm text-gray-500 group-hover:text-blue-600 font-medium">
+                        Nova Coluna
+                      </span>
+                    </button>
+                  </div>
+                </PermissionGuard>
+              )}
             </div>
           )}
         </div>
