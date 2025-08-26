@@ -369,9 +369,15 @@ export class RouteHandlers {
         });
 
         res.json(board);
-      } catch (error) {
-        console.error('❌ [GATEWAY] Erro em getBoardById:', error);
-        res.status(500).json({ error: 'Board service unavailable' });
+      } catch (error: any) {
+        // Se é erro 404, retornar 404 específico
+        if (error.status === 404) {
+          console.log(`⚠️ [GATEWAY] Board não encontrado: ${req.params.id}`);
+          res.status(404).json({ error: 'Board não encontrado' });
+        } else {
+          console.error('❌ [GATEWAY] Erro em getBoardById:', error);
+          res.status(500).json({ error: 'Board service unavailable' });
+        }
       }
     },
   };

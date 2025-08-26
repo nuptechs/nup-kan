@@ -190,7 +190,7 @@ export default function TaskPriorityPage() {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => setLocation("/kanban/cd3c01f3-e346-4213-9f8c-6acbf6dd69ab")}
+            onClick={() => setLocation("/kanban")}
             data-testid="button-back-to-kanban"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

@@ -1,47 +1,15 @@
 [
   {
-    "id": "log_1756247657164_8psegzhjr",
-    "timestamp": "2025-08-26T22:34:17.164Z",
-    "level": "error",
-    "message": "❌ [GATEWAY] Erro em getBoardById: Error: Board cd3c01f3-e346-4213-9f8c-6acbf6dd69ab não encontrado",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756247657163_wettgisni",
-    "timestamp": "2025-08-26T22:34:17.163Z",
-    "level": "error",
-    "message": "❌ [BOARD-SERVICE] Erro buscando board em 0ms: Error: Board cd3c01f3-e346-4213-9f8c-6acbf6dd69ab não encontrado",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756247645813_5jqxqxarb",
-    "timestamp": "2025-08-26T22:34:05.813Z",
-    "level": "error",
-    "message": "❌ [GATEWAY] Erro em getBoardById: Error: Board cd3c01f3-e346-4213-9f8c-6acbf6dd69ab não encontrado",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756247645809_lzjcpmb44",
-    "timestamp": "2025-08-26T22:34:05.809Z",
-    "level": "error",
-    "message": "❌ [BOARD-SERVICE] Erro buscando board em 0ms: Error: Board cd3c01f3-e346-4213-9f8c-6acbf6dd69ab não encontrado",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756247626743_53ww7bnsg",
-    "timestamp": "2025-08-26T22:33:46.743Z",
+    "id": "log_1756247870258_dygz7m46n",
+    "timestamp": "2025-08-26T22:37:50.258Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756247625584_unmxoo9yd",
-    "timestamp": "2025-08-26T22:33:45.584Z",
+    "id": "log_1756247868777_j2bzt0hqk",
+    "timestamp": "2025-08-26T22:37:48.777Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

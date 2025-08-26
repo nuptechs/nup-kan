@@ -209,12 +209,19 @@ export class BoardService {
         return cached;
       }
 
-      // Buscar dados do board (MongoDB First)
+      // Buscar dados do board (MongoDB First, depois PostgreSQL direto se não encontrar)
+      let board = null;
+      
+      // Primeiro: tentar na lista otimizada
       const boardsData = await QueryHandlers.getBoardsWithStats(100, 0);
-      const board = Array.isArray(boardsData) ? boardsData.find(b => b.id === boardId) : null;
-
+      board = Array.isArray(boardsData) ? boardsData.find(b => b.id === boardId) : null;
+      
+      // Se não encontrou, o board não existe
       if (!board) {
-        throw new Error(`Board ${boardId} não encontrado`);
+        console.log(`⚠️ [BOARD-SERVICE] Board ${boardId} não existe`);
+        const error = new Error(`Board não encontrado`) as any;
+        error.status = 404;
+        throw error;
       }
 
       // TODO: Verificar permissões de acesso ao board
