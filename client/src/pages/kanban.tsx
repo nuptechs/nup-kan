@@ -124,19 +124,6 @@ export default function KanbanPage() {
             </Button>
           )}
 
-          {/* User Settings Button - só para quem não é read-only */}
-          {!isReadOnly && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.location.href = "/settings"}
-              className="p-2 text-gray-400 hover:text-gray-600"
-              data-testid="button-user-settings"
-              title="Configurações do Usuário"
-            >
-              <User className="w-4 h-4" />
-            </Button>
-          )}
 
           {/* Settings Button - só para quem pode configurar */}
           {!isReadOnly && (
