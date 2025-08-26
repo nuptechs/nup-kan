@@ -566,11 +566,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async reorderTasks(reorderedTasks: { id: string; position: number }[]): Promise<void> {
+    console.log("🔍 [STORAGE] Reordenando tasks:", reorderedTasks.map(t => ({ id: t.id, position: t.position })));
+    
+    // First, let's check which tasks exist
+    const taskIds = reorderedTasks.map(t => t.id);
+    const existingTasks = await db.select({ id: tasks.id, title: tasks.title }).from(tasks).where(inArray(tasks.id, taskIds));
+    console.log("🔍 [STORAGE] Tasks existentes no DB:", existingTasks);
+    
     for (const { id, position } of reorderedTasks) {
       const result = await db
         .update(tasks)
         .set({ position })
         .where(eq(tasks.id, id));
+      
+      console.log(`🔍 [STORAGE] Update task ${id} -> position ${position}, rowCount: ${result.rowCount}`);
       
       if (result.rowCount === 0) {
         throw new Error(`Task with id ${id} not found`);
