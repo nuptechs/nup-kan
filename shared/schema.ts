@@ -26,6 +26,7 @@ export const tasks = pgTable("tasks", {
   assigneeName: text("assignee_name").default(""),
   assigneeAvatar: text("assignee_avatar").default(""),
   progress: integer("progress").notNull().default(0),
+  position: integer("position").notNull().default(0),
   tags: text("tags").array().default([]),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

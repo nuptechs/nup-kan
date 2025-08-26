@@ -564,6 +564,15 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async reorderTasks(reorderedTasks: { id: string; position: number }[]): Promise<void> {
+    for (const { id, position } of reorderedTasks) {
+      await db
+        .update(tasks)
+        .set({ position })
+        .where(eq(tasks.id, id));
+    }
+  }
+
   // Team Members methods
   async getTeamMembers(): Promise<TeamMember[]> {
     return await db.select().from(teamMembers);

@@ -546,6 +546,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/tasks/reorder", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Editar Tarefas"), 
+    async (req, res) => {
+    try {
+      const reorderedTasks = req.body.tasks;
+      await storage.reorderTasks(reorderedTasks);
+      res.status(200).json({ message: "Tasks reordered successfully" });
+    } catch (error) {
+      res.status(400).json({ message: "Failed to reorder tasks" });
+    }
+  });
+
   // Team member routes
   app.get("/api/team-members", async (req, res) => {
     try {

@@ -199,6 +199,48 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     },
   });
 
+  const reorderTasksMutation = useMutation({
+    mutationFn: async (reorderedTasks: { id: string; position: number }[]) => {
+      const response = await apiRequest("PATCH", "/api/tasks/reorder", {
+        tasks: reorderedTasks
+      });
+      return response;
+    },
+    onMutate: async (reorderedTasks: { id: string; position: number }[]) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: [tasksEndpoint] });
+
+      // Snapshot the previous value
+      const previousTasks = queryClient.getQueryData([tasksEndpoint]);
+
+      // Optimistically update task positions
+      queryClient.setQueryData([tasksEndpoint], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(task => {
+          const reorderedTask = reorderedTasks.find(rt => rt.id === task.id);
+          return reorderedTask ? { ...task, position: reorderedTask.position } : task;
+        });
+      });
+
+      // Return a context object with the snapshotted value
+      return { previousTasks };
+    },
+    onError: (err, newTasks, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      queryClient.setQueryData([tasksEndpoint], context?.previousTasks);
+      
+      toast({
+        title: "Erro",
+        description: "Falha ao reordenar tarefas. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: [tasksEndpoint] });
+    },
+  });
+
   const handleDragEnd = (result: DropResult) => {
     // Block drag and drop in read-only mode
     if (isReadOnly) return;
@@ -235,8 +277,33 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     const task = tasks.find((t) => t.id === draggableId);
     if (!task) return;
 
-    // Check WIP limits - only count if this is a different task or moving to different column
-    const destColumn = columns.find((c) => c.id === destination.droppableId);
+    const sourceColumn = columns.find(col => col.id === source.droppableId);
+    const destColumn = columns.find(col => col.id === destination.droppableId);
+    
+    if (!sourceColumn || !destColumn) return;
+
+    // Check if reordering within the same column
+    if (source.droppableId === destination.droppableId) {
+      // Reordering within the same column
+      const sourceStatus = getStatusFromColumnTitle(sourceColumn.title);
+      if (!sourceStatus) return;
+      
+      const columnTasks = getTasksByColumn(source.droppableId);
+      const reorderedTasks = Array.from(columnTasks);
+      const [movedTask] = reorderedTasks.splice(source.index, 1);
+      reorderedTasks.splice(destination.index, 0, movedTask);
+      
+      // Update positions
+      const tasksWithNewPositions = reorderedTasks.map((t, index) => ({
+        id: t.id,
+        position: index,
+      }));
+      
+      reorderTasksMutation.mutate(tasksWithNewPositions);
+      return;
+    }
+
+    // Moving between different columns - check WIP limits
     if (destColumn?.wipLimit) {
       // Need to check actual status instead of column ID for WIP limits
       const expectedStatus = getStatusFromColumnTitle(destColumn.title);
@@ -254,16 +321,35 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     }
 
     // Update task status - convert column ID to correct status
-    const destinationColumn = columns.find(col => col.id === destination.droppableId);
-    if (!destinationColumn) return;
-    
-    const newStatus = getStatusFromColumnTitle(destinationColumn.title);
+    const newStatus = getStatusFromColumnTitle(destColumn.title);
     if (!newStatus) return;
     
+    // Get tasks in destination column to set proper position
+    const destColumnTasks = getTasksByColumn(destination.droppableId);
+    const newPosition = destination.index;
+    
+    // Update both status and position when moving between columns
     updateTaskMutation.mutate({
       taskId: draggableId,
-      updates: { status: newStatus },
+      updates: { 
+        status: newStatus,
+        position: newPosition,
+      },
     });
+    
+    // Also need to reorder remaining tasks in destination column
+    const updatedDestTasks = [...destColumnTasks];
+    updatedDestTasks.splice(destination.index, 0, task);
+    
+    const tasksToReorder = updatedDestTasks.map((t, index) => ({
+      id: t.id,
+      position: index,
+    }));
+    
+    // Only reorder if there are other tasks to reorder
+    if (tasksToReorder.length > 1) {
+      setTimeout(() => reorderTasksMutation.mutate(tasksToReorder), 100);
+    }
   };
 
   // Enhanced search function - title and assignee names (both legacy and new structure)
@@ -297,8 +383,10 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     const expectedStatus = getStatusFromColumnTitle(column.title);
     if (!expectedStatus) return [];
     
-    // Use filtered tasks instead of all tasks
-    return filteredTasks.filter((task) => task.status === expectedStatus);
+    // Use filtered tasks instead of all tasks and sort by position
+    return filteredTasks
+      .filter((task) => task.status === expectedStatus)
+      .sort((a, b) => (a.position || 0) - (b.position || 0));
   };
 
   const handleTaskClick = (task: Task) => {
