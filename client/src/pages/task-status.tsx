@@ -303,6 +303,7 @@ export default function TaskStatusPage() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Card>

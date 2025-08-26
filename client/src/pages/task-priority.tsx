@@ -314,6 +314,7 @@ export default function TaskPriorityPage() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Card>
