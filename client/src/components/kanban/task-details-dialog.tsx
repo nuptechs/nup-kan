@@ -382,8 +382,11 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                           min="0"
                           max="100"
                           {...field}
-                          value={field.value || 0}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          value={field.value?.toString() || "0"}
+                          onChange={(e) => {
+                            const value = e.target.value === "" ? 0 : parseInt(e.target.value);
+                            field.onChange(isNaN(value) ? 0 : Math.min(Math.max(value, 0), 100));
+                          }}
                           data-testid="input-edit-progress"
                         />
                       </FormControl>
