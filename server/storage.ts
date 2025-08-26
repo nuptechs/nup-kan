@@ -366,25 +366,67 @@ export class DatabaseStorage implements IStorage {
       throw new Error(`Task with id ${id} not found`);
     }
     
-    // Create event for task update
-    if (oldTask && task.status !== oldTask.status) {
-      await this.createTaskEvent({
-        taskId: task.id,
-        eventType: "moved",
-        description: `Task movida para ${task.status}`,
-        userName: "Sistema",
-        userAvatar: "S",
-        metadata: `De ${oldTask.status} para ${task.status}`
-      });
-    } else {
-      await this.createTaskEvent({
-        taskId: task.id,
-        eventType: "updated",
-        description: "Task atualizada",
-        userName: "Sistema", 
-        userAvatar: "S",
-        metadata: ""
-      });
+    // Only create events for significant changes
+    if (oldTask) {
+      // Status change - task moved between columns
+      if (task.status !== oldTask.status) {
+        const statusNames: Record<string, string> = {
+          'backlog': 'Backlog',
+          'todo': 'To Do', 
+          'inprogress': 'In Progress',
+          'review': 'Review',
+          'done': 'Done'
+        };
+        
+        await this.createTaskEvent({
+          taskId: task.id,
+          eventType: "moved",
+          description: `Task movida para ${statusNames[task.status] || task.status}`,
+          userName: "Sistema",
+          userAvatar: "S",
+          metadata: `De ${statusNames[oldTask.status] || oldTask.status} para ${statusNames[task.status] || task.status}`
+        });
+      }
+      // Title change
+      else if (task.title !== oldTask.title) {
+        await this.createTaskEvent({
+          taskId: task.id,
+          eventType: "updated",
+          description: "Título alterado",
+          userName: "Sistema",
+          userAvatar: "S",
+          metadata: `De "${oldTask.title}" para "${task.title}"`
+        });
+      }
+      // Priority change
+      else if (task.priority !== oldTask.priority) {
+        const priorityNames: Record<string, string> = {
+          'low': 'Baixa',
+          'medium': 'Média', 
+          'high': 'Alta'
+        };
+        
+        await this.createTaskEvent({
+          taskId: task.id,
+          eventType: "updated",
+          description: "Prioridade alterada",
+          userName: "Sistema",
+          userAvatar: "S",
+          metadata: `De ${priorityNames[oldTask.priority] || oldTask.priority} para ${priorityNames[task.priority] || task.priority}`
+        });
+      }
+      // Progress change - only for significant changes (>= 10%)
+      else if (Math.abs((task.progress || 0) - (oldTask.progress || 0)) >= 10) {
+        await this.createTaskEvent({
+          taskId: task.id,
+          eventType: "updated",
+          description: "Progresso atualizado",
+          userName: "Sistema",
+          userAvatar: "S",
+          metadata: `${oldTask.progress || 0}% → ${task.progress || 0}%`
+        });
+      }
+      // Skip events for minor changes (tags, assignees, etc.)
     }
     
     return task;
