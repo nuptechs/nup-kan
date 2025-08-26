@@ -22,25 +22,7 @@ interface KanbanBoardProps {
   searchQuery?: string;
 }
 
-// Utility function to map column titles to task status values
-const getStatusFromColumnTitle = (columnTitle: string): string | null => {
-  const statusMap: Record<string, string> = {
-    "Backlog": "backlog",
-    "To Do": "todo", 
-    "In Progress": "inprogress",
-    "Review": "review",
-    "Done": "done"
-  };
-  
-  // If direct mapping exists, use it
-  if (statusMap[columnTitle]) {
-    return statusMap[columnTitle];
-  }
-  
-  // Otherwise, convert column title to lowercase status format
-  // This allows custom column names to work
-  return columnTitle.toLowerCase().replace(/\s+/g, '');
-};
+// Status is now the column ID directly - no more hardcoded mapping needed
 
 export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-access", searchQuery = "" }: KanbanBoardProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -284,9 +266,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
     // Check if reordering within the same column
     if (source.droppableId === destination.droppableId) {
-      // Reordering within the same column
-      const sourceStatus = getStatusFromColumnTitle(sourceColumn.title);
-      if (!sourceStatus) return;
+      // Reordering within the same column - use column ID directly
       
       const columnTasks = getTasksByColumn(source.droppableId);
       const reorderedTasks = Array.from(columnTasks);
@@ -306,24 +286,20 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
     // Moving between different columns - check WIP limits
     if (destColumn?.wipLimit) {
-      // Need to check actual status instead of column ID for WIP limits
-      const expectedStatus = getStatusFromColumnTitle(destColumn.title);
-      if (expectedStatus) {
-        const tasksInDestination = tasks.filter((t) => t.status === expectedStatus && t.id !== draggableId);
-        if (tasksInDestination.length >= destColumn.wipLimit) {
-          toast({
-            title: "Limite WIP Excedido",
-            description: `A coluna ${destColumn.title} já atingiu o limite de ${destColumn.wipLimit} tarefas.`,
-            variant: "destructive",
-          });
-          return;
-        }
+      // Use column ID directly for WIP limits check
+      const tasksInDestination = tasks.filter((t) => t.status === destColumn.id && t.id !== draggableId);
+      if (tasksInDestination.length >= destColumn.wipLimit) {
+        toast({
+          title: "Limite WIP Excedido",
+          description: `A coluna ${destColumn.title} já atingiu o limite de ${destColumn.wipLimit} tarefas.`,
+          variant: "destructive",
+        });
+        return;
       }
     }
 
-    // Update task status - convert column ID to correct status
-    const newStatus = getStatusFromColumnTitle(destColumn.title);
-    if (!newStatus) return;
+    // Update task status - use destination column ID directly
+    const newStatus = destColumn.id;
     
     // Get tasks in destination column to set proper position
     const destColumnTasks = getTasksByColumn(destination.droppableId);
@@ -378,16 +354,9 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   }, [tasks, searchQuery, allAssignees]);
 
   const getTasksByColumn = (columnId: string) => {
-    // Find the column to get its title
-    const column = columns.find(col => col.id === columnId);
-    if (!column) return [];
-    
-    const expectedStatus = getStatusFromColumnTitle(column.title);
-    if (!expectedStatus) return [];
-    
-    // Use filtered tasks instead of all tasks and sort by position
+    // Direct mapping: task.status = column.id
     return filteredTasks
-      .filter((task) => task.status === expectedStatus)
+      .filter((task) => task.status === columnId)
       .sort((a, b) => (a.position || 0) - (b.position || 0));
   };
 
