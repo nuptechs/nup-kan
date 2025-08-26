@@ -159,7 +159,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] z-[99999]" data-testid="add-task-dialog">
+      <DialogContent className="sm:max-w-[425px] z-[99999] max-h-[90vh] flex flex-col" data-testid="add-task-dialog">
         <DialogHeader className="sr-only">
           <DialogTitle data-testid="dialog-title">Adicionar Nova Tarefa</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
@@ -167,7 +167,13 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
+        {/* Cabeçalho fixo */}
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 pb-3 mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Nova Tarefa</h2>
+        </div>
+
+        <div className="flex-1 overflow-auto">
+          <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
@@ -368,6 +374,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
             </div>
           </form>
         </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );
