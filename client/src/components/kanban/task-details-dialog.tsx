@@ -240,8 +240,8 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden [&>button]:hidden p-0" data-testid="task-details-dialog">
         {/* Cabeçalho fixo com título e botões */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 pb-4">
-          <div className="flex items-start justify-between">
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 pb-3">
+          <div className="flex items-center justify-between">
             <div className="flex-1 pr-4">
               <DialogTitle className="text-xl font-semibold text-gray-900" data-testid="dialog-title">
                 {isEditing ? "Editar Tarefa" : task.title}
@@ -253,8 +253,8 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
               )}
             </div>
             
-            {/* Botões de ação no canto superior direito */}
-            <div className="flex flex-col gap-1">
+            {/* Botões de ação organizados horizontalmente */}
+            <div className="flex gap-1">
               <Button
                 variant="ghost"
                 size="sm"
@@ -295,7 +295,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         </div>
 
         {/* Conteúdo scrollável */}
-        <div className="overflow-y-auto max-h-[calc(80vh-5rem)] scrollbar-hide p-6 pt-4">
+        <div className="flex-1 overflow-y-auto p-6 pt-4" style={{ maxHeight: 'calc(80vh - 4rem)' }}>
 
         {isEditing ? (
           <Form {...form}>
