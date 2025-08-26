@@ -336,7 +336,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-blue-700 mb-1.5">Título</FormLabel>
+                    <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">Título</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Digite o título da tarefa"
@@ -355,7 +355,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-blue-700 mb-1.5">Descrição</FormLabel>
+                    <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">Descrição</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Digite a descrição da tarefa"
@@ -377,7 +377,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-blue-700 mb-1.5">Status</FormLabel>
+                      <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">Status</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger 
@@ -405,7 +405,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                   name="priority"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-blue-700 mb-1.5">Prioridade</FormLabel>
+                      <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">Prioridade</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger 
@@ -433,7 +433,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                   name="progress"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium text-blue-700 mb-1.5">Progresso (%)</FormLabel>
+                      <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">Progresso (%)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
