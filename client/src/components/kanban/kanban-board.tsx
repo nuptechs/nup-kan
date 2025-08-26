@@ -13,7 +13,7 @@ import { Plus, Search, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
-import type { Task, Column } from "@shared/schema";
+import type { Task, Column, TaskAssignee, User } from "@shared/schema";
 
 interface KanbanBoardProps {
   boardId?: string;
@@ -63,6 +63,35 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
   const { data: columns = [], isLoading: columnsLoading } = useQuery<Column[]>({
     queryKey: [columnsEndpoint],
+  });
+
+  // Fetch all assignees for all tasks to enable search
+  const { data: allAssignees = {} } = useQuery<Record<string, (TaskAssignee & { user: User })[]>>({
+    queryKey: ["/api/tasks/assignees/bulk", tasks.map(t => t.id)],
+    enabled: tasks.length > 0,
+    queryFn: async () => {
+      const assigneesData: Record<string, (TaskAssignee & { user: User })[]> = {};
+      
+      // Fetch assignees for all tasks in parallel
+      const promises = tasks.map(async (task) => {
+        try {
+          const response = await fetch(`/api/tasks/${task.id}/assignees`, {
+            credentials: "include",
+          });
+          if (response.ok) {
+            const data = await response.json();
+            assigneesData[task.id] = data;
+          } else {
+            assigneesData[task.id] = [];
+          }
+        } catch (error) {
+          assigneesData[task.id] = [];
+        }
+      });
+      
+      await Promise.all(promises);
+      return assigneesData;
+    },
   });
 
   const updateTaskMutation = useMutation({
@@ -217,7 +246,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     });
   };
 
-  // Simplified search function - only title and assignee name
+  // Enhanced search function - title and assignee names (both legacy and new structure)
   const filteredTasks = useMemo(() => {
     if (!searchQuery.trim()) return tasks;
     
@@ -227,12 +256,18 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
       // Search in title
       if (task.title?.toLowerCase().includes(query)) return true;
       
-      // Search in assignee name
+      // Search in legacy assignee name field
       if (task.assigneeName?.toLowerCase().includes(query)) return true;
+      
+      // Search in new assignees structure
+      const taskAssignees = allAssignees[task.id] || [];
+      if (taskAssignees.some(assignee => 
+        assignee.user.name?.toLowerCase().includes(query)
+      )) return true;
       
       return false;
     });
-  }, [tasks, searchQuery]);
+  }, [tasks, searchQuery, allAssignees]);
 
   const getTasksByColumn = (columnId: string) => {
     // Find the column to get its title
