@@ -255,15 +255,6 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
             
             {/* Botões de ação organizados horizontalmente */}
             <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="w-8 h-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
-                data-testid="button-close-task"
-              >
-                <X className="w-4 h-4" />
-              </Button>
               {!isEditing && (
                 <Button
                   variant="ghost"
@@ -289,6 +280,15 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                 }}
               >
                 <Trash2 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="w-8 h-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+                data-testid="button-close-task"
+              >
+                <X className="w-4 h-4" />
               </Button>
             </div>
           </div>
