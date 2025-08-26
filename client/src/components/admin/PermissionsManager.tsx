@@ -37,21 +37,36 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // ONLY these 2 queries load on mount - everything else is lazy loaded
-  const { data: permissions = [], isLoading: permissionsLoading } = useQuery<Permission[]>({
-    queryKey: ["/api/permissions"],
+  // 🚀 SINGLE OPTIMIZED QUERY - All data in one request
+  const { data: permissionsData, isLoading: dataLoading } = useQuery({
+    queryKey: ["/api/permissions-data"],
+    select: (data: any) => data || {
+      permissions: [],
+      profiles: [],
+      users: [],
+      teams: [],
+      userTeams: [],
+      teamProfiles: [],
+      profilePermissions: []
+    }
   });
 
-  const { data: profiles = [], isLoading: profilesLoading } = useQuery<Profile[]>({
-    queryKey: ["/api/profiles"],
-  });
+  // Extract data from consolidated response
+  const permissions = permissionsData?.permissions || [];
+  const profiles = permissionsData?.profiles || [];
+  const permissionsLoading = dataLoading;
+  const profilesLoading = dataLoading;
 
-  // NO REACTIVE QUERIES - everything manual
-  const [users, setUsers] = useState<UserType[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [userTeams, setUserTeams] = useState<UserTeam[]>([]);
-  const [teamProfiles, setTeamProfiles] = useState<TeamProfile[]>([]);
-  const [profilePermissions, setProfilePermissions] = useState<ProfilePermission[]>([]);
+  // Extract all data from consolidated response  
+  const users = permissionsData?.users || [];
+  const teams = permissionsData?.teams || [];
+  const userTeams = permissionsData?.userTeams || [];
+  const teamProfiles = permissionsData?.teamProfiles || [];
+  const profilePermissions = permissionsData?.profilePermissions || [];
+
+  // Keep for UI state (not data fetching)
+  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [selectedProfile, setSelectedProfile] = useState<string>("");
 
   // Target-specific permissions
   const { data: targetPermissions = [] } = useQuery<Permission[]>({
@@ -115,8 +130,8 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
+      // Invalidate consolidated cache
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       toast({
         title: "Perfil atribuído",
         description: "O perfil foi atribuído com sucesso.",
@@ -139,7 +154,8 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
     onSuccess: async (response) => {
       const data = await response.json();
       setSyncReport(data.report);
-      queryClient.invalidateQueries({ queryKey: ["/api/permissions"] });
+      // Invalidate consolidated cache for fresh data  
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       toast({
         title: "Sincronização Concluída",
         description: data.message || "Permissões sincronizadas com sucesso!",

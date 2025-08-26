@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { getPermissionsData, invalidatePermissionsCache } from './permissions-data';
 import bcrypt from "bcryptjs";
 import { promises as fs } from 'fs';
 import { join } from 'path';
@@ -1748,6 +1749,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🚀 CONSOLIDATED PERMISSIONS DATA - Single optimized endpoint
+  app.get("/api/permissions-data", getPermissionsData);
+
   // Permission routes
   app.get("/api/permissions", async (req, res) => {
     try {
@@ -1774,6 +1778,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const permissionData = insertPermissionSchema.parse(req.body);
       const permission = await storage.createPermission(permissionData);
+      invalidatePermissionsCache(); // 🚀 Invalidate cache on data change
       res.status(201).json(permission);
     } catch (error) {
       res.status(400).json({ message: "Invalid permission data" });
