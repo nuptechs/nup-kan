@@ -1,6 +1,7 @@
 import { TaskCard } from "./task-card";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings, Edit2, Trash2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Plus, Settings, Edit2, Trash2, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Task, Column, TaskAssignee, User } from "@shared/schema";
 
@@ -85,32 +86,9 @@ export function KanbanColumn({
         {/* Header */}
         <div className="p-4 pb-2 group">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-medium text-gray-800 flex items-center relative" data-testid={`column-title-${column.id}`}>
+            <h2 className="font-medium text-gray-800 flex items-center" data-testid={`column-title-${column.id}`}>
               <span className={cn("w-2 h-2 rounded-full mr-2", getColumnColorClasses(column.color))}></span>
               {column.title}
-              
-              {/* Linha L saindo do título */}
-              {!isReadOnly && (
-                <>
-                  {/* Linha vertical saindo de baixo do título */}
-                  <div className="absolute left-3 top-full w-px h-3 bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                  
-                  {/* Linha horizontal do L - centralizada com o meio do botão */}
-                  <div className="absolute left-3 top-full translate-y-[18px] w-8 h-px bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                  
-                  {/* Botão + no final da linha */}
-                  <button
-                    onClick={() => {
-                      onAddTask?.(column.id);
-                    }}
-                    className="absolute left-10 top-full translate-y-4 w-5 h-5 bg-white border border-gray-200 hover:border-gray-300 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center group/add opacity-60 hover:opacity-100 shadow-sm z-10"
-                    data-testid={`button-add-task-column-${column.id}`}
-                    title="Adicionar nova tarefa"
-                  >
-                    <Plus className="w-2.5 h-2.5 group-hover/add:scale-110 transition-transform duration-200" />
-                  </button>
-                </>
-              )}
             </h2>
             <div className="flex items-center space-x-1">
               <span
@@ -123,31 +101,56 @@ export function KanbanColumn({
               {/* Botões de ação - só aparecem se não for read-only */}
               {!isReadOnly && (
                 <>
-                  {/* Botões de edição - aparecem no hover */}
+                  {/* Botões de ação - aparecem no hover */}
                   <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {/* Botão + para adicionar tarefa */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onEditColumn?.(column);
+                        onAddTask?.(column.id);
                       }}
-                      className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-blue-100 flex items-center justify-center transition-all duration-200"
-                      data-testid={`button-edit-column-${column.id}`}
-                      title="Editar coluna"
+                      className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-green-100 flex items-center justify-center transition-all duration-200"
+                      data-testid={`button-add-task-column-${column.id}`}
+                      title="Adicionar nova tarefa"
                     >
-                      <Edit2 className="w-3 h-3 text-gray-400 hover:text-blue-500" />
+                      <Plus className="w-3 h-3 text-gray-400 hover:text-green-500" />
                     </button>
                     
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteColumn?.(column.id);
-                      }}
-                      className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-red-100 flex items-center justify-center transition-all duration-200"
-                      data-testid={`button-delete-column-${column.id}`}
-                      title="Excluir coluna"
-                    >
-                      <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-500" />
-                    </button>
+                    {/* Menu de três pontinhos */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-gray-200 flex items-center justify-center transition-all duration-200"
+                          data-testid={`button-column-menu-${column.id}`}
+                          title="Mais opções"
+                        >
+                          <MoreHorizontal className="w-3 h-3 text-gray-400 hover:text-gray-600" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditColumn?.(column);
+                          }}
+                          data-testid={`menu-edit-column-${column.id}`}
+                        >
+                          <Edit2 className="w-4 h-4 mr-2" />
+                          Editar coluna
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteColumn?.(column.id);
+                          }}
+                          className="text-red-600 focus:text-red-600"
+                          data-testid={`menu-delete-column-${column.id}`}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Excluir coluna
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </>
               )}
@@ -171,7 +174,7 @@ export function KanbanColumn({
         </div>
         
         {/* Tasks Container */}
-        <div className="flex-1 overflow-y-auto px-4 pb-4 pt-6 space-y-2" data-testid={`tasks-container-${column.id}`}>
+        <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2" data-testid={`tasks-container-${column.id}`}>
           {tasks.map((task) => (
             <TaskCard
               key={task.id}
