@@ -169,7 +169,9 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
 
         {/* Cabeçalho fixo */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 pb-3 mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Título</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {form.watch("title") || "Nova Tarefa"}
+          </h2>
         </div>
 
         <div className="flex-1 overflow-auto">
