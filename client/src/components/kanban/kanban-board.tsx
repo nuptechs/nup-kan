@@ -5,6 +5,7 @@ import { KanbanColumn } from "./kanban-column";
 import { TaskDetailsDialog } from "./task-details-dialog";
 import { AddTaskDialog } from "./add-task-dialog";
 import { ColumnManagementDialog } from "./column-management-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +45,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
   const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
   const [editingColumn, setEditingColumn] = useState<Column | null>(null);
+  const [columnToDelete, setColumnToDelete] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { canCreateTasks, canEditTasks, canManageColumns } = usePermissions();
@@ -237,9 +239,14 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   };
 
   const handleDeleteColumn = async (columnId: string) => {
-    // Open column management dialog to handle deletion
-    // This centralizes column deletion logic in one place
-    setIsColumnManagementOpen(true);
+    setColumnToDelete(columnId);
+  };
+
+  const confirmDeleteColumn = () => {
+    if (columnToDelete) {
+      deleteColumnMutation.mutate(columnToDelete);
+      setColumnToDelete(null);
+    }
   };
 
   if (tasksLoading || columnsLoading) {
@@ -376,6 +383,29 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
           editingColumn={editingColumn}
         />
       )}
+
+      {/* Delete Column Confirmation Dialog */}
+      <AlertDialog open={!!columnToDelete} onOpenChange={() => setColumnToDelete(null)}>
+        <AlertDialogContent data-testid="dialog-delete-column-confirmation">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. A coluna e todas as suas tarefas serão permanentemente excluídas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete-column">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteColumn}
+              disabled={deleteColumnMutation.isPending}
+              className="bg-red-600 hover:bg-red-700"
+              data-testid="button-confirm-delete-column"
+            >
+              {deleteColumnMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
