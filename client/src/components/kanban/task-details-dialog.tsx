@@ -238,58 +238,64 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden [&>button]:hidden" data-testid="task-details-dialog">
-        {/* Botões de ação fixos no canto superior esquerdo */}
-        <div className="absolute top-4 left-4 z-50 flex flex-col gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="w-7 h-7 p-0 text-gray-400 hover:text-gray-600 bg-white/80 hover:bg-white shadow-sm rounded-full transition-all opacity-75 hover:opacity-100"
-            data-testid="button-close-task"
-          >
-            <X className="w-3.5 h-3.5" />
-          </Button>
-          {!isEditing && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditing(true);
-              }}
-              className="w-7 h-7 p-0 text-gray-400 hover:text-blue-500 bg-white/80 hover:bg-white shadow-sm rounded-full transition-all opacity-75 hover:opacity-100"
-              data-testid="button-edit-task"
-            >
-              <Edit className="w-3.5 h-3.5" />
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-7 h-7 p-0 text-gray-400 hover:text-red-500 bg-white/80 hover:bg-white shadow-sm rounded-full transition-all opacity-75 hover:opacity-100"
-            data-testid="button-delete-task"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsDeleteDialogOpen(true);
-            }}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </Button>
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden [&>button]:hidden p-0" data-testid="task-details-dialog">
+        {/* Cabeçalho fixo com título e botões */}
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 pb-4">
+          <div className="flex items-start justify-between">
+            <div className="flex-1 pr-4">
+              <DialogTitle className="text-xl font-semibold text-gray-900" data-testid="dialog-title">
+                {isEditing ? "Editar Tarefa" : task.title}
+              </DialogTitle>
+              {isEditing && (
+                <DialogDescription className="mt-1 text-sm text-gray-600">
+                  Modifique as informações da tarefa conforme necessário.
+                </DialogDescription>
+              )}
+            </div>
+            
+            {/* Botões de ação no canto superior direito */}
+            <div className="flex flex-col gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="w-8 h-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+                data-testid="button-close-task"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+              {!isEditing && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditing(true);
+                  }}
+                  className="w-8 h-8 p-0 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-all"
+                  data-testid="button-edit-task"
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-8 h-8 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
+                data-testid="button-delete-task"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsDeleteDialogOpen(true);
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Conteúdo scrollável */}
-        <div className="overflow-y-auto max-h-[calc(80vh-2rem)] scrollbar-hide">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold pr-16" data-testid="dialog-title">
-              {isEditing ? "Editar Tarefa" : task.title}
-            </DialogTitle>
-            {isEditing && (
-              <DialogDescription>
-                Modifique as informações da tarefa conforme necessário.
-              </DialogDescription>
-            )}
-          </DialogHeader>
+        <div className="overflow-y-auto max-h-[calc(80vh-5rem)] scrollbar-hide p-6 pt-4">
 
         {isEditing ? (
           <Form {...form}>
