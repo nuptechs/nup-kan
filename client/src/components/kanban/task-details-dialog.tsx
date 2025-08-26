@@ -157,6 +157,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         description: "Tarefa atualizada com sucesso!",
       });
       setIsEditing(false);
+      onClose(); // Fecha o modal automaticamente após edição
     },
     onError: () => {
       toast({
