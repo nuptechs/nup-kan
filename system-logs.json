@@ -1,5 +1,19 @@
 [
   {
+    "id": "action_1756167375353_mhz0ylok5",
+    "timestamp": "2025-08-26T00:16:15.353Z",
+    "level": "info",
+    "message": "Sistema executou: Criar coluna \"aaa\"",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "system",
+    "userName": "Sistema",
+    "action": "Criar coluna \"aaa\"",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 76
+  },
+  {
     "id": "log_1756167360225_of9hev5w9",
     "timestamp": "2025-08-26T00:16:00.225Z",
     "level": "warn",
