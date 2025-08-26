@@ -16,7 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { updateTaskSchema } from "@shared/schema";
-import type { Task, TeamMember } from "@shared/schema";
+import type { Task, TeamMember, Tag } from "@shared/schema";
 import { TagSelector } from "./tag-selector";
 import { MultiUserSelector } from "./multi-user-selector";
 import { z } from "zod";
@@ -82,6 +82,11 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
 
   const { data: teamMembers = [] } = useQuery<TeamMember[]>({
     queryKey: ["/api/team-members"],
+  });
+
+  // Fetch all tags to get colors
+  const { data: allTags = [] } = useQuery<Tag[]>({
+    queryKey: ["/api/tags"],
   });
 
   // Get current assignees for the task
@@ -530,9 +535,19 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                 <div>
                   <h3 className="text-sm font-medium text-gray-900 mb-2">Tags</h3>
                   <div className="flex flex-wrap gap-2">
-                    {task.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs" data-testid={`task-tag-${index}`}>
-                        {tag}
+                    {allTags.filter(tag => task.tags?.includes(tag.name)).map((tag) => (
+                      <Badge 
+                        key={tag.id} 
+                        variant="secondary" 
+                        className="text-xs px-2 py-0.5 rounded-md font-medium"
+                        style={{
+                          backgroundColor: `${tag.color}20`,
+                          color: tag.color,
+                          borderColor: `${tag.color}40`,
+                        }}
+                        data-testid={`task-tag-${tag.name}`}
+                      >
+                        {tag.name}
                       </Badge>
                     ))}
                   </div>
