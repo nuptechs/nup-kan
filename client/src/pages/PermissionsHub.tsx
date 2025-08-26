@@ -158,49 +158,31 @@ export default function PermissionsHub() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Dados com configuração de cache otimizada para reduzir re-fetching
-  const { data: users = [] } = useQuery<UserType[]>({ 
-    queryKey: ["/api/users"],
-    staleTime: 10 * 60 * 1000, // 10 minutos
-    gcTime: 15 * 60 * 1000,
-    refetchOnWindowFocus: false
-  });
-  const { data: teams = [] } = useQuery<Team[]>({ 
-    queryKey: ["/api/teams"],
-    staleTime: 10 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
-    refetchOnWindowFocus: false
-  });
-  const { data: profiles = [] } = useQuery<Profile[]>({ 
-    queryKey: ["/api/profiles"],
-    staleTime: 10 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
-    refetchOnWindowFocus: false
-  });
-  const { data: permissions = [] } = useQuery<Permission[]>({ 
-    queryKey: ["/api/permissions"],
-    staleTime: 15 * 60 * 1000, // Permissões mudam menos
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false
-  });
-  const { data: userTeams = [] } = useQuery<UserTeam[]>({ 
-    queryKey: ["/api/user-teams"],
-    staleTime: 5 * 60 * 1000,
+  // 🚀 ENDPOINT CONSOLIDADO - 1 query ao invés de 7!
+  const { data: permissionsData, isLoading } = useQuery({
+    queryKey: ["/api/permissions-data"],
+    staleTime: 5 * 60 * 1000, // 5 minutos cache
     gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    select: (data: any) => data || {
+      permissions: [],
+      profiles: [],
+      users: [],
+      teams: [],
+      userTeams: [],
+      teamProfiles: [],
+      profilePermissions: []
+    }
   });
-  const { data: teamProfiles = [] } = useQuery<TeamProfile[]>({ 
-    queryKey: ["/api/team-profiles"],
-    staleTime: 10 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
-    refetchOnWindowFocus: false
-  });
-  const { data: profilePermissions = [] } = useQuery<ProfilePermission[]>({ 
-    queryKey: ["/api/profile-permissions"],
-    staleTime: 15 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false
-  });
+
+  // Extrair dados da resposta consolidada
+  const users = permissionsData?.users || [];
+  const teams = permissionsData?.teams || [];
+  const profiles = permissionsData?.profiles || [];
+  const permissions = permissionsData?.permissions || [];
+  const userTeams = permissionsData?.userTeams || [];
+  const teamProfiles = permissionsData?.teamProfiles || [];
+  const profilePermissions = permissionsData?.profilePermissions || [];
 
   // Para edição de times - obter membros atuais
   const getCurrentTeamMembers = (teamId: string) => {
@@ -249,7 +231,7 @@ export default function PermissionsHub() {
   const createUser = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/users", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       userForm.reset();
       toast({ title: "Usuário criado" });
     }
@@ -258,7 +240,7 @@ export default function PermissionsHub() {
   const updateUser = useMutation({
     mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/users/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       setEditingId(null);
       userForm.reset();
       toast({ title: "Usuário atualizado" });
@@ -268,7 +250,7 @@ export default function PermissionsHub() {
   const deleteUser = useMutation({
     mutationFn: (id: string) => apiRequest("DELETE", `/api/users/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       toast({ title: "Usuário excluído" });
     }
   });
@@ -276,7 +258,7 @@ export default function PermissionsHub() {
   const createTeam = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/teams", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       teamForm.reset();
       toast({ title: "Time criado" });
     }
@@ -285,7 +267,7 @@ export default function PermissionsHub() {
   const updateTeam = useMutation({
     mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/teams/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       setEditingId(null);
       teamForm.reset();
       toast({ title: "Time atualizado" });
@@ -295,7 +277,7 @@ export default function PermissionsHub() {
   const deleteTeam = useMutation({
     mutationFn: (id: string) => apiRequest("DELETE", `/api/teams/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       toast({ title: "Time excluído" });
     }
   });
@@ -303,7 +285,7 @@ export default function PermissionsHub() {
   const createProfile = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/profiles", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       profileForm.reset();
       toast({ title: "Perfil criado" });
     }
@@ -312,7 +294,7 @@ export default function PermissionsHub() {
   const updateProfile = useMutation({
     mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/profiles/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       setEditingId(null);
       profileForm.reset();
       toast({ title: "Perfil atualizado" });
@@ -322,7 +304,7 @@ export default function PermissionsHub() {
   const deleteProfile = useMutation({
     mutationFn: (id: string) => apiRequest("DELETE", `/api/profiles/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       toast({ title: "Perfil excluído" });
     }
   });
@@ -349,7 +331,7 @@ export default function PermissionsHub() {
     mutationFn: ({ teamId, profileId }: { teamId: string; profileId: string }) => 
       apiRequest("POST", "/api/team-profiles", { teamId, profileId }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/team-profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       toast({ title: "Time vinculado ao perfil" });
     }
   });
@@ -358,7 +340,7 @@ export default function PermissionsHub() {
     mutationFn: (linkId: string) => 
       apiRequest("DELETE", `/api/team-profiles/${linkId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/team-profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       toast({ title: "Vínculo removido" });
     }
   });
@@ -367,7 +349,7 @@ export default function PermissionsHub() {
     mutationFn: ({ userId, teamId, role = "member" }: { userId: string; teamId: string; role?: string }) => 
       apiRequest("POST", `/api/users/${userId}/teams/${teamId}`, { role }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       toast({ title: "Usuário adicionado ao time" });
     }
   });
@@ -376,7 +358,7 @@ export default function PermissionsHub() {
     mutationFn: ({ userId, teamId }: { userId: string; teamId: string }) => 
       apiRequest("DELETE", `/api/users/${userId}/teams/${teamId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       toast({ title: "Usuário removido do time" });
     }
   });
@@ -385,8 +367,8 @@ export default function PermissionsHub() {
     mutationFn: ({ permissionId, profileId }: { permissionId: string; profileId: string }) => 
       apiRequest("POST", `/api/profiles/${profileId}/permissions`, { permissionId }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/profile-permissions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       // Toast removido - será mostrado apenas no final do processo
     }
   });
@@ -395,8 +377,8 @@ export default function PermissionsHub() {
     mutationFn: ({ permissionId, profileId }: { permissionId: string; profileId: string }) => 
       apiRequest("DELETE", `/api/profiles/${profileId}/permissions/${permissionId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/profile-permissions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       toast({ title: "Permissão removida do perfil" });
     }
   });
