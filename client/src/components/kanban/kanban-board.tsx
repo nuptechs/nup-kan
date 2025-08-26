@@ -270,42 +270,6 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   return (
     <>
       <div className="flex flex-col gap-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">Board Kanban</h1>
-            {!isReadOnly && (
-              <PermissionGuard 
-                requiredPermissions={["Criar Tarefas"]} 
-                fallback={null}
-              >
-                <Button 
-                  onClick={handleAddTask}
-                  className="flex items-center gap-2"
-                  data-testid="button-add-task"
-                >
-                  <Plus className="h-4 w-4" />
-                  Nova Tarefa
-                </Button>
-              </PermissionGuard>
-            )}
-          </div>
-          
-          {!isReadOnly && (
-            <PermissionGuard 
-              requiredPermissions={["Editar Colunas"]} 
-              fallback={null}
-            >
-              <Button 
-                variant="outline" 
-                onClick={handleManageColumns}
-                data-testid="button-manage-columns"
-              >
-                Gerenciar Colunas
-              </Button>
-            </PermissionGuard>
-          )}
-        </div>
 
         {/* Kanban Board */}
         <div className="overflow-x-auto">
