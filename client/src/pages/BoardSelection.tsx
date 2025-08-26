@@ -271,7 +271,7 @@ export default function BoardSelection() {
               {canCreate("Boards") && (
                 <Button
                   onClick={() => setIsCreateOpen(true)}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-blue-600 hover:bg-blue-700 self-end"
                   data-testid="button-create-board"
                 >
                   <Plus className="w-4 h-4 mr-2" />

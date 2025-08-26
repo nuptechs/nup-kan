@@ -792,7 +792,7 @@ export default function PermissionsHub() {
           
           <Dialog>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="self-end">
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Time
               </Button>
@@ -1179,7 +1179,7 @@ export default function PermissionsHub() {
           
           <Dialog>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="self-end">
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Perfil
               </Button>
