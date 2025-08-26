@@ -59,21 +59,13 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
     enabled: !!boardId,
   });
 
-  // Get the first column's status for default value
+  // Get the first column's ID for default status
   const getDefaultStatus = () => {
     if (columns.length === 0) return "backlog";
     const firstColumn = columns.sort((a, b) => a.position - b.position)[0];
     
-    // Convert column title to status format
-    const statusMap: Record<string, string> = {
-      "Backlog": "backlog",
-      "To Do": "todo", 
-      "In Progress": "inprogress",
-      "Review": "review",
-      "Done": "done"
-    };
-    
-    return statusMap[firstColumn.title] || firstColumn.title.toLowerCase().replace(/\s+/g, '');
+    // Use column ID directly as status - no more hardcoded mapping!
+    return firstColumn.id;
   };
 
   const form = useForm<FormData>({
