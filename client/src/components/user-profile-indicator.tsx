@@ -88,14 +88,14 @@ export function UserProfileIndicator() {
                 {currentUser?.avatar || (currentUser?.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U')}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+            <div className="flex-1 min-w-0 group">
+              <p className="text-sm font-medium text-gray-900 truncate group-hover:text-gray-950 transition-colors">
                 {currentUser?.name || 'Usuário'}
               </p>
-              <p className="text-sm text-gray-500 truncate">
+              <p className="text-sm text-gray-500 truncate group-hover:text-gray-600 transition-colors">
                 {currentUser?.email || 'email@exemplo.com'}
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 group-hover:text-gray-500 transition-colors">
                 {currentUser?.role || 'Usuário'}
               </p>
             </div>
@@ -105,14 +105,14 @@ export function UserProfileIndicator() {
         <div className="p-2">
           <Button 
             variant="ghost" 
-            className="w-full justify-start text-sm"
+            className="w-full justify-start text-sm hover:bg-gray-50 transition-colors group"
             onClick={() => {
               setLocation("/settings");
             }}
             data-testid="button-user-settings"
           >
-            <Settings className="w-4 h-4 mr-2" />
-            Configurações
+            <Settings className="w-4 h-4 mr-2 group-hover:text-gray-600 transition-colors" />
+            <span className="group-hover:text-gray-900 transition-colors">Configurações</span>
           </Button>
           
           <div className="border-t my-2" />

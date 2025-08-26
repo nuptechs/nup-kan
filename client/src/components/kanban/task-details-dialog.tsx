@@ -481,33 +481,33 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Flag className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">Prioridade:</span>
+                <div className="flex items-center space-x-3 group hover:bg-gray-50 -mx-2 px-2 py-1 rounded-md transition-colors">
+                  <Flag className="w-4 h-4 text-gray-400 group-hover:text-gray-500 transition-colors" />
+                  <span className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">Prioridade:</span>
                   <Badge className={getPriorityColor(task.priority)} data-testid="task-priority">
                     {getPriorityText(task.priority)}
                   </Badge>
                 </div>
 
-                <div className="flex items-center space-x-3">
-                  <Clock className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">Status:</span>
-                  <span className="font-medium text-gray-900" data-testid="task-status">
+                <div className="flex items-center space-x-3 group hover:bg-gray-50 -mx-2 px-2 py-1 rounded-md transition-colors">
+                  <Clock className="w-4 h-4 text-gray-400 group-hover:text-gray-500 transition-colors" />
+                  <span className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">Status:</span>
+                  <span className="font-medium text-gray-900 group-hover:text-gray-950 transition-colors" data-testid="task-status">
                     {getStatusText(task.status)}
                   </span>
                 </div>
 
                 {task.assigneeName && (
-                  <div className="flex items-center space-x-3">
-                    <User className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">Responsável:</span>
+                  <div className="flex items-center space-x-3 group hover:bg-gray-50 -mx-2 px-2 py-1 rounded-md transition-colors">
+                    <User className="w-4 h-4 text-gray-400 group-hover:text-gray-500 transition-colors" />
+                    <span className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">Responsável:</span>
                     <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
+                      <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center group-hover:bg-indigo-600 transition-colors">
                         <span className="text-white text-xs font-medium" data-testid="task-assignee-avatar">
                           {task.assigneeAvatar}
                         </span>
                       </div>
-                      <span className="font-medium text-gray-900" data-testid="task-assignee-name">
+                      <span className="font-medium text-gray-900 group-hover:text-gray-950 transition-colors" data-testid="task-assignee-name">
                         {task.assigneeName}
                       </span>
                     </div>
@@ -516,27 +516,27 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Calendar className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">Criada em:</span>
-                  <span className="font-medium text-gray-900" data-testid="task-created-date">
+                <div className="flex items-center space-x-3 group hover:bg-gray-50 -mx-2 px-2 py-1 rounded-md transition-colors">
+                  <Calendar className="w-4 h-4 text-gray-400 group-hover:text-gray-500 transition-colors" />
+                  <span className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">Criada em:</span>
+                  <span className="font-medium text-gray-900 group-hover:text-gray-950 transition-colors" data-testid="task-created-date">
                     {task.createdAt ? new Date(task.createdAt).toLocaleDateString('pt-BR') : 'N/A'}
                   </span>
                 </div>
 
-                <div className="flex items-center space-x-3">
-                  <Calendar className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">Atualizada em:</span>
-                  <span className="font-medium text-gray-900" data-testid="task-updated-date">
+                <div className="flex items-center space-x-3 group hover:bg-gray-50 -mx-2 px-2 py-1 rounded-md transition-colors">
+                  <Calendar className="w-4 h-4 text-gray-400 group-hover:text-gray-500 transition-colors" />
+                  <span className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">Atualizada em:</span>
+                  <span className="font-medium text-gray-900 group-hover:text-gray-950 transition-colors" data-testid="task-updated-date">
                     {task.updatedAt ? new Date(task.updatedAt).toLocaleDateString('pt-BR') : 'N/A'}
                   </span>
                 </div>
 
                 {task.status === "inprogress" && task.progress !== undefined && (
                   <div>
-                    <div className="flex justify-between text-sm text-gray-600 mb-2">
-                      <span>Progresso</span>
-                      <span data-testid="task-progress-value">{task.progress}%</span>
+                    <div className="flex justify-between text-sm text-gray-600 mb-2 group hover:bg-gray-50 -mx-2 px-2 py-1 rounded-md transition-colors">
+                      <span className="group-hover:text-gray-700 transition-colors">Progresso</span>
+                      <span className="group-hover:text-gray-950 font-medium transition-colors" data-testid="task-progress-value">{task.progress}%</span>
                     </div>
                     <Progress value={task.progress} className="h-3" />
                   </div>

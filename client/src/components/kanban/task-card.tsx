@@ -66,11 +66,11 @@ function TaskAssignees({ taskId }: { taskId: string }) {
 
   if (assignees.length === 0) {
     return (
-      <div className="flex items-center space-x-1.5">
-        <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center">
-          <span className="text-gray-400 text-xs">?</span>
+      <div className="flex items-center space-x-1.5 group">
+        <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center group-hover:bg-gray-300 transition-colors">
+          <span className="text-gray-400 text-xs group-hover:text-gray-500 transition-colors">?</span>
         </div>
-        <span className="text-xs text-gray-400">Não atribuído</span>
+        <span className="text-xs text-gray-400 group-hover:text-gray-500 transition-colors">Não atribuído</span>
       </div>
     );
   }
@@ -80,26 +80,26 @@ function TaskAssignees({ taskId }: { taskId: string }) {
   };
 
   return (
-    <div className="flex items-center space-x-1.5">
+    <div className="flex items-center space-x-1.5 group">
       <div className="flex -space-x-1">
         {assignees.slice(0, 3).map((assignee, index) => (
           <Avatar 
             key={assignee.user.id} 
-            className="w-5 h-5 border border-white"
+            className="w-5 h-5 border border-white group-hover:border-gray-100 transition-colors"
             style={{ zIndex: assignees.length - index }}
           >
-            <AvatarFallback className="bg-indigo-500 text-white text-xs">
+            <AvatarFallback className="bg-indigo-500 text-white text-xs group-hover:bg-indigo-600 transition-colors">
               {assignee.user.avatar || getUserInitials(assignee.user.name)}
             </AvatarFallback>
           </Avatar>
         ))}
         {assignees.length > 3 && (
-          <div className="w-5 h-5 bg-gray-500 rounded-full flex items-center justify-center border border-white text-white text-xs">
+          <div className="w-5 h-5 bg-gray-500 rounded-full flex items-center justify-center border border-white text-white text-xs group-hover:bg-gray-600 transition-colors">
             +{assignees.length - 3}
           </div>
         )}
       </div>
-      <span className="text-xs text-gray-600">
+      <span className="text-xs text-gray-600 group-hover:text-gray-700 transition-colors">
         {assignees.length === 1 
           ? assignees[0].user.name 
           : `${assignees.length} responsáveis`
@@ -165,9 +165,9 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
       {/* Progress - Only for in-progress tasks */}
       {isInProgress && task.progress !== undefined && (
         <div className="mb-2">
-          <div className="flex justify-between text-xs text-gray-600 mb-1">
-            <span>Progresso</span>
-            <span data-testid={`progress-${task.id}`}>{task.progress}%</span>
+          <div className="flex justify-between text-xs text-gray-600 mb-1 group hover:bg-gray-50 -mx-1 px-1 py-0.5 rounded transition-colors">
+            <span className="group-hover:text-gray-700 transition-colors">Progresso</span>
+            <span className="group-hover:text-gray-900 font-medium transition-colors" data-testid={`progress-${task.id}`}>{task.progress}%</span>
           </div>
           <Progress value={task.progress} className="h-1.5" />
         </div>
@@ -230,9 +230,9 @@ export function TaskCard({ task, columnColor, onTaskClick }: TaskCardProps) {
         <TaskAssignees taskId={task.id} />
         
         {/* Task Meta Info */}
-        <div className="flex items-center space-x-1.5 text-xs text-gray-400">
-          <Icon className="w-3 h-3" />
-          <span data-testid={`task-meta-${task.id}`}>
+        <div className="flex items-center space-x-1.5 text-xs text-gray-400 group hover:bg-gray-50 -mx-1 px-1 py-0.5 rounded transition-colors">
+          <Icon className="w-3 h-3 group-hover:text-gray-500 transition-colors" />
+          <span className="group-hover:text-gray-600 transition-colors" data-testid={`task-meta-${task.id}`}>
             {isDone ? "Deploy" : getTaskTimeInfo(task)}
           </span>
         </div>
