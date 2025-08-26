@@ -92,7 +92,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
       toast({
         title: "Coluna excluída",
         description: "A coluna foi removida com sucesso.",
-        duration: 1000,
+        duration: 2500,
       });
       
       // Refresh data in background to ensure consistency
@@ -110,14 +110,14 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
         toast({
           title: "Coluna já foi excluída",
           description: "A coluna já não existe mais.",
-          duration: 1000,
+          duration: 2500,
         });
       } else {
         toast({
           title: "Erro ao excluir coluna",
           description: "Não foi possível excluir a coluna. Tente novamente.",
           variant: "destructive",
-          duration: 1000,
+          duration: 2500,
         });
       }
     },

@@ -138,7 +138,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
       toast({
         title: "Sucesso",
         description: "Tarefa criada com sucesso!",
-        duration: 1000,
+        duration: 2500,
       });
       form.reset();
       onClose();
@@ -148,7 +148,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
         title: "Erro",
         description: "Falha ao criar tarefa. Tente novamente.",
         variant: "destructive",
-        duration: 1000,
+        duration: 2500,
       });
     },
   });

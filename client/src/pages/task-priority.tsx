@@ -78,7 +78,7 @@ export default function TaskPriorityPage() {
       toast({
         title: "Prioridade criada",
         description: "A prioridade da tarefa foi criada com sucesso.",
-        duration: 1000,
+        duration: 2500,
       });
     },
     onError: () => {
