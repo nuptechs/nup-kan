@@ -431,15 +431,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/boards/:boardId/columns", async (req, res) => {
     try {
-      let columns = await storage.getBoardColumns(req.params.boardId);
-      
-      // If board has no columns, initialize with default columns
-      if (columns.length === 0) {
-        console.log(`No columns found for board ${req.params.boardId}, initializing with default columns`);
-        await storage.initializeBoardWithDefaults(req.params.boardId);
-        columns = await storage.getBoardColumns(req.params.boardId);
-      }
-      
+      const columns = await storage.getBoardColumns(req.params.boardId);
       res.json(columns);
     } catch (error) {
       console.error("Error fetching board columns:", error);
