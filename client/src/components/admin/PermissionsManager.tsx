@@ -32,24 +32,28 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
   const [isTeamManagementOpen, setIsTeamManagementOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncReport, setSyncReport] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("permissions"); // Track active tab
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Queries
-  const { data: permissions = [] } = useQuery<Permission[]>({
+  // Priority queries - load immediately for core functionality
+  const { data: permissions = [], isLoading: permissionsLoading } = useQuery<Permission[]>({
     queryKey: ["/api/permissions"],
   });
 
-  const { data: profiles = [] } = useQuery<Profile[]>({
+  const { data: profiles = [], isLoading: profilesLoading } = useQuery<Profile[]>({
     queryKey: ["/api/profiles"],
   });
 
+  // Secondary queries - load only when relevant tab is active
   const { data: users = [] } = useQuery<UserType[]>({
     queryKey: ["/api/users"],
+    enabled: activeTab === "quick-assign", // Only load when quick-assign tab is active
   });
 
   const { data: teams = [] } = useQuery<Team[]>({
     queryKey: ["/api/teams"],
+    enabled: activeTab === "quick-assign", // Only load when quick-assign tab is active
   });
 
   // Target-specific permissions
@@ -267,7 +271,12 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
   return (
     <div className="space-y-6">
 
-      <Tabs defaultValue="permissions" className="w-full">
+      <Tabs 
+        defaultValue="permissions" 
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full"
+      >
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="permissions">Permissões Detalhadas</TabsTrigger>
           <TabsTrigger value="profiles">Perfis</TabsTrigger>
