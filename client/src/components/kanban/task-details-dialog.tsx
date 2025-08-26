@@ -331,24 +331,6 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         {isEditing ? (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">Título</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Digite o título da tarefa"
-                        {...field}
-                        className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
-                        data-testid="input-edit-title"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}
