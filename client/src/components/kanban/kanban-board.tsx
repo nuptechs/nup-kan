@@ -83,51 +83,29 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
       const response = await apiRequest("DELETE", `/api/columns/${columnId}`);
       return response.json();
     },
-    onSuccess: async () => {
-      try {
-        // Force refresh all column-related queries
-        await Promise.all([
-          queryClient.invalidateQueries({ queryKey: ["/api/columns"] }),
-          queryClient.invalidateQueries({ queryKey: [columnsEndpoint] }),
-          queryClient.invalidateQueries({ queryKey: ["/api/tasks"] }),
-        ]);
-        
-        // Invalidate board-specific queries  
-        if (boardId) {
-          await Promise.all([
-            queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] }),
-            queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/tasks`] }),
-            queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}`] }),
-          ]);
-        }
-        
-        // Force immediate refetch
-        await queryClient.refetchQueries({ queryKey: [columnsEndpoint] });
-        
-        toast({
-          title: "Coluna excluída",
-          description: "A coluna foi removida com sucesso.",
-          duration: 1500,
-        });
-      } catch (error) {
-        console.error('Erro ao atualizar cache após exclusão:', error);
-        toast({
-          title: "Coluna excluída",
-          description: "A coluna foi removida. Recarregando a página...",
-          duration: 1500,
-        });
-        // Fallback: reload page if cache update fails
-        setTimeout(() => window.location.reload(), 2000);
+    onSuccess: () => {
+      // Just show success message - UI already updated optimistically
+      toast({
+        title: "Coluna excluída",
+        description: "A coluna foi removida com sucesso.",
+        duration: 1500,
+      });
+      
+      // Refresh data in background to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
+      queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
+      if (boardId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
       }
     },
-    onError: (error: any) => {
-      // If it's a 404, the column might already be deleted, refresh the data
+    onError: (error: any, columnId) => {
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
+      
       if (error?.message?.includes('404') || error?.message?.includes('not found')) {
-        queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
-        queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
         toast({
           title: "Coluna já foi excluída",
-          description: "A página será atualizada com os dados mais recentes.",
+          description: "A coluna já não existe mais.",
           duration: 1500,
         });
       } else {
@@ -272,6 +250,12 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
   const confirmDeleteColumn = () => {
     if (columnToDelete && !deleteColumnMutation.isPending) {
+      // Optimistically remove from UI immediately
+      queryClient.setQueryData([columnsEndpoint], (oldColumns: Column[] | undefined) => {
+        if (!oldColumns) return oldColumns;
+        return oldColumns.filter(col => col.id !== columnToDelete);
+      });
+      
       deleteColumnMutation.mutate(columnToDelete);
       setColumnToDelete(null);
     }
