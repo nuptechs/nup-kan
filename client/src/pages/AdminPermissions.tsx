@@ -50,12 +50,19 @@ export default function AdminPermissions() {
             variant="ghost" 
             size="icon" 
             onClick={() => {
-              // Try browser back first, fallback to dashboard
-              if (window.history.length > 1) {
-                window.history.back();
-              } else {
-                setLocation("/dashboard");
-              }
+              // Smart navigation with timeout fallback
+              const initialLocation = window.location.href;
+              
+              // Try browser back
+              window.history.back();
+              
+              // If we're still on the same page after 100ms, redirect manually
+              setTimeout(() => {
+                if (window.location.href === initialLocation) {
+                  // No navigation occurred, redirect to dashboard
+                  setLocation("/dashboard");
+                }
+              }, 100);
             }}
             data-testid="button-back-permissions"
           >
