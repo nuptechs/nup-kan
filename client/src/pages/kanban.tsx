@@ -4,8 +4,9 @@ import { SettingsPanel } from "@/components/kanban/settings-panel";
 import { BoardSharingDialog } from "@/components/kanban/board-sharing-dialog";
 import { UserProfileIndicator } from "@/components/user-profile-indicator";
 import { useQuery } from "@tanstack/react-query";
-import { Settings, Users, Shield, User, ArrowLeft, Share2 } from "lucide-react";
+import { Settings, Users, Shield, User, ArrowLeft, Share2, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Link, useParams } from "wouter";
 import { useProfileMode } from "@/hooks/useProfileMode";
@@ -16,6 +17,7 @@ export default function KanbanPage() {
   const boardId = params.boardId;
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSharingOpen, setIsSharingOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { canManageProfiles } = usePermissions();
   const { mode, isReadOnly, canCreate, canEdit } = useProfileMode();
 
@@ -88,6 +90,30 @@ export default function KanbanPage() {
             <h1 className="text-2xl font-semibold text-gray-900 truncate" data-testid="page-title" title={board.name}>
               {board.name}
             </h1>
+            
+            {/* Search Input */}
+            <div className="relative flex-shrink-0 w-64 ml-6">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Buscar por tarefa ou responsável..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-8 h-9 text-sm border-gray-200 focus:border-blue-300 focus:ring-blue-200 focus:ring-1"
+                data-testid="header-search-input"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
+                  data-testid="clear-header-search-btn"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-500 flex-shrink-0 whitespace-nowrap">
             <Users className="w-4 h-4" />
@@ -142,7 +168,7 @@ export default function KanbanPage() {
 
       {/* Main Kanban Board */}
       <main className="flex-1 overflow-hidden h-full" data-testid="main-content">
-        <KanbanBoard boardId={boardId} isReadOnly={isReadOnly} profileMode={mode} />
+        <KanbanBoard boardId={boardId} isReadOnly={isReadOnly} profileMode={mode} searchQuery={searchQuery} />
       </main>
 
       {/* User Profile Indicator - Fixed Bottom Left */}
