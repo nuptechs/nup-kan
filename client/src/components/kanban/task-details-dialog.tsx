@@ -432,16 +432,13 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
           </Form>
         ) : (
           <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2" data-testid="task-title">
-                {task.title}
-              </h2>
-              {task.description && (
+            {task.description && (
+              <div>
                 <p className="text-gray-600 leading-relaxed" data-testid="task-description">
                   {task.description}
                 </p>
-              )}
-            </div>
+              </div>
+            )}
 
             <Separator />
 
