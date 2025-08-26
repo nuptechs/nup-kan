@@ -162,13 +162,9 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
         position: index
       }));
       
-      console.log('🚀 Enviando reordenação para API:', columnsToReorder);
-      
       const response = await apiRequest("POST", "/api/columns/reorder", {
         columns: columnsToReorder
       });
-      
-      console.log('✅ Resposta da API:', response.status);
       return reorderedColumns;
     },
     onMutate: async (reorderedColumns) => {
@@ -220,8 +216,6 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
     // Handle column reordering
     if (type === 'COLUMN') {
-      console.log('🔄 Reordenando colunas - Source:', source.index, 'Destination:', destination.index);
-      
       const sortedColumns = [...columns].sort((a, b) => a.position - b.position);
       const reorderedColumns = Array.from(sortedColumns);
       const [reorderedColumn] = reorderedColumns.splice(source.index, 1);
@@ -232,8 +226,6 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
         ...column,
         position: index,
       }));
-      
-      console.log('📋 Colunas reordenadas:', columnsWithNewPositions.map(c => ({ id: c.id, title: c.title, position: c.position })));
       
       reorderColumnsMutation.mutate(columnsWithNewPositions);
       return;

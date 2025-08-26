@@ -1332,10 +1332,21 @@ export class DatabaseStorage implements IStorage {
       return; // Already initialized
     }
     
-    // No default columns - board starts completely empty
-    // Users can create columns as needed
+    // Create default columns for the board
+    const defaultColumns = [
+      { boardId, title: "Backlog", position: 0, wipLimit: null, color: "gray" },
+      { boardId, title: "To Do", position: 1, wipLimit: 5, color: "blue" },
+      { boardId, title: "In Progress", position: 2, wipLimit: 3, color: "yellow" },
+      { boardId, title: "Review", position: 3, wipLimit: 4, color: "purple" },
+      { boardId, title: "Done", position: 4, wipLimit: null, color: "green" },
+    ];
     
-    console.log(`Board ${boardId} initialized with 0 columns and 0 tasks`);
+    // Insert default columns
+    for (const column of defaultColumns) {
+      await db.insert(columns).values(column);
+    }
+    
+    console.log(`Board ${boardId} initialized with ${defaultColumns.length} default columns`);
   }
 
   // Task methods
