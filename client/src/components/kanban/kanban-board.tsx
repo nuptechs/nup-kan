@@ -86,6 +86,10 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
       queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
+      // Invalidate board-specific queries  
+      if (boardId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
+      }
       toast({
         title: "Coluna excluída",
         description: "A coluna foi removida com sucesso.",
@@ -243,7 +247,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   };
 
   const confirmDeleteColumn = () => {
-    if (columnToDelete) {
+    if (columnToDelete && !deleteColumnMutation.isPending) {
       deleteColumnMutation.mutate(columnToDelete);
       setColumnToDelete(null);
     }
