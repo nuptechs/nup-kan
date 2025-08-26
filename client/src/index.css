@@ -109,6 +109,28 @@
   }
 }
 
+/* Placeholder styling for better visual hierarchy */
+input::placeholder,
+textarea::placeholder {
+  font-size: 0.875rem; /* text-sm */
+  color: hsl(var(--muted-foreground));
+  opacity: 0.6;
+}
+
+/* Darker placeholder for light mode */
+.light input::placeholder,
+.light textarea::placeholder {
+  color: #9ca3af; /* gray-400 */
+  opacity: 0.7;
+}
+
+/* Lighter placeholder for dark mode */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #6b7280; /* gray-500 */
+  opacity: 0.8;
+}
+
 .column-scroll {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--gray-300)) transparent;
