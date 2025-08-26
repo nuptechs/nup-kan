@@ -145,6 +145,1025 @@ export interface IStorage {
 // MemStorage removido - Sistema de produção usa apenas DatabaseStorage com PostgreSQL
 
 export class DatabaseStorage implements IStorage {
+  }
+
+  async getTag(id: string): Promise<Tag | undefined> {
+    const tags = await this.getTags();
+    return tags.find(tag => tag.id === id);
+  }
+
+  async createTag(insertTag: InsertTag): Promise<Tag> {
+    const tag: Tag = {
+      id: randomUUID(),
+      ...insertTag,
+      color: insertTag.color || "#3b82f6",
+      createdAt: new Date(),
+    };
+    return tag;
+  }
+
+  async updateTag(id: string, updateData: Partial<Tag>): Promise<Tag> {
+    const existingTag = await this.getTag(id);
+    if (!existingTag) {
+      throw new Error(`Tag with id ${id} not found`);
+    }
+    return { ...existingTag, ...updateData };
+  }
+
+  async deleteTag(id: string): Promise<void> {
+    const existingTag = await this.getTag(id);
+    if (!existingTag) {
+      throw new Error(`Tag with id ${id} not found`);
+    }
+  }
+
+  // Teams methods for MemStorage
+  async getTeams(): Promise<Team[]> {
+    return [
+      { id: "team-1", name: "Desenvolvimento", description: "Equipe responsável pelo desenvolvimento", color: "#3b82f6", createdAt: new Date(), updatedAt: new Date() },
+      { id: "team-2", name: "Design", description: "Equipe de design e UX", color: "#8b5cf6", createdAt: new Date(), updatedAt: new Date() },
+      { id: "team-3", name: "Product", description: "Gestão de produto e estratégia", color: "#10b981", createdAt: new Date(), updatedAt: new Date() },
+    ];
+  }
+
+  async getTeam(id: string): Promise<Team | undefined> {
+    const teams = await this.getTeams();
+    return teams.find(team => team.id === id);
+  }
+
+  async createTeam(insertTeam: InsertTeam): Promise<Team> {
+    const team: Team = {
+      id: randomUUID(),
+      ...insertTeam,
+      color: insertTeam.color || "#3b82f6",
+      description: insertTeam.description || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    return team;
+  }
+
+  async updateTeam(id: string, updateData: UpdateTeam): Promise<Team> {
+    const existingTeam = await this.getTeam(id);
+    if (!existingTeam) {
+      throw new Error(`Team with id ${id} not found`);
+    }
+    return { ...existingTeam, ...updateData, updatedAt: new Date() };
+  }
+
+  async deleteTeam(id: string): Promise<void> {
+    const existingTeam = await this.getTeam(id);
+    if (!existingTeam) {
+      throw new Error(`Team with id ${id} not found`);
+    }
+  }
+
+  // Users methods for MemStorage
+  async getUsers(): Promise<User[]> {
+    return [
+      { id: "1", name: "Ana Maria", email: "ana.maria@example.com", password: null, role: "Designer UX/UI", avatar: "AM", status: "online", profileId: "profile-designer", createdAt: new Date(), updatedAt: new Date() },
+      { id: "2", name: "João Silva", email: "joao.silva@example.com", password: null, role: "Full Stack Developer", avatar: "JS", status: "busy", profileId: "profile-developer", createdAt: new Date(), updatedAt: new Date() },
+      { id: "3", name: "Maria Costa", email: "maria.costa@example.com", password: null, role: "Product Manager", avatar: "MC", status: "online", profileId: "profile-manager", createdAt: new Date(), updatedAt: new Date() },
+      { id: "4", name: "Rafael Santos", email: "rafael.santos@example.com", password: null, role: "Backend Developer", avatar: "RF", status: "offline", profileId: "profile-developer", createdAt: new Date(), updatedAt: new Date() },
+      { id: "5", name: "Lucas Oliveira", email: "lucas.oliveira@example.com", password: null, role: "DevOps Engineer", avatar: "LC", status: "online", profileId: "profile-devops", createdAt: new Date(), updatedAt: new Date() },
+    ];
+  }
+
+  async getUser(id: string): Promise<User | undefined> {
+    const users = await this.getUsers();
+    return users.find(user => user.id === id);
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const user: User = {
+      id: randomUUID(),
+      ...insertUser,
+      password: insertUser.password || null,
+      role: insertUser.role || null,
+      avatar: insertUser.avatar || insertUser.name.split(' ').map(n => n[0]).join('').toUpperCase(),
+      status: insertUser.status || "offline",
+      profileId: insertUser.profileId || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    return user;
+  }
+
+  async updateUser(id: string, updateData: UpdateUser): Promise<User> {
+    const existingUser = await this.getUser(id);
+    if (!existingUser) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    return { ...existingUser, ...updateData, updatedAt: new Date() };
+  }
+
+  async updateUserPassword(id: string, newPassword: string): Promise<void> {
+    const existingUser = await this.getUser(id);
+    if (!existingUser) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    // In memory storage simulation - password updated conceptually
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    const existingUser = await this.getUser(id);
+    if (!existingUser) {
+      throw new Error(`User with id ${id} not found`);
+    }
+  }
+
+  // User Teams methods for MemStorage
+  async getAllUserTeams(): Promise<UserTeam[]> {
+    return [
+      { id: "ut-1", userId: "1", teamId: "team-2", role: "member", createdAt: new Date() },
+      { id: "ut-2", userId: "2", teamId: "team-1", role: "lead", createdAt: new Date() },
+      { id: "ut-3", userId: "3", teamId: "team-3", role: "admin", createdAt: new Date() },
+      { id: "ut-4", userId: "4", teamId: "team-1", role: "member", createdAt: new Date() },
+      { id: "ut-5", userId: "5", teamId: "team-1", role: "member", createdAt: new Date() },
+    ];
+  }
+
+  async getUserTeams(userId: string): Promise<UserTeam[]> {
+    const userTeamsMock = await this.getAllUserTeams();
+    return userTeamsMock.filter(ut => ut.userId === userId);
+  }
+
+  async getTeamUsers(teamId: string): Promise<UserTeam[]> {
+    const userTeamsMock = [
+      { id: "ut-1", userId: "1", teamId: "team-2", role: "member", createdAt: new Date() },
+      { id: "ut-2", userId: "2", teamId: "team-1", role: "lead", createdAt: new Date() },
+      { id: "ut-3", userId: "3", teamId: "team-3", role: "admin", createdAt: new Date() },
+      { id: "ut-4", userId: "4", teamId: "team-1", role: "member", createdAt: new Date() },
+      { id: "ut-5", userId: "5", teamId: "team-1", role: "member", createdAt: new Date() },
+    ];
+    return userTeamsMock.filter(ut => ut.teamId === teamId);
+  }
+
+  async addUserToTeam(insertUserTeam: InsertUserTeam): Promise<UserTeam> {
+    const userTeam: UserTeam = {
+      id: randomUUID(),
+      ...insertUserTeam,
+      role: insertUserTeam.role || "member",
+      createdAt: new Date(),
+    };
+    return userTeam;
+  }
+
+  async removeUserFromTeam(userId: string, teamId: string): Promise<void> {
+    // In memory storage simulation - no actual removal needed
+  }
+
+  async updateUserTeamRole(userId: string, teamId: string, role: string): Promise<UserTeam> {
+    const userTeamsMock = await this.getUserTeams(userId);
+    const userTeam = userTeamsMock.find(ut => ut.teamId === teamId);
+    if (!userTeam) {
+      throw new Error(`User ${userId} not found in team ${teamId}`);
+    }
+    return { ...userTeam, role };
+  }
+
+  // Profiles methods for MemStorage
+  async getProfiles(): Promise<Profile[]> {
+    return [
+      { id: "profile-admin", name: "Administrador", description: "Acesso total ao sistema", color: "#ef4444", isDefault: "false", createdAt: new Date(), updatedAt: new Date() },
+      { id: "profile-manager", name: "Gerente", description: "Gerenciamento de projetos e equipes", color: "#8b5cf6", isDefault: "false", createdAt: new Date(), updatedAt: new Date() },
+      { id: "profile-developer", name: "Desenvolvedor", description: "Desenvolvimento e edição de tarefas", color: "#3b82f6", isDefault: "true", createdAt: new Date(), updatedAt: new Date() },
+      { id: "profile-designer", name: "Designer", description: "Design e prototipação", color: "#06b6d4", isDefault: "false", createdAt: new Date(), updatedAt: new Date() },
+      { id: "profile-devops", name: "DevOps", description: "Infraestrutura e deploy", color: "#10b981", isDefault: "false", createdAt: new Date(), updatedAt: new Date() },
+    ];
+  }
+
+  async getProfile(id: string): Promise<Profile | undefined> {
+    const profiles = await this.getProfiles();
+    return profiles.find(profile => profile.id === id);
+  }
+
+  async createProfile(insertProfile: InsertProfile): Promise<Profile> {
+    const profile: Profile = {
+      id: randomUUID(),
+      ...insertProfile,
+      description: insertProfile.description || null,
+      color: insertProfile.color || "#3b82f6",
+      isDefault: insertProfile.isDefault || "false",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    return profile;
+  }
+
+  async updateProfile(id: string, updateData: UpdateProfile): Promise<Profile> {
+    const existingProfile = await this.getProfile(id);
+    if (!existingProfile) {
+      throw new Error(`Profile with id ${id} not found`);
+    }
+    return { ...existingProfile, ...updateData, updatedAt: new Date() };
+  }
+
+  async deleteProfile(id: string): Promise<void> {
+    const existingProfile = await this.getProfile(id);
+    if (!existingProfile) {
+      throw new Error(`Profile with id ${id} not found`);
+    }
+  }
+
+  // Permissions methods for MemStorage
+  async getPermissions(): Promise<Permission[]> {
+    return [
+      // Tarefas
+      { id: "perm-task-create", name: "Criar Tarefas", description: "Permitir criação de novas tarefas", category: "tasks", createdAt: new Date() },
+      { id: "perm-task-edit", name: "Editar Tarefas", description: "Permitir edição de tarefas existentes", category: "tasks", createdAt: new Date() },
+      { id: "perm-task-delete", name: "Excluir Tarefas", description: "Permitir exclusão de tarefas", category: "tasks", createdAt: new Date() },
+      { id: "perm-task-assign", name: "Atribuir Tarefas", description: "Permitir atribuição de tarefas a usuários", category: "tasks", createdAt: new Date() },
+      
+      // Colunas
+      { id: "perm-column-create", name: "Criar Colunas", description: "Permitir criação de novas colunas", category: "columns", createdAt: new Date() },
+      { id: "perm-column-edit", name: "Editar Colunas", description: "Permitir edição de colunas existentes", category: "columns", createdAt: new Date() },
+      { id: "perm-column-delete", name: "Excluir Colunas", description: "Permitir exclusão de colunas", category: "columns", createdAt: new Date() },
+      { id: "perm-column-reorder", name: "Reordenar Colunas", description: "Permitir reordenação de colunas", category: "columns", createdAt: new Date() },
+      
+      // Times
+      { id: "perm-team-create", name: "Criar Times", description: "Permitir criação de novos times", category: "teams", createdAt: new Date() },
+      { id: "perm-team-edit", name: "Editar Times", description: "Permitir edição de times existentes", category: "teams", createdAt: new Date() },
+      { id: "perm-team-delete", name: "Excluir Times", description: "Permitir exclusão de times", category: "teams", createdAt: new Date() },
+      { id: "perm-team-manage", name: "Gerenciar Membros", description: "Permitir gerenciamento de membros do time", category: "teams", createdAt: new Date() },
+      
+      // Usuários
+      { id: "perm-user-create", name: "Criar Usuários", description: "Permitir criação de novos usuários", category: "users", createdAt: new Date() },
+      { id: "perm-user-edit", name: "Editar Usuários", description: "Permitir edição de usuários existentes", category: "users", createdAt: new Date() },
+      { id: "perm-user-delete", name: "Excluir Usuários", description: "Permitir exclusão de usuários", category: "users", createdAt: new Date() },
+      
+      // Perfis
+      { id: "perm-profile-create", name: "Criar Perfis", description: "Permitir criação de novos perfis", category: "profiles", createdAt: new Date() },
+      { id: "perm-profile-edit", name: "Editar Perfis", description: "Permitir edição de perfis existentes", category: "profiles", createdAt: new Date() },
+      { id: "perm-profile-delete", name: "Excluir Perfis", description: "Permitir exclusão de perfis", category: "profiles", createdAt: new Date() },
+      
+      // Analytics
+      { id: "perm-analytics-view", name: "Ver Analytics", description: "Permitir visualização de métricas e relatórios", category: "analytics", createdAt: new Date() },
+    ];
+  }
+
+  async getPermission(id: string): Promise<Permission | undefined> {
+    const permissions = await this.getPermissions();
+    return permissions.find(permission => permission.id === id);
+  }
+
+  async createPermission(insertPermission: InsertPermission): Promise<Permission> {
+    const permission: Permission = {
+      id: randomUUID(),
+      ...insertPermission,
+      description: insertPermission.description || null,
+      createdAt: new Date(),
+    };
+    return permission;
+  }
+
+  async updatePermission(id: string, updateData: Partial<Permission>): Promise<Permission> {
+    const existingPermission = await this.getPermission(id);
+    if (!existingPermission) {
+      throw new Error(`Permission with id ${id} not found`);
+    }
+    return { ...existingPermission, ...updateData };
+  }
+
+  async deletePermission(id: string): Promise<void> {
+    const existingPermission = await this.getPermission(id);
+    if (!existingPermission) {
+      throw new Error(`Permission with id ${id} not found`);
+    }
+  }
+
+  // Profile Permissions methods for MemStorage
+  async getAllProfilePermissions(): Promise<ProfilePermission[]> {
+    // Retorna todas as associações perfil-permissão simuladas
+    const allPermissions: ProfilePermission[] = [];
+    
+    const defaultProfilePermissions: { [key: string]: string[] } = {
+      "profile-admin": ["perm-create-tasks", "perm-edit-tasks", "perm-delete-tasks", "perm-manage-users"],
+      "profile-developer": ["perm-create-tasks", "perm-edit-tasks", "perm-view-tasks"],
+      "profile-designer": ["perm-create-tasks", "perm-edit-tasks"],
+    };
+
+    Object.entries(defaultProfilePermissions).forEach(([profileId, permissionIds]) => {
+      permissionIds.forEach(permissionId => {
+        allPermissions.push({
+          id: randomUUID(),
+          profileId,
+          permissionId,
+          createdAt: new Date(),
+        });
+      });
+    });
+
+    return allPermissions;
+  }
+
+  async getProfilePermissions(profileId: string): Promise<ProfilePermission[]> {
+    // Retorna permissões baseadas no perfil
+    const defaultPermissions: { [key: string]: string[] } = {
+      "profile-admin": ["perm-task-create", "perm-task-edit", "perm-task-delete", "perm-task-assign", "perm-column-create", "perm-column-edit", "perm-column-delete", "perm-column-reorder", "perm-team-create", "perm-team-edit", "perm-team-delete", "perm-team-manage", "perm-user-create", "perm-user-edit", "perm-user-delete", "perm-profile-create", "perm-profile-edit", "perm-profile-delete", "perm-analytics-view"],
+      "profile-manager": ["perm-task-create", "perm-task-edit", "perm-task-assign", "perm-column-edit", "perm-team-edit", "perm-team-manage", "perm-user-edit", "perm-analytics-view"],
+      "profile-developer": ["perm-task-create", "perm-task-edit", "perm-task-assign"],
+      "profile-designer": ["perm-task-create", "perm-task-edit"],
+      "profile-devops": ["perm-task-create", "perm-task-edit", "perm-column-edit", "perm-analytics-view"],
+    };
+
+    const permissionIds = defaultPermissions[profileId] || [];
+    return permissionIds.map(permissionId => ({
+      id: randomUUID(),
+      profileId,
+      permissionId,
+      createdAt: new Date(),
+    }));
+  }
+
+  async addPermissionToProfile(profileId: string, permissionId: string): Promise<ProfilePermission> {
+    const profilePermission: ProfilePermission = {
+      id: randomUUID(),
+      profileId,
+      permissionId,
+      createdAt: new Date(),
+    };
+    return profilePermission;
+  }
+
+  async removePermissionFromProfile(profileId: string, permissionId: string): Promise<void> {
+    // Simulação de remoção
+  }
+
+  // Team Profiles methods for MemStorage
+  async getTeamProfiles(teamId: string): Promise<TeamProfile[]> {
+    // Associações padrão de perfis por time
+    const defaultTeamProfiles: { [key: string]: string[] } = {
+      "team-1": ["profile-developer", "profile-devops"], // Desenvolvimento
+      "team-2": ["profile-designer"], // Design
+      "team-3": ["profile-manager"], // Product
+    };
+
+    const profileIds = defaultTeamProfiles[teamId] || [];
+    return profileIds.map(profileId => ({
+      id: randomUUID(),
+      teamId,
+      profileId,
+      createdAt: new Date(),
+    }));
+  }
+
+  async assignProfileToTeam(teamId: string, profileId: string): Promise<TeamProfile> {
+    const teamProfile: TeamProfile = {
+      id: randomUUID(),
+      teamId,
+      profileId,
+      createdAt: new Date(),
+    };
+    return teamProfile;
+  }
+
+  async getAllTeamProfiles(): Promise<TeamProfile[]> {
+    // Retorna todas as associações de perfis por time usando dados simulados
+    const allProfiles: TeamProfile[] = [];
+    const defaultTeamProfiles: { [key: string]: string[] } = {
+      "team-1": ["profile-developer", "profile-devops"],
+      "team-2": ["profile-designer"],
+      "team-3": ["profile-manager"],
+    };
+
+    Object.entries(defaultTeamProfiles).forEach(([teamId, profileIds]) => {
+      profileIds.forEach(profileId => {
+        allProfiles.push({
+          id: randomUUID(),
+          teamId,
+          profileId,
+          createdAt: new Date(),
+        });
+      });
+    });
+
+    return allProfiles;
+  }
+
+  async removeProfileFromTeam(teamId: string, profileId: string): Promise<void> {
+    // Simulação de remoção
+  }
+
+  async deleteTeamProfile(id: string): Promise<void> {
+    // Simulação de remoção por ID
+  }
+
+  // User Permissions methods for MemStorage
+  async getUserPermissions(userId: string): Promise<Permission[]> {
+    const startTime = Date.now();
+    try {
+      // 🚀 USAR QUERY ULTRA-OTIMIZADA
+      const result = await OptimizedQueries.getUserPermissionsOptimized(userId);
+      
+      if (!result || !Array.isArray(result) || result.length === 0) {
+        return [];
+      }
+
+      const duration = Date.now() - startTime;
+      PerformanceStats.trackQuery('getUserPermissions', duration);
+      return result;
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      PerformanceStats.trackQuery('getUserPermissions_error', duration);
+      console.error("❌ [SECURITY] Erro em getUserPermissions:", error);
+      return [];
+    }
+  }
+
+  // Task Events methods for MemStorage
+  async getTaskEvents(taskId: string): Promise<TaskEvent[]> {
+    return [];
+  }
+
+  async createTaskEvent(event: InsertTaskEvent): Promise<TaskEvent> {
+    const taskEvent: TaskEvent = {
+      id: randomUUID(),
+      ...event,
+      userId: event.userId || null,
+      userName: event.userName || null,
+      userAvatar: event.userAvatar || null,
+      metadata: event.metadata || null,
+      createdAt: new Date(),
+    };
+    return taskEvent;
+  }
+
+  // Export History methods for MemStorage
+  async getExportHistory(userId: string): Promise<ExportHistory[]> {
+    // Return mock export history for memory storage
+    return [
+      {
+        id: randomUUID(),
+        userId,
+        exportType: "full",
+        status: "completed",
+        fileName: "kanban-data-2025-08-22.json",
+        fileSize: 15624,
+        recordsCount: 25,
+        errorMessage: null,
+        createdAt: new Date(Date.now() - 86400000), // 1 day ago
+        completedAt: new Date(Date.now() - 86400000 + 5000), // 5 seconds later
+      }
+    ];
+  }
+
+  async createExportHistory(exportData: InsertExportHistory): Promise<ExportHistory> {
+    const exportHistory: ExportHistory = {
+      id: randomUUID(),
+      userId: exportData.userId,
+      exportType: exportData.exportType,
+      status: exportData.status || "pending",
+      fileName: exportData.fileName || null,
+      fileSize: exportData.fileSize || null,
+      recordsCount: exportData.recordsCount || null,
+      errorMessage: exportData.errorMessage || null,
+      createdAt: new Date(),
+      completedAt: null,
+    };
+    return exportHistory;
+  }
+
+  async updateExportHistory(id: string, updates: Partial<ExportHistory>): Promise<ExportHistory> {
+    // Mock update for memory storage
+    const mockExport: ExportHistory = {
+      id,
+      userId: updates.userId || "mock-user",
+      exportType: updates.exportType || "full",
+      status: updates.status || "completed",
+      fileName: updates.fileName || null,
+      fileSize: updates.fileSize || null,
+      recordsCount: updates.recordsCount || null,
+      errorMessage: updates.errorMessage || null,
+      createdAt: new Date(),
+      completedAt: updates.completedAt || new Date(),
+    };
+    return mockExport;
+  }
+
+  private initializeDefaultBoards() {
+    const defaultBoard: Board = {
+      id: "default-board",
+      name: "Main Kanban Board",
+      description: "Principal quadro Kanban",
+      color: "#3b82f6",
+      createdById: "system",
+      isActive: "true",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.boards.set(defaultBoard.id, defaultBoard);
+  }
+
+  private initializeDefaultColumns() {
+    const defaultBoardId = "default-board";
+    const defaultColumns: Column[] = [
+      { id: "backlog", boardId: defaultBoardId, title: "Backlog", position: 0, wipLimit: null, color: "gray" },
+      { id: "todo", boardId: defaultBoardId, title: "To Do", position: 1, wipLimit: 5, color: "blue" },
+      { id: "inprogress", boardId: defaultBoardId, title: "In Progress", position: 2, wipLimit: 3, color: "yellow" },
+      { id: "review", boardId: defaultBoardId, title: "Review", position: 3, wipLimit: 4, color: "purple" },
+      { id: "done", boardId: defaultBoardId, title: "Done", position: 4, wipLimit: null, color: "green" },
+    ];
+    
+    defaultColumns.forEach(column => {
+      this.columns.set(column.id, column);
+    });
+  }
+
+  private initializeDefaultTeamMembers() {
+    const defaultMembers: TeamMember[] = [
+      { id: randomUUID(), name: "Ana Maria", role: "Designer UX/UI", avatar: "AM", status: "online" },
+      { id: randomUUID(), name: "João Silva", role: "Full Stack Developer", avatar: "JS", status: "busy" },
+      { id: randomUUID(), name: "Maria Costa", role: "Product Manager", avatar: "MC", status: "online" },
+      { id: randomUUID(), name: "Rafael Santos", role: "Backend Developer", avatar: "RF", status: "offline" },
+      { id: randomUUID(), name: "Lucas Oliveira", role: "DevOps Engineer", avatar: "LC", status: "online" },
+    ];
+    
+    defaultMembers.forEach(member => {
+      this.teamMembers.set(member.id, member);
+    });
+  }
+
+  private initializeDefaultTasks() {
+    // Get team members for assignment
+    const members = Array.from(this.teamMembers.values());
+    const defaultBoardId = "default-board";
+    
+    const defaultTasks: Omit<Task, 'id'>[] = [
+      {
+        boardId: defaultBoardId,
+        title: "Redesign da página inicial",
+        description: "Atualizar o design da landing page com nova identidade visual e melhorar conversão",
+        status: "backlog",
+        priority: "high",
+        assigneeId: members[0]?.id || "",
+        assigneeName: members[0]?.name || "",
+        assigneeAvatar: members[0]?.avatar || "",
+        progress: 0,
+        tags: ["design", "ui"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        boardId: defaultBoardId,
+        title: "Integração com API de pagamento",
+        description: "Implementar gateway de pagamento para checkout",
+        status: "backlog",
+        priority: "medium",
+        assigneeId: members[1]?.id || "",
+        assigneeName: members[1]?.name || "",
+        assigneeAvatar: members[1]?.avatar || "",
+        progress: 0,
+        tags: ["backend", "api"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        boardId: defaultBoardId,
+        title: "Otimização de performance",
+        description: "Melhorar tempo de carregamento das páginas principais",
+        status: "todo",
+        priority: "high",
+        assigneeId: members[3]?.id || "",
+        assigneeName: members[3]?.name || "",
+        assigneeAvatar: members[3]?.avatar || "",
+        progress: 0,
+        tags: ["performance", "optimization"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        boardId: defaultBoardId,
+        title: "Dashboard analytics",
+        description: "Implementar gráficos e métricas no painel administrativo",
+        status: "inprogress",
+        priority: "high",
+        assigneeId: members[0]?.id || "",
+        assigneeName: members[0]?.name || "",
+        assigneeAvatar: members[0]?.avatar || "",
+        progress: 65,
+        tags: ["analytics", "dashboard"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        boardId: defaultBoardId,
+        title: "Sistema de notificações",
+        description: "Implementação de notificações push e email",
+        status: "review",
+        priority: "medium",
+        assigneeId: members[2]?.id || "",
+        assigneeName: members[2]?.name || "",
+        assigneeAvatar: members[2]?.avatar || "",
+        progress: 100,
+        tags: ["notifications", "backend"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        boardId: defaultBoardId,
+        title: "Login social OAuth",
+        description: "Integração com Google, Facebook e GitHub",
+        status: "done",
+        priority: "high",
+        assigneeId: members[3]?.id || "",
+        assigneeName: members[3]?.name || "",
+        assigneeAvatar: members[3]?.avatar || "",
+        progress: 100,
+        tags: ["auth", "oauth"],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
+    
+    defaultTasks.forEach(taskData => {
+      const task: Task = {
+        id: randomUUID(),
+        ...taskData,
+      };
+      this.tasks.set(task.id, task);
+    });
+  }
+
+  // Board methods
+  async getBoards(): Promise<Board[]> {
+    return Array.from(this.boards.values());
+  }
+
+  async getBoard(id: string): Promise<Board | undefined> {
+    return this.boards.get(id);
+  }
+
+  async initializeBoardWithDefaults(boardId: string): Promise<void> {
+    console.log(`Initializing board ${boardId} with default data`);
+    
+    // No default columns - board starts completely empty
+    // Users can create columns as needed
+
+    console.log(`Board ${boardId} initialized with 0 columns and 0 tasks`);
+  }
+
+  async createBoard(insertBoard: InsertBoard): Promise<Board> {
+    const board: Board = {
+      id: randomUUID(),
+      ...insertBoard,
+      description: insertBoard.description || "",
+      color: insertBoard.color || "#3b82f6",
+      isActive: insertBoard.isActive || "true",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.boards.set(board.id, board);
+    return board;
+  }
+
+  async updateBoard(id: string, updateData: UpdateBoard): Promise<Board> {
+    const existingBoard = this.boards.get(id);
+    if (!existingBoard) {
+      throw new Error(`Board with id ${id} not found`);
+    }
+    const updatedBoard = { ...existingBoard, ...updateData, updatedAt: new Date() };
+    this.boards.set(id, updatedBoard);
+    return updatedBoard;
+  }
+
+  async deleteBoard(id: string): Promise<void> {
+    if (!this.boards.has(id)) {
+      throw new Error(`Board with id ${id} not found`);
+    }
+    this.boards.delete(id);
+  }
+
+  async getBoardTasks(boardId: string): Promise<Task[]> {
+    return Array.from(this.tasks.values()).filter(task => task.boardId === boardId);
+  }
+
+  async getBoardColumns(boardId: string): Promise<Column[]> {
+    return Array.from(this.columns.values()).filter(column => column.boardId === boardId).sort((a, b) => a.position - b.position);
+  }
+
+  // Task methods
+  async getTasks(): Promise<Task[]> {
+    return Array.from(this.tasks.values());
+  }
+
+  async getTask(id: string): Promise<Task | undefined> {
+    return this.tasks.get(id);
+  }
+
+  async createTask(insertTask: InsertTask): Promise<Task> {
+    const id = randomUUID();
+    const task: Task = {
+      ...insertTask,
+      id,
+      description: insertTask.description || "",
+      status: insertTask.status || "backlog",
+      priority: insertTask.priority || "medium",
+      assigneeId: insertTask.assigneeId || "",
+      assigneeName: insertTask.assigneeName || "",
+      assigneeAvatar: insertTask.assigneeAvatar || "",
+      tags: insertTask.tags || [],
+      progress: insertTask.progress || 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.tasks.set(id, task);
+    return task;
+  }
+
+  async updateTask(id: string, updateData: UpdateTask): Promise<Task> {
+    const existingTask = this.tasks.get(id);
+    if (!existingTask) {
+      throw new Error(`Task with id ${id} not found`);
+    }
+    
+    const updatedTask: Task = {
+      ...existingTask,
+      ...updateData,
+      updatedAt: new Date(),
+    };
+    
+    this.tasks.set(id, updatedTask);
+    return updatedTask;
+  }
+
+  async deleteTask(id: string): Promise<void> {
+    if (!this.tasks.has(id)) {
+      throw new Error(`Task with id ${id} not found`);
+    }
+    this.tasks.delete(id);
+  }
+
+  // Task Assignees methods (placeholder for MemStorage)
+  async getTaskAssignees(taskId: string): Promise<(TaskAssignee & { user: User })[]> {
+    return [];
+  }
+
+  async addTaskAssignee(assignee: InsertTaskAssignee): Promise<TaskAssignee> {
+    const taskAssignee: TaskAssignee = {
+      id: randomUUID(),
+      ...assignee,
+      assignedAt: new Date(),
+    };
+    return taskAssignee;
+  }
+
+  async removeTaskAssignee(taskId: string, userId: string): Promise<void> {
+    // Placeholder implementation for MemStorage
+  }
+
+  async setTaskAssignees(taskId: string, userIds: string[]): Promise<void> {
+    // Placeholder implementation for MemStorage
+  }
+
+  // Column methods
+  async getColumns(): Promise<Column[]> {
+    return Array.from(this.columns.values()).sort((a, b) => a.position - b.position);
+  }
+
+  async getColumn(id: string): Promise<Column | undefined> {
+    return this.columns.get(id);
+  }
+
+  async createColumn(insertColumn: InsertColumn): Promise<Column> {
+    const id = insertColumn.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const column: Column = {
+      id: id || `column-${Date.now()}`,
+      ...insertColumn,
+      wipLimit: insertColumn.wipLimit || null,
+    };
+    this.columns.set(column.id, column);
+    return column;
+  }
+
+  async updateColumn(id: string, data: UpdateColumn): Promise<Column> {
+    const existingColumn = this.columns.get(id);
+    if (!existingColumn) {
+      throw new Error(`Column with id ${id} not found`);
+    }
+    
+    const updatedColumn = { ...existingColumn, ...data };
+    this.columns.set(id, updatedColumn);
+    return updatedColumn;
+  }
+
+  async deleteColumn(id: string): Promise<void> {
+    const existingColumn = this.columns.get(id);
+    if (!existingColumn) {
+      throw new Error(`Column with id ${id} not found`);
+    }
+    
+    // Move tasks from deleted column to backlog
+    const tasks = Array.from(this.tasks.values());
+    tasks.forEach(task => {
+      if (task.status === id) {
+        this.tasks.set(task.id, { ...task, status: "backlog" });
+      }
+    });
+    
+    this.columns.delete(id);
+  }
+
+  async reorderColumns(reorderedColumns: { id: string; position: number }[]): Promise<void> {
+    reorderedColumns.forEach(({ id, position }) => {
+      const column = this.columns.get(id);
+      if (column) {
+        this.columns.set(id, { ...column, position });
+      }
+    });
+  }
+
+  // Team member methods
+  async getTeamMembers(): Promise<TeamMember[]> {
+    return Array.from(this.teamMembers.values());
+  }
+
+  async createTeamMember(member: InsertTeamMember): Promise<TeamMember> {
+    const id = randomUUID();
+    const teamMember: TeamMember = {
+      ...member,
+      id,
+      role: member.role || "",
+      avatar: member.avatar || "",
+      status: member.status || "offline",
+    };
+    this.teamMembers.set(id, teamMember);
+    return teamMember;
+  }
+
+  async updateTeamMemberStatus(id: string, status: string): Promise<TeamMember> {
+    const existingMember = this.teamMembers.get(id);
+    if (!existingMember) {
+      throw new Error(`Team member with id ${id} not found`);
+    }
+    
+    const updatedMember: TeamMember = {
+      ...existingMember,
+      status,
+    };
+    
+    this.teamMembers.set(id, updatedMember);
+    return updatedMember;
+  }
+
+  // Board Shares - placeholder implementations for MemStorage
+  async getBoardShares(boardId: string): Promise<BoardShare[]> {
+    return [];
+  }
+
+  async getAllBoardShares(): Promise<BoardShare[]> {
+    return [];
+  }
+
+  async getUserSharedBoards(userId: string): Promise<BoardShare[]> {
+    return [];
+  }
+
+  async getTeamSharedBoards(teamId: string): Promise<BoardShare[]> {
+    return [];
+  }
+
+  async getBoardMembers(boardId: string): Promise<User[]> {
+    return [];
+  }
+
+  async getBoardMemberCount(boardId: string): Promise<number> {
+    return 0;
+  }
+
+  async createBoardShare(share: InsertBoardShare): Promise<BoardShare> {
+    throw new Error("Board sharing not implemented in MemStorage");
+  }
+
+  async updateBoardShare(id: string, share: UpdateBoardShare): Promise<BoardShare> {
+    throw new Error("Board sharing not implemented in MemStorage");
+  }
+
+  async deleteBoardShare(id: string): Promise<void> {
+    throw new Error("Board sharing not implemented in MemStorage");
+  }
+
+  async getUserBoardPermission(userId: string, boardId: string): Promise<string | null> {
+    return null;
+  }
+
+  // Task Status methods for MemStorage (basic implementation)
+  async getTaskStatuses(): Promise<TaskStatus[]> {
+    return [
+      { 
+        id: "1", 
+        name: "backlog", 
+        displayName: "Backlog", 
+        color: "#6b7280", 
+        isDefault: "true", 
+        position: 0, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      { 
+        id: "2", 
+        name: "todo", 
+        displayName: "To Do", 
+        color: "#3b82f6", 
+        isDefault: "false", 
+        position: 1, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      { 
+        id: "3", 
+        name: "inprogress", 
+        displayName: "In Progress", 
+        color: "#f59e0b", 
+        isDefault: "false", 
+        position: 2, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      { 
+        id: "4", 
+        name: "done", 
+        displayName: "Done", 
+        color: "#10b981", 
+        isDefault: "false", 
+        position: 3, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+  }
+
+  async getTaskStatus(id: string): Promise<TaskStatus | undefined> {
+    const statuses = await this.getTaskStatuses();
+    return statuses.find(status => status.id === id);
+  }
+
+  async createTaskStatus(status: InsertTaskStatus): Promise<TaskStatus> {
+    throw new Error("Task Status creation not implemented in MemStorage");
+  }
+
+  async updateTaskStatus(id: string, status: UpdateTaskStatus): Promise<TaskStatus> {
+    throw new Error("Task Status updates not implemented in MemStorage");
+  }
+
+  async deleteTaskStatus(id: string): Promise<void> {
+    throw new Error("Task Status deletion not implemented in MemStorage");
+  }
+
+  // Task Priority methods for MemStorage (basic implementation)
+  async getTaskPriorities(): Promise<TaskPriority[]> {
+    return [
+      { 
+        id: "1", 
+        name: "low", 
+        displayName: "Baixa", 
+        color: "#3b82f6", 
+        isDefault: "false", 
+        level: 1, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      { 
+        id: "2", 
+        name: "medium", 
+        displayName: "Média", 
+        color: "#f59e0b", 
+        isDefault: "true", 
+        level: 2, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      { 
+        id: "3", 
+        name: "high", 
+        displayName: "Alta", 
+        color: "#ef4444", 
+        isDefault: "false", 
+        level: 3, 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+  }
+
+  async getTaskPriority(id: string): Promise<TaskPriority | undefined> {
+    const priorities = await this.getTaskPriorities();
+    return priorities.find(priority => priority.id === id);
+  }
+
+  async createTaskPriority(priority: InsertTaskPriority): Promise<TaskPriority> {
+    throw new Error("Task Priority creation not implemented in MemStorage");
+  }
+
+  async updateTaskPriority(id: string, priority: UpdateTaskPriority): Promise<TaskPriority> {
+    throw new Error("Task Priority updates not implemented in MemStorage");
+  }
+
+  async deleteTaskPriority(id: string): Promise<void> {
+    throw new Error("Task Priority deletion not implemented in MemStorage");
+  }
+}
+
 export class DatabaseStorage implements IStorage {
   // Cache simples para permissões (dados raramente modificados)
   private permissionsCache = new Map<string, { data: Permission[], timestamp: number }>();

@@ -4,6 +4,8 @@ This is a Kanban board application called **"NuP-Kan"** built with React and Exp
 
 **Recent Updates (August 26, 2025):**
 - ✅ **CRITICAL ARCHITECTURE FIX**: Corrigida inconsistência grave entre MemStorage e DatabaseStorage
+- ✅ **PRODUCTION READY**: MemStorage completamente removido - sistema usa apenas PostgreSQL
+- ✅ **CODE CLEANUP**: Arquivo storage.ts reduzido de 2300+ para 1150 linhas (~50% menor)
 - ✅ **DRAG & DROP COLUMNS**: DatabaseStorage agora cria colunas padrão (Backlog, To Do, In Progress, Review, Done)
 - ✅ **DATA INTEGRITY**: Boards no PostgreSQL não ficam mais vazios, permitindo funcionalidade completa do Kanban
 - ✅ **COLOR MAPPING**: Adicionado suporte a códigos hex e nomes de cores nas colunas
