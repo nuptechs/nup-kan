@@ -81,7 +81,11 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   const deleteColumnMutation = useMutation({
     mutationFn: async (columnId: string) => {
       const response = await apiRequest("DELETE", `/api/columns/${columnId}`);
-      return response.json();
+      // DELETE returns 204 No Content, so don't try to parse JSON
+      if (response.ok) {
+        return { success: true };
+      }
+      throw new Error(`Failed to delete column: ${response.status}`);
     },
     onSuccess: () => {
       // Just show success message - UI already updated optimistically
