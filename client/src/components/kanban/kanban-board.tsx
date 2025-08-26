@@ -34,6 +34,10 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
   
+  // Column drag and drop state
+  const [draggedColumn, setDraggedColumn] = useState<Column | null>(null);
+  const [dragOverColumnIndex, setDragOverColumnIndex] = useState<number | null>(null);
+  
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { canCreateTasks, canEditTasks, canManageColumns } = usePermissions();
@@ -99,6 +103,25 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     },
   });
 
+  const updateColumnPositionsMutation = useMutation({
+    mutationFn: async (columnUpdates: { id: string; position: number }[]) => {
+      console.log("🔄 [FRONTEND] Updating column positions:", columnUpdates);
+      return await apiRequest("POST", "/api/columns/reorder", { columns: columnUpdates });
+    },
+    onSuccess: () => {
+      console.log("✅ [FRONTEND] Column positions updated successfully");
+      queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
+    },
+    onError: (error) => {
+      console.error("❌ [FRONTEND] Column reorder failed:", error);
+      toast({
+        title: "Erro",
+        description: "Falha ao reordenar colunas. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteColumnMutation = useMutation({
     mutationFn: async (columnId: string) => {
       return await apiRequest("DELETE", `/api/columns/${columnId}`);
@@ -134,6 +157,71 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     console.log("🔄 [DRAG] Ending drag");
     setDraggedTask(null);
     setDragOverColumn(null);
+  };
+
+  // Column drag and drop handlers
+  const handleColumnDragStart = (e: React.DragEvent, column: Column) => {
+    if (isReadOnly) {
+      e.preventDefault();
+      return;
+    }
+    
+    console.log("🔄 [COLUMN-DRAG] Starting drag for column:", column.title);
+    setDraggedColumn(column);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleColumnDragEnd = () => {
+    console.log("🔄 [COLUMN-DRAG] Ending column drag");
+    setDraggedColumn(null);
+    setDragOverColumnIndex(null);
+  };
+
+  const handleColumnReorderDragOver = (e: React.DragEvent, columnIndex: number) => {
+    if (!draggedColumn || isReadOnly) return;
+    
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverColumnIndex(columnIndex);
+  };
+
+  const handleColumnDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    
+    if (!draggedColumn || isReadOnly) return;
+    
+    const sortedColumns = [...columns].sort((a, b) => a.position - b.position);
+    const sourceIndex = sortedColumns.findIndex(col => col.id === draggedColumn.id);
+    
+    if (sourceIndex === targetIndex) {
+      handleColumnDragEnd();
+      return;
+    }
+    
+    console.log("🔄 [COLUMN-DRAG] Dropping column from", sourceIndex, "to", targetIndex);
+    
+    // Create new column order
+    const newColumns = [...sortedColumns];
+    const [removed] = newColumns.splice(sourceIndex, 1);
+    newColumns.splice(targetIndex, 0, removed);
+    
+    // Update positions
+    const columnUpdates = newColumns.map((col, index) => ({
+      id: col.id,
+      position: index
+    }));
+    
+    // Optimistically update UI
+    queryClient.setQueryData([columnsEndpoint], (oldColumns: Column[] | undefined) => {
+      if (!oldColumns) return oldColumns;
+      return oldColumns.map(col => {
+        const update = columnUpdates.find(u => u.id === col.id);
+        return update ? { ...col, position: update.position } : col;
+      });
+    });
+    
+    updateColumnPositionsMutation.mutate(columnUpdates);
+    handleColumnDragEnd();
   };
 
   const handleColumnDragOver = (e: React.DragEvent, columnId: string) => {
@@ -278,22 +366,42 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
           <div className="flex gap-6 min-w-max p-4">
             {columns
               .sort((a, b) => a.position - b.position)
-              .map((column) => {
+              .map((column, index) => {
                 const columnTasks = getTasksByColumn(column.id);
                 const isWipLimitExceeded = column.wipLimit && columnTasks.length > column.wipLimit;
                 const isDragOver = dragOverColumn === column.id;
+                const isColumnDragOver = dragOverColumnIndex === index;
+                const isDraggingColumn = draggedColumn?.id === column.id;
 
                 return (
                   <div
                     key={column.id}
-                    className={`min-w-80 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border-2 transition-colors ${
+                    className={`min-w-80 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border-2 transition-all duration-200 ${
                       isDragOver 
                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                        : isColumnDragOver 
+                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                         : 'border-transparent'
-                    }`}
-                    onDragOver={(e) => handleColumnDragOver(e, column.id)}
+                    } ${isDraggingColumn ? 'opacity-50 scale-95' : ''}`}
+                    draggable={!isReadOnly}
+                    onDragStart={(e) => handleColumnDragStart(e, column)}
+                    onDragEnd={handleColumnDragEnd}
+                    onDragOver={(e) => {
+                      // Handle task drops
+                      handleColumnDragOver(e, column.id);
+                      // Handle column reordering
+                      handleColumnReorderDragOver(e, index);
+                    }}
                     onDragLeave={handleColumnDragLeave}
-                    onDrop={(e) => handleTaskDrop(e, column.id)}
+                    onDrop={(e) => {
+                      // Check if it's a column being dropped
+                      if (draggedColumn) {
+                        handleColumnDrop(e, index);
+                      } else {
+                        // Handle task drop
+                        handleTaskDrop(e, column.id);
+                      }
+                    }}
                     data-testid={`column-${column.id}`}
                   >
                     <KanbanColumn
@@ -340,7 +448,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
           setEditingColumn(null);
         }}
         editingColumn={editingColumn}
-        boardId={boardId}
+        boardId={boardId || ""}
       />
 
       <AlertDialog open={!!columnToDelete} onOpenChange={() => setColumnToDelete(null)}>

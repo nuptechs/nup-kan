@@ -592,7 +592,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("✅ [ROUTE] Storage reorder completed successfully");
       
       // Force cache invalidation to ensure fresh data
-      cache.delete(CacheKeys.TASKS);
+      // cache.delete(CacheKeys.TASKS); // Commented out due to cache dependency
       
       res.status(200).json({ message: "Tasks reordered successfully" });
     } catch (error) {
