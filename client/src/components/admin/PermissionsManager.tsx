@@ -37,7 +37,7 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Priority queries - load immediately for core functionality
+  // ONLY these 2 queries load on mount - everything else is lazy loaded
   const { data: permissions = [], isLoading: permissionsLoading } = useQuery<Permission[]>({
     queryKey: ["/api/permissions"],
   });
@@ -46,15 +46,22 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
     queryKey: ["/api/profiles"],
   });
 
-  // Secondary queries - completely disabled for performance
-  const { data: users = [], refetch: refetchUsers } = useQuery<UserType[]>({
+  // AGGRESSIVE LAZY LOADING - absolutely nothing loads unless clicked
+  const [loadUsers, setLoadUsers] = useState(false);
+  const [loadTeams, setLoadTeams] = useState(false);
+  const [loadUserTeams, setLoadUserTeams] = useState(false);
+  const [loadTeamProfiles, setLoadTeamProfiles] = useState(false);
+  const [loadProfilePermissions, setLoadProfilePermissions] = useState(false);
+
+  // ALL secondary queries disabled by default
+  const { data: users = [] } = useQuery<UserType[]>({
     queryKey: ["/api/users"],
-    enabled: false, // Disabled completely
+    enabled: loadUsers && activeTab === "quick-assign",
   });
 
-  const { data: teams = [], refetch: refetchTeams } = useQuery<Team[]>({
+  const { data: teams = [] } = useQuery<Team[]>({
     queryKey: ["/api/teams"],
-    enabled: false, // Disabled completely
+    enabled: loadTeams && activeTab === "quick-assign",
   });
 
   // Target-specific permissions
@@ -162,20 +169,20 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
     },
   });
 
-  // Tertiary queries - all disabled for performance
-  const { data: userTeams = [], refetch: refetchUserTeams } = useQuery<UserTeam[]>({
+  // ALL tertiary queries disabled by default
+  const { data: userTeams = [] } = useQuery<UserTeam[]>({
     queryKey: ["/api/user-teams"],
-    enabled: false,
+    enabled: loadUserTeams && activeTab === "quick-assign",
   });
 
-  const { data: teamProfiles = [], refetch: refetchTeamProfiles } = useQuery<TeamProfile[]>({
+  const { data: teamProfiles = [] } = useQuery<TeamProfile[]>({
     queryKey: ["/api/team-profiles"],
-    enabled: false,
+    enabled: loadTeamProfiles && activeTab === "quick-assign",
   });
 
-  const { data: profilePermissions = [], refetch: refetchProfilePermissions } = useQuery<ProfilePermission[]>({
+  const { data: profilePermissions = [] } = useQuery<ProfilePermission[]>({
     queryKey: ["/api/profile-permissions"],
-    enabled: false,
+    enabled: loadProfilePermissions && activeTab === "sync",
   });
 
   // Query para relatório de funcionalidades
@@ -301,10 +308,10 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
             value="quick-assign"
             onClick={() => {
               // Load data only when tab is clicked
-              refetchUsers();
-              refetchTeams();
-              refetchUserTeams();
-              refetchTeamProfiles();
+              setLoadUsers(true);
+              setLoadTeams(true);
+              setLoadUserTeams(true);
+              setLoadTeamProfiles(true);
             }}
           >
             Atribuição Rápida
@@ -313,7 +320,7 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
             value="sync"
             onClick={() => {
               // Load data only when tab is clicked
-              refetchProfilePermissions();
+              setLoadProfilePermissions(true);
             }}
           >
             Sincronização
