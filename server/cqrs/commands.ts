@@ -39,36 +39,47 @@ export class CommandHandlers {
     
     try {
       const validData = createBoardCommandSchema.parse(command);
+      const boardId = randomUUID();
+      const now = new Date();
       
-      // Executar no PostgreSQL (Write Model)
-      const [board] = await db
-        .insert(boards)
-        .values({
-          ...validData,
-          id: randomUUID(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .returning();
+      // 🔥 TRANSAÇÃO ÚNICA: board + boardShare em uma operação
+      const [board] = await db.transaction(async (tx) => {
+        // Inserir board
+        const [newBoard] = await tx
+          .insert(boards)
+          .values({
+            ...validData,
+            id: boardId,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .returning();
 
-      // 🔗 Adicionar criador como admin do board automaticamente
-      await db.insert(boardShares).values({
-        id: randomUUID(),
-        boardId: board.id,
-        shareType: 'user',
-        shareWithId: validData.createdById,
-        permission: 'admin',
-        sharedByUserId: validData.createdById,
-        createdAt: new Date(),
+        // Inserir creator como admin (mesma transação)
+        await tx.insert(boardShares).values({
+          id: randomUUID(),
+          boardId: boardId,
+          shareType: 'user',
+          shareWithId: validData.createdById,
+          permission: 'admin',
+          sharedByUserId: validData.createdById,
+          createdAt: now,
+        });
+
+        return [newBoard];
       });
 
-      // 📡 Emitir evento para sincronização
-      await eventBus.emit('board.created', {
+      // 📡 Emitir evento ASSÍNCRONO (não bloqueia resposta)
+      eventBus.emit('board.created', {
         boardId: board.id,
         board,
-        timestamp: new Date(),
+        timestamp: now,
+      }).catch(error => {
+        console.error('⚠️ [EVENT] Erro assíncrono em board.created:', error);
       });
 
+      const duration = Date.now() - startTime;
+      console.log(`✅ [COMMAND] Board criado em ${duration}ms`);
       
       return board;
     } catch (error) {

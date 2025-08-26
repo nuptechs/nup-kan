@@ -78,7 +78,8 @@ class EventBus {
   private async handleEvent(event: DomainEvent): Promise<void> {
     switch (event.type) {
       case 'board.created':
-        await EventHandlers.handleBoardCreated(event as BoardCreatedEvent);
+        EventHandlers.handleBoardCreated(event as BoardCreatedEvent)
+          .catch(error => console.error('⚠️ [EVENT-HANDLER] Erro assíncrono em board.created:', error));
         break;
       case 'task.created':
         await EventHandlers.handleTaskCreated(event as TaskCreatedEvent);

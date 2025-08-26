@@ -86,11 +86,13 @@ export class BoardService {
         createdById: authContext.userId,
       });
 
-      // 🔄 Invalidar caches relacionados
-      await Promise.all([
+      // 🔄 Invalidar caches ASSÍNCRONO (não bloqueia resposta)
+      Promise.all([
         cache.invalidatePattern('boards_*'),
         cache.del('boards_count_db'),
-      ]);
+      ]).catch(error => {
+        console.error('⚠️ [CACHE] Erro assíncrono na invalidação:', error);
+      });
 
 
       // Retornar resposta otimizada
