@@ -54,43 +54,34 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<bool
       <body>
         <div class="container">
           <div class="header">
-            <div class="logo">Kanban</div>
-            <p>Sistema de Gerenciamento de Projetos</p>
+            <div class="logo">NuPtechs</div>
+            <p>A Força tech que revoluciona negócios</p>
           </div>
           
           <div class="content">
             <div class="welcome-box">
-              <h2>Bem-vindo(a), ${params.userName}! 🎉</h2>
+              <h2>Olá ${params.userName}, 🚀</h2>
               
-              <p>Estamos muito felizes em tê-lo(a) na nossa plataforma <strong>Kanban</strong>!</p>
+              <p>É um prazer ter você com a gente! 🎉</p>
               
-              <p>Sua conta foi criada com sucesso com as seguintes informações:</p>
-              <ul>
-                <li><strong>Nome:</strong> ${params.userName}</li>
-                <li><strong>Email:</strong> ${params.to}</li>
-                ${params.userRole ? `<li><strong>Cargo:</strong> ${params.userRole}</li>` : ''}
-              </ul>
+              <p>A partir de agora, você faz parte do <strong>ecossistema NuPtechs</strong>, onde tecnologia e negócios se encontram para criar algo maior. Não somos apenas uma empresa de software: somos uma equipe apaixonada por transformar ideias em resultados e simplificar o que parece complexo.</p>
               
-              <p>Com a plataforma, você poderá:</p>
-              <ul>
-                <li>✅ Gerenciar tarefas de forma organizada</li>
-                <li>✅ Colaborar eficientemente com sua equipe</li>
-                <li>✅ Acompanhar o progresso dos projetos</li>
-                <li>✅ Usar limites WIP para otimizar o fluxo de trabalho</li>
-                <li>✅ Visualizar analytics detalhados</li>
-              </ul>
+              <p>Aqui, cada clique abre portas para um novo universo de possibilidades, com soluções que unem inovação, estratégia e um toque humano que faz toda a diferença.</p>
               
-              <p>Agora você pode começar a usar todas as funcionalidades do sistema. Explore, crie suas primeiras tarefas e organize seu fluxo de trabalho!</p>
-            </div>
-            
-            <div style="text-align: center;">
-              <p>Pronto para começar? Acesse a plataforma agora!</p>
+              <p><strong>Nosso compromisso é claro:</strong> entregar valor real para você e para o seu negócio.</p>
+              
+              <p>👉 O próximo passo é simples: acesse a plataforma e comece a explorar todas as funcionalidades disponíveis.</p>
+              
+              <p>Se precisar de ajuda, conte com o nosso time – estamos prontos para caminhar com você.</p>
+              
+              <p><strong>Seja bem-vindo(a) à NuPtechs.</strong><br>
+              A Força tech que revoluciona negócios.</p>
             </div>
           </div>
           
           <div class="footer">
-            <p>Este email foi enviado automaticamente pelo sistema Kanban</p>
-            <p>Se você não se cadastrou em nossa plataforma, pode ignorar este email.</p>
+            <p><strong>Com energia e entusiasmo,</strong><br>
+            Equipe NuPtechs</p>
           </div>
         </div>
       </body>
@@ -98,28 +89,33 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<bool
     `;
 
     const textContent = `
-Bem-vindo(a) ao Kanban, ${params.userName}!
+Olá ${params.userName},
 
-Sua conta foi criada com sucesso em nosso sistema de gerenciamento Kanban.
+É um prazer ter você com a gente! 🎉
 
-Informações da conta:
-- Nome: ${params.userName}
-- Email: ${params.to}
-${params.userRole ? `- Cargo: ${params.userRole}` : ''}
+A partir de agora, você faz parte do ecossistema NuPtechs, onde tecnologia e negócios se encontram para criar algo maior. Não somos apenas uma empresa de software: somos uma equipe apaixonada por transformar ideias em resultados e simplificar o que parece complexo.
 
-Com o Kanban, você poderá gerenciar tarefas de forma organizada, colaborar com sua equipe e acompanhar o progresso dos projetos.
+Aqui, cada clique abre portas para um novo universo de possibilidades, com soluções que unem inovação, estratégia e um toque humano que faz toda a diferença.
 
-Agora você pode começar a usar todas as funcionalidades do sistema!
+Nosso compromisso é claro: entregar valor real para você e para o seu negócio.
+
+👉 O próximo passo é simples: acesse a plataforma e comece a explorar todas as funcionalidades disponíveis.
+
+Se precisar de ajuda, conte com o nosso time – estamos prontos para caminhar com você.
+
+Seja bem-vindo(a) à NuPtechs.
+A Força tech que revoluciona negócios.
 
 ---
-Este email foi enviado automaticamente pelo sistema Kanban.
+Com energia e entusiasmo,
+Equipe NuPtechs
     `;
 
     const senderDomain = process.env.SENDER_DOMAIN || 'replit.app';
     await mailService.send({
       to: params.to,
       from: `noreply@${senderDomain}`,
-      subject: '🎉 Bem-vindo(a) ao Kanban! Sua conta foi criada com sucesso',
+      subject: '🚀 Bem-vindo(a) ao universo NuPtechs',
       text: textContent,
       html: htmlContent,
     });

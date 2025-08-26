@@ -3,6 +3,7 @@
 This is a Kanban board application called **"NuP-Kan"** built with React and Express, featuring a modern task management interface with drag-and-drop functionality. The application allows users to organize tasks across different columns (Backlog, To Do, In Progress, Review, Done), manage team members, and track project analytics. It includes WIP (Work In Progress) limits, task assignments, progress tracking, and real-time updates. **The system uses PostgreSQL for persistent data storage with a many-to-many relationship between users and teams.**
 
 **Recent Updates (August 26, 2025):**
+- ✅ **EMAIL BRANDING UPDATE**: Template de boas-vindas atualizado com nova identidade NuPtechs
 - ✅ **CRITICAL ARCHITECTURE FIX**: Corrigida inconsistência grave entre MemStorage e DatabaseStorage
 - ✅ **PRODUCTION READY**: MemStorage completamente removido - sistema usa apenas PostgreSQL
 - ✅ **CODE CLEANUP**: Arquivo storage.ts reduzido de 2300+ para 1150 linhas (~50% menor)
