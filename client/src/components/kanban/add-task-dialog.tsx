@@ -47,9 +47,15 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
   });
 
   // Get custom fields for this board
-  const customFieldsEndpoint = boardId ? `/api/custom-fields?boardId=${boardId}` : "/api/custom-fields";
   const { data: customFields = [] } = useQuery<any[]>({
-    queryKey: [customFieldsEndpoint],
+    queryKey: ["/api/custom-fields", boardId],
+    queryFn: async () => {
+      const response = await fetch(`/api/custom-fields?boardId=${boardId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch custom fields');
+      }
+      return response.json();
+    },
     enabled: !!boardId,
   });
 
@@ -106,7 +112,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const { assigneeIds, ...restTaskData } = data;
+      const { assigneeIds, customFields, ...restTaskData } = data;
       
       // Create the task first
       const response = await apiRequest("POST", "/api/tasks", restTaskData);
@@ -117,6 +123,26 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
         await apiRequest("PUT", `/api/tasks/${task.id}/assignees`, {
           userIds: assigneeIds,
         });
+      }
+      
+      // Save custom fields if any were filled
+      if (customFields && Object.keys(customFields).length > 0) {
+        const customFieldPromises = Object.entries(customFields)
+          .filter(([_, value]) => value && value.toString().trim() !== '')
+          .map(([fieldName, value]) => {
+            const field = customFields.find((f: any) => f.name === fieldName);
+            if (field) {
+              return apiRequest("POST", `/api/tasks/${task.id}/custom-values`, {
+                customFieldId: field.id,
+                value: value.toString(),
+              });
+            }
+          })
+          .filter(Boolean);
+          
+        if (customFieldPromises.length > 0) {
+          await Promise.all(customFieldPromises);
+        }
       }
       
       return task;
@@ -290,9 +316,9 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
 
             {/* Custom Fields */}
             {customFields.length > 0 && (
-              <div className="space-y-4">
-                <div className="border-t pt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Campos Personalizados</h4>
+              <div className="p-3 border border-blue-200 rounded-lg bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-slate-700 mb-3">Campos Personalizados</h4>
                   <div className="space-y-3">
                     {customFields.map((field) => (
                       <FormField
@@ -301,7 +327,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                         name={`customFields.${field.name}`}
                         render={({ field: formField }) => (
                           <FormItem>
-                            <FormLabel>
+                            <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">
                               {field.label}
                               {field.required === "true" && <span className="text-red-500 ml-1">*</span>}
                             </FormLabel>
@@ -311,6 +337,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                                   <Input
                                     {...formField}
                                     placeholder={field.placeholder || field.label}
+                                    className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
                                     data-testid={`input-custom-${field.name}`}
                                   />
                                 )}
@@ -318,12 +345,16 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                                   <Textarea
                                     {...formField}
                                     placeholder={field.placeholder || field.label}
+                                    className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors resize-none"
                                     data-testid={`textarea-custom-${field.name}`}
                                   />
                                 )}
                                 {field.type === "select" && field.options && field.options.length > 0 && (
                                   <Select onValueChange={formField.onChange} value={formField.value || ""}>
-                                    <SelectTrigger data-testid={`select-custom-${field.name}`}>
+                                    <SelectTrigger 
+                                      className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                                      data-testid={`select-custom-${field.name}`}
+                                    >
                                       <SelectValue placeholder={field.placeholder || field.label} />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -340,7 +371,35 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
                                     {...formField}
                                     type="number"
                                     placeholder={field.placeholder || field.label}
+                                    className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
                                     data-testid={`input-number-custom-${field.name}`}
+                                  />
+                                )}
+                                {field.type === "date" && (
+                                  <Input
+                                    {...formField}
+                                    type="date"
+                                    placeholder={field.placeholder || field.label}
+                                    className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                                    data-testid={`input-date-custom-${field.name}`}
+                                  />
+                                )}
+                                {field.type === "email" && (
+                                  <Input
+                                    {...formField}
+                                    type="email"
+                                    placeholder={field.placeholder || "email@exemplo.com"}
+                                    className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                                    data-testid={`input-email-custom-${field.name}`}
+                                  />
+                                )}
+                                {field.type === "url" && (
+                                  <Input
+                                    {...formField}
+                                    type="url"
+                                    placeholder={field.placeholder || "https://..."}
+                                    className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                                    data-testid={`input-url-custom-${field.name}`}
                                   />
                                 )}
                               </>

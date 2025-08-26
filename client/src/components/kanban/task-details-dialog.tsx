@@ -456,6 +456,13 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                 />
               </div>
 
+              {/* Custom Fields no modo edição */}
+              {boardId && (
+                <div className="p-3 border border-blue-200 rounded-lg bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                  <TaskCustomFields taskId={task.id} boardId={boardId} />
+                </div>
+              )}
+
               <div className="flex justify-end space-x-2 pt-4">
                 <Button
                   type="button"
