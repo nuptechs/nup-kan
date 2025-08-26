@@ -138,9 +138,7 @@ export function TaskCard({ task, columnColor, onTaskClick, isDragging = false, o
       className={cn(
         "bg-white rounded-xl p-2 sm:p-3 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group border border-gray-100 min-w-0",
         (isInProgress || isReview) && `border-l-4 ${getColumnBorderClasses(columnColor)}`,
-        isDone && "opacity-80",
-        isDragging && "opacity-50 rotate-1 scale-105 shadow-xl",
-        !isReadOnly && "cursor-grab active:cursor-grabbing"
+        isDone && "opacity-80"
       )}
       data-testid={`card-${task.id}`}
       onClick={handleClick}
