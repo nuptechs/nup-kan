@@ -546,7 +546,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/tasks/reorder", async (req, res) => {
+  app.patch("/api/tasks/reorder", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Editar Tarefas"), 
+    async (req, res) => {
     console.log("🔍 [REORDER] Request received at /api/tasks/reorder");
     console.log("🔍 [REORDER] Method:", req.method);
     console.log("🔍 [REORDER] URL:", req.url);
