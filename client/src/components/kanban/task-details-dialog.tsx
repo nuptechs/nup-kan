@@ -267,7 +267,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                   </DialogDescription>
                   <Input
                     {...form.register("title")}
-                    className="text-xl font-semibold border-none p-0 focus:ring-0 focus:border-none shadow-none bg-transparent"
+                    className="text-xl font-semibold border-none p-0 focus:ring-0 focus:border-none shadow-none bg-blue-50/40 hover:bg-blue-50/60 rounded-md px-2 transition-colors"
                     placeholder="Digite o título da tarefa"
                     data-testid="input-header-title"
                   />
@@ -336,11 +336,12 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Título</FormLabel>
+                    <FormLabel className="text-sm font-medium text-blue-700 mb-1.5">Título</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Digite o título da tarefa"
                         {...field}
+                        className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
                         data-testid="input-edit-title"
                       />
                     </FormControl>
@@ -354,13 +355,14 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descrição</FormLabel>
+                    <FormLabel className="text-sm font-medium text-blue-700 mb-1.5">Descrição</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Digite a descrição da tarefa"
                         {...field}
                         value={field.value || ""}
                         rows={3}
+                        className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors resize-none"
                         data-testid="input-edit-description"
                       />
                     </FormControl>
@@ -375,10 +377,13 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Status</FormLabel>
+                      <FormLabel className="text-sm font-medium text-blue-700 mb-1.5">Status</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger data-testid="select-edit-status">
+                          <SelectTrigger 
+                            className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                            data-testid="select-edit-status"
+                          >
                             <SelectValue placeholder="Selecione um status" />
                           </SelectTrigger>
                         </FormControl>
@@ -400,10 +405,13 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                   name="priority"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Prioridade</FormLabel>
+                      <FormLabel className="text-sm font-medium text-blue-700 mb-1.5">Prioridade</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger data-testid="select-edit-priority">
+                          <SelectTrigger 
+                            className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                            data-testid="select-edit-priority"
+                          >
                             <SelectValue placeholder="Selecione uma prioridade" />
                           </SelectTrigger>
                         </FormControl>
@@ -425,7 +433,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                   name="progress"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Progresso (%)</FormLabel>
+                      <FormLabel className="text-sm font-medium text-blue-700 mb-1.5">Progresso (%)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -437,6 +445,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                             const value = e.target.value === "" ? 0 : parseInt(e.target.value);
                             field.onChange(isNaN(value) ? 0 : Math.min(Math.max(value, 0), 100));
                           }}
+                          className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
                           data-testid="input-edit-progress"
                         />
                       </FormControl>
@@ -446,23 +455,28 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                 />
               </div>
 
-              <MultiUserSelector
-                selectedUserIds={form.watch("assigneeIds") || []}
-                onUserSelectionChange={(userIds) => {
-                  form.setValue("assigneeIds", userIds);
-                }}
-              />
+              <div className="p-3 border border-blue-200 rounded-lg bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                <MultiUserSelector
+                  selectedUserIds={form.watch("assigneeIds") || []}
+                  onUserSelectionChange={(userIds) => {
+                    form.setValue("assigneeIds", userIds);
+                  }}
+                />
+              </div>
 
-              <TagSelector
-                selectedTags={form.watch("tags")}
-                onTagsChange={(tags) => form.setValue("tags", tags)}
-              />
+              <div className="p-3 border border-blue-200 rounded-lg bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                <TagSelector
+                  selectedTags={form.watch("tags")}
+                  onTagsChange={(tags) => form.setValue("tags", tags)}
+                />
+              </div>
 
               <div className="flex justify-end space-x-2 pt-4">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsEditing(false)}
+                  className="border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-colors"
                   data-testid="button-cancel-edit"
                 >
                   Cancelar
@@ -470,7 +484,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                 <Button
                   type="submit"
                   disabled={updateTaskMutation.isPending}
-                  className="bg-indigo-500 hover:bg-indigo-600"
+                  className="bg-indigo-500 hover:bg-indigo-600 shadow-md hover:shadow-lg transition-all ring-2 ring-indigo-200"
                   data-testid="button-save-task"
                 >
                   {updateTaskMutation.isPending ? "Salvando..." : "Salvar Alterações"}
