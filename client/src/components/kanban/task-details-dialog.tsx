@@ -260,7 +260,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
           {/* Indicador de edição */}
           {isEditing && (
             <div className="absolute top-2 left-2">
-              <span className="text-xs text-slate-500 bg-blue-50 px-2 py-1 rounded-md font-medium">
+              <span className="text-xs text-slate-500 font-medium">
                 Editando dados da tarefa
               </span>
             </div>
