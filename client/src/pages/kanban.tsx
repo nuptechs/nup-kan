@@ -92,14 +92,14 @@ export default function KanbanPage() {
             </h1>
             
             {/* Search Input */}
-            <div className="relative flex-shrink-0 w-64 ml-6">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <div className="relative flex-shrink-0 w-48 ml-4">
+              <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
               <Input
                 type="text"
-                placeholder="Buscar por tarefa ou responsável..."
+                placeholder="tarefa ou responsável..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-8 h-9 text-sm border-gray-200 focus:border-blue-300 focus:ring-blue-200 focus:ring-1"
+                className="pl-8 pr-7 h-8 text-sm border-gray-200 focus:border-blue-300 focus:ring-blue-200 focus:ring-1"
                 data-testid="header-search-input"
               />
               {searchQuery && (
@@ -107,7 +107,7 @@ export default function KanbanPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
                   data-testid="clear-header-search-btn"
                 >
                   <X className="h-3 w-3" />
