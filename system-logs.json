@@ -1,5 +1,19 @@
 [
   {
+    "id": "action_1756248919289_vpq551w8k",
+    "timestamp": "2025-08-26T22:55:19.289Z",
+    "level": "info",
+    "message": "Sistema executou: Criar coluna \"teste\"",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "system",
+    "userName": "Sistema",
+    "action": "Criar coluna \"teste\"",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 87
+  },
+  {
     "id": "log_1756248911544_zx9urauil",
     "timestamp": "2025-08-26T22:55:11.544Z",
     "level": "error",
