@@ -10,6 +10,7 @@ interface KanbanColumnProps {
   onTaskClick: (task: Task) => void;
   onEditColumn?: (column: Column) => void;
   onDeleteColumn?: (columnId: string) => void;
+  onAddTask?: (columnId: string) => void;
   isReadOnly?: boolean;
   onTaskDragStart?: (e: React.DragEvent, task: Task) => void;
   onTaskDragEnd?: () => void;
@@ -66,6 +67,7 @@ export function KanbanColumn({
   onTaskClick, 
   onEditColumn, 
   onDeleteColumn, 
+  onAddTask,
   isReadOnly = false, 
   onTaskDragStart, 
   onTaskDragEnd, 
@@ -128,6 +130,24 @@ export function KanbanColumn({
               )}
             </div>
           </div>
+          
+          {/* Botão sutil para adicionar tarefa */}
+          {!isReadOnly && (
+            <div className="flex justify-center mb-2">
+              <button
+                onClick={() => {
+                  onAddTask?.(column.id);
+                }}
+                className="w-full py-2 border-2 border-dashed border-gray-200 hover:border-gray-300 rounded-lg text-gray-400 hover:text-gray-500 transition-all duration-200 group/add"
+                data-testid={`button-add-task-column-${column.id}`}
+                title="Adicionar nova tarefa"
+              >
+                <div className="flex items-center justify-center">
+                  <Plus className="w-4 h-4 group-hover/add:scale-110 transition-transform duration-200" />
+                </div>
+              </button>
+            </div>
+          )}
           
           {/* WIP Progress */}
           {column.wipLimit && (

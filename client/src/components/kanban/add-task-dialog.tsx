@@ -22,6 +22,7 @@ interface AddTaskDialogProps {
   isOpen: boolean;
   onClose: () => void;
   boardId?: string;
+  defaultColumnId?: string | null;
 }
 
 const formSchema = insertTaskSchema.extend({
@@ -32,7 +33,7 @@ const formSchema = insertTaskSchema.extend({
 
 type FormData = z.infer<typeof formSchema>;
 
-export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) {
+export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: AddTaskDialogProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -59,8 +60,11 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
     enabled: !!boardId,
   });
 
-  // Get the first column's ID for default status
+  // Get the default status based on defaultColumnId or first column
   const getDefaultStatus = () => {
+    if (defaultColumnId && columns.find(c => c.id === defaultColumnId)) {
+      return defaultColumnId;
+    }
     if (columns.length === 0) return "backlog";
     const firstColumn = columns.sort((a, b) => a.position - b.position)[0];
     
@@ -84,9 +88,9 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
     },
   });
 
-  // Reset form with updated default status when columns change
+  // Reset form with updated default status when columns change or dialog opens
   useEffect(() => {
-    if (columns.length > 0) {
+    if (columns.length > 0 && isOpen) {
       form.reset({
         title: "",
         description: "",
@@ -100,7 +104,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId }: AddTaskDialogProps) 
         customFields: {},
       });
     }
-  }, [columns, form, boardId]);
+  }, [columns, form, boardId, isOpen, defaultColumnId]);
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: FormData) => {

@@ -25,6 +25,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskDetailsOpen, setIsTaskDetailsOpen] = useState(false);
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+  const [selectedColumnForNewTask, setSelectedColumnForNewTask] = useState<string | null>(null);
   const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
   const [editingColumn, setEditingColumn] = useState<Column | null>(null);
   const [columnToDelete, setColumnToDelete] = useState<string | null>(null);
@@ -224,7 +225,8 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     setIsTaskDetailsOpen(true);
   };
 
-  const handleAddTask = () => {
+  const handleAddTask = (columnId?: string) => {
+    setSelectedColumnForNewTask(columnId || null);
     setIsAddTaskOpen(true);
   };
 
@@ -300,6 +302,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
                       onTaskClick={handleTaskClick}
                       onEditColumn={handleEditColumn}
                       onDeleteColumn={handleDeleteColumn}
+                      onAddTask={handleAddTask}
                       isReadOnly={isReadOnly}
                       onTaskDragStart={handleTaskDragStart}
                       onTaskDragEnd={handleTaskDragEnd}
@@ -322,8 +325,12 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
       <AddTaskDialog
         isOpen={isAddTaskOpen}
-        onClose={() => setIsAddTaskOpen(false)}
+        onClose={() => {
+          setIsAddTaskOpen(false);
+          setSelectedColumnForNewTask(null);
+        }}
         boardId={boardId}
+        defaultColumnId={selectedColumnForNewTask}
       />
 
       <ColumnManagementDialog
