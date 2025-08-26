@@ -248,13 +248,17 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 pb-3">
           <div className="flex items-center justify-between">
             <div className="flex-1 pr-4">
-              <DialogTitle className="text-xl font-semibold text-gray-900" data-testid="dialog-title">
-                {isEditing ? "Editar Tarefa" : task.title}
-              </DialogTitle>
-              {isEditing && (
-                <DialogDescription className="mt-1 text-sm text-gray-600">
-                  Modifique as informações da tarefa conforme necessário.
-                </DialogDescription>
+              {isEditing ? (
+                <Input
+                  {...form.register("title")}
+                  className="text-xl font-semibold border-none p-0 focus:ring-0 focus:border-none shadow-none bg-transparent"
+                  placeholder="Digite o título da tarefa"
+                  data-testid="input-header-title"
+                />
+              ) : (
+                <DialogTitle className="text-xl font-semibold text-gray-900" data-testid="dialog-title">
+                  {task.title}
+                </DialogTitle>
               )}
             </div>
             
@@ -305,24 +309,6 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         {isEditing ? (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Título</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Digite o título da tarefa"
-                        {...field}
-                        data-testid="input-edit-title"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <FormField
                 control={form.control}
                 name="description"
