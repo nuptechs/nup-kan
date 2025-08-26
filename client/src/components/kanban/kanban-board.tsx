@@ -299,6 +299,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
         position: index,
       }));
       
+      
       reorderTasksMutation.mutate(tasksWithNewPositions);
       return;
     }
@@ -345,6 +346,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
       id: t.id,
       position: index,
     }));
+    
     
     // Only reorder if there are other tasks to reorder
     if (tasksToReorder.length > 1) {

@@ -552,9 +552,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
     try {
       const reorderedTasks = req.body.tasks;
+      // Validate that tasks array exists and is not empty
+      if (!reorderedTasks || !Array.isArray(reorderedTasks) || reorderedTasks.length === 0) {
+        return res.status(400).json({ message: "Invalid tasks array" });
+      }
+      
+      // Validate each task has required fields
+      for (const task of reorderedTasks) {
+        if (!task.id || typeof task.position !== 'number') {
+          return res.status(400).json({ message: "Invalid task data" });
+        }
+      }
+      
       await storage.reorderTasks(reorderedTasks);
+      
+      // Force cache invalidation to ensure fresh data
+      cache.delete(CacheKeys.TASKS);
+      
       res.status(200).json({ message: "Tasks reordered successfully" });
     } catch (error) {
+      console.error("❌ [REORDER] Erro ao reordenar tasks:", error);
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Task not found" });
+      }
       res.status(400).json({ message: "Failed to reorder tasks" });
     }
   });
