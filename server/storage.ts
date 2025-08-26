@@ -145,7 +145,6 @@ export interface IStorage {
 // MemStorage removido - Sistema de produção usa apenas DatabaseStorage com PostgreSQL
 
 export class DatabaseStorage implements IStorage {
-export class DatabaseStorage implements IStorage {
   // Cache simples para permissões (dados raramente modificados)
   private permissionsCache = new Map<string, { data: Permission[], timestamp: number }>();
   private readonly CACHE_TTL = 300000; // 5 minutos

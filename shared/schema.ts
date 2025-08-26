@@ -204,6 +204,7 @@ export const insertBoardSchema = createInsertSchema(boards).omit({
   updatedAt: true,
 }).extend({
   name: z.string().min(3, "O nome do board deve conter pelo menos 3 caracteres").trim(),
+  createDefaultColumns: z.boolean().default(true).optional(),
 });
 
 export const updateBoardSchema = insertBoardSchema.partial();

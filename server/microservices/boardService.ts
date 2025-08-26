@@ -10,6 +10,7 @@ export interface BoardCreateRequest {
   name: string;
   description?: string;
   color?: string;
+  createDefaultColumns?: boolean;
   templateId?: string;
   isPrivate?: boolean;
   settings?: {
@@ -84,6 +85,7 @@ export class BoardService {
         description: request.description || '',
         color: request.color || '#3B82F6',
         createdById: authContext.userId,
+        createDefaultColumns: request.createDefaultColumns !== false,
       });
 
       // 🔄 Invalidar caches ASSÍNCRONO (não bloqueia resposta)

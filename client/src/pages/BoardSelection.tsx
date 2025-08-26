@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useForm } from "react-hook-form";
@@ -26,6 +27,7 @@ const boardSchema = z.object({
   name: z.string().min(3, "O nome do board deve conter pelo menos 3 caracteres").trim(),
   description: z.string().optional(),
   color: z.string().default("#3b82f6"),
+  createDefaultColumns: z.boolean().default(true).optional(),
 });
 
 type BoardFormData = z.infer<typeof boardSchema>;
@@ -66,6 +68,7 @@ export default function BoardSelection() {
       name: "",
       description: "",
       color: "#3b82f6",
+      createDefaultColumns: true,
     },
   });
 
@@ -483,6 +486,30 @@ export default function BoardSelection() {
                       </div>
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={createForm.control}
+                name="createDefaultColumns"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        data-testid="checkbox-create-default-columns"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Criar colunas padrão
+                      </FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        Inclui as colunas: Backlog, To Do, In Progress, Review, Done
+                      </p>
+                    </div>
                   </FormItem>
                 )}
               />

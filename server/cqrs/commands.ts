@@ -8,12 +8,15 @@ import { boards, tasks, boardShares } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 
+import { storage } from "../storage";
+
 // Schemas para validação de commands
 export const createBoardCommandSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
   color: z.string().optional(),
   createdById: z.string().uuid(),
+  createDefaultColumns: z.boolean().default(true).optional(),
 });
 
 export const createTaskCommandSchema = z.object({
@@ -66,6 +69,13 @@ export class CommandHandlers {
       }).catch(error => {
         console.error('⚠️ [BOARD-SHARE] Erro assíncrono criando share:', error);
       });
+
+      // 🏗️ Criar colunas padrão se solicitado
+      if (validData.createDefaultColumns !== false) {
+        storage.initializeBoardWithDefaults(boardId).catch((error: any) => {
+          console.error('⚠️ [BOARD-INIT] Erro assíncrono criando colunas padrão:', error);
+        });
+      }
 
       // 📡 Emitir evento ASSÍNCRONO (não bloqueia resposta)
       eventBus.emit('board.created', {
