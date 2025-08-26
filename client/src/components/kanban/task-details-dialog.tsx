@@ -77,6 +77,15 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
   const [isEditing, setIsEditing] = useState(false);
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  // Reset editing state when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setIsEditing(false);
+      setIsHistoryExpanded(false);
+      setIsDeleteDialogOpen(false);
+    }
+  }, [isOpen]);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -109,7 +118,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
     },
   });
 
-  // Reset form when task changes
+  // Reset form and editing state when task changes
   useEffect(() => {
     if (task && currentAssignees) {
       const assigneeIds = Array.isArray(currentAssignees) 
@@ -125,6 +134,8 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         tags: task.tags || [],
         assigneeIds: assigneeIds,
       });
+      // Reset editing state when task changes
+      setIsEditing(false);
     }
   }, [task, currentAssignees, form]);
 
