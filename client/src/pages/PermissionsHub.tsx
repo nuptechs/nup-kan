@@ -403,6 +403,58 @@ export default function PermissionsHub() {
     }
   };
 
+  // Loading state durante fetch dos dados
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="mb-8">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => {
+              if (window.history.length > 1) {
+                const currentUrl = window.location.href;
+                window.history.back();
+                setTimeout(() => {
+                  if (window.location.href === currentUrl) {
+                    window.location.href = '/dashboard';
+                  }
+                }, 150);
+              } else {
+                window.location.href = '/dashboard';
+              }
+            }}
+            className="mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
+          <h1 className="text-2xl font-bold">Sistema de Permissões</h1>
+          <p className="text-muted-foreground">Carregando dados...</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {[1,2,3,4].map(i => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center justify-between text-lg">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-5 h-5 bg-gray-300 rounded"></div>
+                    <div className="w-20 h-4 bg-gray-300 rounded"></div>
+                  </div>
+                  <div className="w-8 h-4 bg-gray-300 rounded"></div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="w-full h-4 bg-gray-300 rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   // Dashboard principal
   if (!activeSection) {
     return (
