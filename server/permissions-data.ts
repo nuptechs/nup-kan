@@ -35,25 +35,36 @@ export async function getPermissionsData(req: Request, res: Response) {
     const startTime = Date.now();
 
     try {
-      // 🚀 SINGLE ULTRA-FAST QUERY - Get all data from materialized view
-      const viewData = await storage.getPermissionsManagementData();
+      // 🚀 HYBRID APPROACH: View + Complete original data
+      const [viewData, fullProfiles, fullTeams] = await Promise.all([
+        storage.getPermissionsManagementData(),
+        storage.getProfiles(), // Buscar perfis COMPLETOS com cores e outras propriedades
+        storage.getTeams()     // Buscar teams COMPLETOS com descrições e outras propriedades
+      ]);
       
-      // Process view data into backward-compatible format for existing UI
+      // Process view data for relationships and permissions
       const processedData = processViewData(viewData);
       
-      const data: OptimizedPermissionsData = {
+      // Replace incomplete data with full data from original tables
+      const completeData: OptimizedPermissionsData = {
         viewData,
-        ...processedData
+        permissions: processedData.permissions,
+        profiles: fullProfiles, // ✅ DADOS COMPLETOS com cores, etc.
+        users: processedData.users,
+        teams: fullTeams,       // ✅ DADOS COMPLETOS com descrições, etc.
+        userTeams: processedData.userTeams,
+        teamProfiles: processedData.teamProfiles,
+        profilePermissions: processedData.profilePermissions
       };
 
       // Update cache
-      permissionsCache = data;
+      permissionsCache = completeData;
       cacheTimestamp = now;
 
       const duration = Date.now() - startTime;
-      console.log(`⚡ [PERMISSIONS-DATA] View query completed in ${duration}ms (${viewData.length} records)`);
+      console.log(`⚡ [PERMISSIONS-DATA] Hybrid query completed in ${duration}ms (view: ${viewData.length} records, profiles: ${fullProfiles.length}, teams: ${fullTeams.length})`);
 
-      res.json(data);
+      res.json(completeData);
       
     } catch (viewError) {
       // Fallback to old method if view doesn't exist yet
@@ -87,7 +98,7 @@ function processViewData(viewData: PermissionsManagementData[]) {
       });
     }
     
-    // Extract unique profiles
+    // Extract unique profiles (dados serão substituídos pelos completos depois)
     if (row.profileId && !profiles.has(row.profileId)) {
       profiles.set(row.profileId, {
         id: row.profileId,
@@ -107,7 +118,7 @@ function processViewData(viewData: PermissionsManagementData[]) {
       });
     }
     
-    // Extract unique teams
+    // Extract unique teams (dados serão substituídos pelos completos depois)
     if (row.teamId && !teams.has(row.teamId)) {
       teams.set(row.teamId, {
         id: row.teamId,
