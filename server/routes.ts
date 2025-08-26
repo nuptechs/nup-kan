@@ -546,69 +546,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/tasks/reorder", 
-    (req, res, next) => {
-      console.log("🔍 [MIDDLEWARE-1] Request received at /api/tasks/reorder");
-      console.log("🔍 [MIDDLEWARE-1] Method:", req.method);
-      console.log("🔍 [MIDDLEWARE-1] Headers:", req.headers);
-      console.log("🔍 [MIDDLEWARE-1] Body:", req.body);
-      next();
-    },
-    AuthMiddleware.requireAuth,
-    (req, res, next) => {
-      console.log("🔍 [MIDDLEWARE-2] After requireAuth");
-      next();
-    },
-    AuthMiddleware.requirePermissions("Editar Tarefas"), 
-    (req, res, next) => {
-      console.log("🔍 [MIDDLEWARE-3] After requirePermissions");
-      next();
-    },
-    async (req, res) => {
+  app.patch("/api/tasks/reorder", async (req, res) => {
+    console.log("🔍 [REORDER] Request received at /api/tasks/reorder");
+    console.log("🔍 [REORDER] Method:", req.method);
+    console.log("🔍 [REORDER] URL:", req.url);
+    console.log("🔍 [REORDER] Body:", JSON.stringify(req.body, null, 2));
+    
     try {
-      console.log("🔍 [ROUTE] Received reorder request - full body:", JSON.stringify(req.body, null, 2));
-      
       const reorderedTasks = req.body.tasks;
-      console.log("🔍 [ROUTE] Extracted tasks:", reorderedTasks);
+      console.log("🔍 [REORDER] Extracted tasks:", reorderedTasks);
       
       // Validate that tasks array exists and is not empty
       if (!reorderedTasks || !Array.isArray(reorderedTasks) || reorderedTasks.length === 0) {
-        console.log("❌ [ROUTE] Invalid tasks array validation failed");
+        console.log("❌ [REORDER] Invalid tasks array validation failed");
         return res.status(400).json({ message: "Invalid tasks array" });
       }
       
       // Validate each task has required fields
       for (const task of reorderedTasks) {
         if (!task.id || typeof task.position !== 'number') {
-          console.log("❌ [ROUTE] Invalid task data:", task);
+          console.log("❌ [REORDER] Invalid task data:", task);
           return res.status(400).json({ message: "Invalid task data" });
         }
       }
       
-      console.log("✅ [ROUTE] All validations passed, calling storage.reorderTasks");
-      
-      // Check if tasks exist before reordering
-      console.log("🔍 [ROUTE] Checking if tasks exist before reordering...");
-      const allTasks = await storage.getTasks();
-      const existingTaskIds = allTasks.map(t => t.id);
-      const requestedTaskIds = reorderedTasks.map(t => t.id);
-      const missingTasks = requestedTaskIds.filter(id => !existingTaskIds.includes(id));
-      
-      console.log("🔍 [ROUTE] All task IDs in DB:", existingTaskIds.slice(0, 5), existingTaskIds.length > 5 ? `... (+${existingTaskIds.length - 5} more)` : '');
-      console.log("🔍 [ROUTE] Requested task IDs:", requestedTaskIds);
-      console.log("🔍 [ROUTE] Missing tasks:", missingTasks);
-      
-      if (missingTasks.length > 0) {
-        console.log("❌ [ROUTE] Some tasks not found:", missingTasks);
-        return res.status(404).json({ message: `Tasks not found: ${missingTasks.join(', ')}` });
-      }
+      console.log("✅ [REORDER] All validations passed, calling storage.reorderTasks");
       
       await storage.reorderTasks(reorderedTasks);
       
-      console.log("✅ [ROUTE] Storage reorder completed successfully");
-      
-      // Force cache invalidation to ensure fresh data
-      // cache.delete(CacheKeys.TASKS); // Commented out due to cache dependency
+      console.log("✅ [REORDER] Storage reorder completed successfully");
       
       res.status(200).json({ message: "Tasks reordered successfully" });
     } catch (error) {
@@ -616,7 +582,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "Task not found" });
       }
-      res.status(400).json({ message: "Failed to reorder tasks" });
+      res.status(500).json({ message: "Failed to reorder tasks" });
     }
   });
 
