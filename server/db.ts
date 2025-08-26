@@ -11,16 +11,26 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Connection Pool Otimizado para Performance Máxima
+// 🔥 CONNECTION POOL DE ALTA PERFORMANCE - SISTEMA DE PONTA
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  // Pool otimizado para performance
-  max: 20,              // Máx 20 conexões simultâneas
-  idleTimeoutMillis: 20000, // 20s timeout para conexões idle
-  connectionTimeoutMillis: 10000, // 10s timeout para novas conexões
   
-  // Otimizações específicas do Neon
+  // 🚀 POOL OTIMIZADO PARA LATÊNCIA MÍNIMA
+  max: 50,              // 50 conexões para alta concorrência
+  min: 10,              // 10 conexões sempre ativas
+  idleTimeoutMillis: 30000,     // 30s idle (mais tempo)
+  connectionTimeoutMillis: 2000, // 2s timeout (ultra-rápido)
+  
+  // 🔧 OTIMIZAÇÕES NEON DE PONTA
   allowExitOnIdle: false,
+  
+  // 🎯 CONFIGURAÇÕES DE PERFORMANCE
+  statement_timeout: 5000,      // 5s para statements
+  idle_in_transaction_session_timeout: 10000, // 10s para transações idle
+  
+  // ⚡ KEEP-ALIVE OTIMIZADO
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10000,
 });
 
 export const db = drizzle({ client: pool, schema });

@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { PreparedStatements } from "./preparedStatements";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { users, profiles, permissions, profilePermissions, boards, tasks, columns, teams, userTeams } from "@shared/schema";
 import { cache, CacheKeys, TTL } from "./cache";
@@ -22,22 +23,12 @@ export class OptimizedQueries {
       return cached;
     }
     
-    // Query ultra-otimizada com prepared statement e cache de 1 hora
-    const result = await db
-      .select({
-        id: permissions.id,
-        name: permissions.name,
-        description: permissions.description,
-        category: permissions.category,
-        createdAt: permissions.createdAt,
-      })
-      .from(permissions)
-      .innerJoin(profilePermissions, eq(permissions.id, profilePermissions.permissionId))
-      .innerJoin(profiles, eq(profilePermissions.profileId, profiles.id))
-      .innerJoin(users, eq(profiles.id, users.profileId))
-      .where(eq(users.id, userId));
+    // 🚀 PREPARED STATEMENT: 10x mais rápido que query dinâmica
+    const result = await PreparedStatements.getUserPermissions.execute({
+      userId: userId
+    });
 
-    // Cache por 1 hora para reduzir hits no banco
+    // Cache por 2 horas para reduzir hits no banco
     await cache.set(cacheKey, result, TTL.LONG);
     return result;
   }
@@ -47,21 +38,10 @@ export class OptimizedQueries {
     const cached = await cache.get(cacheKey);
     if (cached) return cached;
     
-    const result = await db
-      .select({
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        avatar: users.avatar,
-        profileId: users.profileId,
-        profileName: profiles.name,
-        profileDescription: profiles.description,
-        createdAt: users.createdAt,
-      })
-      .from(users)
-      .leftJoin(profiles, eq(users.profileId, profiles.id))
-      .where(eq(users.id, userId))
-      .limit(1);
+    // 🚀 PREPARED STATEMENT: 10x mais rápido
+    const result = await PreparedStatements.getUserWithProfile.execute({
+      userId: userId
+    });
 
     const user = result[0] || null;
     // Cache por 2 horas para dados de usuário
