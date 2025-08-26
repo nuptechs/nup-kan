@@ -541,7 +541,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/columns/reorder", async (req, res) => {
+  app.post("/api/columns/reorder", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Editar Columns"), 
+    async (req, res) => {
     try {
       const reorderedColumns = req.body.columns;
       await storage.reorderColumns(reorderedColumns);

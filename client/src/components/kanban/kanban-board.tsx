@@ -157,10 +157,14 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
   const reorderColumnsMutation = useMutation({
     mutationFn: async (reorderedColumns: Column[]) => {
-      const updatePromises = reorderedColumns.map((column, index) =>
-        apiRequest("PATCH", `/api/columns/${column.id}`, { position: index })
-      );
-      await Promise.all(updatePromises);
+      const columnsToReorder = reorderedColumns.map((column, index) => ({
+        id: column.id,
+        position: index
+      }));
+      
+      const response = await apiRequest("POST", "/api/columns/reorder", {
+        columns: columnsToReorder
+      });
       return reorderedColumns;
     },
     onSuccess: () => {
