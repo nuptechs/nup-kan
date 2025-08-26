@@ -394,6 +394,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ✅ Reorder tasks - DEVE VIR ANTES da rota /:id 
+  app.patch("/api/tasks/reorder", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Editar Tarefas"), 
+    async (req, res) => {
+    console.log("🔍 [REORDER] Request received at /api/tasks/reorder");
+    console.log("🔍 [REORDER] Method:", req.method);
+    console.log("🔍 [REORDER] URL:", req.url);
+    console.log("🔍 [REORDER] Body:", JSON.stringify(req.body, null, 2));
+    
+    try {
+      const reorderedTasks = req.body.tasks;
+      console.log("🔍 [REORDER] Extracted tasks:", reorderedTasks);
+      
+      // Validate that tasks array exists and is not empty
+      if (!reorderedTasks || !Array.isArray(reorderedTasks) || reorderedTasks.length === 0) {
+        console.log("❌ [REORDER] Invalid tasks array validation failed");
+        return res.status(400).json({ message: "Invalid tasks array" });
+      }
+      
+      // Validate each task has required fields
+      for (const task of reorderedTasks) {
+        if (!task.id || typeof task.position !== 'number') {
+          console.log("❌ [REORDER] Invalid task data:", task);
+          return res.status(400).json({ message: "Invalid task data" });
+        }
+      }
+      
+      console.log("✅ [REORDER] All validations passed, calling storage.reorderTasks");
+      
+      await storage.reorderTasks(reorderedTasks);
+      
+      console.log("✅ [REORDER] Storage reorder completed successfully");
+      
+      res.status(200).json({ message: "Tasks reordered successfully" });
+    } catch (error) {
+      console.error("❌ [REORDER] Erro ao reordenar tasks:", error);
+      if (error instanceof Error && error.message.includes("not found")) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      res.status(500).json({ message: "Failed to reorder tasks" });
+    }
+  });
+
   // Atualizar task
   app.patch("/api/tasks/:id",
     AuthMiddleware.requireAuth,
@@ -543,49 +587,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json({ message: "Columns reordered successfully" });
     } catch (error) {
       res.status(400).json({ message: "Failed to reorder columns" });
-    }
-  });
-
-  app.patch("/api/tasks/reorder", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Editar Tarefas"), 
-    async (req, res) => {
-    console.log("🔍 [REORDER] Request received at /api/tasks/reorder");
-    console.log("🔍 [REORDER] Method:", req.method);
-    console.log("🔍 [REORDER] URL:", req.url);
-    console.log("🔍 [REORDER] Body:", JSON.stringify(req.body, null, 2));
-    
-    try {
-      const reorderedTasks = req.body.tasks;
-      console.log("🔍 [REORDER] Extracted tasks:", reorderedTasks);
-      
-      // Validate that tasks array exists and is not empty
-      if (!reorderedTasks || !Array.isArray(reorderedTasks) || reorderedTasks.length === 0) {
-        console.log("❌ [REORDER] Invalid tasks array validation failed");
-        return res.status(400).json({ message: "Invalid tasks array" });
-      }
-      
-      // Validate each task has required fields
-      for (const task of reorderedTasks) {
-        if (!task.id || typeof task.position !== 'number') {
-          console.log("❌ [REORDER] Invalid task data:", task);
-          return res.status(400).json({ message: "Invalid task data" });
-        }
-      }
-      
-      console.log("✅ [REORDER] All validations passed, calling storage.reorderTasks");
-      
-      await storage.reorderTasks(reorderedTasks);
-      
-      console.log("✅ [REORDER] Storage reorder completed successfully");
-      
-      res.status(200).json({ message: "Tasks reordered successfully" });
-    } catch (error) {
-      console.error("❌ [REORDER] Erro ao reordenar tasks:", error);
-      if (error instanceof Error && error.message.includes("not found")) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-      res.status(500).json({ message: "Failed to reorder tasks" });
     }
   });
 
