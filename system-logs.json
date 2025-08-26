@@ -1,5 +1,19 @@
 [
   {
+    "id": "action_1756211326265_alxhr7htt",
+    "timestamp": "2025-08-26T12:28:46.265Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar usuário \"Analista\" (teste@teste.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário \"Analista\" (teste@teste.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 89
+  },
+  {
     "id": "log_1756211194285_8hmod4ifk",
     "timestamp": "2025-08-26T12:26:34.285Z",
     "level": "warn",
