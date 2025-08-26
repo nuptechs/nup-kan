@@ -15,6 +15,7 @@ interface KanbanColumnProps {
   isReadOnly?: boolean;
   onTaskDragStart?: (e: React.DragEvent, task: Task) => void;
   onTaskDragEnd?: () => void;
+  onTaskDrop?: (e: React.DragEvent, columnId: string, taskIndex?: number) => void;
   allAssignees: Record<string, (TaskAssignee & { user: User })[]>;
 }
 
@@ -71,7 +72,8 @@ export function KanbanColumn({
   onAddTask,
   isReadOnly = false, 
   onTaskDragStart, 
-  onTaskDragEnd, 
+  onTaskDragEnd,
+  onTaskDrop,
   allAssignees 
 }: KanbanColumnProps) {
   const wipProgress = column.wipLimit ? (tasks.length / column.wipLimit) * 100 : 0;
@@ -174,18 +176,56 @@ export function KanbanColumn({
         </div>
         
         {/* Tasks Container */}
-        <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2" data-testid={`tasks-container-${column.id}`}>
-          {tasks.map((task) => (
-            <TaskCard
+        <div 
+          className="flex-1 overflow-y-auto px-4 pb-4 space-y-2" 
+          data-testid={`tasks-container-${column.id}`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Find the task index where we're dropping
+            const rect = e.currentTarget.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            
+            let dropIndex = tasks.length; // Default to end
+            
+            // Find which task we're dropping near
+            const taskElements = e.currentTarget.querySelectorAll('[data-task-id]');
+            for (let i = 0; i < taskElements.length; i++) {
+              const taskElement = taskElements[i];
+              const taskRect = taskElement.getBoundingClientRect();
+              const taskY = taskRect.top - rect.top;
+              const taskMiddle = taskY + taskRect.height / 2;
+              
+              if (y < taskMiddle) {
+                dropIndex = i;
+                break;
+              }
+            }
+            
+            onTaskDrop?.(e, column.id, dropIndex);
+          }}
+        >
+          {tasks.map((task, index) => (
+            <div
               key={task.id}
-              task={task}
-              columnColor={column.color}
-              onTaskClick={onTaskClick}
-              onDragStart={onTaskDragStart}
-              onDragEnd={onTaskDragEnd}
-              isReadOnly={isReadOnly}
-              assignees={allAssignees[task.id] || []}
-            />
+              data-task-id={task.id}
+              data-task-index={index}
+            >
+              <TaskCard
+                task={task}
+                columnColor={column.color}
+                onTaskClick={onTaskClick}
+                onDragStart={onTaskDragStart}
+                onDragEnd={onTaskDragEnd}
+                isReadOnly={isReadOnly}
+                assignees={allAssignees[task.id] || []}
+              />
+            </div>
           ))}
         </div>
       </div>

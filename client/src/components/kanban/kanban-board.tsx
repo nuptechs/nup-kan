@@ -33,6 +33,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   // Native drag and drop state
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
+  const [dragOverTaskIndex, setDragOverTaskIndex] = useState<number | null>(null);
   
   // Column drag and drop state
   const [draggedColumn, setDraggedColumn] = useState<Column | null>(null);
@@ -103,6 +104,25 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     },
   });
 
+  const reorderTasksMutation = useMutation({
+    mutationFn: async (taskUpdates: { id: string; position: number }[]) => {
+      console.log("🔄 [FRONTEND] Reordering tasks:", taskUpdates);
+      return await apiRequest("PATCH", "/api/tasks/reorder", { tasks: taskUpdates });
+    },
+    onSuccess: () => {
+      console.log("✅ [FRONTEND] Tasks reordered successfully");
+      queryClient.invalidateQueries({ queryKey: [tasksEndpoint] });
+    },
+    onError: (error) => {
+      console.error("❌ [FRONTEND] Task reorder failed:", error);
+      toast({
+        title: "Erro",
+        description: "Falha ao reordenar tarefas. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const updateColumnPositionsMutation = useMutation({
     mutationFn: async (columnUpdates: { id: string; position: number }[]) => {
       console.log("🔄 [FRONTEND] Updating column positions:", columnUpdates);
@@ -157,6 +177,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     console.log("🔄 [DRAG] Ending drag");
     setDraggedTask(null);
     setDragOverColumn(null);
+    setDragOverTaskIndex(null);
   };
 
   // Column drag and drop handlers
@@ -234,12 +255,12 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     setDragOverColumn(null);
   };
 
-  const handleTaskDrop = (e: React.DragEvent, targetColumnId: string) => {
+  const handleTaskDrop = (e: React.DragEvent, targetColumnId: string, targetTaskIndex?: number) => {
     e.preventDefault();
     
     if (!draggedTask || isReadOnly) return;
     
-    console.log("🔄 [DRAG] Dropping task", draggedTask.id, "into column", targetColumnId);
+    console.log("🔄 [DRAG] Dropping task", draggedTask.id, "into column", targetColumnId, "at index", targetTaskIndex);
     
     const sourceColumnId = draggedTask.status;
     const targetColumn = columns.find(col => col.id === targetColumnId);
@@ -260,20 +281,53 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
       }
     }
     
-    // If moving to same column, do nothing
-    if (sourceColumnId === targetColumnId) {
+    // If moving to same column, handle reordering
+    if (sourceColumnId === targetColumnId && targetTaskIndex !== undefined) {
+      const columnTasks = getTasksByColumn(targetColumnId);
+      const sourceIndex = columnTasks.findIndex(t => t.id === draggedTask.id);
+      
+      if (sourceIndex === targetTaskIndex) {
+        handleTaskDragEnd();
+        return;
+      }
+      
+      console.log("🔄 [REORDER] Reordering task from", sourceIndex, "to", targetTaskIndex);
+      
+      // Create new task order within the column
+      const newTasks = [...columnTasks];
+      const [removed] = newTasks.splice(sourceIndex, 1);
+      newTasks.splice(targetTaskIndex, 0, removed);
+      
+      // Update positions
+      const taskUpdates = newTasks.map((task, index) => ({
+        id: task.id,
+        position: index
+      }));
+      
+      // Optimistically update UI
+      queryClient.setQueryData([tasksEndpoint], (oldTasks: Task[] | undefined) => {
+        if (!oldTasks) return oldTasks;
+        return oldTasks.map(task => {
+          const update = taskUpdates.find(u => u.id === task.id);
+          return update ? { ...task, position: update.position } : task;
+        });
+      });
+      
+      reorderTasksMutation.mutate(taskUpdates);
       handleTaskDragEnd();
       return;
     }
     
-    // Update task status to new column
-    updateTaskMutation.mutate({
-      taskId: draggedTask.id,
-      updates: { 
-        status: targetColumnId,
-        position: 0, // Add to top of new column
-      },
-    });
+    // Moving to different column
+    if (sourceColumnId !== targetColumnId) {
+      updateTaskMutation.mutate({
+        taskId: draggedTask.id,
+        updates: { 
+          status: targetColumnId,
+          position: targetTaskIndex ?? 0,
+        },
+      });
+    }
     
     handleTaskDragEnd();
   };
@@ -414,6 +468,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
                       isReadOnly={isReadOnly}
                       onTaskDragStart={handleTaskDragStart}
                       onTaskDragEnd={handleTaskDragEnd}
+                      onTaskDrop={handleTaskDrop}
                       allAssignees={allAssignees}
                     />
                   </div>
