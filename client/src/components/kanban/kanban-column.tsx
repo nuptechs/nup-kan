@@ -93,17 +93,17 @@ export function KanbanColumn({
               {!isReadOnly && (
                 <>
                   {/* Linha vertical saindo de baixo do título */}
-                  <div className="absolute left-3 top-full w-px h-4 bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  <div className="absolute left-3 top-full w-px h-3 bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                   
                   {/* Linha horizontal do L - alinhada com o centro do botão */}
-                  <div className="absolute left-3 top-full translate-y-4 w-8 h-px bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  <div className="absolute left-3 top-full translate-y-3 w-8 h-px bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                   
-                  {/* Botão + no final da linha - mais próximo */}
+                  {/* Botão + no final da linha - movido para cima */}
                   <button
                     onClick={() => {
                       onAddTask?.(column.id);
                     }}
-                    className="absolute left-10 top-full translate-y-3 w-5 h-5 bg-white border border-gray-200 hover:border-gray-300 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center group/add opacity-60 hover:opacity-100 shadow-sm z-10"
+                    className="absolute left-10 top-full translate-y-2 w-5 h-5 bg-white border border-gray-200 hover:border-gray-300 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center group/add opacity-60 hover:opacity-100 shadow-sm z-10"
                     data-testid={`button-add-task-column-${column.id}`}
                     title="Adicionar nova tarefa"
                   >
