@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 import { KanbanColumn } from "./kanban-column";
@@ -6,8 +6,10 @@ import { TaskDetailsDialog } from "./task-details-dialog";
 import { AddTaskDialog } from "./add-task-dialog";
 import { ColumnManagementDialog } from "./column-management-dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
-import { Plus } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -46,6 +48,8 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   const [isColumnManagementOpen, setIsColumnManagementOpen] = useState(false);
   const [editingColumn, setEditingColumn] = useState<Column | null>(null);
   const [columnToDelete, setColumnToDelete] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { canCreateTasks, canEditTasks, canManageColumns } = usePermissions();
@@ -214,6 +218,38 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     });
   };
 
+  // Advanced search function
+  const filteredTasks = useMemo(() => {
+    if (!searchQuery.trim()) return tasks;
+    
+    const query = searchQuery.toLowerCase().trim();
+    
+    return tasks.filter((task) => {
+      // Search in title
+      if (task.title?.toLowerCase().includes(query)) return true;
+      
+      // Search in description
+      if (task.description?.toLowerCase().includes(query)) return true;
+      
+      // Search in assignee name
+      if (task.assigneeName?.toLowerCase().includes(query)) return true;
+      
+      // Search in priority
+      if (task.priority?.toLowerCase().includes(query)) return true;
+      
+      // Search in status
+      if (task.status?.toLowerCase().includes(query)) return true;
+      
+      // Search in tags
+      if (task.tags?.some(tag => tag.toLowerCase().includes(query))) return true;
+      
+      // Search by task ID (partial match)
+      if (task.id?.toLowerCase().includes(query)) return true;
+      
+      return false;
+    });
+  }, [tasks, searchQuery]);
+
   const getTasksByColumn = (columnId: string) => {
     // Find the column to get its title
     const column = columns.find(col => col.id === columnId);
@@ -222,7 +258,8 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     const expectedStatus = getStatusFromColumnTitle(column.title);
     if (!expectedStatus) return [];
     
-    return tasks.filter((task) => task.status === expectedStatus);
+    // Use filtered tasks instead of all tasks
+    return filteredTasks.filter((task) => task.status === expectedStatus);
   };
 
   const handleTaskClick = (task: Task) => {
@@ -265,6 +302,18 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     }
   };
 
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setIsSearchOpen(false);
+  };
+
+  const handleSearchToggle = () => {
+    if (isSearchOpen && searchQuery.trim()) {
+      setSearchQuery("");
+    }
+    setIsSearchOpen(!isSearchOpen);
+  };
+
   if (tasksLoading || columnsLoading) {
     return (
       <div className="flex h-full">
@@ -295,8 +344,74 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     .filter(column => column.id && column.id.trim() !== '')
     .sort((a, b) => a.position - b.position);
 
+  // Get search results count
+  const totalTasks = tasks.length;
+  const filteredTasksCount = filteredTasks.length;
+  const hasSearchResults = searchQuery.trim() && filteredTasksCount !== totalTasks;
+
   return (
-    <div className="flex h-full bg-gradient-to-br from-gray-50 to-white" data-testid="kanban-board">
+    <div className="flex flex-col h-full bg-gradient-to-br from-gray-50 to-white" data-testid="kanban-board">
+      {/* Subtle Search Bar */}
+      <div className="flex-shrink-0 px-4 py-2 bg-white/80 backdrop-blur-sm border-b border-gray-100">
+        <div className="flex items-center justify-between max-w-full">
+          <div className="flex items-center gap-2">
+            {!isSearchOpen ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSearchToggle}
+                className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                data-testid="search-toggle-btn"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2 flex-1 min-w-0 max-w-md">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Buscar tarefas..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-8 h-8 text-sm border-gray-200 focus:border-blue-300 focus:ring-blue-200 focus:ring-1"
+                    data-testid="search-input"
+                    autoFocus
+                  />
+                  {searchQuery && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleClearSearch}
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                      data-testid="clear-search-btn"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSearchToggle}
+                  className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700"
+                  data-testid="close-search-btn"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+          
+          {/* Search Results Info */}
+          {hasSearchResults && (
+            <div className="text-xs text-gray-500 bg-blue-50 px-2 py-1 rounded-md">
+              {filteredTasksCount} de {totalTasks} tarefas encontradas
+            </div>
+          )}
+        </div>
+      </div>
+      
       <div className="flex-1 overflow-x-auto overflow-y-hidden">
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="columns" direction="horizontal" type="COLUMN">
