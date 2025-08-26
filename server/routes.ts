@@ -587,6 +587,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("✅ [ROUTE] All validations passed, calling storage.reorderTasks");
       
+      // Check if tasks exist before reordering
+      console.log("🔍 [ROUTE] Checking if tasks exist before reordering...");
+      const allTasks = await storage.getTasks();
+      const existingTaskIds = allTasks.map(t => t.id);
+      const requestedTaskIds = reorderedTasks.map(t => t.id);
+      const missingTasks = requestedTaskIds.filter(id => !existingTaskIds.includes(id));
+      
+      console.log("🔍 [ROUTE] All task IDs in DB:", existingTaskIds.slice(0, 5), existingTaskIds.length > 5 ? `... (+${existingTaskIds.length - 5} more)` : '');
+      console.log("🔍 [ROUTE] Requested task IDs:", requestedTaskIds);
+      console.log("🔍 [ROUTE] Missing tasks:", missingTasks);
+      
+      if (missingTasks.length > 0) {
+        console.log("❌ [ROUTE] Some tasks not found:", missingTasks);
+        return res.status(404).json({ message: `Tasks not found: ${missingTasks.join(', ')}` });
+      }
+      
       await storage.reorderTasks(reorderedTasks);
       
       console.log("✅ [ROUTE] Storage reorder completed successfully");

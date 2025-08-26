@@ -573,6 +573,14 @@ export class DatabaseStorage implements IStorage {
     const existingTasks = await db.select({ id: tasks.id, title: tasks.title }).from(tasks).where(inArray(tasks.id, taskIds));
     console.log("🔍 [STORAGE] Tasks existentes no DB:", existingTasks);
     
+    const foundTaskIds = existingTasks.map(t => t.id);
+    const missingTaskIds = taskIds.filter(id => !foundTaskIds.includes(id));
+    
+    if (missingTaskIds.length > 0) {
+      console.log("❌ [STORAGE] Tasks não encontradas:", missingTaskIds);
+      throw new Error(`Tasks not found: ${missingTaskIds.join(', ')}`);
+    }
+    
     for (const { id, position } of reorderedTasks) {
       const result = await db
         .update(tasks)
@@ -582,9 +590,12 @@ export class DatabaseStorage implements IStorage {
       console.log(`🔍 [STORAGE] Update task ${id} -> position ${position}, rowCount: ${result.rowCount}`);
       
       if (result.rowCount === 0) {
+        console.log(`❌ [STORAGE] Task ${id} não foi atualizada - pode não existir`);
         throw new Error(`Task with id ${id} not found`);
       }
     }
+    
+    console.log("✅ [STORAGE] Todas as tasks foram reordenadas com sucesso");
   }
 
   // Team Members methods
