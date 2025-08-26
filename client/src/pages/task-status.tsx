@@ -209,7 +209,7 @@ export default function TaskStatusPage() {
           <div>
             <h1 className="text-3xl font-bold">Status das Tarefas</h1>
             <p className="text-muted-foreground">
-              Gerencie os diferentes status disponíveis para as tarefas
+              Gerencie os status das tarefas
             </p>
           </div>
         </div>

@@ -207,7 +207,7 @@ export default function TaskPriorityPage() {
           <div>
             <h1 className="text-3xl font-bold">Prioridades das Tarefas</h1>
             <p className="text-muted-foreground">
-              Gerencie as diferentes prioridades disponíveis para as tarefas
+              Gerencie as prioridades das tarefas
             </p>
           </div>
         </div>
