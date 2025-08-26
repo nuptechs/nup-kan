@@ -50,12 +50,19 @@ export default function AdminPermissions() {
             variant="ghost" 
             size="icon" 
             onClick={() => {
-              // SOLUÇÃO ROBUSTA: Verificar documento.referrer para histórico real
-              if (document.referrer && !document.referrer.includes('/admin/permissions')) {
-                // Há uma página anterior válida
+              // SOLUÇÃO DEFINITIVA: Mesma lógica robusta em todas as páginas
+              if (window.history.length > 1) {
+                const currentUrl = window.location.href;
                 window.history.back();
+                
+                // Fallback: se não conseguiu voltar em 150ms, vai para dashboard
+                setTimeout(() => {
+                  if (window.location.href === currentUrl) {
+                    setLocation("/dashboard");
+                  }
+                }, 150);
               } else {
-                // Sem histórico válido (refresh/acesso direto), ir para dashboard
+                // Sem histórico, vai direto para dashboard
                 setLocation("/dashboard");
               }
             }}

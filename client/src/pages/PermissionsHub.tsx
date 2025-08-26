@@ -430,10 +430,21 @@ export default function PermissionsHub() {
             variant="ghost" 
             size="sm" 
             onClick={() => {
-              // CONSISTÊNCIA: Usar a mesma lógica robusta
-              if (document.referrer && !document.referrer.includes('/admin/permissions')) {
+              // SOLUÇÃO DEFINITIVA: Se há mais de 1 entrada no histórico, tenta voltar
+              // Senão, vai direto para dashboard (refresh/acesso direto)
+              if (window.history.length > 1) {
+                // Há histórico, mas precisa verificar se consegue voltar
+                const currentUrl = window.location.href;
                 window.history.back();
+                
+                // Fallback: se não conseguiu voltar em 150ms, vai para dashboard
+                setTimeout(() => {
+                  if (window.location.href === currentUrl) {
+                    window.location.href = '/dashboard';
+                  }
+                }, 150);
               } else {
+                // Sem histórico, vai direto para dashboard
                 window.location.href = '/dashboard';
               }
             }}
