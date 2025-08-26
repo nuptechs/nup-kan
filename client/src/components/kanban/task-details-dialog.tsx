@@ -237,48 +237,49 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
   if (!task) return null;
 
   return (
-    <div className="relative">
-      {/* Botões de ação posicionados fora do modal */}
-      <div className="absolute top-4 right-4 z-50 flex flex-col space-y-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          className="p-2 text-gray-400 hover:text-gray-600 bg-white shadow-md rounded-full"
-          data-testid="button-close-task"
-        >
-          <X className="w-4 h-4" />
-        </Button>
-        {!isEditing && (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent 
+        className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto scrollbar-hide relative [&>button]:hidden" 
+        data-testid="task-details-dialog"
+      >
+        {/* Botões de ação posicionados no canto superior direito */}
+        <div className="absolute -top-2 -right-2 z-[60] flex flex-col gap-1">
           <Button
             variant="ghost"
             size="sm"
+            onClick={onClose}
+            className="w-8 h-8 p-0 text-gray-500 hover:text-gray-700 bg-white/90 hover:bg-white shadow-sm border border-gray-200 rounded-full"
+            data-testid="button-close-task"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+          {!isEditing && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditing(true);
+              }}
+              className="w-8 h-8 p-0 text-gray-500 hover:text-blue-600 bg-white/90 hover:bg-white shadow-sm border border-gray-200 rounded-full"
+              data-testid="button-edit-task"
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-8 h-8 p-0 text-gray-500 hover:text-red-600 bg-white/90 hover:bg-white shadow-sm border border-gray-200 rounded-full"
+            data-testid="button-delete-task"
             onClick={(e) => {
               e.stopPropagation();
-              setIsEditing(true);
+              setIsDeleteDialogOpen(true);
             }}
-            className="p-2 text-gray-400 hover:text-gray-600 bg-white shadow-md rounded-full"
-            data-testid="button-edit-task"
           >
-            <Edit className="w-4 h-4" />
+            <Trash2 className="w-4 h-4" />
           </Button>
-        )}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="p-2 text-red-400 hover:text-red-600 bg-white shadow-md rounded-full"
-          data-testid="button-delete-task"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsDeleteDialogOpen(true);
-          }}
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
-      </div>
-
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto scrollbar-hide" data-testid="task-details-dialog">
+        </div>
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold pr-16" data-testid="dialog-title">
               {isEditing ? "Editar Tarefa" : task.title}
@@ -573,8 +574,6 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         )}
       </DialogContent>
 
-      </Dialog>
-
       {/* Delete Confirmation Dialog - Outside the main dialog */}
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}
@@ -585,6 +584,6 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         }}
         isLoading={deleteTaskMutation.isPending}
       />
-    </div>
+    </Dialog>
   );
 }
