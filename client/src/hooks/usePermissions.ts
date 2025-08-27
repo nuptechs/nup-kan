@@ -68,7 +68,6 @@ export function usePermissions() {
     
     // Verificar ambas as versões (português e inglês) para compatibilidade
     const hasPermissionResult = permissionMap.has(permissionName) || 
-           permissionMap.has(permissionName.replace("Boards", "Boards")) || 
            permissionMap.has(permissionName.replace("Tarefas", "Tasks")) ||
            permissionMap.has(permissionName.replace("Tasks", "Tarefas"));
     

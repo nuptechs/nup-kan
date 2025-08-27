@@ -697,7 +697,7 @@ export default function PermissionsHub() {
                   {user.role && <Badge variant="outline">{user.role}</Badge>}
                 </div>
                 <div className="flex space-x-2">
-                  <Dialog>
+                  <Dialog open={editingId === user.id} onOpenChange={(open) => !open && setEditingId(null)}>
                     <DialogTrigger asChild>
                       <Button 
                         variant="ghost" 
