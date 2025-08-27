@@ -426,7 +426,7 @@ export default function BoardSelection() {
                         className={`
                           px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 border
                           ${board.isActive === "true" 
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800" 
+                            ? "bg-green-100 text-green-800 border-green-300 hover:bg-green-200 hover:text-green-900" 
                             : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
                           }
                           ${canEdit("Boards") && !toggleBoardStatusMutation.isPending
@@ -442,6 +442,7 @@ export default function BoardSelection() {
                         }
                       >
                         {board.isActive === "true" ? "Ativo" : "Inativo"}
+                        {/* DEBUG: {board.isActive} */}
                       </button>
                     </div>
                     

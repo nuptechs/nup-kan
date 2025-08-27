@@ -1,5 +1,21 @@
 [
   {
+    "id": "log_1756305213841_lb2kqpa5h",
+    "timestamp": "2025-08-27T14:33:33.841Z",
+    "level": "error",
+    "message": "❌ [BOARD-SERVICE] Erro buscando board em 0ms: Error: Board não encontrado",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756305211821_6uwcjxe6h",
+    "timestamp": "2025-08-27T14:33:31.821Z",
+    "level": "error",
+    "message": "❌ [BOARD-SERVICE] Erro buscando board em 76ms: Error: Board não encontrado",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756305146646_ugawrpe3z",
     "timestamp": "2025-08-27T14:32:26.646Z",
     "level": "warn",
