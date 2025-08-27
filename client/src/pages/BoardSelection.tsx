@@ -424,10 +424,10 @@ export default function BoardSelection() {
                         }}
                         disabled={!canEdit("Boards") || toggleBoardStatusMutation.isPending}
                         className={`
-                          px-3 py-1 rounded-full text-xs font-medium transition-all duration-200
+                          px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 border
                           ${board.isActive === "true" 
-                            ? "bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700" 
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-800" 
+                            : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
                           }
                           ${canEdit("Boards") && !toggleBoardStatusMutation.isPending
                             ? "cursor-pointer transform hover:scale-105" 
