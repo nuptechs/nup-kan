@@ -358,7 +358,7 @@ export default function PermissionsHub() {
     mutationFn: ({ teamId, profileId }: { teamId: string; profileId: string }) => 
       apiRequest("POST", "/api/team-profiles", { teamId, profileId }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/team-profiles"] });
       toast({ title: "Time vinculado ao perfil" });
     }
   });
@@ -367,7 +367,7 @@ export default function PermissionsHub() {
     mutationFn: (linkId: string) => 
       apiRequest("DELETE", `/api/team-profiles/${linkId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/team-profiles"] });
       toast({ title: "Vínculo removido" });
     }
   });
@@ -376,7 +376,7 @@ export default function PermissionsHub() {
     mutationFn: ({ userId, teamId, role = "member" }: { userId: string; teamId: string; role?: string }) => 
       apiRequest("POST", `/api/users/${userId}/teams/${teamId}`, { role }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
       toast({ title: "Usuário adicionado ao time" });
     }
   });
@@ -385,7 +385,7 @@ export default function PermissionsHub() {
     mutationFn: ({ userId, teamId }: { userId: string; teamId: string }) => 
       apiRequest("DELETE", `/api/users/${userId}/teams/${teamId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
       toast({ title: "Usuário removido do time" });
     }
   });
@@ -394,8 +394,7 @@ export default function PermissionsHub() {
     mutationFn: ({ permissionId, profileId }: { permissionId: string; profileId: string }) => 
       apiRequest("POST", `/api/profiles/${profileId}/permissions`, { permissionId }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profile-permissions"] });
       // Toast removido - será mostrado apenas no final do processo
     }
   });
@@ -404,8 +403,7 @@ export default function PermissionsHub() {
     mutationFn: ({ permissionId, profileId }: { permissionId: string; profileId: string }) => 
       apiRequest("DELETE", `/api/profiles/${profileId}/permissions/${permissionId}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profile-permissions"] });
       toast({ title: "Permissão removida do perfil" });
     }
   });
@@ -817,9 +815,12 @@ export default function PermissionsHub() {
             </div>
           </div>
           
-          <Dialog>
+          <Dialog open={editingId === 'new-team'} onOpenChange={(open) => !open && setEditingId(null)}>
             <DialogTrigger asChild>
-              <Button className="self-end">
+              <Button 
+                className="self-end"
+                onClick={() => setEditingId('new-team')}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Time
               </Button>
@@ -987,12 +988,13 @@ export default function PermissionsHub() {
                   </div>
                 </div>
                 <div className="flex space-x-2">
-                  <Dialog>
+                  <Dialog open={editingId === team.id} onOpenChange={(open) => !open && setEditingId(null)}>
                     <DialogTrigger asChild>
                       <Button 
                         variant="ghost" 
                         size="sm"
                         onClick={() => {
+                          setEditingId(team.id); // 🔥 CRÍTICO: Usar editingId
                           setEditingTeam(team);
                           // Inicializar com membros atuais do time
                           const currentMembers = getCurrentTeamMembers(team.id);
@@ -1204,9 +1206,12 @@ export default function PermissionsHub() {
             <h2 className="text-xl font-bold">Perfis</h2>
           </div>
           
-          <Dialog>
+          <Dialog open={editingId === 'new-profile'} onOpenChange={(open) => !open && setEditingId(null)}>
             <DialogTrigger asChild>
-              <Button className="self-end">
+              <Button 
+                className="self-end"
+                onClick={() => setEditingId('new-profile')}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Perfil
               </Button>
@@ -1337,12 +1342,15 @@ export default function PermissionsHub() {
                   </div>
                 </div>
                 <div className="flex space-x-2">
-                  <Dialog>
+                  <Dialog open={editingId === profile.id} onOpenChange={(open) => !open && setEditingId(null)}>
                     <DialogTrigger asChild>
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleEdit('profile', profile)}
+                        onClick={() => {
+                          setEditingId(profile.id); // 🔥 CRÍTICO: Usar editingId
+                          handleEdit('profile', profile);
+                        }}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
