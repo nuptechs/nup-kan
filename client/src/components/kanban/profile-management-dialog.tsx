@@ -105,6 +105,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
       setEditingProfile(null);
+      setOpen(false); // Fecha o modal automaticamente
       toast({
         title: "Sucesso",
         description: "Perfil atualizado com sucesso!",

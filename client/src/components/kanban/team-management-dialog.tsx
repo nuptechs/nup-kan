@@ -167,6 +167,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
       setEditingTeam(null);
       form.reset();
       setSelectedUsers([]);
+      onOpenChange(false); // Fecha o modal automaticamente
     },
     onError: () => {
       toast({

@@ -92,6 +92,7 @@ export function BoardSharingDialog({ board, open, onOpenChange }: BoardSharingDi
       queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/member-count`] });
       queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/members`] });
       form.reset();
+      onOpenChange(false); // Fecha o modal automaticamente
       toast({
         title: "Board compartilhado",
         description: "O board foi compartilhado com sucesso!",
