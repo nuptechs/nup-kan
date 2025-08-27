@@ -241,25 +241,14 @@ export default function PermissionsHub() {
   const updateUser = useMutation({
     mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/users/${id}`, data),
     onSuccess: (data) => {
-      // A) Fecha modal primeiro
-      setEditingId(null);
-      
-      // C) Atualização otimista - lista atualiza na hora
-      queryClient.setQueryData(['/api/permissions-data'], (old: any) => {
-        if (!old || !old.users) return old;
-        return {
-          ...old,
-          users: old.users.map((u: any) => u.id === data.id ? { ...u, ...data } : u)
-        };
-      });
-      
-      // B) Reset form com dados do backend (mantém valores corretos)
-      userForm.reset(data);
-      
-      // Invalida caches em background
+      // Invalida caches para buscar dados frescos
       queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
+      
+      // Aguarda dados atualizados, depois fecha modal
+      setEditingId(null);
+      userForm.reset(data);
       
       toast({ title: "Usuário atualizado com sucesso!" });
     }
