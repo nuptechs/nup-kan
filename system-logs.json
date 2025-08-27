@@ -1,5 +1,47 @@
 [
   {
+    "id": "action_1756334856349_v77m7rfz2",
+    "timestamp": "2025-08-27T22:47:36.349Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Deletar usuário (ID: c8693ea0-0a52-40e1-b949-89e10699ea49)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Deletar usuário (ID: c8693ea0-0a52-40e1-b949-89e10699ea49)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 71
+  },
+  {
+    "id": "action_1756334852978_1by2y61qj",
+    "timestamp": "2025-08-27T22:47:32.978Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Deletar usuário (ID: efeab639-d98b-4de0-a1f7-3efa19a21dd0)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Deletar usuário (ID: efeab639-d98b-4de0-a1f7-3efa19a21dd0)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 71
+  },
+  {
+    "id": "action_1756334849488_83laqk253",
+    "timestamp": "2025-08-27T22:47:29.488Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Deletar usuário (ID: 2b2425b1-c5f3-4591-8912-60e00ea1687e)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Deletar usuário (ID: 2b2425b1-c5f3-4591-8912-60e00ea1687e)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 79
+  },
+  {
     "id": "log_1756334753018_l2izohwy7",
     "timestamp": "2025-08-27T22:45:53.018Z",
     "level": "warn",
