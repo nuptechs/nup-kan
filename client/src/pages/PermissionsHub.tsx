@@ -246,14 +246,15 @@ export default function PermissionsHub() {
     },
     onSuccess: () => {
       console.log("🟢 [PERMISSIONS-HUB] onSuccess - USUÁRIO ATUALIZADO!");
-      console.log("🟢 [PERMISSIONS-HUB] Invalidando cache /api/permissions-data");
+      console.log("🟢 [PERMISSIONS-HUB] Invalidando cache /api/permissions-data E /api/users");
       queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       console.log("🟢 [PERMISSIONS-HUB] Executando setEditingId(null)");
       setEditingId(null);
       console.log("🟢 [PERMISSIONS-HUB] Resetando userForm");
       userForm.reset();
-      toast({ title: "Usuário atualizado" });
-      console.log("🟢 [PERMISSIONS-HUB] EDIÇÃO FINALIZADA NO PERMISSIONS HUB");
+      toast({ title: "Usuário atualizado com sucesso!" });
+      console.log("🟢 [PERMISSIONS-HUB] EDIÇÃO FINALIZADA - TODOS OS CACHES INVALIDADOS");
     }
   });
 
