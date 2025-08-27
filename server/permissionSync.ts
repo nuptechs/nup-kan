@@ -39,84 +39,84 @@ export class PermissionSyncService {
   private analyzeRoutes(app: Express): DetectedFunction[] {
     const detectedFunctions: DetectedFunction[] = [];
     
-    // Lista de funcionalidades conhecidas baseadas na estrutura atual
+    // Function definitions for automatic permission generation (English)
     const functionMap: { [key: string]: DetectedFunction } = {
       'tasks': {
-        name: 'Gerenciar Tarefas',
+        name: 'Manage Tasks',
         category: 'tasks',
-        description: 'Funcionalidades relacionadas ao gerenciamento de tarefas',
+        description: 'Task management functionality',
         routes: []
       },
       'boards': {
-        name: 'Gerenciar Boards',
+        name: 'Manage Boards',
         category: 'boards',
-        description: 'Funcionalidades relacionadas ao gerenciamento de quadros kanban',
+        description: 'Kanban board management functionality',
         routes: []
       },
       'columns': {
-        name: 'Gerenciar Colunas',
+        name: 'Manage Columns',
         category: 'columns',
-        description: 'Funcionalidades relacionadas ao gerenciamento de colunas',
+        description: 'Column management functionality',
         routes: []
       },
       'teams': {
-        name: 'Gerenciar Times',
+        name: 'Manage Teams',
         category: 'teams',
-        description: 'Funcionalidades relacionadas ao gerenciamento de times',
+        description: 'Team management functionality',
         routes: []
       },
       'users': {
-        name: 'Gerenciar Usuários',
+        name: 'Manage Users',
         category: 'users',
-        description: 'Funcionalidades relacionadas ao gerenciamento de usuários',
+        description: 'User management functionality',
         routes: []
       },
       'profiles': {
-        name: 'Gerenciar Perfis',
+        name: 'Manage Profiles',
         category: 'profiles',
-        description: 'Funcionalidades relacionadas ao gerenciamento de perfis de acesso',
+        description: 'Access profile management functionality',
         routes: []
       },
       'permissions': {
-        name: 'Gerenciar Permissões',
+        name: 'Manage Permissions',
         category: 'permissions',
-        description: 'Funcionalidades relacionadas ao sistema de permissões',
+        description: 'Permission system functionality',
         routes: []
       },
       'analytics': {
-        name: 'Visualizar Analytics',
+        name: 'View Analytics',
         category: 'analytics',
-        description: 'Funcionalidades relacionadas a métricas e relatórios',
+        description: 'Analytics and reports functionality',
         routes: []
       },
       'tags': {
-        name: 'Gerenciar Tags',
+        name: 'Manage Tags',
         category: 'tags',
-        description: 'Funcionalidades relacionadas ao gerenciamento de tags',
+        description: 'Tag management functionality',
         routes: []
       },
       'custom-fields': {
-        name: 'Campos Personalizados',
+        name: 'Custom Fields',
         category: 'custom-fields',
-        description: 'Funcionalidades relacionadas aos campos personalizados',
+        description: 'Custom fields functionality',
         routes: []
       },
       'export': {
-        name: 'Exportar Dados',
+        name: 'Export Data',
         category: 'export',
-        description: 'Funcionalidades relacionadas à exportação de dados',
+        description: 'Data export functionality',
         routes: []
       },
       'system': {
-        name: 'Sistema',
+        name: 'System',
         category: 'system',
-        description: 'Funcionalidades do sistema como logs e configurações',
+        description: 'System functionality like logs and settings',
         routes: []
       },
       'auth': {
-        name: 'Autenticação',
+        name: 'Authentication',
         category: 'auth',
-        description: 'Funcionalidades de autenticação e autorização',
+        description: 'Authentication and authorization functionality',
         routes: []
       }
     };
@@ -218,9 +218,9 @@ export class PermissionSyncService {
       
       if (!functionMap[categoryKey]) {
         functionMap[categoryKey] = {
-          name: `Gerenciar ${categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)}`,
+          name: `Manage ${categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)}`,
           category: categoryKey,
-          description: `Funcionalidades relacionadas ao gerenciamento de ${categoryKey}`,
+          description: `${categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)} management functionality`,
           routes: []
         };
       }
@@ -240,20 +240,20 @@ export class PermissionSyncService {
   private generatePermissions(detectedFunctions: DetectedFunction[]): RoutePermission[] {
     const permissions: RoutePermission[] = [];
     
-    // Mapear ações para nomes amigáveis
+    // Map actions to English names for consistency
     const actionNames: { [key: string]: string } = {
-      'list': 'Listar',
-      'view': 'Visualizar',
-      'create': 'Criar',
-      'edit': 'Editar',
-      'delete': 'Excluir',
-      'assign': 'Atribuir',
-      'unassign': 'Desatribuir',
-      'reorder': 'Reordenar',
-      'export': 'Exportar',
-      'login': 'Fazer Login',
-      'register': 'Registrar',
-      'logout': 'Fazer Logout'
+      'list': 'List',
+      'view': 'View',
+      'create': 'Create',
+      'edit': 'Edit',
+      'delete': 'Delete',
+      'assign': 'Assign',
+      'unassign': 'Unassign',
+      'reorder': 'Reorder',
+      'export': 'Export',
+      'login': 'Login',
+      'register': 'Register',
+      'logout': 'Logout'
     };
 
     detectedFunctions.forEach(func => {
@@ -278,7 +278,7 @@ export class PermissionSyncService {
         permissions.push({
           id: `perm-${func.category}-${action}`,
           name: `${actionName} ${categoryName}`,
-          description: `Permitir ${actionName.toLowerCase()} ${categoryName.toLowerCase()}`,
+          description: `Allow ${actionName.toLowerCase()} ${categoryName.toLowerCase()}`,
           category: func.category,
           route: routes[0], // Usar a primeira rota como referência
           method: routes[0].split(' ')[0]
