@@ -4,7 +4,8 @@ import { SettingsPanel } from "@/components/kanban/settings-panel";
 import { BoardSharingDialog } from "@/components/kanban/board-sharing-dialog";
 import { UserProfileIndicator } from "@/components/user-profile-indicator";
 import { useQuery } from "@tanstack/react-query";
-import { Settings, Users, Shield, User, ArrowLeft, Share2, Search, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Settings, Users, Shield, User, ArrowLeft, Share2, Search, X, PowerOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -64,6 +65,74 @@ export default function KanbanPage() {
               Voltar aos Boards
             </Button>
           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if board is inactive
+  const isBoardInactive = board.isActive === "false";
+
+  // Show inactive board warning
+  if (isBoardInactive) {
+    return (
+      <div className="h-screen overflow-hidden bg-bg-main relative" data-testid="kanban-page">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 px-6 py-4" data-testid="header">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Link href="/">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  data-testid="button-back-to-boards"
+                  title="Voltar aos Boards"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
+              </Link>
+              <div className="w-2 h-8 bg-gradient-to-b from-gray-400 to-gray-500 rounded-full flex-shrink-0"></div>
+              <h1 className="text-2xl font-semibold text-gray-600" data-testid="page-title" title={board.name}>
+                {board.name}
+              </h1>
+              <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+                Inativo
+              </Badge>
+            </div>
+          </div>
+        </header>
+
+        {/* Inactive Board Message */}
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center max-w-md">
+            <div className="w-16 h-16 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl mx-auto mb-6 flex items-center justify-center">
+              <PowerOff className="w-8 h-8 text-gray-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Board Inativo</h2>
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              Este board está temporariamente inativo e não pode ser modificado. 
+              Entre em contato com o administrador para reativar o board.
+            </p>
+            <div className="space-y-3">
+              <p className="text-sm text-gray-500">
+                <strong>Nome:</strong> {board.name}
+              </p>
+              {board.description && (
+                <p className="text-sm text-gray-500">
+                  <strong>Descrição:</strong> {board.description}
+                </p>
+              )}
+            </div>
+            <div className="mt-8">
+              <Link href="/">
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Voltar aos Boards
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );

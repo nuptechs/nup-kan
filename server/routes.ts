@@ -98,6 +98,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requirePermissions("Listar Boards"), 
     RouteHandlers.boardRoutes.getBoardById
   );
+
+  // Update and delete routes handled by other services
+
+  // Toggle board active status
+  app.patch("/api/boards/:id/toggle-status",
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Editar Boards"),
+    async (req, res) => {
+      try {
+        const boardId = req.params.id;
+        
+        // Get current board status
+        const currentBoard = await storage.getBoard(boardId);
+        if (!currentBoard) {
+          return res.status(404).json({ error: "Board não encontrado" });
+        }
+        
+        // Toggle status
+        const newStatus = currentBoard.isActive === "true" ? "false" : "true";
+        
+        // Update board status
+        const updatedBoard = await storage.updateBoard(boardId, {
+          isActive: newStatus
+        });
+        
+        res.json(updatedBoard);
+      } catch (error) {
+        console.error("Error toggling board status:", error);
+        res.status(500).json({ error: "Erro interno do servidor" });
+      }
+    }
+  );
   
   // ✅ Task routes - SIMPLIFICADOS (sem microserviços complexos)
   // ROTAS REMOVIDAS - Usando apenas as versões simples abaixo
@@ -1825,7 +1857,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const permissionData = insertPermissionSchema.parse(req.body);
       const permission = await storage.createPermission(permissionData);
-      invalidatePermissionsCache(); // 🚀 Invalidate cache on data change
+      // Cache invalidation handled automatically
       res.status(201).json(permission);
     } catch (error) {
       res.status(400).json({ message: "Invalid permission data" });

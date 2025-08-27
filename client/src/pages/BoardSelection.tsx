@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Grid, Edit, Trash2, MoreVertical, User, Eye } from "lucide-react";
+import { Plus, Grid, Edit, Trash2, MoreVertical, User, Eye, Power, PowerOff } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
@@ -205,6 +205,34 @@ export default function BoardSelection() {
     },
   });
 
+  // Toggle board status mutation
+  const toggleBoardStatusMutation = useMutation({
+    mutationFn: async (boardId: string) => {
+      const response = await apiRequest("PATCH", `/api/boards/${boardId}/toggle-status`);
+      return response.json();
+    },
+    onSuccess: async (updatedBoard) => {
+      // 🔄 FORÇAR INVALIDAÇÃO COMPLETA - Corrigir problema de cache
+      await queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
+      
+      // 🚀 FORÇAR REFETCH IMEDIATO dos boards
+      await queryClient.refetchQueries({ queryKey: ["/api/boards"] });
+      
+      const statusText = updatedBoard.isActive === "true" ? "ativado" : "inativado";
+      toast({
+        title: `Board ${statusText}`,
+        description: `O board "${updatedBoard.name}" foi ${statusText} com sucesso!`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao alterar status do board. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleEditBoard = (board: Board) => {
     setSelectedBoard(board);
     editForm.reset({
@@ -344,17 +372,40 @@ export default function BoardSelection() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         {canEdit("Boards") && (
-                          <DropdownMenuItem 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleEditBoard(board);
-                            }}
-                            className="cursor-pointer"
-                            data-testid={`menu-edit-board-${board.id}`}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
+                          <>
+                            <DropdownMenuItem 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleEditBoard(board);
+                              }}
+                              className="cursor-pointer"
+                              data-testid={`menu-edit-board-${board.id}`}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                toggleBoardStatusMutation.mutate(board.id);
+                              }}
+                              className="cursor-pointer"
+                              data-testid={`menu-toggle-board-${board.id}`}
+                              disabled={toggleBoardStatusMutation.isPending}
+                            >
+                              {board.isActive === "true" ? (
+                                <>
+                                  <PowerOff className="mr-2 h-4 w-4" />
+                                  Inativar
+                                </>
+                              ) : (
+                                <>
+                                  <Power className="mr-2 h-4 w-4" />
+                                  Ativar
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                          </>
                         )}
                         {canDelete("Boards") && (
                           <DropdownMenuItem 
