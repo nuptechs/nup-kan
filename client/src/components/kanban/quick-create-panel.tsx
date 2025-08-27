@@ -158,44 +158,11 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
       return;
     }
     
-    if (editingUser) {
-      // Modo edição - atualizar usuário existente
-      updateUserMutation.mutate({
-        id: editingUser.id,
-        ...userForm
-      });
-    } else {
-      // Modo criação - criar novo usuário
-      createUserMutation.mutate(userForm);
-    }
+    // Apenas criação permitida aqui - edição via user-management-dialog
+    createUserMutation.mutate(userForm);
   };
   
-  // Update mutations
-  const updateUserMutation = useMutation({
-    mutationFn: (data: { id: string; name: string; email: string; role: string; profileId: string }) =>
-      apiRequest("PATCH", `/api/users/${data.id}`, {
-        name: data.name,
-        email: data.email,
-        role: data.role,
-        profileId: data.profileId,
-      }),
-    onSuccess: () => {
-      toast({
-        title: "Usuário atualizado",
-        description: "As informações do usuário foram atualizadas.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      setEditingUser(null);
-      setUserForm({ name: "", email: "", role: "", profileId: "" });
-    },
-    onError: () => {
-      toast({
-        title: "Erro ao atualizar usuário",
-        description: "Tente novamente.",
-        variant: "destructive",
-      });
-    },
-  });
+  // REMOVIDO: updateUserMutation duplicado - usar apenas user-management-dialog
 
   const handleTeamSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -460,12 +427,9 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
                       <Button 
                         type="submit" 
                         className="flex-1"
-                        disabled={createUserMutation.isPending || updateUserMutation.isPending}
+                        disabled={createUserMutation.isPending}
                       >
-                        {editingUser 
-                          ? (updateUserMutation.isPending ? "Atualizando..." : "Atualizar Usuário")
-                          : (createUserMutation.isPending ? "Criando..." : "Criar Usuário")
-                        }
+                        {createUserMutation.isPending ? "Criando..." : "Criar Usuário"}
                       </Button>
                       <Button 
                         type="button" 
