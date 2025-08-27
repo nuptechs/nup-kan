@@ -123,6 +123,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isActive: newStatus
         });
         
+        // 🚀 INVALIDAR CACHE DO BOARD SERVICE
+        await cache.invalidatePattern(`board_with_stats:${boardId}:*`);
+        await cache.invalidatePattern('boards_*');
+        await cache.invalidatePattern('boards_with_stats:*');
+        
+        console.log(`🔄 [TOGGLE] Cache invalidado para board ${boardId} - novo status: ${newStatus}`);
+        
         res.json(updatedBoard);
       } catch (error) {
         console.error("Error toggling board status:", error);
