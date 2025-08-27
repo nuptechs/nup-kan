@@ -18,65 +18,21 @@ export function NotificationSystem() {
   const { user, isAuthenticated } = useAuth();
   const { createNotification, notifications } = useNotifications();
 
-  // Create some demo notifications when user first logs in
+  // TEMPORARIAMENTE DESABILITADO - Evitar loop de notificações
+  // TODO: Reativar depois que o sistema estiver estável
+  /*
   useEffect(() => {
-    if (!isAuthenticated || !user?.id || notifications.length > 0) return;
+    if (!isAuthenticated || !user?.id) return;
+    
+    // Evitar loop - usar flag no localStorage
+    const demoNotificationsCreated = localStorage.getItem(`demo-notifications-${user.id}`);
+    if (demoNotificationsCreated) return;
 
-    const createDemoNotifications = async () => {
-      // Wait a bit to ensure everything is loaded
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Create welcome notification
-      createNotification({
-        userId: user.id,
-        title: "🎉 Bem-vindo ao Sistema!",
-        message: "Sistema de notificações ativado com sucesso. Aqui você receberá atualizações importantes sobre suas tarefas e projetos.",
-        type: "success",
-        priority: "normal",
-        category: "system",
-        metadata: JSON.stringify({ 
-          isDemo: true,
-          feature: "notifications" 
-        })
-      });
-
-      // Create info notification after 3 seconds
-      setTimeout(() => {
-        createNotification({
-          userId: user.id,
-          title: "📋 Nova funcionalidade disponível",
-          message: "O sistema de permissões foi atualizado com novas funcionalidades. Verifique suas configurações.",
-          type: "info",
-          priority: "low",
-          category: "updates",
-          actionUrl: "/admin/permissions",
-          metadata: JSON.stringify({ 
-            isDemo: true,
-            feature: "permissions" 
-          })
-        });
-      }, 3000);
-
-      // Create high priority notification after 6 seconds
-      setTimeout(() => {
-        createNotification({
-          userId: user.id,
-          title: "⚠️ Cache Apollo limpo",
-          message: "Conflitos de cache anterior foram resolvidos. O erro 'ApolloError: Notification alert not found' foi corrigido.",
-          type: "warning",
-          priority: "high",
-          category: "system",
-          metadata: JSON.stringify({ 
-            isDemo: true,
-            technical: "apollo-cache-cleanup",
-            resolved: true
-          })
-        });
-      }, 6000);
-    };
-
-    createDemoNotifications();
-  }, [isAuthenticated, user?.id, notifications.length, createNotification]);
+    console.log('🔔 [NOTIFICATION-SYSTEM] Criando notificações demo para:', user.id);
+    localStorage.setItem(`demo-notifications-${user.id}`, 'true');
+    
+  }, [isAuthenticated, user?.id]);
+  */
 
   // Run Apollo cleanup on component mount
   useEffect(() => {

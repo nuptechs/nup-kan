@@ -21,7 +21,10 @@ export interface NotificationCreateRequest {
   title: string;
   message: string;
   type?: string;
+  priority?: string;
+  category?: string;
   metadata?: any;
+  actionUrl?: string;
   expiresAt?: Date;
 }
 
@@ -107,8 +110,24 @@ export class NotificationService extends BaseService {
     this.log('notification-service', 'createNotification', { userId: authContext.userId, targetUserId: request.userId });
     
     try {
+      // Preparar dados para validação
+      const dataForValidation = {
+        userId: request.userId,
+        title: request.title,
+        message: request.message,
+        type: request.type || 'info',
+        priority: request.priority || 'normal',
+        category: request.category || 'general',
+        isRead: false,
+        metadata: typeof request.metadata === 'string' ? request.metadata : JSON.stringify(request.metadata || {}),
+        expiresAt: request.expiresAt || null,
+        actionUrl: request.actionUrl || null
+      };
+
+      console.log('🔍 [NOTIFICATION-SERVICE] Dados para validação:', dataForValidation);
+      
       // Validar dados
-      const validatedData = insertNotificationSchema.parse(request);
+      const validatedData = insertNotificationSchema.parse(dataForValidation);
 
       const notification = await this.storage.createNotification(validatedData);
 
@@ -129,7 +148,13 @@ export class NotificationService extends BaseService {
       return notification;
     } catch (error) {
       this.logError('notification-service', 'createNotification', error);
-      throw error;
+      
+      // Retornar erro estruturado para o response service
+      if (error instanceof Error) {
+        throw new Error(`Erro na criação da notificação: ${error.message}`);
+      }
+      
+      throw new Error('Erro desconhecido na criação da notificação');
     }
   }
 
