@@ -67,18 +67,20 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       return response.json();
     },
     onSuccess: () => {
-      // Invalidações imediatas e aguardar
+      // Fechar modal IMEDIATAMENTE
+      form.reset();
+      onClose();
+      
+      // Invalidações e toast em paralelo (não bloqueia UI)
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ["/api/users"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] })
-      ]).then(() => {
-        toast({
-          title: "Sucesso",
-          description: "Usuário criado com sucesso!",
-        });
-        form.reset();
-        onClose(); // Fecha a modal automaticamente
+      ]);
+      
+      toast({
+        title: "Sucesso",
+        description: "Usuário criado com sucesso!",
       });
     },
     onError: () => {
@@ -96,19 +98,23 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       return response.json();
     },
     onSuccess: () => {
-      // Invalidações imediatas e aguardar
+      // Sair do modo edição IMEDIATAMENTE
+      setEditingUser(null);
+      editForm.reset();
+      
+      // Fechar modal IMEDIATAMENTE
+      onClose();
+      
+      // Invalidações e toast em paralelo (não bloqueia UI)
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ["/api/users"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] })
-      ]).then(() => {
-        toast({
-          title: "Sucesso",
-          description: "Usuário atualizado com sucesso!",
-        });
-        setEditingUser(null);
-        editForm.reset();
-        onClose(); // Fecha a modal automaticamente
+      ]);
+      
+      toast({
+        title: "Sucesso",
+        description: "Usuário atualizado com sucesso!",
       });
     },
     onError: () => {
@@ -126,16 +132,16 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       return response.json();
     },
     onSuccess: () => {
-      // Invalidações imediatas e aguardar
+      // Invalidações e toast em paralelo (não bloqueia UI)
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ["/api/users"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] })
-      ]).then(() => {
-        toast({
-          title: "Sucesso",
-          description: "Usuário excluído com sucesso!",
-        });
+      ]);
+      
+      toast({
+        title: "Sucesso",
+        description: "Usuário excluído com sucesso!",
       });
     },
     onError: () => {
