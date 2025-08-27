@@ -136,13 +136,19 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
         await addUserToTeamMutation.mutateAsync({ userId, teamId: team.id });
       }
       
-      queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
+      // Invalidações imediatas e aguardar
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/teams"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] })
+      ]);
+      
       toast({
         title: "Sucesso",
         description: `Time criado com ${selectedUsers.length} membros!`,
       });
       form.reset();
       setSelectedUsers([]);
+      onOpenChange(false); // Fecha o modal automaticamente
     },
     onError: () => {
       toast({
@@ -159,15 +165,20 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
-      toast({
-        title: "Sucesso",
-        description: "Time atualizado com sucesso!",
+      // Invalidações imediatas e aguardar
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/teams"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] })
+      ]).then(() => {
+        toast({
+          title: "Sucesso",
+          description: "Time atualizado com sucesso!",
+        });
+        setEditingTeam(null);
+        form.reset();
+        setSelectedUsers([]);
+        onOpenChange(false); // Fecha o modal automaticamente
       });
-      setEditingTeam(null);
-      form.reset();
-      setSelectedUsers([]);
-      onOpenChange(false); // Fecha o modal automaticamente
     },
     onError: () => {
       toast({

@@ -80,12 +80,18 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
-      setIsCreatingProfile(false);
-      profileForm.reset();
-      toast({
-        title: "Sucesso",
-        description: "Perfil criado com sucesso!",
+      // Invalidações imediatas e aguardar
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/profiles"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] })
+      ]).then(() => {
+        toast({
+          title: "Sucesso",
+          description: "Perfil criado com sucesso!",
+        });
+        setIsCreatingProfile(false);
+        profileForm.reset();
+        setOpen(false); // Fecha o modal automaticamente
       });
     },
     onError: () => {
@@ -103,12 +109,17 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
-      setEditingProfile(null);
-      setOpen(false); // Fecha o modal automaticamente
-      toast({
-        title: "Sucesso",
-        description: "Perfil atualizado com sucesso!",
+      // Invalidações imediatas e aguardar
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/profiles"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] })
+      ]).then(() => {
+        toast({
+          title: "Sucesso",
+          description: "Perfil atualizado com sucesso!",
+        });
+        setEditingProfile(null);
+        setOpen(false); // Fecha o modal automaticamente
       });
     },
     onError: () => {
