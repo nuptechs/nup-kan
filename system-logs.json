@@ -1,43 +1,15 @@
 [
   {
-    "id": "action_1756256404788_47nqomdik",
-    "timestamp": "2025-08-27T01:00:04.788Z",
-    "level": "info",
-    "message": "Yuri Francis executou: Deletar usuário (ID: 66b50a02-2f07-459c-a943-7812439028df)",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
-    "userName": "Yuri Francis",
-    "action": "Deletar usuário (ID: 66b50a02-2f07-459c-a943-7812439028df)",
-    "status": "success",
-    "errorDetails": null,
-    "duration": 86
-  },
-  {
-    "id": "action_1756256392180_phzslshpq",
-    "timestamp": "2025-08-27T00:59:52.180Z",
-    "level": "info",
-    "message": "Yuri Francis executou: Atualizar usuário \"lo\" ()",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
-    "userName": "Yuri Francis",
-    "action": "Atualizar usuário \"lo\" ()",
-    "status": "success",
-    "errorDetails": null,
-    "duration": 84
-  },
-  {
-    "id": "log_1756256366211_7xa1p30sr",
-    "timestamp": "2025-08-27T00:59:26.211Z",
+    "id": "log_1756256904666_alyeucf7s",
+    "timestamp": "2025-08-27T01:08:24.666Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756256365009_4f003cv41",
-    "timestamp": "2025-08-27T00:59:25.009Z",
+    "id": "log_1756256903124_qlqff9z6a",
+    "timestamp": "2025-08-27T01:08:23.124Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",
