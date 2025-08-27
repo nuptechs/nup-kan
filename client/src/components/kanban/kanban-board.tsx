@@ -416,7 +416,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
       <div className="flex flex-col gap-6 h-full">
 
         {/* Kanban Board */}
-        <div className="flex-1 h-full overflow-hidden">
+        <div className="flex-1 h-full overflow-x-auto scrollbar-hide">
           {columns.length === 0 ? (
             /* Empty Board State */
             <div className="flex items-center justify-center min-h-96 p-8">
@@ -449,7 +449,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
             </div>
           ) : (
             /* Normal Board with Columns */
-            <div className="flex gap-6 p-4 items-start h-full overflow-x-hidden">
+            <div className="flex gap-6 p-4 items-start h-full min-w-max">
               {columns
                 .sort((a, b) => a.position - b.position)
                 .map((column, index) => {
