@@ -3021,10 +3021,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error creating notification:", error);
-      if (error.name === 'ZodError') {
+      if (error instanceof Error && error.name === 'ZodError') {
         return res.status(400).json({ 
           error: "Validation error", 
-          details: error.errors 
+          details: (error as any).errors 
         });
       }
       res.status(500).json({ error: "Failed to create notification" });
@@ -3060,10 +3060,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error updating notification:", error);
-      if (error.name === 'ZodError') {
+      if (error instanceof Error && error.name === 'ZodError') {
         return res.status(400).json({ 
           error: "Validation error", 
-          details: error.errors 
+          details: (error as any).errors 
         });
       }
       res.status(500).json({ error: "Failed to update notification" });
