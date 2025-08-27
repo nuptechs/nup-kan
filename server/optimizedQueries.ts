@@ -62,6 +62,7 @@ export class OptimizedQueries {
         name: boards.name,
         description: boards.description,
         color: boards.color,
+        isActive: boards.isActive,
         createdAt: boards.createdAt,
         createdById: boards.createdById,
         // Contar tasks diretamente na query

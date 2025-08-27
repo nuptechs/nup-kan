@@ -32,6 +32,7 @@ export interface BoardResponse {
   name: string;
   description: string;
   color: string;
+  isActive: string;
   createdAt: Date;
   createdById: string;
   taskCount: number;
@@ -103,6 +104,7 @@ export class BoardService {
         name: board.name,
         description: board.description || '',
         color: board.color || '#3B82F6',
+        isActive: board.isActive || 'true',
         createdAt: board.createdAt || new Date(),
         createdById: board.createdById || '',
         taskCount: 0,

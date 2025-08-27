@@ -34,6 +34,7 @@ export class QueryHandlers {
             name: board.name,
             description: board.description,
             color: board.color,
+            isActive: board.isActive || 'true',
             createdAt: board.createdAt,
             createdById: board.createdById,
             taskCount: board.taskCount,
