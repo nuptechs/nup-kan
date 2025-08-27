@@ -244,7 +244,7 @@ export default function PermissionsHub() {
     mutationFn: (data: any) => apiRequest("POST", "/api/users", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      // B) Reset só para criação - campos vazios
+      setEditingId(null); // 🔥 CRÍTICO: Fecha modal
       userForm.reset({ name: "", email: "", role: "" });
       toast({ title: "Usuário criado" });
     }
@@ -252,16 +252,15 @@ export default function PermissionsHub() {
 
   const updateUser = useMutation({
     mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/users/${id}`, data),
-    onSuccess: async (data) => {
+    onSuccess: async () => {
       // Aguarda atualização completa dos dados ANTES de fechar modal
-      await queryClient.refetchQueries({ queryKey: ["/api/users"] });
       await queryClient.refetchQueries({ queryKey: ["/api/users"] });
       
       // Só agora fecha modal (dados já atualizados)
       setEditingId(null);
-      userForm.reset(data);
+      userForm.reset();
       
-      toast({ title: "Usuário atualizado com sucesso!" });
+      toast({ title: "Usuário atualizado" });
     }
   });
 
@@ -276,7 +275,8 @@ export default function PermissionsHub() {
   const createTeam = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/teams", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
+      setEditingId(null); // 🔥 CRÍTICO: Fecha modal
       teamForm.reset();
       toast({ title: "Time criado" });
     }
@@ -284,9 +284,9 @@ export default function PermissionsHub() {
 
   const updateTeam = useMutation({
     mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/teams/${id}`, data),
-    onSuccess: async (data) => {
+    onSuccess: async () => {
       // Aguarda atualização completa dos dados ANTES de fechar modal
-      await queryClient.refetchQueries({ queryKey: ["/api/users"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/teams"] });
       
       // Só agora fecha modal (dados já atualizados)
       setEditingId(null);
@@ -299,7 +299,7 @@ export default function PermissionsHub() {
   const deleteTeam = useMutation({
     mutationFn: (id: string) => apiRequest("DELETE", `/api/teams/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
       toast({ title: "Time excluído" });
     }
   });
@@ -307,7 +307,8 @@ export default function PermissionsHub() {
   const createProfile = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/profiles", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      setEditingId(null); // 🔥 CRÍTICO: Fecha modal
       profileForm.reset();
       toast({ title: "Perfil criado" });
     }
@@ -315,9 +316,9 @@ export default function PermissionsHub() {
 
   const updateProfile = useMutation({
     mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/profiles/${id}`, data),
-    onSuccess: async (data) => {
+    onSuccess: async () => {
       // Aguarda atualização completa dos dados ANTES de fechar modal
-      await queryClient.refetchQueries({ queryKey: ["/api/users"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/profiles"] });
       
       // Só agora fecha modal (dados já atualizados)
       setEditingId(null);
@@ -330,7 +331,7 @@ export default function PermissionsHub() {
   const deleteProfile = useMutation({
     mutationFn: (id: string) => apiRequest("DELETE", `/api/profiles/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
       toast({ title: "Perfil excluído" });
     }
   });
