@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Grid, Edit, Trash2, MoreVertical, User, Eye, Power, PowerOff } from "lucide-react";
+import { Plus, Grid, Edit, Trash2, MoreVertical, User, Eye } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
@@ -384,27 +384,6 @@ export default function BoardSelection() {
                               <Edit className="mr-2 h-4 w-4" />
                               Editar
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                toggleBoardStatusMutation.mutate(board.id);
-                              }}
-                              className="cursor-pointer"
-                              data-testid={`menu-toggle-board-${board.id}`}
-                              disabled={toggleBoardStatusMutation.isPending}
-                            >
-                              {board.isActive === "true" ? (
-                                <>
-                                  <PowerOff className="mr-2 h-4 w-4" />
-                                  Inativar
-                                </>
-                              ) : (
-                                <>
-                                  <Power className="mr-2 h-4 w-4" />
-                                  Ativar
-                                </>
-                              )}
-                            </DropdownMenuItem>
                           </>
                         )}
                         {canDelete("Boards") && (
@@ -435,9 +414,35 @@ export default function BoardSelection() {
                           {board.name}
                         </h3>
                       </div>
-                      <Badge variant="secondary" data-testid={`badge-status-${board.id}`}>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (canEdit("Boards")) {
+                            toggleBoardStatusMutation.mutate(board.id);
+                          }
+                        }}
+                        disabled={!canEdit("Boards") || toggleBoardStatusMutation.isPending}
+                        className={`
+                          px-3 py-1 rounded-full text-xs font-medium transition-all duration-200
+                          ${board.isActive === "true" 
+                            ? "bg-green-100 text-green-700 hover:bg-green-200" 
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          }
+                          ${canEdit("Boards") && !toggleBoardStatusMutation.isPending
+                            ? "cursor-pointer transform hover:scale-105" 
+                            : "cursor-not-allowed opacity-70"
+                          }
+                          ${toggleBoardStatusMutation.isPending ? "animate-pulse" : ""}
+                        `}
+                        data-testid={`badge-status-${board.id}`}
+                        title={canEdit("Boards") 
+                          ? `Clique para ${board.isActive === "true" ? "inativar" : "ativar"} o board`
+                          : "Você não tem permissão para alterar o status"
+                        }
+                      >
                         {board.isActive === "true" ? "Ativo" : "Inativo"}
-                      </Badge>
+                      </button>
                     </div>
                     
                     {board.description && (
