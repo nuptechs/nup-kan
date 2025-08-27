@@ -239,10 +239,13 @@ export default function PermissionsHub() {
 
   const updateUser = useMutation({
     mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/users/${id}`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
+    onSuccess: async (updatedUser) => {
+      // Força refetch imediato dos dados
+      await queryClient.refetchQueries({ queryKey: ["/api/permissions-data"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/users"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/team-members"] });
+      
+      // Fecha a edição imediatamente
       setEditingId(null);
       userForm.reset();
       toast({ title: "Usuário atualizado com sucesso!" });

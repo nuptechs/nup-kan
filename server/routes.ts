@@ -796,31 +796,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.patch("/api/users/:id", async (req, res) => {
-    console.log("🔴 [TRACE-SERVER-1] PATCH /api/users/:id INICIADO");
-    console.log("🔴 [TRACE-SERVER-1] ID do usuário:", req.params.id);
-    console.log("🔴 [TRACE-SERVER-1] Body da requisição:", req.body);
-    console.log("🔴 [TRACE-SERVER-1] User autenticado:", req.session?.user?.name);
-    
     const startTime = Date.now();
     const userId = req.session?.user?.id || 'unknown';
     const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
-      console.log("🔴 [TRACE-SERVER-2] Processando dados de atualização");
       const userData = req.body;
-      console.log("🔴 [TRACE-SERVER-2] Dados para atualização:", userData);
-      
-      console.log("🔴 [TRACE-SERVER-3] Chamando storage.updateUser");
       const user = await storage.updateUser(req.params.id, userData);
-      console.log("🔴 [TRACE-SERVER-3] Usuário atualizado com sucesso:", user);
       
       const duration = Date.now() - startTime;
-      console.log("🔴 [TRACE-SERVER-4] Logando ação e retornando resposta");
       addUserActionLog(userId, userName, `Atualizar usuário "${user.name}" (${user.email})`, 'success', null, duration);
       
-      console.log("🔴 [TRACE-SERVER-5] Enviando resposta JSON:", user);
       res.json(user);
-      console.log("🔴 [TRACE-SERVER-6] PATCH /api/users/:id CONCLUÍDO COM SUCESSO");
     } catch (error) {
       const duration = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
