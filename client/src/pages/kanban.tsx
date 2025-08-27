@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { SettingsPanel } from "@/components/kanban/settings-panel";
 import { BoardSharingDialog } from "@/components/kanban/board-sharing-dialog";
@@ -20,24 +20,6 @@ export default function KanbanPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const { canManageProfiles } = usePermissions();
   const { mode, isReadOnly, canCreate, canEdit } = useProfileMode();
-  const headerRef = useRef<HTMLElement>(null);
-
-  // Function to handle mouse enter - enable horizontal scroll
-  const handleHeaderMouseEnter = () => {
-    if (headerRef.current) {
-      headerRef.current.classList.remove('overflow-x-hidden');
-      headerRef.current.classList.add('overflow-x-auto');
-    }
-  };
-
-  // Function to handle mouse leave - disable scroll and return to start
-  const handleHeaderMouseLeave = () => {
-    if (headerRef.current) {
-      headerRef.current.classList.remove('overflow-x-auto');
-      headerRef.current.classList.add('overflow-x-hidden');
-      headerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-    }
-  };
 
   // Load board data
   const { data: board, isLoading: isLoadingBoard } = useQuery<Board>({
@@ -90,14 +72,8 @@ export default function KanbanPage() {
   return (
     <div className="h-screen overflow-hidden bg-bg-main relative" data-testid="kanban-page">
       {/* Header */}
-      <header 
-        ref={headerRef}
-        className="bg-white border-b border-gray-200 px-6 py-4 overflow-x-hidden scrollbar-hide" 
-        data-testid="header"
-        onMouseEnter={handleHeaderMouseEnter}
-        onMouseLeave={handleHeaderMouseLeave}
-      >
-        <div className="flex items-center justify-between" style={{ minWidth: '1200px' }}>
+      <header className="bg-white border-b border-gray-200 px-6 py-4" data-testid="header">
+        <div className="flex items-center justify-between">
           <Link href="/">
             <Button
               variant="ghost"
@@ -109,7 +85,7 @@ export default function KanbanPage() {
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
-          <div className="flex items-center space-x-4 flex-1">
+          <div className="flex items-center space-x-3 flex-1 min-w-0">
             <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full flex-shrink-0"></div>
             <h1 className="text-2xl font-semibold text-gray-900 truncate" data-testid="page-title" title={board.name}>
               {board.name}
