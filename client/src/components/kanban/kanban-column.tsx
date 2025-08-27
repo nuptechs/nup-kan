@@ -80,7 +80,7 @@ export function KanbanColumn({
   const isWipExceeded = column.wipLimit && tasks.length >= column.wipLimit;
 
   return (
-    <div className="h-full">
+    <div className="h-full flex-shrink-0" style={{ minWidth: '280px', maxWidth: '350px', width: '300px' }}>
       <div
         className="bg-white/50 backdrop-blur-sm rounded-2xl border-0 h-full flex flex-col transition-all duration-300"
         data-testid={`column-${column.id}`}
