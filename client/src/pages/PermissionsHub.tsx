@@ -149,6 +149,7 @@ function PasswordChangeDialog({ userId, userName }: { userId: string; userName: 
 export default function PermissionsHub() {
   const [activeSection, setActiveSection] = useState<Section>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
@@ -360,6 +361,7 @@ export default function PermissionsHub() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-profiles"] });
       toast({ title: "Time vinculado ao perfil" });
+      setEditingTeamId(null);
     }
   });
 
@@ -1693,9 +1695,13 @@ export default function PermissionsHub() {
                     {item.team?.description}
                   </p>
                   <div className="flex space-x-2 flex-shrink-0">
-                    <Dialog>
+                    <Dialog open={editingTeamId === item.id} onOpenChange={(open) => !open && setEditingTeamId(null)}>
                       <DialogTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setEditingTeamId(item.id)}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                       </DialogTrigger>
