@@ -212,11 +212,19 @@ export default function BoardSelection() {
       return response.json();
     },
     onSuccess: async (updatedBoard) => {
+      // 🔍 DEBUG: Log da resposta da API
+      console.log("🔍 [DEBUG] Resposta do toggle:", updatedBoard);
+      console.log("🔍 [DEBUG] isActive na resposta:", updatedBoard.isActive, typeof updatedBoard.isActive);
+      
       // 🔄 FORÇAR INVALIDAÇÃO COMPLETA - Corrigir problema de cache
       await queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
       
       // 🚀 FORÇAR REFETCH IMEDIATO dos boards
       await queryClient.refetchQueries({ queryKey: ["/api/boards"] });
+      
+      // 🔍 DEBUG: Log dos boards após refetch
+      const currentBoards = queryClient.getQueryData(["/api/boards"]);
+      console.log("🔍 [DEBUG] Boards no cache após refetch:", currentBoards);
       
       const statusText = updatedBoard.isActive === "true" ? "ativado" : "inativado";
       toast({
