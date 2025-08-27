@@ -1,31 +1,15 @@
 [
   {
-    "id": "log_1756306460973_r5rw02qke",
-    "timestamp": "2025-08-27T14:54:20.973Z",
-    "level": "error",
-    "message": "❌ [BOARD-SERVICE] Erro buscando board em 0ms: Error: Board não encontrado",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756306460660_wgdagj2yo",
-    "timestamp": "2025-08-27T14:54:20.660Z",
-    "level": "error",
-    "message": "❌ [BOARD-SERVICE] Erro buscando board em 308ms: Error: Board não encontrado",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756306396572_hef55hhd2",
-    "timestamp": "2025-08-27T14:53:16.572Z",
+    "id": "log_1756306923602_ezgwwhxms",
+    "timestamp": "2025-08-27T15:02:03.603Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756306394607_gbw4u06xx",
-    "timestamp": "2025-08-27T14:53:14.607Z",
+    "id": "log_1756306922026_c7npn7ksl",
+    "timestamp": "2025-08-27T15:02:02.026Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

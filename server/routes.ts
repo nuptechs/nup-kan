@@ -15,7 +15,7 @@ import { OptimizedQueries, PerformanceStats } from "./optimizedQueries";
 import { cache } from "./cache";
 
 // 🚀 NÍVEL 3: MICROSERVIÇOS IMPORTADOS
-import { APIGateway, RouteHandlers } from './microservices/apiGateway';
+import { APIGateway } from './microservices/apiGateway'; // RouteHandlers REMOVIDO - SIMPLIFICAÇÃO
 import { AuthMiddleware, AuthService } from './microservices/authService';
 import { BoardService } from './microservices/boardService';
 import { mongoStore } from './mongodb';
@@ -70,33 +70,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Auth routes
   
-  // 🔐 Auth routes - Microserviço de autenticação
-  app.get("/api/auth/current-user", 
-    RouteHandlers.authRoutes.currentUser
-  );
+  // 🔐 Auth routes - SIMPLIFICADO
+  app.get("/api/auth/current-user", async (req, res) => {
+    try {
+      const auth = await AuthService.verifyAuth(req);
+      res.json(auth);
+    } catch (error) {
+      res.status(401).json({ error: "Not authenticated" });
+    }
+  });
   
   app.get("/api/users/:userId/permissions", 
     AuthMiddleware.requireAuth,
-    RouteHandlers.authRoutes.userPermissions
+    async (req, res) => {
+      try {
+        const permissions = await storage.getUserPermissions(req.params.userId);
+        res.json(permissions);
+      } catch (error) {
+        console.error("Error fetching user permissions:", error);
+        res.status(500).json({ error: "Failed to fetch user permissions" });
+      }
+    }
   );
   
-  // 📋 Board routes - Microserviço de boards  
+  // 📋 Board routes - SIMPLIFICADO (sem microserviços)
   app.get("/api/boards",
     AuthMiddleware.requireAuth,
     AuthMiddleware.requirePermissions("Listar Boards"),
-    RouteHandlers.boardRoutes.getBoards
+    async (req, res) => {
+      try {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 20;
+        
+        // 🚀 ACESSO DIRETO AO STORAGE - SEM COMPLEXIDADE
+        const boards = await storage.getBoards();
+        
+        // Paginação simples
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedBoards = boards.slice(startIndex, endIndex);
+        
+        res.json({
+          data: paginatedBoards,
+          pagination: {
+            page,
+            limit,
+            total: boards.length,
+            pages: Math.ceil(boards.length / limit),
+            hasNext: endIndex < boards.length,
+            hasPrev: page > 1,
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching boards:", error);
+        res.status(500).json({ error: "Failed to fetch boards" });
+      }
+    }
   );
   
   app.post("/api/boards",
     AuthMiddleware.requireAuth, 
     AuthMiddleware.requirePermissions("Criar Boards"),
-    RouteHandlers.boardRoutes.createBoard
+    async (req, res) => {
+      try {
+        const boardData = insertBoardSchema.parse({
+          ...req.body,
+          createdById: req.body.createdById || "system"
+        });
+        const board = await storage.createBoard(boardData);
+        await cache.invalidatePattern('boards*');
+        res.status(201).json(board);
+      } catch (error) {
+        console.error("Board creation error:", error);
+        res.status(400).json({ error: "Failed to create board" });
+      }
+    }
   );
   
   app.get("/api/boards/:id",
     AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Listar Boards"), 
-    RouteHandlers.boardRoutes.getBoardById
+    AuthMiddleware.requirePermissions("Visualizar Boards"), 
+    async (req, res) => {
+      try {
+        const board = await storage.getBoard(req.params.id);
+        if (!board) {
+          return res.status(404).json({ error: "Board not found" });
+        }
+        res.json(board);
+      } catch (error) {
+        console.error("Error fetching board:", error);
+        res.status(500).json({ error: "Failed to fetch board" });
+      }
+    }
   );
 
   // Update and delete routes handled by other services
@@ -123,12 +188,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isActive: newStatus
         });
         
-        // 🚀 INVALIDAR CACHE DO BOARD SERVICE
-        await cache.invalidatePattern(`board_with_stats:${boardId}:*`);
-        await cache.invalidatePattern('boards_*');
-        await cache.invalidatePattern('boards_with_stats:*');
-        
-        console.log(`🔄 [TOGGLE] Cache invalidado para board ${boardId} - novo status: ${newStatus}`);
+        // 🚀 CACHE SIMPLES - UMA ÚNICA CAMADA
+        await cache.invalidatePattern('boards*');
+        await cache.invalidatePattern(`board:${boardId}`);
         
         res.json(updatedBoard);
       } catch (error) {
@@ -142,14 +204,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ROTAS REMOVIDAS - Usando apenas as versões simples abaixo
   
   // 📊 System routes - Monitoramento e métricas
-  app.get("/api/system/health",
-    RouteHandlers.systemRoutes.health
-  );
+  app.get("/api/system/health", async (req, res) => {
+    try {
+      const health = await APIGateway.healthCheck();
+      res.json(health);
+    } catch (error) {
+      res.status(500).json({ error: "Health check failed" });
+    }
+  });
   
   app.get("/api/system/metrics",
     AuthMiddleware.requireAuth,
     AuthMiddleware.requirePermissions("Visualizar Analytics"),
-    RouteHandlers.systemRoutes.metrics
+    async (req, res) => {
+      try {
+        const metrics = await APIGateway.getGatewayMetrics();
+        res.json(metrics);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to fetch metrics" });
+      }
+    }
   );
 
   // Legacy routes fallback

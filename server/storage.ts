@@ -166,17 +166,13 @@ export class DatabaseStorage implements IStorage {
   }
   // Board methods
   async getBoards(): Promise<Board[]> {
-    // 🚀 CACHE: Verificar cache primeiro
-    const cached = await cache.get<Board[]>(CacheKeys.ALL_BOARDS);
-    if (cached) {
-      return cached;
-    }
-
-    console.log("🔍 [CACHE MISS] Buscando boards no banco");
-    const result = await db.select().from(boards).orderBy(desc(boards.createdAt));
+    // 🚀 CACHE SIMPLES - ESTRATÉGIA UNIFICADA
+    const cacheKey = 'boards:all';
+    const cached = await cache.get<Board[]>(cacheKey);
+    if (cached) return cached;
     
-    // Cache por 1 minuto (boards podem mudar mais frequentemente)
-    await cache.set(CacheKeys.ALL_BOARDS, result, TTL.SHORT);
+    const result = await db.select().from(boards).orderBy(desc(boards.createdAt));
+    await cache.set(cacheKey, result, TTL.SHORT);
     return result;
   }
 
