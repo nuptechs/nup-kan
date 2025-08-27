@@ -355,7 +355,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                         name={`customFields.${field.name}`}
                         render={({ field: formField }) => (
                           <FormItem>
-                            <FormLabel htmlFor={`custom-field-${field.name}`} className="text-sm font-medium text-slate-700 mb-1.5">
+                            <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">
                               {field.label}
                               {field.required === "true" && <span className="text-red-500 ml-1">*</span>}
                             </FormLabel>
@@ -364,8 +364,6 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                                 {field.type === "text" && (
                                   <Input
                                     {...formField}
-                                    id={`custom-field-${field.name}`}
-                                    name={`customFields.${field.name}`}
                                     placeholder={field.placeholder || field.label}
                                     className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
                                     data-testid={`input-custom-${field.name}`}
@@ -374,8 +372,6 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                                 {field.type === "textarea" && (
                                   <Textarea
                                     {...formField}
-                                    id={`custom-field-${field.name}`}
-                                    name={`customFields.${field.name}`}
                                     placeholder={field.placeholder || field.label}
                                     className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors resize-none"
                                     data-testid={`textarea-custom-${field.name}`}
@@ -401,8 +397,6 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                                 {field.type === "number" && (
                                   <Input
                                     {...formField}
-                                    id={`custom-field-${field.name}`}
-                                    name={`customFields.${field.name}`}
                                     type="number"
                                     placeholder={field.placeholder || field.label}
                                     className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
@@ -412,8 +406,6 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                                 {field.type === "date" && (
                                   <Input
                                     {...formField}
-                                    id={`custom-field-${field.name}`}
-                                    name={`customFields.${field.name}`}
                                     type="date"
                                     placeholder={field.placeholder || field.label}
                                     className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
@@ -423,8 +415,6 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                                 {field.type === "email" && (
                                   <Input
                                     {...formField}
-                                    id={`custom-field-${field.name}`}
-                                    name={`customFields.${field.name}`}
                                     type="email"
                                     placeholder={field.placeholder || "email@exemplo.com"}
                                     className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
@@ -434,8 +424,6 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                                 {field.type === "url" && (
                                   <Input
                                     {...formField}
-                                    id={`custom-field-${field.name}`}
-                                    name={`customFields.${field.name}`}
                                     type="url"
                                     placeholder={field.placeholder || "https://..."}
                                     className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"

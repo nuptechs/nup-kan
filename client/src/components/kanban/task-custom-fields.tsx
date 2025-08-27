@@ -229,7 +229,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
       case 'select':
         return (
           <div className="space-y-2" data-testid={`field-${field.name}`}>
-            <Label htmlFor={`edit-field-${field.name}`} className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
+            <Label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
               <Icon className="w-4 h-4" />
               {field.label}
               {isRequired && <span className="text-red-500">*</span>}
@@ -241,8 +241,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
                 handleFieldBlur(field.id, newValue);
               }}
             >
-              <SelectTrigger 
-                id={`edit-field-${field.name}`}
+              <SelectTrigger
                 className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
                 data-testid={`select-${field.name}`}
               >
@@ -264,14 +263,12 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
         return (
           <div className="space-y-2" data-testid={`field-${field.name}`}>
             <div className="flex items-center justify-between">
-              <Label htmlFor={`edit-field-${field.name}`} className="flex items-center gap-2">
+              <Label className="flex items-center gap-2">
                 <Icon className="w-4 h-4" />
                 {field.label}
                 {isRequired && <span className="text-red-500">*</span>}
               </Label>
               <Switch
-                id={`edit-field-${field.name}`}
-                name={`edit-field-${field.name}`}
                 checked={value === 'true'}
                 onCheckedChange={(checked) => {
                   const newValue = checked ? 'true' : 'false';
