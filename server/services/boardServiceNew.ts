@@ -71,8 +71,11 @@ export class BoardService extends BaseService {
     this.log('board-service', 'getBoards', { userId: authContext.userId, options });
     
     try {
-      // Verificar permissão básica
-      this.requirePermission(authContext, 'Listar Boards', 'listar boards');
+      // Verificar permissão básica - ajustando para permitir acesso aos próprios boards
+      if (!this.hasPermission(authContext, 'Listar Boards') && !this.hasPermission(authContext, 'Visualizar Boards')) {
+        // Se não tem permissão geral, só pode ver os próprios boards - isso será filtrado mais tarde
+        console.log('⚠️ [BOARD-SERVICE] Usuário sem permissão geral, filtrando apenas próprios boards');
+      }
 
       const { page = 1, limit = 20 } = options;
       const offset = (page - 1) * limit;
@@ -85,12 +88,20 @@ export class BoardService extends BaseService {
         return cached;
       }
 
-      // Buscar boards básicos do DAO
-      const boards = await this.storage.getBoardsPaginated(limit, offset);
+      // Buscar boards básicos do DAO - filtrar por criador se não tem permissão geral
+      const hasGeneralPermission = this.hasPermission(authContext, 'Listar Boards');
+      let boards;
+      
+      if (hasGeneralPermission) {
+        boards = await this.storage.getBoardsPaginated(limit, offset);
+      } else {
+        // Se não tem permissão geral, buscar apenas os boards criados pelo usuário
+        boards = await this.storage.getBoardsByCreator(authContext.userId, limit, offset);
+      }
       
       // Enriquecer com estatísticas e permissões
       const enrichedBoards: BoardWithStats[] = await Promise.all(
-        boards.map(async (board) => {
+        boards.map(async (board: Board) => {
           // Calcular estatísticas
           const stats = await this.calculateBoardStats(board.id);
           

@@ -16,6 +16,8 @@ export interface IStorage {
   deleteBoard(id: string): Promise<void>;
   getBoardTasks(boardId: string): Promise<Task[]>;
   getBoardColumns(boardId: string): Promise<Column[]>;
+  getBoardsPaginated(limit: number, offset: number): Promise<Board[]>;
+  getBoardsByCreator(creatorId: string, limit: number, offset: number): Promise<Board[]>;
   
   // Tasks
   getTasks(): Promise<Task[]>;
@@ -222,6 +224,29 @@ export class DatabaseStorage implements IStorage {
     // Cache por 2 minutos
     await cache.set('boards_count', count, TTL.MEDIUM / 2);
     return count;
+  }
+
+  // 🚀 NOVA: Buscar boards por criador com paginação
+  async getBoardsByCreator(creatorId: string, limit: number, offset: number): Promise<Board[]> {
+    const cacheKey = `boards_creator:${creatorId}:${limit}:${offset}`;
+    const cached = await cache.get<Board[]>(cacheKey);
+    if (cached) {
+      console.log("🚀 [CACHE HIT] Boards por criador servidos do cache");
+      return cached;
+    }
+
+    console.log("🔍 [CACHE MISS] Buscando boards do criador no banco:", creatorId);
+    const result = await db
+      .select()
+      .from(boards)
+      .where(eq(boards.createdById, creatorId))
+      .orderBy(desc(boards.createdAt))
+      .limit(limit)
+      .offset(offset);
+    
+    // Cache por 30 segundos
+    await cache.set(cacheKey, result, TTL.SHORT / 2);
+    return result;
   }
 
   async getBoard(id: string): Promise<Board | undefined> {
