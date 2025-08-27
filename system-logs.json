@@ -1,5 +1,19 @@
 [
   {
+    "id": "action_1756300421115_16jn16hf6",
+    "timestamp": "2025-08-27T13:13:41.115Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar time \"Analista de Re\"",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar time \"Analista de Re\"",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 84
+  },
+  {
     "id": "log_1756300398001_9y6p9phuh",
     "timestamp": "2025-08-27T13:13:18.001Z",
     "level": "warn",
