@@ -34,6 +34,12 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  
+  // Debug - rastrear mudanças de estado
+  useEffect(() => {
+    console.log("📱 [DEBUG] isOpen mudou para:", isOpen);
+    console.log("📱 [DEBUG] editingUser atual:", editingUser?.name || "null");
+  }, [isOpen, editingUser]);
 
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
@@ -99,23 +105,33 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       return response.json();
     },
     onSuccess: async () => {
+      console.log("🟢 [DEBUG] updateUserMutation.onSuccess iniciado");
+      
       // 1. INVALIDAR CACHE PRIMEIRO para garantir dados atualizados
+      console.log("🔄 [DEBUG] Invalidando cache...");
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["/api/users"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] })
       ]);
+      console.log("✅ [DEBUG] Cache invalidado");
       
       // 2. AGORA sair do modo edição e fechar
+      console.log("🚪 [DEBUG] Fechando modal e resetando estado...");
+      console.log("🚪 [DEBUG] editingUser antes:", editingUser?.name);
       setEditingUser(null);
+      console.log("🚪 [DEBUG] editingUser agora deve ser null");
       editForm.reset();
+      console.log("🚪 [DEBUG] Form resetado, chamando onClose()...");
       onClose();
+      console.log("🚪 [DEBUG] onClose() chamado com sucesso");
       
       // 3. Toast por último
       toast({
         title: "Sucesso",
         description: "Usuário atualizado com sucesso!",
       });
+      console.log("🟢 [DEBUG] updateUserMutation.onSuccess concluído");
     },
     onError: () => {
       toast({
@@ -164,6 +180,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
   };
 
   const startEdit = (user: User) => {
+    console.log("✏️ [DEBUG] Iniciando edição do usuário:", user.name);
     setEditingUser(user);
     editForm.reset({
       name: user.name,
@@ -172,6 +189,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       avatar: user.avatar || "",
       status: user.status || "offline",
     });
+    console.log("✏️ [DEBUG] Usuário definido para edição e form resetado");
   };
 
   const cancelEdit = () => {

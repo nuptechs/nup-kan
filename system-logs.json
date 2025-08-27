@@ -1,5 +1,33 @@
 [
   {
+    "id": "action_1756255677685_dwyxr51w0",
+    "timestamp": "2025-08-27T00:47:57.685Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar usuário \"asd\" (asd@m.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário \"asd\" (asd@m.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 85
+  },
+  {
+    "id": "action_1756255562129_rqmqc5a9u",
+    "timestamp": "2025-08-27T00:46:02.129Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar usuário \"Perfil de Teste\" (teste@teste.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário \"Perfil de Teste\" (teste@teste.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 105
+  },
+  {
     "id": "action_1756255427002_zja4baash",
     "timestamp": "2025-08-27T00:43:47.002Z",
     "level": "info",
