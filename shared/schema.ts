@@ -427,3 +427,36 @@ export type UpdateCustomField = z.infer<typeof updateCustomFieldSchema>;
 export type TaskCustomValue = typeof taskCustomValues.$inferSelect;
 export type InsertTaskCustomValue = z.infer<typeof insertTaskCustomValueSchema>;
 export type UpdateTaskCustomValue = z.infer<typeof updateTaskCustomValueSchema>;
+
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type").notNull().default("info"), // info, success, warning, error
+  isRead: text("is_read").notNull().default("false"),
+  priority: text("priority").notNull().default("normal"), // low, normal, high, urgent
+  category: text("category").default("general"), // general, system, task, board, team
+  metadata: text("metadata").default("{}"), // JSON string for additional data
+  actionUrl: text("action_url"), // URL for notification action
+  expiresAt: timestamp("expires_at"), // Optional expiration
+  createdAt: timestamp("created_at").defaultNow(),
+  readAt: timestamp("read_at"),
+});
+
+// Notification schemas
+export const insertNotificationSchema = createInsertSchema(notifications, {
+  title: z.string().min(1, "Título é obrigatório"),
+  message: z.string().min(1, "Mensagem é obrigatória"),
+  type: z.enum(["info", "success", "warning", "error"]).default("info"),
+  priority: z.enum(["low", "normal", "high", "urgent"]).default("normal"),
+  isRead: z.enum(["true", "false"]).default("false"),
+});
+
+export const updateNotificationSchema = insertNotificationSchema.partial();
+
+// Notification types
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type UpdateNotification = z.infer<typeof updateNotificationSchema>;

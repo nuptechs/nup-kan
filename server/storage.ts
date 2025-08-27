@@ -1,6 +1,6 @@
-import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type BoardShare, type InsertBoardShare, type UpdateBoardShare, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory, type TaskStatus, type InsertTaskStatus, type UpdateTaskStatus, type TaskPriority, type InsertTaskPriority, type UpdateTaskPriority, type TaskAssignee, type InsertTaskAssignee } from "@shared/schema";
+import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type BoardShare, type InsertBoardShare, type UpdateBoardShare, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory, type TaskStatus, type InsertTaskStatus, type UpdateTaskStatus, type TaskPriority, type InsertTaskPriority, type UpdateTaskPriority, type TaskAssignee, type InsertTaskAssignee, type Notification, type InsertNotification, type UpdateNotification } from "@shared/schema";
 import { db } from "./db";
-import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory, taskStatuses, taskPriorities, taskAssignees } from "@shared/schema";
+import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory, taskStatuses, taskPriorities, taskAssignees, notifications } from "@shared/schema";
 import { eq, desc, and, inArray, sql, or } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
@@ -138,6 +138,17 @@ export interface IStorage {
   createTaskPriority(priority: InsertTaskPriority): Promise<TaskPriority>;
   updateTaskPriority(id: string, priority: UpdateTaskPriority): Promise<TaskPriority>;
   deleteTaskPriority(id: string): Promise<void>;
+
+  // Notifications
+  getNotifications(userId: string): Promise<Notification[]>;
+  getNotification(id: string): Promise<Notification | undefined>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  updateNotification(id: string, notification: UpdateNotification): Promise<Notification>;
+  deleteNotification(id: string): Promise<void>;
+  markNotificationAsRead(id: string): Promise<Notification>;
+  markAllNotificationsAsRead(userId: string): Promise<number>;
+  getUnreadNotificationCount(userId: string): Promise<number>;
+  deleteExpiredNotifications(): Promise<number>;
 
   // Board initialization
   initializeBoardWithDefaults(boardId: string): Promise<void>;
@@ -1339,6 +1350,166 @@ export class DatabaseStorage implements IStorage {
     if (result.rowCount === 0) {
       throw new Error(`TaskPriority with id ${id} not found`);
     }
+  }
+
+  // Notifications Implementation
+  async getNotifications(userId: string): Promise<Notification[]> {
+    const cacheKey = `notifications:user:${userId}`;
+    const cached = await cache.get<Notification[]>(cacheKey);
+    if (cached) return cached;
+
+    const result = await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+    
+    await cache.set(cacheKey, result, TTL.SHORT);
+    return result;
+  }
+
+  async getNotification(id: string): Promise<Notification | undefined> {
+    const cacheKey = `notification:${id}`;
+    const cached = await cache.get<Notification>(cacheKey);
+    if (cached) return cached;
+
+    const result = await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.id, id));
+    
+    const notification = result[0];
+    if (notification) {
+      await cache.set(cacheKey, notification, TTL.SHORT);
+    }
+    return notification;
+  }
+
+  async createNotification(insertNotification: InsertNotification): Promise<Notification> {
+    const [notification] = await db
+      .insert(notifications)
+      .values({
+        ...insertNotification,
+        metadata: insertNotification.metadata || "{}",
+      })
+      .returning();
+    
+    // Invalidate user cache
+    await cache.del(`notifications:user:${notification.userId}`);
+    await cache.del(`notifications:unread:${notification.userId}`);
+    
+    return notification;
+  }
+
+  async updateNotification(id: string, updateData: UpdateNotification): Promise<Notification> {
+    const [notification] = await db
+      .update(notifications)
+      .set({
+        ...updateData,
+      })
+      .where(eq(notifications.id, id))
+      .returning();
+    
+    if (!notification) {
+      throw new Error(`Notification with id ${id} not found`);
+    }
+
+    // Invalidate caches
+    await cache.del(`notification:${id}`);
+    await cache.del(`notifications:user:${notification.userId}`);
+    await cache.del(`notifications:unread:${notification.userId}`);
+    
+    return notification;
+  }
+
+  async deleteNotification(id: string): Promise<void> {
+    const notification = await this.getNotification(id);
+    if (!notification) {
+      throw new Error(`Notification with id ${id} not found`);
+    }
+
+    const result = await db.delete(notifications).where(eq(notifications.id, id));
+    if (result.rowCount === 0) {
+      throw new Error(`Notification with id ${id} not found`);
+    }
+
+    // Invalidate caches
+    await cache.del(`notification:${id}`);
+    await cache.del(`notifications:user:${notification.userId}`);
+    await cache.del(`notifications:unread:${notification.userId}`);
+  }
+
+  async markNotificationAsRead(id: string): Promise<Notification> {
+    const [notification] = await db
+      .update(notifications)
+      .set({
+        isRead: "true",
+        readAt: new Date(),
+      })
+      .where(eq(notifications.id, id))
+      .returning();
+    
+    if (!notification) {
+      throw new Error(`Notification with id ${id} not found`);
+    }
+
+    // Invalidate caches
+    await cache.del(`notification:${id}`);
+    await cache.del(`notifications:user:${notification.userId}`);
+    await cache.del(`notifications:unread:${notification.userId}`);
+    
+    return notification;
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<number> {
+    const result = await db
+      .update(notifications)
+      .set({
+        isRead: "true",
+        readAt: new Date(),
+      })
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.isRead, "false")
+      ));
+
+    // Invalidate caches
+    await cache.del(`notifications:user:${userId}`);
+    await cache.del(`notifications:unread:${userId}`);
+    
+    return result.rowCount || 0;
+  }
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    const cacheKey = `notifications:unread:${userId}`;
+    const cached = await cache.get<number>(cacheKey);
+    if (cached !== null) return cached;
+
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(notifications)
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.isRead, "false")
+      ));
+    
+    const count = result[0]?.count || 0;
+    await cache.set(cacheKey, count, TTL.SHORT);
+    return count;
+  }
+
+  async deleteExpiredNotifications(): Promise<number> {
+    const result = await db
+      .delete(notifications)
+      .where(and(
+        sql`expires_at IS NOT NULL`,
+        sql`expires_at < NOW()`
+      ));
+    
+    // Clear all notification caches since we don't know which users were affected
+    await cache.invalidatePattern("notifications:*");
+    
+    return result.rowCount || 0;
   }
 
 }

@@ -6,7 +6,7 @@ import { promises as fs } from 'fs';
 import { join } from 'path';
 import { storage } from "./storage";
 import { db } from "./db";
-import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema, insertTaskAssigneeSchema, insertCustomFieldSchema, updateCustomFieldSchema, insertTaskCustomValueSchema, updateTaskCustomValueSchema, customFields, taskCustomValues } from "@shared/schema";
+import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema, insertTaskAssigneeSchema, insertCustomFieldSchema, updateCustomFieldSchema, insertTaskCustomValueSchema, updateTaskCustomValueSchema, customFields, taskCustomValues, insertNotificationSchema, updateNotificationSchema } from "@shared/schema";
 import { eq, sql, and } from "drizzle-orm";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 import { PermissionSyncService } from "./permissionSync";
@@ -2937,32 +2937,237 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Nova funcionalidade de teste para demonstrar a atribuição automática
-  app.get("/api/notifications", async (req, res) => {
+  // ==============================================
+  // NOTIFICATIONS ENDPOINTS - Sistema Completo
+  // ==============================================
+
+  // GET /api/notifications - Buscar notificações do usuário logado
+  app.get("/api/notifications", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
     try {
+      const userId = req.session?.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const notifications = await storage.getNotifications(userId);
       res.json({
-        notifications: [
-          { id: "1", message: "Sistema de permissões atualizado", type: "info" },
-          { id: "2", message: "Nova funcionalidade detectada", type: "success" }
-        ]
+        notifications,
+        count: notifications.length
       });
     } catch (error) {
+      console.error("Error fetching notifications:", error);
       res.status(500).json({ error: "Failed to get notifications" });
     }
   });
 
-  app.post("/api/notifications", async (req, res) => {
+  // GET /api/notifications/unread-count - Contar notificações não lidas
+  app.get("/api/notifications/unread-count", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
     try {
-      const { message, type } = req.body;
-      const notification = {
-        id: Date.now().toString(),
-        message,
-        type: type || "info",
-        createdAt: new Date()
-      };
+      const userId = req.session?.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const count = await storage.getUnreadNotificationCount(userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+      res.status(500).json({ error: "Failed to get unread count" });
+    }
+  });
+
+  // GET /api/notifications/:id - Buscar notificação específica
+  app.get("/api/notifications/:id", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
+    try {
+      const { id } = req.params;
+      const notification = await storage.getNotification(id);
+      
+      if (!notification) {
+        return res.status(404).json({ error: "Notification not found" });
+      }
+
+      // Verificar se a notificação pertence ao usuário
+      const userId = req.session?.user?.id;
+      if (notification.userId !== userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
       res.json(notification);
     } catch (error) {
+      console.error("Error fetching notification:", error);
+      res.status(500).json({ error: "Failed to get notification" });
+    }
+  });
+
+  // POST /api/notifications - Criar nova notificação
+  app.post("/api/notifications", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
+    try {
+      // Validar dados usando schema Zod
+      const validatedData = insertNotificationSchema.parse(req.body);
+      
+      const notification = await storage.createNotification(validatedData);
+      
+      res.status(201).json({
+        success: true,
+        notification
+      });
+    } catch (error) {
+      console.error("Error creating notification:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          error: "Validation error", 
+          details: error.errors 
+        });
+      }
       res.status(500).json({ error: "Failed to create notification" });
+    }
+  });
+
+  // PUT /api/notifications/:id - Atualizar notificação
+  app.put("/api/notifications/:id", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Verificar se a notificação existe e pertence ao usuário
+      const existingNotification = await storage.getNotification(id);
+      if (!existingNotification) {
+        return res.status(404).json({ error: "Notification not found" });
+      }
+
+      const userId = req.session?.user?.id;
+      if (existingNotification.userId !== userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      // Validar dados
+      const validatedData = updateNotificationSchema.parse(req.body);
+      
+      const notification = await storage.updateNotification(id, validatedData);
+      
+      res.json({
+        success: true,
+        notification
+      });
+    } catch (error) {
+      console.error("Error updating notification:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          error: "Validation error", 
+          details: error.errors 
+        });
+      }
+      res.status(500).json({ error: "Failed to update notification" });
+    }
+  });
+
+  // DELETE /api/notifications/:id - Excluir notificação
+  app.delete("/api/notifications/:id", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Verificar se a notificação existe e pertence ao usuário
+      const existingNotification = await storage.getNotification(id);
+      if (!existingNotification) {
+        return res.status(404).json({ error: "Notification not found" });
+      }
+
+      const userId = req.session?.user?.id;
+      if (existingNotification.userId !== userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      await storage.deleteNotification(id);
+      
+      res.json({
+        success: true,
+        message: "Notification deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      res.status(500).json({ error: "Failed to delete notification" });
+    }
+  });
+
+  // PATCH /api/notifications/:id/read - Marcar notificação como lida
+  app.patch("/api/notifications/:id/read", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Verificar se a notificação existe e pertence ao usuário
+      const existingNotification = await storage.getNotification(id);
+      if (!existingNotification) {
+        return res.status(404).json({ error: "Notification not found" });
+      }
+
+      const userId = req.session?.user?.id;
+      if (existingNotification.userId !== userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      const notification = await storage.markNotificationAsRead(id);
+      
+      res.json({
+        success: true,
+        notification
+      });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ error: "Failed to mark notification as read" });
+    }
+  });
+
+  // PATCH /api/notifications/mark-all-read - Marcar todas as notificações como lidas
+  app.patch("/api/notifications/mark-all-read", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+      
+      const updatedCount = await storage.markAllNotificationsAsRead(userId);
+      
+      res.json({
+        success: true,
+        message: `${updatedCount} notifications marked as read`,
+        updatedCount
+      });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ error: "Failed to mark all notifications as read" });
+    }
+  });
+
+  // Limpeza automática de notificações expiradas (executar periodicamente)
+  app.post("/api/notifications/cleanup-expired", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
+    try {
+      const deletedCount = await storage.deleteExpiredNotifications();
+      
+      res.json({
+        success: true,
+        message: `${deletedCount} expired notifications deleted`,
+        deletedCount
+      });
+    } catch (error) {
+      console.error("Error cleaning expired notifications:", error);
+      res.status(500).json({ error: "Failed to cleanup expired notifications" });
     }
   });
 

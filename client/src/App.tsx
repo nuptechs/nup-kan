@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProtectedRoute } from "@/components/auth/protected-route";
+import { NotificationSystem } from "@/components/NotificationSystem";
 import LoginPage from "@/pages/login";
 import BoardSelection from "@/pages/BoardSelection";
 import KanbanPage from "@/pages/kanban";
@@ -104,6 +105,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
+        <NotificationSystem />
         <Router />
       </TooltipProvider>
     </QueryClientProvider>
