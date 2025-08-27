@@ -80,13 +80,15 @@ export class BoardService extends BaseService {
       const { page = 1, limit = 20 } = options;
       const offset = (page - 1) * limit;
 
-      // Tentar cache primeiro
-      const cacheKey = `boards:user:${authContext.userId}:${page}:${limit}`;
-      const cached = await this.cache.get<BoardWithStats[]>(cacheKey);
-      if (cached) {
-        this.log('board-service', 'cache hit', { cacheKey });
-        return cached;
-      }
+      // TEMPORARIAMENTE DESABILITAR CACHE para debug
+      // const cacheKey = `boards:user:${authContext.userId}:${page}:${limit}`;
+      // const cached = await this.cache.get<BoardWithStats[]>(cacheKey);
+      // if (cached) {
+      //   this.log('board-service', 'cache hit', { cacheKey });
+      //   return cached;
+      // }
+      
+      console.log('💫 [BOARD-SERVICE] Cache desabilitado para debug - forçando busca nova');
 
       // Buscar boards básicos do DAO - filtrar por criador se não tem permissão geral
       const hasGeneralPermission = this.hasPermission(authContext, 'Listar Boards');
@@ -99,22 +101,54 @@ export class BoardService extends BaseService {
         boards = await this.storage.getBoardsByCreator(authContext.userId, limit, offset);
       }
       
-      // Enriquecer com estatísticas e permissões
-      const enrichedBoards: BoardWithStats[] = await Promise.all(
-        boards.map(async (board: Board) => {
-          // Calcular estatísticas
-          const stats = await this.calculateBoardStats(board.id);
+      // Enriquecer com estatísticas e permissões de forma defensiva
+      const enrichedBoards: BoardWithStats[] = [];
+      
+      for (const board of boards) {
+        try {
+          console.log(`🔍 [BOARD-SERVICE] Processando board: ${board.id} - ${board.name}`);
           
-          // Verificar permissões específicas
-          const permissions = await this.calculateBoardPermissions(authContext, board.id);
+          // Calcular estatísticas (com fallback)
+          let stats;
+          try {
+            stats = await this.calculateBoardStats(board.id);
+            console.log(`✅ [BOARD-SERVICE] Stats calculadas para ${board.id}:`, stats);
+          } catch (error) {
+            console.error(`❌ [BOARD-SERVICE] Erro calculando stats para ${board.id}:`, error);
+            stats = { taskCount: 0, completedTasks: 0, inProgressTasks: 0, pendingTasks: 0 };
+          }
           
-          // Buscar membros ativos
-          const members = await this.getBoardMembers(board.id);
+          // Verificar permissões específicas (com fallback)
+          let permissions;
+          try {
+            permissions = await this.calculateBoardPermissions(authContext, board.id);
+            console.log(`✅ [BOARD-SERVICE] Permissões calculadas para ${board.id}:`, permissions);
+          } catch (error) {
+            console.error(`❌ [BOARD-SERVICE] Erro calculando permissões para ${board.id}:`, error);
+            permissions = { canEdit: false, canDelete: false, canManageMembers: false };
+          }
           
-          // Buscar colunas
-          const columns = await this.getBoardColumns(board.id);
+          // Buscar membros ativos (com fallback)
+          let members;
+          try {
+            members = await this.getBoardMembers(board.id);
+            console.log(`✅ [BOARD-SERVICE] Membros encontrados para ${board.id}:`, members.length);
+          } catch (error) {
+            console.error(`❌ [BOARD-SERVICE] Erro buscando membros para ${board.id}:`, error);
+            members = [];
+          }
+          
+          // Buscar colunas (com fallback)
+          let columns;
+          try {
+            columns = await this.getBoardColumns(board.id);
+            console.log(`✅ [BOARD-SERVICE] Colunas encontradas para ${board.id}:`, columns.length);
+          } catch (error) {
+            console.error(`❌ [BOARD-SERVICE] Erro buscando colunas para ${board.id}:`, error);
+            columns = [];
+          }
 
-          return {
+          const enrichedBoard: BoardWithStats = {
             ...board,
             ...stats,
             columns,
@@ -127,11 +161,18 @@ export class BoardService extends BaseService {
               lastActivity: board.updatedAt || board.createdAt || new Date(),
             }
           };
-        })
-      );
+          
+          enrichedBoards.push(enrichedBoard);
+          console.log(`✅ [BOARD-SERVICE] Board ${board.id} processado com sucesso`);
+          
+        } catch (boardError) {
+          console.error(`❌ [BOARD-SERVICE] Erro processando board ${board.id}:`, boardError);
+          // Continua processamento dos outros boards
+        }
+      }
 
-      // Cache por 2 minutos
-      await this.cache.set(cacheKey, enrichedBoards, TTL.SHORT);
+      // Cache temporariamente desabilitado para debug
+      // await this.cache.set(cacheKey, enrichedBoards, TTL.SHORT);
       
       this.log('board-service', 'boards retrieved', { count: enrichedBoards.length });
       return enrichedBoards;
