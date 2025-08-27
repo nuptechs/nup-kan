@@ -80,9 +80,9 @@ export function KanbanColumn({
   const isWipExceeded = column.wipLimit && tasks.length >= column.wipLimit;
 
   return (
-    <div className="h-full">
+    <div>
       <div
-        className="bg-white/50 backdrop-blur-sm rounded-2xl border-0 h-full flex flex-col transition-all duration-300"
+        className="bg-white/50 backdrop-blur-sm rounded-2xl border-0 flex flex-col transition-all duration-300"
         data-testid={`column-${column.id}`}
       >
         {/* Header */}
@@ -177,7 +177,7 @@ export function KanbanColumn({
         
         {/* Tasks Container */}
         <div 
-          className="flex-1 px-4 pb-4 space-y-2 min-h-0" 
+          className="px-4 pb-4 space-y-2" 
           data-testid={`tasks-container-${column.id}`}
           onDragOver={(e) => {
             e.preventDefault();
@@ -208,10 +208,6 @@ export function KanbanColumn({
             }
             
             onTaskDrop?.(e, column.id, dropIndex);
-          }}
-          style={{ 
-            maxHeight: tasks.length > 8 ? 'calc(100vh - 200px)' : 'auto',
-            overflowY: tasks.length > 8 ? 'auto' : 'visible'
           }}
         >
           {tasks.map((task, index) => (
