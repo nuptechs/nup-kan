@@ -1,5 +1,19 @@
 [
   {
+    "id": "action_1756297114116_h36jcg15l",
+    "timestamp": "2025-08-27T12:18:34.116Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar usuário \"TO\" (asd@m.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário \"TO\" (asd@m.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 325
+  },
+  {
     "id": "log_1756297030976_rv5f262bc",
     "timestamp": "2025-08-27T12:17:10.976Z",
     "level": "warn",
