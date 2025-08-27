@@ -804,6 +804,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userData = req.body;
       const user = await storage.updateUser(req.params.id, userData);
       
+      // 🔥 CRÍTICO: Invalidar cache permissions-data para atualização imediata
+      invalidatePermissionsCache();
+      
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Atualizar usuário "${user.name}" (${user.email})`, 'success', null, duration);
       
