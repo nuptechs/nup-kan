@@ -426,7 +426,7 @@ export default function BoardSelection() {
                         className={`
                           px-3 py-1 rounded-full text-xs font-medium transition-all duration-200
                           ${board.isActive === "true" 
-                            ? "bg-green-100 text-green-700 hover:bg-green-200" 
+                            ? "bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700" 
                             : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                           }
                           ${canEdit("Boards") && !toggleBoardStatusMutation.isPending
