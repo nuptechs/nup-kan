@@ -124,13 +124,13 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       console.log("🔴 [TRACE-3] isOpen atual:", isOpen);
       console.log("🔴 [TRACE-3] Dialog state antes das ações");
       
-      // 1. Cancelar edição primeiro
-      console.log("🔴 [TRACE-4] Executando cancelEdit()");
-      cancelEdit();
-      
-      // 2. Forçar fechamento
-      console.log("🔴 [TRACE-5] Executando onClose()");
+      // 1. FECHAR MODAL PRIMEIRO (com contexto intacto)
+      console.log("🔴 [TRACE-4] Executando onClose() - FECHANDO MODAL");
       onClose();
+      
+      // 2. LIMPAR ESTADO DEPOIS (modal já fechado)
+      console.log("🔴 [TRACE-5] Executando cancelEdit() - LIMPANDO ESTADO");
+      cancelEdit();
       
       // 3. Invalidar cache em background
       console.log("🔴 [TRACE-6] Agendando invalidação de cache");
