@@ -1,29 +1,15 @@
 [
   {
-    "id": "action_1756316645473_5mlf7cbth",
-    "timestamp": "2025-08-27T17:44:05.473Z",
-    "level": "info",
-    "message": "Sistema executou: Criar coluna \"llmlmm\"",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "system",
-    "userName": "Sistema",
-    "action": "Criar coluna \"llmlmm\"",
-    "status": "success",
-    "errorDetails": null,
-    "duration": 81
-  },
-  {
-    "id": "log_1756316615746_vaons1l4n",
-    "timestamp": "2025-08-27T17:43:35.746Z",
+    "id": "log_1756316809357_gpbcqv4wo",
+    "timestamp": "2025-08-27T17:46:49.357Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756316614075_sr97mkn24",
-    "timestamp": "2025-08-27T17:43:34.075Z",
+    "id": "log_1756316808131_qc890vje9",
+    "timestamp": "2025-08-27T17:46:48.131Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

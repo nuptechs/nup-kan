@@ -182,33 +182,8 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
     },
   });
 
-  // Manual data loading functions
-  const loadQuickAssignData = async () => {
-    try {
-      const [usersRes, teamsRes, userTeamsRes, teamProfilesRes] = await Promise.all([
-        fetch("/api/users").then(r => r.json()),
-        fetch("/api/teams").then(r => r.json()),
-        fetch("/api/user-teams").then(r => r.json()),
-        fetch("/api/team-profiles").then(r => r.json())
-      ]);
-      setUsers(usersRes);
-      setTeams(teamsRes);
-      setUserTeams(userTeamsRes);
-      setTeamProfiles(teamProfilesRes);
-    } catch (error) {
-      console.error('Error loading quick assign data:', error);
-    }
-  };
-
-  const loadSyncData = async () => {
-    try {
-      const response = await fetch("/api/profile-permissions");
-      const data = await response.json();
-      setProfilePermissions(data);
-    } catch (error) {
-      console.error('Error loading sync data:', error);
-    }
-  };
+  // These functions are no longer needed since data is fetched via React Query
+  // Data will be automatically fetched when the queries are enabled
 
   // Query para relatório de funcionalidades
   const { data: functionalityReport, refetch: refetchReport } = useQuery({
@@ -329,20 +304,10 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="permissions">Permissões Detalhadas</TabsTrigger>
           <TabsTrigger value="profiles">Perfis</TabsTrigger>
-          <TabsTrigger 
-            value="quick-assign"
-            onClick={() => {
-              if (users.length === 0) loadQuickAssignData();
-            }}
-          >
+          <TabsTrigger value="quick-assign">
             Atribuição Rápida
           </TabsTrigger>
-          <TabsTrigger 
-            value="sync"
-            onClick={() => {
-              if (profilePermissions.length === 0) loadSyncData();
-            }}
-          >
+          <TabsTrigger value="sync">
             Sincronização
           </TabsTrigger>
         </TabsList>
