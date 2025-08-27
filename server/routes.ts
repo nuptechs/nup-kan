@@ -84,8 +84,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requireAuth,
     async (req, res) => {
       try {
-        const permissions = await storage.getUserPermissions(req.params.userId);
-        res.json(permissions);
+        // 🔐 VERIFICAR SE O USUÁRIO PODE ACESSAR SUAS PRÓPRIAS PERMISSÕES
+        const requestingUserId = req.session?.user?.id;
+        const targetUserId = req.params.userId;
+        
+        if (requestingUserId !== targetUserId) {
+          return res.status(403).json({ error: "Access denied to other user's permissions" });
+        }
+        
+        const permissionsArray = await storage.getUserPermissions(targetUserId);
+        console.log(`🔍 [DEBUG] Permissões raw do storage:`, permissionsArray);
+        
+        // 🔧 CONVERTER Permission[] para { permissions: string[] }
+        const permissionsResponse = {
+          permissions: Array.isArray(permissionsArray) 
+            ? permissionsArray.map(p => typeof p === 'string' ? p : p.name || p)
+            : []
+        };
+        
+        console.log(`🔍 [DEBUG] Permissões formatadas:`, permissionsResponse);
+        res.json(permissionsResponse);
       } catch (error) {
         console.error("Error fetching user permissions:", error);
         res.status(500).json({ error: "Failed to fetch user permissions" });

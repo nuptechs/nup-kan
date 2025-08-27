@@ -9,7 +9,7 @@ export function usePermissions() {
 
   // Buscar permissões do usuário baseado no seu perfil - usando endpoint correto que funciona
   const { data: userPermissionsData, isLoading: permissionsLoading, error: permissionsError } = useQuery<{permissions: string[]}>({
-    queryKey: ["/api/users", currentUser?.id, "permissions"],
+    queryKey: [`/api/users/${currentUser?.id}/permissions`],
     enabled: !!currentUser?.id,
     staleTime: 300000, // Cache por 5 minutos - permissões mudam raramente
     gcTime: 600000, // Manter em cache por 10 minutos
