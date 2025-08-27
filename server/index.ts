@@ -1,17 +1,22 @@
 import express, { type Request, Response, NextFunction } from "express";
-import cookieSession from "cookie-session";
+import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
-// Session configuration
-app.use(cookieSession({
-  name: 'session',
-  keys: ['your-secret-key', 'another-secret-key'], // Use environment variables in production
-  maxAge: 24 * 60 * 60 * 1000, // 24 hours
-  secure: false, // Set to true in production with HTTPS
-  httpOnly: true,
+// Session configuration - MELHORADA para persistir corretamente
+app.use(session({
+  secret: 'nupkan-secret-key-2025',
+  resave: false,
+  saveUninitialized: false,
+  name: 'connect.sid',
+  cookie: {
+    secure: false, // Para desenvolvimento HTTP
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 horas
+    sameSite: 'lax'
+  }
 }));
 
 app.use(express.json());

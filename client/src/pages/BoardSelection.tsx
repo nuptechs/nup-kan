@@ -37,20 +37,7 @@ export default function BoardSelection() {
   const { hasPermission, userPermissions, isLoading: permissionsLoading } = usePermissions();
   const { mode, isReadOnly, canCreate, canEdit, canDelete } = useProfileMode();
 
-  // 🐛 DEBUG: Log permissões para diagnosticar problemas (temporário)
-  if (userPermissions?.length === 0 && !permissionsLoading) {
-    console.log("🔍 [DEBUG] Permissões do usuário:", {
-      userPermissions: userPermissions?.map(p => p.name),
-      canCreateBoards: canCreate("Boards"),
-      canEditBoards: canEdit("Boards"),
-      canDeleteBoards: canDelete("Boards"),
-      hasCreateBoardsPermission: hasPermission("Criar Boards"),
-      hasListBoardsPermission: hasPermission("Listar Boards"),
-      mode,
-      isReadOnly,
-      permissionsLoading
-    });
-  }
+  // DEBUG REMOVIDO - problema de sessão resolvido
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
@@ -422,7 +409,6 @@ export default function BoardSelection() {
                 <Link href={`/kanban/${board.id}`}>
                   <div 
                     className="cursor-pointer" 
-                    onClick={() => console.log(`🔍 [DEBUG] Clicando no board: ${board.id}, URL: /kanban/${board.id}`)}
                   >
                     <div className="flex items-start justify-between mb-4 pr-8">
                       <div className="flex items-center">
