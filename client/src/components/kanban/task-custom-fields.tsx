@@ -148,12 +148,14 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
       case 'text':
         return (
           <div className="space-y-2" data-testid={`field-${field.name}`}>
-            <Label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
+            <Label htmlFor={`edit-field-${field.name}`} className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
               <Icon className="w-4 h-4" />
               {field.label}
               {isRequired && <span className="text-red-500">*</span>}
             </Label>
             <Input
+              id={`edit-field-${field.name}`}
+              name={`edit-field-${field.name}`}
               value={value}
               placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
               onChange={(e) => handleValueChange(field.id, e.target.value)}
@@ -167,12 +169,14 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
       case 'number':
         return (
           <div className="space-y-2" data-testid={`field-${field.name}`}>
-            <Label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
+            <Label htmlFor={`edit-field-${field.name}`} className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
               <Icon className="w-4 h-4" />
               {field.label}
               {isRequired && <span className="text-red-500">*</span>}
             </Label>
             <Input
+              id={`edit-field-${field.name}`}
+              name={`edit-field-${field.name}`}
               type="number"
               value={value}
               placeholder={field.placeholder || `Digite ${field.label.toLowerCase()}`}
@@ -225,7 +229,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
       case 'select':
         return (
           <div className="space-y-2" data-testid={`field-${field.name}`}>
-            <Label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
+            <Label htmlFor={`edit-field-${field.name}`} className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
               <Icon className="w-4 h-4" />
               {field.label}
               {isRequired && <span className="text-red-500">*</span>}
@@ -238,6 +242,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
               }}
             >
               <SelectTrigger 
+                id={`edit-field-${field.name}`}
                 className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
                 data-testid={`select-${field.name}`}
               >
@@ -259,12 +264,14 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
         return (
           <div className="space-y-2" data-testid={`field-${field.name}`}>
             <div className="flex items-center justify-between">
-              <Label className="flex items-center gap-2">
+              <Label htmlFor={`edit-field-${field.name}`} className="flex items-center gap-2">
                 <Icon className="w-4 h-4" />
                 {field.label}
                 {isRequired && <span className="text-red-500">*</span>}
               </Label>
               <Switch
+                id={`edit-field-${field.name}`}
+                name={`edit-field-${field.name}`}
                 checked={value === 'true'}
                 onCheckedChange={(checked) => {
                   const newValue = checked ? 'true' : 'false';
@@ -286,6 +293,8 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
               {isRequired && <span className="text-red-500">*</span>}
             </Label>
             <Input
+              id={`edit-field-${field.name}`}
+              name={`edit-field-${field.name}`}
               type="url"
               value={value}
               placeholder={field.placeholder || "https://..."}
@@ -306,6 +315,8 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
               {isRequired && <span className="text-red-500">*</span>}
             </Label>
             <Input
+              id={`edit-field-${field.name}`}
+              name={`edit-field-${field.name}`}
               type="email"
               value={value}
               placeholder={field.placeholder || "email@exemplo.com"}
