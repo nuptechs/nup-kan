@@ -232,19 +232,35 @@ export default function PermissionsHub() {
     mutationFn: (data: any) => apiRequest("POST", "/api/users", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
-      userForm.reset();
+      // B) Reset só para criação - campos vazios
+      userForm.reset({ name: "", email: "", role: "" });
       toast({ title: "Usuário criado" });
     }
   });
 
   const updateUser = useMutation({
     mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/users/${id}`, data),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // A) Fecha modal primeiro
+      setEditingId(null);
+      
+      // C) Atualização otimista - lista atualiza na hora
+      queryClient.setQueryData(['/api/permissions-data'], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          users: old.users?.map((u: any) => u.id === data.id ? data : u) || []
+        };
+      });
+      
+      // B) Reset form com dados do backend (mantém valores corretos)
+      userForm.reset(data);
+      
+      // Invalida caches em background
       queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
-      setEditingId(null);
-      userForm.reset({ name: "", email: "", role: "" });
+      
       toast({ title: "Usuário atualizado com sucesso!" });
     }
   });
