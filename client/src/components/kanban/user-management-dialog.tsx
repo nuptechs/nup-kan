@@ -68,6 +68,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] });
       toast({
         title: "Sucesso",
         description: "Usuário criado com sucesso!",
@@ -90,6 +91,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] });
       toast({
         title: "Sucesso",
         description: "Usuário atualizado com sucesso!",
@@ -114,6 +116,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] });
       toast({
         title: "Sucesso",
         description: "Usuário excluído com sucesso!",
