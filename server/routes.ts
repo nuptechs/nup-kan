@@ -52,7 +52,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: user.id,
         email: user.email,
         name: user.name,
-        profileId: user.profileId
+        profileId: user.profileId ?? undefined
       });
 
       console.log('✅ [LOGIN-JWT] Login bem-sucedido:', {
