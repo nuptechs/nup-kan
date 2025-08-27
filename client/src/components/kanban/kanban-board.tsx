@@ -413,10 +413,10 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
   return (
     <>
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 h-full">
 
         {/* Kanban Board */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto flex-1">
           {columns.length === 0 ? (
             /* Empty Board State */
             <div className="flex items-center justify-center min-h-96 p-8">

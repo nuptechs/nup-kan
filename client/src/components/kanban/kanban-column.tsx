@@ -177,7 +177,7 @@ export function KanbanColumn({
         
         {/* Tasks Container */}
         <div 
-          className="flex-1 overflow-y-auto px-4 pb-4 space-y-2" 
+          className="flex-1 px-4 pb-4 space-y-2 min-h-0" 
           data-testid={`tasks-container-${column.id}`}
           onDragOver={(e) => {
             e.preventDefault();
@@ -208,6 +208,10 @@ export function KanbanColumn({
             }
             
             onTaskDrop?.(e, column.id, dropIndex);
+          }}
+          style={{ 
+            maxHeight: tasks.length > 8 ? 'calc(100vh - 200px)' : 'auto',
+            overflowY: tasks.length > 8 ? 'auto' : 'visible'
           }}
         >
           {tasks.map((task, index) => (

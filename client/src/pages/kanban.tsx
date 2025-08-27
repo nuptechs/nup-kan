@@ -167,7 +167,7 @@ export default function KanbanPage() {
       </header>
 
       {/* Main Kanban Board */}
-      <main className="flex-1 overflow-hidden h-full" data-testid="main-content">
+      <main className="flex-1 overflow-hidden flex flex-col" data-testid="main-content">
         <KanbanBoard boardId={boardId} isReadOnly={isReadOnly} profileMode={mode} searchQuery={searchQuery} />
       </main>
 
