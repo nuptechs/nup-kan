@@ -549,7 +549,12 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                             size="sm"
                             variant="ghost"
                             className="h-8 w-8 p-0 text-blue-600 hover:text-blue-800"
-                            onClick={() => startEdit(user)}
+                            onClick={() => {
+                              console.log("🟡 [BUTTON-CLICK] Lápis clicado para usuário:", user.name);
+                              console.log("🟡 [BUTTON-CLICK] User ID:", user.id);
+                              console.log("🟡 [BUTTON-CLICK] Chamando startEdit...");
+                              startEdit(user);
+                            }}
                             data-testid={`button-edit-user-${user.id}`}
                           >
                             <Edit2 className="w-4 h-4" />
