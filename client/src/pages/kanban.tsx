@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { SettingsPanel } from "@/components/kanban/settings-panel";
 import { BoardSharingDialog } from "@/components/kanban/board-sharing-dialog";
@@ -20,6 +20,22 @@ export default function KanbanPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const { canManageProfiles } = usePermissions();
   const { mode, isReadOnly, canCreate, canEdit } = useProfileMode();
+  const headerRef = useRef<HTMLElement>(null);
+
+  // Function to handle mouse enter - enable horizontal scroll
+  const handleHeaderMouseEnter = () => {
+    if (headerRef.current) {
+      headerRef.current.style.overflowX = 'auto';
+    }
+  };
+
+  // Function to handle mouse leave - disable scroll and return to start
+  const handleHeaderMouseLeave = () => {
+    if (headerRef.current) {
+      headerRef.current.style.overflowX = 'hidden';
+      headerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+    }
+  };
 
   // Load board data
   const { data: board, isLoading: isLoadingBoard } = useQuery<Board>({
@@ -72,8 +88,15 @@ export default function KanbanPage() {
   return (
     <div className="h-screen overflow-hidden bg-bg-main relative" data-testid="kanban-page">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between" data-testid="header">
-        <div className="flex items-center space-x-4 flex-1">
+      <header 
+        ref={headerRef}
+        className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between overflow-x-hidden scrollbar-hide" 
+        data-testid="header"
+        onMouseEnter={handleHeaderMouseEnter}
+        onMouseLeave={handleHeaderMouseLeave}
+        style={{ minWidth: 'max-content' }}
+      >
+        <div className="flex items-center space-x-4 flex-1 min-w-0">
           <Link href="/">
             <Button
               variant="ghost"
