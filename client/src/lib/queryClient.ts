@@ -58,8 +58,13 @@ export const getQueryFn: <T>(options: {
       credentials: "include",
     });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+    // 🔧 Para rotas de autenticação, 401 significa "não autenticado" (não é erro)
+    if (res.status === 401) {
+      if (unauthorizedBehavior === "returnNull") {
+        return null;
+      }
+      // Para outras rotas, 401 é erro de permissão
+      throw new Error("Acesso não autorizado - faça login para continuar");
     }
 
     await throwIfResNotOk(res);
@@ -69,11 +74,11 @@ export const getQueryFn: <T>(options: {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
+      queryFn: getQueryFn({ on401: "returnNull" }), // 🔧 401s retornam null em vez de erro
       refetchInterval: false,
-      refetchOnWindowFocus: false, // Desabilita refresh automático ao focar janela
-      staleTime: 30 * 1000, // 30 segundos - reduzido para atualizações mais rápidas
-      gcTime: 5 * 60 * 1000, // 5 minutos na memória
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutos de cache
+      gcTime: 10 * 60 * 1000, // 10 minutos na memória
       retry: false,
     },
     mutations: {

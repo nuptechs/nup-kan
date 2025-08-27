@@ -18,18 +18,18 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
   useEffect(() => {
     if (isLoading) return;
 
-    // If auth is required but user is not authenticated, redirect to login
-    if (requireAuth && (error || !currentUser)) {
+    // Se auth é obrigatória mas usuário não está autenticado, redirecionar para login
+    if (requireAuth && !currentUser) {
       setLocation("/login");
       return;
     }
 
-    // If user is authenticated but trying to access login page, redirect to boards
+    // Se usuário está autenticado mas tentando acessar página de login, redirecionar para boards
     if (!requireAuth && currentUser) {
       setLocation("/boards");
       return;
     }
-  }, [isLoading, currentUser, error, requireAuth, setLocation]);
+  }, [isLoading, currentUser, requireAuth, setLocation]);
 
   // Show loading spinner while checking authentication
   if (isLoading) {
@@ -45,12 +45,12 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
     );
   }
 
-  // If auth is required but user is not authenticated, show nothing while redirecting
-  if (requireAuth && (error || !currentUser)) {
+  // Se auth é obrigatória mas usuário não está autenticado, não mostrar nada enquanto redireciona
+  if (requireAuth && !currentUser) {
     return null;
   }
 
-  // If user is authenticated but trying to access login page, show nothing while redirecting
+  // Se usuário está autenticado mas tentando acessar página de login, não mostrar nada enquanto redireciona
   if (!requireAuth && currentUser) {
     return null;
   }
