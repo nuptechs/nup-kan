@@ -1,5 +1,47 @@
 [
   {
+    "id": "action_1756296518420_r1mnwnpr5",
+    "timestamp": "2025-08-27T12:08:38.420Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar usuário \"TOPopp\" (asd@m.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário \"TOPopp\" (asd@m.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 76
+  },
+  {
+    "id": "action_1756296510580_mxozxb9k2",
+    "timestamp": "2025-08-27T12:08:30.580Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar usuário \"TOPop\" (asd@m.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário \"TOPop\" (asd@m.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 75
+  },
+  {
+    "id": "action_1756296501185_rfg1ockf2",
+    "timestamp": "2025-08-27T12:08:21.185Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar usuário \"TOPo\" (asd@m.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário \"TOPo\" (asd@m.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 371
+  },
+  {
     "id": "action_1756296457987_jov9eh4j0",
     "timestamp": "2025-08-27T12:07:37.987Z",
     "level": "info",

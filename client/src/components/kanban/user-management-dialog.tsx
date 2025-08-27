@@ -109,46 +109,59 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       console.log("🔴 [TRACE-1] Data:", data);
       console.log("🔴 [TRACE-1] Enviando PATCH para /api/users/" + id);
       
-      const response = await apiRequest("PATCH", `/api/users/${id}`, data);
-      
-      console.log("🔴 [TRACE-2] Response recebida - Status:", response.status);
-      const result = await response.json();
-      console.log("🔴 [TRACE-2] Response JSON:", result);
-      
-      return result;
+      try {
+        const response = await apiRequest("PATCH", `/api/users/${id}`, data);
+        
+        console.log("🔴 [TRACE-2] Response recebida - Status:", response.status);
+        const result = await response.json();
+        console.log("🔴 [TRACE-2] Response JSON:", result);
+        console.log("🔴 [TRACE-2] Returning result para onSuccess...");
+        
+        return result;
+      } catch (error) {
+        console.log("🔴 [TRACE-ERROR] Erro na mutationFn:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
-      console.log("🔴 [TRACE-3] updateUserMutation.onSuccess INICIADO");
-      console.log("🔴 [TRACE-3] Data recebida:", data);
-      console.log("🔴 [TRACE-3] editingUser atual:", editingUser);
-      console.log("🔴 [TRACE-3] isOpen atual:", isOpen);
-      console.log("🔴 [TRACE-3] Dialog state antes das ações");
-      
-      // 1. FECHAR MODAL PRIMEIRO (com contexto intacto)
-      console.log("🔴 [TRACE-4] Executando onClose() - FECHANDO MODAL");
-      onClose();
-      
-      // 2. LIMPAR ESTADO DEPOIS (modal já fechado)
-      console.log("🔴 [TRACE-5] Executando cancelEdit() - LIMPANDO ESTADO");
-      cancelEdit();
-      
-      // 3. Invalidar cache em background
-      console.log("🔴 [TRACE-6] Agendando invalidação de cache");
-      setTimeout(() => {
-        console.log("🔴 [TRACE-7] Invalidando cache /api/users");
-        queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-        console.log("🔴 [TRACE-7] Cache invalidado");
-      }, 100);
-      
-      // 4. Toast de sucesso
-      toast({
-        title: "Sucesso",
-        description: "Usuário atualizado com sucesso!",
-      });
-      
-      console.log("🔴 [TRACE-8] updateUserMutation.onSuccess CONCLUÍDO");
+      try {
+        console.log("🔴 [TRACE-3] updateUserMutation.onSuccess INICIADO");
+        console.log("🔴 [TRACE-3] Data recebida:", data);
+        console.log("🔴 [TRACE-3] editingUser atual:", editingUser);
+        console.log("🔴 [TRACE-3] isOpen atual:", isOpen);
+        console.log("🔴 [TRACE-3] Dialog state antes das ações");
+        
+        // 1. FECHAR MODAL PRIMEIRO (com contexto intacto)
+        console.log("🔴 [TRACE-4] Executando onClose() - FECHANDO MODAL");
+        onClose();
+        
+        // 2. LIMPAR ESTADO DEPOIS (modal já fechado)
+        console.log("🔴 [TRACE-5] Executando cancelEdit() - LIMPANDO ESTADO");
+        cancelEdit();
+        
+        // 3. Invalidar cache em background
+        console.log("🔴 [TRACE-6] Agendando invalidação de cache");
+        setTimeout(() => {
+          console.log("🔴 [TRACE-7] Invalidando cache /api/users");
+          queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+          console.log("🔴 [TRACE-7] Cache invalidado");
+        }, 100);
+        
+        // 4. Toast de sucesso
+        toast({
+          title: "Sucesso",
+          description: "Usuário atualizado com sucesso!",
+        });
+        
+        console.log("🔴 [TRACE-8] updateUserMutation.onSuccess CONCLUÍDO");
+      } catch (error) {
+        console.log("🔴 [TRACE-ERROR-SUCCESS] Erro no onSuccess:", error);
+      }
     },
-    onError: () => {
+    onError: (error) => {
+      console.log("🔴 [TRACE-ERROR-MUTATION] updateUserMutation.onError EXECUTADO");
+      console.log("🔴 [TRACE-ERROR-MUTATION] Error:", error);
+      
       toast({
         title: "Erro",
         description: "Falha ao atualizar usuário. Tente novamente.",
