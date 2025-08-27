@@ -240,13 +240,12 @@ export default function PermissionsHub() {
 
   const updateUser = useMutation({
     mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/users/${id}`, data),
-    onSuccess: (data) => {
-      // Invalida caches para buscar dados frescos
-      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
+    onSuccess: async (data) => {
+      // Aguarda atualização completa dos dados ANTES de fechar modal
+      await queryClient.refetchQueries({ queryKey: ["/api/permissions-data"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/users"] });
       
-      // Aguarda dados atualizados, depois fecha modal
+      // Só agora fecha modal (dados já atualizados)
       setEditingId(null);
       userForm.reset(data);
       
