@@ -271,48 +271,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Board routes - Protegidas com permissões
-  app.get("/api/boards", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Listar Boards"), 
-    async (req, res) => {
-    try {
-      // 🚀 PAGINAÇÃO ULTRA-RÁPIDA: Parâmetros otimizados
-      const page = parseInt(req.query.page as string);
-      const limit = parseInt(req.query.limit as string);
-      
-      // Se não usar paginação, retorna todos (compatibilidade)
-      if (!page && !limit) {
-        const boards = await storage.getBoards();
-        return res.json(boards);
-      }
-      
-      // Paginação otimizada com cache
-      const validPage = Math.max(1, page || 1);
-      const validLimit = Math.min(100, Math.max(1, limit || 20));
-      const offset = (validPage - 1) * validLimit;
-      
-      // 🔥 PARALLEL QUERIES para performance máxima
-      const [boards, total] = await Promise.all([
-        storage.getBoardsPaginated(validLimit, offset),
-        storage.getBoardsCount()
-      ]);
-      
-      res.json({
-        data: boards,
-        pagination: {
-          page: validPage,
-          limit: validLimit,
-          total,
-          pages: Math.ceil(total / validLimit),
-          hasNext: validPage < Math.ceil(total / validLimit),
-          hasPrev: validPage > 1
-        }
-      });
-    } catch (error) {
-      console.error('Error fetching boards:', error);
-      res.status(500).json({ message: "Failed to fetch boards" });
-    }
-  });
 
   app.get("/api/boards/:id", 
     AuthMiddleware.requireAuth,
