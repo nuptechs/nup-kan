@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -72,23 +72,26 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       const response = await apiRequest("POST", "/api/users", data);
       return response.json();
     },
-    onSuccess: async () => {
-      // 1. INVALIDAR CACHE PRIMEIRO
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["/api/users"] }),
-        queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] }),
-        queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] })
-      ]);
+    onSuccess: () => {
+      // SOLUÇÃO ISOLADA: Ações imediatas
+      console.log("🟢 [USER-CREATE] Sucesso na criação, aplicando solução isolada");
       
-      // 2. AGORA fechar modal
+      // 1. RESETAR E FECHAR IMEDIATAMENTE
       form.reset();
       onClose();
       
-      // 3. Toast por último
+      // 2. INVALIDAR EM BACKGROUND
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      }, 100);
+      
+      // 3. Toast de confirmação
       toast({
         title: "Sucesso",
         description: "Usuário criado com sucesso!",
       });
+      
+      console.log("✅ [USER-CREATE] Modal fechado com sucesso");
     },
     onError: () => {
       toast({
@@ -104,34 +107,32 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       const response = await apiRequest("PATCH", `/api/users/${id}`, data);
       return response.json();
     },
-    onSuccess: async () => {
-      console.log("🟢 [DEBUG] updateUserMutation.onSuccess iniciado");
+    onSuccess: () => {
+      // SOLUÇÃO ISOLADA: Ações imediatas e forçadas
+      console.log("🟢 [USER-EDIT] Sucesso na atualização, aplicando solução isolada");
       
-      // 1. INVALIDAR CACHE PRIMEIRO para garantir dados atualizados
-      console.log("🔄 [DEBUG] Invalidando cache...");
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["/api/users"] }),
-        queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] }),
-        queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] })
-      ]);
-      console.log("✅ [DEBUG] Cache invalidado");
-      
-      // 2. AGORA sair do modo edição e fechar
-      console.log("🚪 [DEBUG] Fechando modal e resetando estado...");
-      console.log("🚪 [DEBUG] editingUser antes:", editingUser?.name);
+      // 1. RESETAR ESTADO IMEDIATAMENTE - NÃO AGUARDAR CACHE
       setEditingUser(null);
-      console.log("🚪 [DEBUG] editingUser agora deve ser null");
       editForm.reset();
-      console.log("🚪 [DEBUG] Form resetado, chamando onClose()...");
-      onClose();
-      console.log("🚪 [DEBUG] onClose() chamado com sucesso");
       
-      // 3. Toast por último
+      // 2. FORÇAR FECHAMENTO DO MODAL
+      onClose();
+      
+      // 3. INVALIDAR EM BACKGROUND (não bloqueia UI)
+      setTimeout(() => {
+        Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["/api/users"] }),
+          queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] })
+        ]);
+      }, 100);
+      
+      // 4. Toast de confirmação
       toast({
         title: "Sucesso",
         description: "Usuário atualizado com sucesso!",
       });
-      console.log("🟢 [DEBUG] updateUserMutation.onSuccess concluído");
+      
+      console.log("✅ [USER-EDIT] Modal fechado e estado resetado");
     },
     onError: () => {
       toast({
