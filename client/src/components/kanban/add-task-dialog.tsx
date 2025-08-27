@@ -25,13 +25,36 @@ interface AddTaskDialogProps {
   defaultColumnId?: string | null;
 }
 
-const formSchema = insertTaskSchema.extend({
-  tags: z.array(z.string()).default([]),
-  assigneeIds: z.array(z.string()).default([]),
-  customFields: z.record(z.string()).optional(),
-});
+// Create base schema
+const createFormSchema = (customFields: any[] = []) => {
+  // Build dynamic custom fields validation
+  const customFieldsSchema = customFields.reduce((schema, field) => {
+    const fieldName = field.name;
+    
+    if (field.required === "true") {
+      // Required field validation
+      schema[fieldName] = z.string().min(1, `${field.label} é obrigatório`);
+    } else {
+      // Optional field
+      schema[fieldName] = z.string().optional();
+    }
+    
+    return schema;
+  }, {} as Record<string, any>);
 
-type FormData = z.infer<typeof formSchema>;
+  return insertTaskSchema.extend({
+    tags: z.array(z.string()).default([]),
+    assigneeIds: z.array(z.string()).default([]),
+    customFields: z.object(customFieldsSchema).optional(),
+  });
+};
+
+// Base type for form data
+type FormData = z.infer<typeof insertTaskSchema> & {
+  tags: string[];
+  assigneeIds: string[];
+  customFields?: Record<string, string>;
+};
 
 export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: AddTaskDialogProps) {
   const queryClient = useQueryClient();
@@ -72,6 +95,9 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
     return firstColumn.id;
   };
 
+  // Create dynamic form schema based on custom fields
+  const formSchema = createFormSchema(customFields);
+  
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -88,9 +114,9 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
     },
   });
 
-  // Reset form with updated default status when columns change or dialog opens
+  // Reset form when dialog opens or when columns/custom fields change
   useEffect(() => {
-    if (columns.length > 0 && isOpen) {
+    if (isOpen) {
       form.reset({
         title: "",
         description: "",
@@ -104,7 +130,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
         customFields: {},
       });
     }
-  }, [columns, form, boardId, isOpen, defaultColumnId]);
+  }, [columns, form, boardId, isOpen, defaultColumnId, customFields]);
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: FormData) => {
