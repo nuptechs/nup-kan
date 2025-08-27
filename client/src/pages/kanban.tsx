@@ -70,7 +70,7 @@ export default function KanbanPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-main relative" data-testid="kanban-page">
+    <div className="h-screen overflow-hidden bg-bg-main relative" data-testid="kanban-page">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between" data-testid="header">
         <div className="flex items-center space-x-4 flex-1">
@@ -167,7 +167,7 @@ export default function KanbanPage() {
       </header>
 
       {/* Main Kanban Board */}
-      <main className="flex-1 flex flex-col" data-testid="main-content">
+      <main className="flex-1 overflow-hidden" data-testid="main-content">
         <KanbanBoard boardId={boardId} isReadOnly={isReadOnly} profileMode={mode} searchQuery={searchQuery} />
       </main>
 
