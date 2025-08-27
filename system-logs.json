@@ -1,5 +1,629 @@
 [
   {
+    "id": "log_1756338228267_p2x8e4vuc",
+    "timestamp": "2025-08-27T23:43:48.267Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338228199_jo3bah4ab",
+    "timestamp": "2025-08-27T23:43:48.199Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338228197_x5l4t4qgc",
+    "timestamp": "2025-08-27T23:43:48.197Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338228195_5092tll2g",
+    "timestamp": "2025-08-27T23:43:48.195Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338228118_9jwpx99dg",
+    "timestamp": "2025-08-27T23:43:48.118Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338228116_u3sjh2dzf",
+    "timestamp": "2025-08-27T23:43:48.116Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227887_jb0o6qsyv",
+    "timestamp": "2025-08-27T23:43:47.887Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227823_20cvmatpv",
+    "timestamp": "2025-08-27T23:43:47.823Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227822_sqafvx4pp",
+    "timestamp": "2025-08-27T23:43:47.823Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227821_i3jt1ng78",
+    "timestamp": "2025-08-27T23:43:47.821Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227730_dphjhvxpm",
+    "timestamp": "2025-08-27T23:43:47.730Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227728_nucol5s6h",
+    "timestamp": "2025-08-27T23:43:47.728Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227515_1nstfnx93",
+    "timestamp": "2025-08-27T23:43:47.515Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227447_6l8qo8pij",
+    "timestamp": "2025-08-27T23:43:47.447Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227445_7year5wgo",
+    "timestamp": "2025-08-27T23:43:47.445Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227439_emaxdir8n",
+    "timestamp": "2025-08-27T23:43:47.439Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227348_rvpbqgg7c",
+    "timestamp": "2025-08-27T23:43:47.348Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227346_y0r3zqmty",
+    "timestamp": "2025-08-27T23:43:47.346Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227125_r38hc2jn8",
+    "timestamp": "2025-08-27T23:43:47.125Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227056_mh4o426ha",
+    "timestamp": "2025-08-27T23:43:47.056Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227054_ce970pzyj",
+    "timestamp": "2025-08-27T23:43:47.054Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338227053_63h2xuedw",
+    "timestamp": "2025-08-27T23:43:47.053Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226958_wih8bcbg6",
+    "timestamp": "2025-08-27T23:43:46.958Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226957_for8ejvb2",
+    "timestamp": "2025-08-27T23:43:46.957Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226742_hzpjsdm4d",
+    "timestamp": "2025-08-27T23:43:46.742Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226680_hcz8d899q",
+    "timestamp": "2025-08-27T23:43:46.680Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226679_2whcnk00g",
+    "timestamp": "2025-08-27T23:43:46.679Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226657_gxcier4s1",
+    "timestamp": "2025-08-27T23:43:46.657Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226573_shgtomk00",
+    "timestamp": "2025-08-27T23:43:46.573Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226572_814d9fw67",
+    "timestamp": "2025-08-27T23:43:46.572Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226367_c3vr69hjv",
+    "timestamp": "2025-08-27T23:43:46.367Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226293_byo680wyo",
+    "timestamp": "2025-08-27T23:43:46.293Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226291_61ojfplul",
+    "timestamp": "2025-08-27T23:43:46.291Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226265_0bxlusuhx",
+    "timestamp": "2025-08-27T23:43:46.265Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226192_2f0d6qbi4",
+    "timestamp": "2025-08-27T23:43:46.192Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338226191_3ylxhjn6p",
+    "timestamp": "2025-08-27T23:43:46.191Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225962_24ynq2c6u",
+    "timestamp": "2025-08-27T23:43:45.962Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225901_8c5okwc4o",
+    "timestamp": "2025-08-27T23:43:45.901Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225890_2tdfgmrh6",
+    "timestamp": "2025-08-27T23:43:45.890Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225885_1815neslr",
+    "timestamp": "2025-08-27T23:43:45.885Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225806_gjebateq0",
+    "timestamp": "2025-08-27T23:43:45.806Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225805_2m60o9mig",
+    "timestamp": "2025-08-27T23:43:45.805Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225579_kpwjwdad4",
+    "timestamp": "2025-08-27T23:43:45.579Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225518_mxjigul7p",
+    "timestamp": "2025-08-27T23:43:45.518Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225499_rd8nrd62f",
+    "timestamp": "2025-08-27T23:43:45.499Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225495_v9ca240vi",
+    "timestamp": "2025-08-27T23:43:45.495Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225419_3t3cz3gaf",
+    "timestamp": "2025-08-27T23:43:45.419Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225418_bfyco3dz2",
+    "timestamp": "2025-08-27T23:43:45.418Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225191_mw305e0gz",
+    "timestamp": "2025-08-27T23:43:45.191Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225125_gopibfajq",
+    "timestamp": "2025-08-27T23:43:45.125Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225116_0q8u0uf0x",
+    "timestamp": "2025-08-27T23:43:45.116Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225109_wx6p03m4u",
+    "timestamp": "2025-08-27T23:43:45.109Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225017_zqt6pk61o",
+    "timestamp": "2025-08-27T23:43:45.017Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338225016_zqumvoqjz",
+    "timestamp": "2025-08-27T23:43:45.016Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338224802_plrtmmjzd",
+    "timestamp": "2025-08-27T23:43:44.802Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338224754_1sbldclpu",
+    "timestamp": "2025-08-27T23:43:44.754Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338224750_iy0z8ywlx",
+    "timestamp": "2025-08-27T23:43:44.750Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338224736_7i26on7t0",
+    "timestamp": "2025-08-27T23:43:44.736Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338224638_8sc8eywei",
+    "timestamp": "2025-08-27T23:43:44.638Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338224637_oj420xxdi",
+    "timestamp": "2025-08-27T23:43:44.637Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338224432_i2rkv4ykn",
+    "timestamp": "2025-08-27T23:43:44.432Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338224380_wnget26j0",
+    "timestamp": "2025-08-27T23:43:44.380Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338224337_g6fz471b6",
+    "timestamp": "2025-08-27T23:43:44.337Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338224051_ld5ldzw5e",
+    "timestamp": "2025-08-27T23:43:44.051Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338224009_bfo8t0huv",
+    "timestamp": "2025-08-27T23:43:44.009Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338223796_ov49bm5l6",
+    "timestamp": "2025-08-27T23:43:43.796Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338223633_mmxuc45vw",
+    "timestamp": "2025-08-27T23:43:43.633Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338223370_krp4xusrv",
+    "timestamp": "2025-08-27T23:43:43.370Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338223342_ml56yejlw",
+    "timestamp": "2025-08-27T23:43:43.342Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338223189_7wnivapi2",
+    "timestamp": "2025-08-27T23:43:43.189Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338222815_bxwlqvp7e",
+    "timestamp": "2025-08-27T23:43:42.815Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338222754_iwwir6105",
+    "timestamp": "2025-08-27T23:43:42.754Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338222745_eecveltr6",
+    "timestamp": "2025-08-27T23:43:42.745Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338222638_o33skxjdq",
+    "timestamp": "2025-08-27T23:43:42.638Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338222388_9obws0133",
+    "timestamp": "2025-08-27T23:43:42.388Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338222341_e6d365pwp",
+    "timestamp": "2025-08-27T23:43:42.341Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338222038_6st0c22ui",
+    "timestamp": "2025-08-27T23:43:42.038Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338221636_mcwbe7g7m",
+    "timestamp": "2025-08-27T23:43:41.636Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756338220804_twhh3mgr6",
     "timestamp": "2025-08-27T23:43:40.804Z",
     "level": "warn",
