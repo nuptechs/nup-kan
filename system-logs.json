@@ -1,5 +1,57 @@
 [
   {
+    "id": "action_1756254383671_4ma2ievvv",
+    "timestamp": "2025-08-27T00:26:23.671Z",
+    "level": "error",
+    "message": "Yuri Francis executou: Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
+    "status": "error",
+    "errorDetails": {
+      "error": "relation \"permissions_management_view\" does not exist",
+      "details": {
+        "length": 265,
+        "name": "error",
+        "severity": "ERROR",
+        "code": "42P01",
+        "where": "SQL statement \"REFRESH MATERIALIZED VIEW permissions_management_view\"\nPL/pgSQL function refresh_permissions_view() line 3 at SQL statement",
+        "file": "namespace.c",
+        "line": "435",
+        "routine": "RangeVarGetRelidExtended"
+      }
+    },
+    "duration": 301
+  },
+  {
+    "id": "action_1756254339452_lge3228r9",
+    "timestamp": "2025-08-27T00:25:39.452Z",
+    "level": "error",
+    "message": "Yuri Francis executou: Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
+    "status": "error",
+    "errorDetails": {
+      "error": "relation \"permissions_management_view\" does not exist",
+      "details": {
+        "length": 265,
+        "name": "error",
+        "severity": "ERROR",
+        "code": "42P01",
+        "where": "SQL statement \"REFRESH MATERIALIZED VIEW permissions_management_view\"\nPL/pgSQL function refresh_permissions_view() line 3 at SQL statement",
+        "file": "namespace.c",
+        "line": "435",
+        "routine": "RangeVarGetRelidExtended"
+      }
+    },
+    "duration": 312
+  },
+  {
     "id": "action_1756254309429_zv32hec1i",
     "timestamp": "2025-08-27T00:25:09.429Z",
     "level": "error",
