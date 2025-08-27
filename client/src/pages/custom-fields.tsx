@@ -540,6 +540,8 @@ export default function CustomFieldsPage() {
                 <Label>Opções de Seleção</Label>
                 <div className="flex gap-2">
                   <Input
+                    id="option-input"
+                    name="option-input"
                     value={optionInput}
                     onChange={(e) => setOptionInput(e.target.value)}
                     placeholder="Opção"
