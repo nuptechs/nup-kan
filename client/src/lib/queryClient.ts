@@ -37,11 +37,6 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  console.log("🔴 [TRACE-API-1] apiRequest INICIADO");
-  console.log("🔴 [TRACE-API-1] Method:", method);
-  console.log("🔴 [TRACE-API-1] URL:", url);
-  console.log("🔴 [TRACE-API-1] Data:", data);
-  
   const res = await fetch(url, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
@@ -49,12 +44,7 @@ export async function apiRequest(
     credentials: "include",
   });
 
-  console.log("🔴 [TRACE-API-2] Fetch concluído");
-  console.log("🔴 [TRACE-API-2] Response status:", res.status);
-  console.log("🔴 [TRACE-API-2] Response headers:", Object.fromEntries(res.headers.entries()));
-
   await throwIfResNotOk(res);
-  console.log("🔴 [TRACE-API-3] throwIfResNotOk passou - response OK");
   return res;
 }
 

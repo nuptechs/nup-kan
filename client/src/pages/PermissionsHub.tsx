@@ -238,23 +238,14 @@ export default function PermissionsHub() {
   });
 
   const updateUser = useMutation({
-    mutationFn: ({ id, ...data }: any) => {
-      console.log("🟢 [PERMISSIONS-HUB] updateUser mutation EXECUTADO!");
-      console.log("🟢 [PERMISSIONS-HUB] ID:", id);
-      console.log("🟢 [PERMISSIONS-HUB] Data:", data);
-      return apiRequest("PATCH", `/api/users/${id}`, data);
-    },
+    mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/users/${id}`, data),
     onSuccess: () => {
-      console.log("🟢 [PERMISSIONS-HUB] onSuccess - USUÁRIO ATUALIZADO!");
-      console.log("🟢 [PERMISSIONS-HUB] Invalidando cache /api/permissions-data E /api/users");
       queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      console.log("🟢 [PERMISSIONS-HUB] Executando setEditingId(null)");
+      queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
       setEditingId(null);
-      console.log("🟢 [PERMISSIONS-HUB] Resetando userForm");
       userForm.reset();
       toast({ title: "Usuário atualizado com sucesso!" });
-      console.log("🟢 [PERMISSIONS-HUB] EDIÇÃO FINALIZADA - TODOS OS CACHES INVALIDADOS");
     }
   });
 
