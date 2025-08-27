@@ -1216,7 +1216,7 @@ export default function PermissionsHub() {
                 Novo Perfil
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Criar Perfil</DialogTitle>
                 <DialogDescription>Defina um conjunto de funcionalidades do sistema</DialogDescription>
@@ -1281,7 +1281,7 @@ export default function PermissionsHub() {
                         {selectedPermissions.length === permissions.length ? "Desmarcar Todas" : "Selecionar Todas"}
                       </Button>
                     </div>
-                    <div className="border rounded-md p-3 max-h-60 overflow-y-auto">
+                    <div className="border rounded-md p-2 max-h-48 overflow-y-auto">
                       {permissions.map((permission) => (
                         <div key={permission.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
                           <Checkbox
@@ -1355,7 +1355,7 @@ export default function PermissionsHub() {
                         <Edit className="w-4 h-4" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>Editar Perfil</DialogTitle>
                         <DialogDescription>Altere as informações do perfil e gerencie suas permissões</DialogDescription>
@@ -1419,7 +1419,7 @@ export default function PermissionsHub() {
                                     <FormLabel className="text-green-600">Permissões Ativas</FormLabel>
                                     <Badge variant="secondary">{currentPermissions.length}</Badge>
                                   </div>
-                                  <div className="border rounded-md p-3 max-h-60 overflow-y-auto">
+                                  <div className="border rounded-md p-2 max-h-48 overflow-y-auto">
                                     {currentPermissions.map((permission: Permission) => (
                                       <div key={permission.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
                                         <div className="flex-1">
@@ -1476,7 +1476,7 @@ export default function PermissionsHub() {
                                       </Button>
                                     </div>
                                   </div>
-                                  <div className="border rounded-md p-3 max-h-60 overflow-y-auto">
+                                  <div className="border rounded-md p-2 max-h-48 overflow-y-auto">
                                     {availablePermissions.map((permission: Permission) => (
                                       <div key={permission.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
                                         <Checkbox

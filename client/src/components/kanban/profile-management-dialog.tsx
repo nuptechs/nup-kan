@@ -269,7 +269,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh]" aria-describedby="profile-management-description">
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto" aria-describedby="profile-management-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserCog className="h-5 w-5" />
