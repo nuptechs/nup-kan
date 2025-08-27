@@ -833,6 +833,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.deleteUser(req.params.id);
       
+      // 🔥 CRÍTICO: Invalidar cache permissions-data para atualização imediata
+      invalidatePermissionsCache();
+      
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Deletar usuário (ID: ${req.params.id})`, 'success', null, duration);
       

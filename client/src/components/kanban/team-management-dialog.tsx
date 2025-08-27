@@ -164,20 +164,20 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
       const response = await apiRequest("PATCH", `/api/teams/${data.id}`, data);
       return response.json();
     },
-    onSuccess: () => {
-      // Invalidações imediatas e aguardar
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["/api/teams"] }),
-        queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] })
-      ]).then(() => {
-        toast({
-          title: "Sucesso",
-          description: "Time atualizado com sucesso!",
-        });
-        setEditingTeam(null);
-        form.reset();
-        setSelectedUsers([]);
-        onOpenChange(false); // Fecha o modal automaticamente
+    onSuccess: async () => {
+      // Aguarda atualização completa dos dados ANTES de fechar modal
+      await queryClient.refetchQueries({ queryKey: ["/api/teams"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/user-teams"] });
+      
+      // Só agora fecha modal (dados já atualizados)
+      setEditingTeam(null);
+      form.reset();
+      setSelectedUsers([]);
+      onOpenChange(false);
+      
+      toast({
+        title: "Sucesso",
+        description: "Time atualizado com sucesso!",
       });
     },
     onError: () => {
