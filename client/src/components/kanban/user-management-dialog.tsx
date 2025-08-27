@@ -205,12 +205,18 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
     console.log("🔴 [TRACE-SUBMIT] onEditSubmit INICIADO");
     console.log("🔴 [TRACE-SUBMIT] Data do form:", data);
     console.log("🔴 [TRACE-SUBMIT] editingUser:", editingUser);
+    console.log("🔴 [TRACE-SUBMIT] updateUserMutation object:", updateUserMutation);
     
     if (editingUser) {
       console.log("🔴 [TRACE-SUBMIT] Chamando updateUserMutation.mutate com:");
       console.log("🔴 [TRACE-SUBMIT] - ID:", editingUser.id);
       console.log("🔴 [TRACE-SUBMIT] - Data:", data);
+      console.log("🔴 [TRACE-SUBMIT] - Mutation status:", updateUserMutation.status);
+      console.log("🔴 [TRACE-SUBMIT] - Executando mutation AGORA...");
+      
       updateUserMutation.mutate({ id: editingUser.id, data });
+      
+      console.log("🔴 [TRACE-SUBMIT] Mutation.mutate() executado");
     } else {
       console.log("🔴 [TRACE-SUBMIT] ERRO: editingUser é null!");
     }

@@ -172,21 +172,27 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
   
   // Update mutations
   const updateUserMutation = useMutation({
-    mutationFn: (data: { id: string; name: string; email: string; role: string; profileId: string }) =>
-      apiRequest("PATCH", `/api/users/${data.id}`, {
+    mutationFn: (data: { id: string; name: string; email: string; role: string; profileId: string }) => {
+      console.log("🟣 [QUICK-PANEL] updateUserMutation EXECUTADO!");
+      console.log("🟣 [QUICK-PANEL] Data:", data);
+      return apiRequest("PATCH", `/api/users/${data.id}`, {
         name: data.name,
         email: data.email,
         role: data.role,
         profileId: data.profileId,
-      }),
+      });
+    },
     onSuccess: () => {
+      console.log("🟣 [QUICK-PANEL] onSuccess - USUÁRIO ATUALIZADO COM SUCESSO!");
       toast({
         title: "Usuário atualizado",
         description: "As informações do usuário foram atualizadas.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      console.log("🟣 [QUICK-PANEL] Limpando editingUser e form");
       setEditingUser(null);
       setUserForm({ name: "", email: "", role: "", profileId: "" });
+      console.log("🟣 [QUICK-PANEL] EDIÇÃO FINALIZADA");
     },
     onError: () => {
       toast({

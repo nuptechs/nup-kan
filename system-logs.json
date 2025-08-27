@@ -1,5 +1,33 @@
 [
   {
+    "id": "action_1756296654873_99pw76b7s",
+    "timestamp": "2025-08-27T12:10:54.873Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar usuário \"TO\" (asd@m.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário \"TO\" (asd@m.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 75
+  },
+  {
+    "id": "action_1756296629565_gt9vk9kai",
+    "timestamp": "2025-08-27T12:10:29.565Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar usuário \"TOPoppoi\" (asd@m.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário \"TOPoppoi\" (asd@m.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 296
+  },
+  {
     "id": "action_1756296518420_r1mnwnpr5",
     "timestamp": "2025-08-27T12:08:38.420Z",
     "level": "info",
