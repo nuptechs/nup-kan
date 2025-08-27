@@ -92,13 +92,12 @@ export default function KanbanPage() {
       {/* Header */}
       <header 
         ref={headerRef}
-        className="bg-white border-b border-gray-200 px-6 py-4 overflow-x-hidden scrollbar-hide flex items-center justify-between" 
+        className="bg-white border-b border-gray-200 px-6 py-4 overflow-x-hidden scrollbar-hide" 
         data-testid="header"
         onMouseEnter={handleHeaderMouseEnter}
         onMouseLeave={handleHeaderMouseLeave}
-        style={{ minWidth: 'max-content' }}
       >
-        <div className="flex items-center space-x-4 flex-1">
+        <div className="flex items-center justify-between" style={{ minWidth: '1200px' }}>
           <Link href="/">
             <Button
               variant="ghost"
@@ -110,7 +109,7 @@ export default function KanbanPage() {
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
-          <div className="flex items-center space-x-3 flex-1 min-w-0">
+          <div className="flex items-center space-x-4 flex-1">
             <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full flex-shrink-0"></div>
             <h1 className="text-2xl font-semibold text-gray-900 truncate" data-testid="page-title" title={board.name}>
               {board.name}
@@ -139,10 +138,6 @@ export default function KanbanPage() {
                 </Button>
               )}
             </div>
-          </div>
-          <div className="flex items-center space-x-2 text-sm text-gray-500 flex-shrink-0 whitespace-nowrap">
-            <Users className="w-4 h-4" />
-            <span data-testid="team-count">{boardMemberCount?.count || 0} membros</span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-500 flex-shrink-0 whitespace-nowrap">
             <Users className="w-4 h-4" />
