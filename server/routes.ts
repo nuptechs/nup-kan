@@ -422,40 +422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Board routes - Protegidas com permissões
-
-  app.get("/api/boards/:id", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Visualizar Boards"), 
-    async (req, res) => {
-    try {
-      const board = await storage.getBoard(req.params.id);
-      if (!board) {
-        return res.status(404).json({ message: "Board not found" });
-      }
-      res.json(board);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch board" });
-    }
-  });
-
-  app.post("/api/boards", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Criar Boards"), 
-    async (req, res) => {
-    try {
-      const boardData = insertBoardSchema.parse({
-        ...req.body,
-        createdById: req.body.createdById || "system", // Default to "system" if not provided
-      });
-      const board = await storage.createBoard(boardData);
-      res.status(201).json(board);
-    } catch (error) {
-      console.error("Board creation error:", error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      res.status(400).json({ message: "Invalid board data", details: errorMessage });
-    }
-  });
+  // ❌ ROTAS DUPLICADAS REMOVIDAS - Usando apenas as versões originais acima
 
   app.patch("/api/boards/:id", 
     AuthMiddleware.requireAuth,
@@ -2049,15 +2016,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User permissions route
-  app.get("/api/users/:userId/permissions", async (req, res) => {
-    try {
-      const permissions = await storage.getUserPermissions(req.params.userId);
-      res.json(permissions);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch user permissions" });
-    }
-  });
+  // ❌ ROTA DUPLICADA REMOVIDA - Usando apenas a versão protegida acima
 
   // ===== ROTA REMOVIDA - AGORA ESTÁ NO INÍCIO =====
 
@@ -2118,7 +2077,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Clear the session completely
       if (req.session) {
-        req.session = null;
+        req.session.destroy((err) => {
+          if (err) {
+            console.error("Session destroy error:", err);
+          }
+        });
       }
       
       // Clear cookies

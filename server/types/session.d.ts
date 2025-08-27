@@ -1,17 +1,12 @@
-import 'express-serve-static-core';
+import 'express-session';
 
-declare global {
-  namespace Express {
-    interface Request {
-      session?: {
-        user?: {
-          id: string;
-          name: string;
-          email: string;
-        };
-        userId?: string;
-        [key: string]: any;
-      } | null;
-    }
+declare module 'express-session' {
+  interface SessionData {
+    user?: {
+      id: string;
+      name: string;
+      email: string;
+    };
+    userId?: string;
   }
 }
