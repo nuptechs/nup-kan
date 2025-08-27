@@ -5,12 +5,22 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
+// 🔧 CONFIGURAR PERSISTÊNCIA DE SESSÃO COM POSTGRESQL
+import connectPgSimple from "connect-pg-simple";
+const PostgreSqlStore = connectPgSimple(session);
+
 // Session configuration - MELHORADA para persistir corretamente
 app.use(session({
   secret: 'nupkan-secret-key-2025',
   resave: false,
   saveUninitialized: false,
   name: 'connect.sid',
+  store: new PostgreSqlStore({
+    conString: process.env.DATABASE_URL,
+    tableName: 'user_sessions', // Tabela para armazenar sessões
+    createTableIfMissing: true, // Criar tabela automaticamente se não existir
+    ttl: 24 * 60 * 60, // TTL em segundos (24 horas)
+  }),
   cookie: {
     secure: false, // Para desenvolvimento HTTP
     httpOnly: true,

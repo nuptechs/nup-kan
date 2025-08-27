@@ -1,7 +1,7 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth"; // ✅ Usar hook centralizado
+import { useAuth } from "@/hooks/useAuth";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -9,50 +9,68 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteProps) {
+  // 🔧 GARANTIR ORDEM CONSISTENTE DE HOOKS
   const [, setLocation] = useLocation();
-  
-  // ✅ USAR HOOK CENTRALIZADO - Evita request duplicado
-  const { user: currentUser, isLoading, error } = useAuth();
+  const { user: currentUser, isLoading, error, isAuthenticated } = useAuth();
 
-  // Handle redirects in useEffect to avoid setState during render
+  // 🔧 MEMOIZAR ESTADO PARA EVITAR RECALCULOS DESNECESSÁRIOS
+  const authState = useMemo(() => ({
+    isLoading,
+    hasUser: !!currentUser,
+    isAuthenticated: isAuthenticated && !!currentUser,
+    needsAuth: requireAuth,
+  }), [isLoading, currentUser, isAuthenticated, requireAuth]);
+
+  // 🔧 MELHORAR LÓGICA DE REDIRECIONAMENTO
   useEffect(() => {
-    if (isLoading) return;
+    // Não fazer nada se ainda estiver carregando
+    if (authState.isLoading) return;
 
-    // Se auth é obrigatória mas usuário não está autenticado, redirecionar para login
-    if (requireAuth && !currentUser) {
+    // Debug do estado atual
+    console.log('🔍 [ProtectedRoute] Estado:', {
+      requireAuth,
+      hasUser: authState.hasUser,
+      isAuthenticated: authState.isAuthenticated,
+      currentPath: window.location.pathname
+    });
+
+    // Se requer autenticação mas usuário não está autenticado
+    if (authState.needsAuth && !authState.isAuthenticated) {
+      console.log('🔄 [ProtectedRoute] Redirecionando para login - usuário não autenticado');
       setLocation("/login");
       return;
     }
 
-    // Se usuário está autenticado mas tentando acessar página de login, redirecionar para boards
-    if (!requireAuth && currentUser) {
+    // Se não requer autenticação mas usuário está autenticado (página de login)
+    if (!authState.needsAuth && authState.isAuthenticated) {
+      console.log('🔄 [ProtectedRoute] Redirecionando para boards - usuário já autenticado');
       setLocation("/boards");
       return;
     }
-  }, [isLoading, currentUser, requireAuth, setLocation]);
+  }, [authState, setLocation]);
 
-  // Always execute all hooks first, then determine what to render
-  // Show loading spinner while checking authentication
-  if (isLoading) {
+  // 🔧 SEMPRE EXECUTAR TODOS OS HOOKS PRIMEIRO
+  // Mostrar loading enquanto verifica autenticação
+  if (authState.isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto" />
           <p className="mt-2 text-xs text-muted-foreground">
-            Verificando...
+            Verificando autenticação...
           </p>
         </div>
       </div>
     );
   }
 
-  // Se auth é obrigatória mas usuário não está autenticado, não mostrar nada enquanto redireciona
-  if (requireAuth && !currentUser) {
+  // Se requer auth mas não está autenticado, não mostrar nada (vai redirecionar)
+  if (authState.needsAuth && !authState.isAuthenticated) {
     return null;
   }
 
-  // Se usuário está autenticado mas tentando acessar página de login, não mostrar nada enquanto redireciona
-  if (!requireAuth && currentUser) {
+  // Se não requer auth mas está autenticado, não mostrar nada (vai redirecionar)
+  if (!authState.needsAuth && authState.isAuthenticated) {
     return null;
   }
 
