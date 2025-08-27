@@ -319,7 +319,29 @@ export class PermissionSyncService {
    */
   private async getAdminProfile() {
     try {
-      const profiles = await storage.getProfiles();
+      // Retry logic for database connection issues
+      let retries = 3;
+      let profiles: any[] = [];
+      
+      while (retries > 0) {
+        try {
+          profiles = await storage.getProfiles();
+          break; // Success, exit retry loop
+        } catch (error: any) {
+          retries--;
+          if (error.message?.includes('Connection terminated') || 
+              error.message?.includes('WebSocket was closed') ||
+              error.message?.includes('connection timeout')) {
+            console.log(`⏳ [PERMISSION SYNC] Tentativa de conexão falhou, tentando novamente... (${3 - retries}/3)`);
+            if (retries > 0) {
+              // Wait before retry with exponential backoff
+              await new Promise(resolve => setTimeout(resolve, (4 - retries) * 2000));
+              continue;
+            }
+          }
+          throw error; // Re-throw if not a connection error or no retries left
+        }
+      }
       
       // Procurar por perfil administrador baseado no nome ou características
       let adminProfile = profiles.find(profile => 
@@ -341,6 +363,7 @@ export class PermissionSyncService {
       return adminProfile;
     } catch (error) {
       console.error('❌ [PERMISSION SYNC] Erro ao buscar perfil administrador:', error);
+      console.log('🔄 [PERMISSION SYNC] A sincronização será tentada novamente na próxima inicialização');
       return null;
     }
   }
@@ -382,7 +405,6 @@ export class PermissionSyncService {
       for (const permission of permissionsToCreate) {
         try {
           const insertPermission: InsertPermission = {
-            id: permission.id,
             name: permission.name,
             description: permission.description,
             category: permission.category
@@ -440,7 +462,7 @@ export class PermissionSyncService {
       detectedFunctions: detectedFunctions.length,
       generatedPermissions: generatedPermissions.length,
       existingPermissions: existingPermissions.length,
-      categories: [...new Set(generatedPermissions.map(p => p.category))],
+      categories: Array.from(new Set(generatedPermissions.map(p => p.category))),
       functionsDetail: detectedFunctions,
       permissionsDetail: generatedPermissions,
       existingPermissionsDetail: existingPermissions

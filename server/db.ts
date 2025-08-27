@@ -22,7 +22,7 @@ export const pool = new Pool({
   max: 50,              // 50 conexões para alta concorrência
   min: 10,              // 10 conexões sempre ativas
   idleTimeoutMillis: 30000,     // 30s idle (mais tempo)
-  connectionTimeoutMillis: 2000, // 2s timeout (ultra-rápido)
+  connectionTimeoutMillis: 10000, // 10s timeout (mais robusto)
   
   // 🔧 OTIMIZAÇÕES NEON DE PONTA
   allowExitOnIdle: false,
