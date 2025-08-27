@@ -114,6 +114,15 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
     },
   });
 
+  // Update resolver when custom fields change
+  useEffect(() => {
+    if (customFields.length >= 0) { // Allow for empty arrays too
+      const newFormSchema = createFormSchema(customFields);
+      form.clearErrors();
+      // We don't need to reset the resolver as the form will handle it
+    }
+  }, [customFields, form]);
+
   // Reset form when dialog opens or when columns/custom fields change
   useEffect(() => {
     if (isOpen) {
