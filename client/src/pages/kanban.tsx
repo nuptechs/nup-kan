@@ -85,14 +85,14 @@ export default function KanbanPage() {
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
-          <div className="flex items-center space-x-3 flex-1 min-w-0">
+          <div className="flex items-center space-x-3">
             <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full flex-shrink-0"></div>
             <h1 className="text-2xl font-semibold text-gray-900 truncate" data-testid="page-title" title={board.name}>
               {board.name}
             </h1>
             
             {/* Search Input */}
-            <div className="relative flex-shrink-0 w-48 ml-4">
+            <div className="relative w-48 ml-4">
               <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
               <Input
                 type="text"
@@ -114,55 +114,56 @@ export default function KanbanPage() {
                 </Button>
               )}
             </div>
+            
+            <div className="flex items-center space-x-2 text-sm text-gray-500 whitespace-nowrap">
+              <Users className="w-4 h-4" />
+              <span data-testid="team-count">{boardMemberCount?.count || 0} membros</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-2 text-sm text-gray-500 flex-shrink-0 whitespace-nowrap">
-            <Users className="w-4 h-4" />
-            <span data-testid="team-count">{boardMemberCount?.count || 0} membros</span>
+          
+          <div className="flex items-center space-x-4">
+            {/* Share Board Button - só para quem pode compartilhar */}
+            {!isReadOnly && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsSharingOpen(true)}
+                className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50"
+                data-testid="button-share-board"
+                title="Compartilhar Board"
+              >
+                <Share2 className="w-4 h-4" />
+              </Button>
+            )}
+
+            {/* Admin Permissions Button */}
+            {canManageProfiles && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.location.href = "/admin/permissions"}
+                className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                data-testid="button-admin-permissions"
+                title="Gerenciar Permissões"
+              >
+                <Shield className="w-4 h-4" />
+              </Button>
+            )}
+
+
+            {/* Settings Button - só para quem pode configurar */}
+            {!isReadOnly && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-2 text-gray-400 hover:text-gray-600"
+                data-testid="button-settings"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+            )}
           </div>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          {/* Share Board Button - só para quem pode compartilhar */}
-          {!isReadOnly && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsSharingOpen(true)}
-              className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50"
-              data-testid="button-share-board"
-              title="Compartilhar Board"
-            >
-              <Share2 className="w-4 h-4" />
-            </Button>
-          )}
-
-          {/* Admin Permissions Button */}
-          {canManageProfiles && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.location.href = "/admin/permissions"}
-              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-              data-testid="button-admin-permissions"
-              title="Gerenciar Permissões"
-            >
-              <Shield className="w-4 h-4" />
-            </Button>
-          )}
-
-
-          {/* Settings Button - só para quem pode configurar */}
-          {!isReadOnly && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsSettingsOpen(true)}
-              className="p-2 text-gray-400 hover:text-gray-600"
-              data-testid="button-settings"
-            >
-              <Settings className="w-4 h-4" />
-            </Button>
-          )}
         </div>
       </header>
 
