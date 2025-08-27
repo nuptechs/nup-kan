@@ -31,6 +31,7 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
     }
   }, [isLoading, currentUser, requireAuth, setLocation]);
 
+  // Always execute all hooks first, then determine what to render
   // Show loading spinner while checking authentication
   if (isLoading) {
     return (
