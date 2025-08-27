@@ -1,197 +1,29 @@
 [
   {
-    "id": "action_1756254383671_4ma2ievvv",
-    "timestamp": "2025-08-27T00:26:23.671Z",
-    "level": "error",
-    "message": "Yuri Francis executou: Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
+    "id": "action_1756254525034_a36pw6e8v",
+    "timestamp": "2025-08-27T00:28:45.034Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar usuário \"Perfil de Teste\" (teste@teste.com)",
     "context": "USER_ACTION",
     "actionType": "user_action",
     "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
     "userName": "Yuri Francis",
-    "action": "Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
-    "status": "error",
-    "errorDetails": {
-      "error": "relation \"permissions_management_view\" does not exist",
-      "details": {
-        "length": 265,
-        "name": "error",
-        "severity": "ERROR",
-        "code": "42P01",
-        "where": "SQL statement \"REFRESH MATERIALIZED VIEW permissions_management_view\"\nPL/pgSQL function refresh_permissions_view() line 3 at SQL statement",
-        "file": "namespace.c",
-        "line": "435",
-        "routine": "RangeVarGetRelidExtended"
-      }
-    },
-    "duration": 301
+    "action": "Atualizar usuário \"Perfil de Teste\" (teste@teste.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 84
   },
   {
-    "id": "action_1756254339452_lge3228r9",
-    "timestamp": "2025-08-27T00:25:39.452Z",
-    "level": "error",
-    "message": "Yuri Francis executou: Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
-    "userName": "Yuri Francis",
-    "action": "Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
-    "status": "error",
-    "errorDetails": {
-      "error": "relation \"permissions_management_view\" does not exist",
-      "details": {
-        "length": 265,
-        "name": "error",
-        "severity": "ERROR",
-        "code": "42P01",
-        "where": "SQL statement \"REFRESH MATERIALIZED VIEW permissions_management_view\"\nPL/pgSQL function refresh_permissions_view() line 3 at SQL statement",
-        "file": "namespace.c",
-        "line": "435",
-        "routine": "RangeVarGetRelidExtended"
-      }
-    },
-    "duration": 312
-  },
-  {
-    "id": "action_1756254309429_zv32hec1i",
-    "timestamp": "2025-08-27T00:25:09.429Z",
-    "level": "error",
-    "message": "Yuri Francis executou: Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
-    "userName": "Yuri Francis",
-    "action": "Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
-    "status": "error",
-    "errorDetails": {
-      "error": "relation \"permissions_management_view\" does not exist",
-      "details": {
-        "length": 265,
-        "name": "error",
-        "severity": "ERROR",
-        "code": "42P01",
-        "where": "SQL statement \"REFRESH MATERIALIZED VIEW permissions_management_view\"\nPL/pgSQL function refresh_permissions_view() line 3 at SQL statement",
-        "file": "namespace.c",
-        "line": "435",
-        "routine": "RangeVarGetRelidExtended"
-      }
-    },
-    "duration": 79
-  },
-  {
-    "id": "action_1756254308621_91lsvmot5",
-    "timestamp": "2025-08-27T00:25:08.621Z",
-    "level": "error",
-    "message": "Yuri Francis executou: Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
-    "userName": "Yuri Francis",
-    "action": "Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
-    "status": "error",
-    "errorDetails": {
-      "error": "relation \"permissions_management_view\" does not exist",
-      "details": {
-        "length": 265,
-        "name": "error",
-        "severity": "ERROR",
-        "code": "42P01",
-        "where": "SQL statement \"REFRESH MATERIALIZED VIEW permissions_management_view\"\nPL/pgSQL function refresh_permissions_view() line 3 at SQL statement",
-        "file": "namespace.c",
-        "line": "435",
-        "routine": "RangeVarGetRelidExtended"
-      }
-    },
-    "duration": 80
-  },
-  {
-    "id": "action_1756254307819_wu2smlycf",
-    "timestamp": "2025-08-27T00:25:07.819Z",
-    "level": "error",
-    "message": "Yuri Francis executou: Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
-    "userName": "Yuri Francis",
-    "action": "Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
-    "status": "error",
-    "errorDetails": {
-      "error": "relation \"permissions_management_view\" does not exist",
-      "details": {
-        "length": 265,
-        "name": "error",
-        "severity": "ERROR",
-        "code": "42P01",
-        "where": "SQL statement \"REFRESH MATERIALIZED VIEW permissions_management_view\"\nPL/pgSQL function refresh_permissions_view() line 3 at SQL statement",
-        "file": "namespace.c",
-        "line": "435",
-        "routine": "RangeVarGetRelidExtended"
-      }
-    },
-    "duration": 77
-  },
-  {
-    "id": "action_1756254305403_08iirgyhy",
-    "timestamp": "2025-08-27T00:25:05.403Z",
-    "level": "error",
-    "message": "Yuri Francis executou: Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
-    "userName": "Yuri Francis",
-    "action": "Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
-    "status": "error",
-    "errorDetails": {
-      "error": "relation \"permissions_management_view\" does not exist",
-      "details": {
-        "length": 265,
-        "name": "error",
-        "severity": "ERROR",
-        "code": "42P01",
-        "where": "SQL statement \"REFRESH MATERIALIZED VIEW permissions_management_view\"\nPL/pgSQL function refresh_permissions_view() line 3 at SQL statement",
-        "file": "namespace.c",
-        "line": "435",
-        "routine": "RangeVarGetRelidExtended"
-      }
-    },
-    "duration": 74
-  },
-  {
-    "id": "action_1756254302496_60wbj93h3",
-    "timestamp": "2025-08-27T00:25:02.496Z",
-    "level": "error",
-    "message": "Yuri Francis executou: Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
-    "context": "USER_ACTION",
-    "actionType": "user_action",
-    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
-    "userName": "Yuri Francis",
-    "action": "Atualizar usuário (ID: fbc5337a-7d8b-4d53-93f0-fc9b8dd7e763)",
-    "status": "error",
-    "errorDetails": {
-      "error": "relation \"permissions_management_view\" does not exist",
-      "details": {
-        "length": 265,
-        "name": "error",
-        "severity": "ERROR",
-        "code": "42P01",
-        "where": "SQL statement \"REFRESH MATERIALIZED VIEW permissions_management_view\"\nPL/pgSQL function refresh_permissions_view() line 3 at SQL statement",
-        "file": "namespace.c",
-        "line": "435",
-        "routine": "RangeVarGetRelidExtended"
-      }
-    },
-    "duration": 79
-  },
-  {
-    "id": "log_1756254272319_7a2h87r3t",
-    "timestamp": "2025-08-27T00:24:32.319Z",
+    "id": "log_1756254501456_leg3lefef",
+    "timestamp": "2025-08-27T00:28:21.456Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756254271330_pkcpik6g3",
-    "timestamp": "2025-08-27T00:24:31.330Z",
+    "id": "log_1756254500439_fp9e3srly",
+    "timestamp": "2025-08-27T00:28:20.439Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",
