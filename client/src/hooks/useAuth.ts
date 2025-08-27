@@ -1,81 +1,145 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import type { User } from "@shared/schema";
+import { AuthService } from "@/services/authService";
 
 export function useAuth() {
+  // 🚀 VERIFICAR AUTENTICAÇÃO LOCAL PRIMEIRO
+  const isLocallyAuthenticated = useMemo(() => {
+    return AuthService.isAuthenticated();
+  }, []);
+
   // 🔧 CALLBACK ESTÁVEL PARA QUERY FUNCTION
   const queryFn = useCallback(async () => {
-    console.log('🔍 [useAuth] Fazendo request para current-user...');
+    console.log('🔍 [useAuth-JWT] Fazendo request para current-user...');
+    
+    // Se não tem token local, não fazer request
+    if (!AuthService.getAccessToken()) {
+      console.log('🔍 [useAuth-JWT] Sem token local');
+      return { isAuthenticated: false, user: null };
+    }
+    
+    const authHeaders = AuthService.getAuthHeader();
     
     const response = await fetch("/api/auth/current-user", {
       credentials: "include",
-      cache: "no-cache", // Evitar cache do browser
+      cache: "no-cache",
+      headers: {
+        ...authHeaders
+      }
     });
     
-    console.log('🔍 [useAuth] Response status:', response.status);
+    console.log('🔍 [useAuth-JWT] Response status:', response.status);
     
-    // 🔧 401 não é erro - significa usuário não autenticado
+    // 🔧 401 significa token inválido ou expirado
     if (response.status === 401) {
-      console.log('🔍 [useAuth] Usuário não autenticado (401)');
+      console.log('🔍 [useAuth-JWT] Token inválido/expirado (401)');
+      AuthService.logout(); // Limpar tokens inválidos
       return { isAuthenticated: false, user: null };
     }
     
     if (!response.ok) {
-      console.error('🔍 [useAuth] Erro na resposta:', response.status, response.statusText);
+      console.error('🔍 [useAuth-JWT] Erro na resposta:', response.status, response.statusText);
       throw new Error(`${response.status}: ${response.statusText}`);
     }
     
     const data = await response.json();
-    console.log('🔍 [useAuth] Dados recebidos:', data);
+    console.log('🔍 [useAuth-JWT] Dados recebidos:', data);
     
     return data;
   }, []);
 
   const { data: authResponse, isLoading, error } = useQuery<any>({
-    queryKey: ["/api/auth/current-user"],
+    queryKey: ["/api/auth/current-user", AuthService.getAccessToken()], // Incluir token na chave para revalidar
     queryFn,
     retry: (failureCount, error) => {
       // Não tentar novamente para erros 401
       if (error?.message?.includes('401')) return false;
-      return failureCount < 2; // Apenas 2 tentativas
+      return failureCount < 1; // Apenas 1 tentativa para JWT
     },
-    staleTime: 2 * 60 * 1000, // 2 minutos (reduzido)
-    gcTime: 5 * 60 * 1000, // 5 minutos (reduzido)
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 10 * 60 * 1000, // 10 minutos
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    enabled: isLocallyAuthenticated, // Só fazer query se tem token
   });
 
-  // 🔧 MEMOIZAR CONVERSÃO PARA EVITAR RECRIAÇÕES DESNECESSÁRIAS
+  // 🚀 AUTO-REFRESH DE TOKEN
+  useEffect(() => {
+    if (!isLocallyAuthenticated) return;
+
+    const checkTokenExpiration = () => {
+      if (AuthService.isTokenExpiringSoon()) {
+        console.log('🔄 [useAuth-JWT] Token expirando, tentando renovar...');
+        AuthService.refreshAccessToken().catch(() => {
+          console.log('❌ [useAuth-JWT] Falha ao renovar token');
+          AuthService.logout();
+          window.location.href = '/login';
+        });
+      }
+    };
+
+    // Verificar a cada minuto
+    const interval = setInterval(checkTokenExpiration, 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, [isLocallyAuthenticated]);
+
+  // 🔧 MEMOIZAR CONVERSÃO PARA FORMATO USER
   const user: User | null = useMemo(() => {
-    if (!authResponse || authResponse.error || !authResponse.isAuthenticated) {
+    // Se não está autenticado localmente, retornar null
+    if (!isLocallyAuthenticated) {
       return null;
     }
 
-    return {
-      id: authResponse.userId || authResponse.id,
-      name: authResponse.userName || authResponse.name,
-      email: authResponse.userEmail || authResponse.email,
-      role: authResponse.profileName || authResponse.role || 'Usuário',
-      avatar: authResponse.avatar,
-      profileId: authResponse.profileId,
-      password: null,
-      status: null,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-  }, [authResponse]);
+    // Se tem dados do servidor, usar eles
+    if (authResponse && authResponse.isAuthenticated) {
+      return {
+        id: authResponse.userId || authResponse.id,
+        name: authResponse.userName || authResponse.name,
+        email: authResponse.userEmail || authResponse.email,
+        role: authResponse.profileName || authResponse.role || 'Usuário',
+        avatar: authResponse.avatar,
+        profileId: authResponse.profileId,
+        password: null,
+        status: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+    }
+
+    // Fallback: dados do localStorage
+    const localUserData = AuthService.getUserData();
+    if (localUserData) {
+      return {
+        id: localUserData.id,
+        name: localUserData.name,
+        email: localUserData.email,
+        role: localUserData.role || 'Usuário',
+        avatar: localUserData.avatar,
+        profileId: localUserData.profileId,
+        password: null,
+        status: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+    }
+
+    return null;
+  }, [authResponse, isLocallyAuthenticated]);
 
   const isAuthenticated = useMemo(() => {
-    return !!user && !!authResponse?.isAuthenticated;
-  }, [user, authResponse?.isAuthenticated]);
+    return isLocallyAuthenticated && !!user;
+  }, [user, isLocallyAuthenticated]);
 
-  console.log('🔍 [useAuth] Estado final:', {
+  console.log('🔍 [useAuth-JWT] Estado final:', {
     hasResponse: !!authResponse,
     hasUser: !!user,
     isAuthenticated,
     isLoading,
-    hasError: !!error
+    hasError: !!error,
+    hasLocalToken: !!AuthService.getAccessToken()
   });
 
   return {

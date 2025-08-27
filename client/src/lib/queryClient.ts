@@ -37,11 +37,27 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  // 🚀 ADICIONAR HEADERS JWT AUTOMATICAMENTE
+  let headers: Record<string, string> = {};
+  
+  if (data) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  // Importação dinâmica para evitar dependência circular
+  try {
+    const { AuthService } = await import('@/services/authService');
+    const authHeaders = AuthService.getAuthHeader();
+    headers = { ...headers, ...authHeaders };
+  } catch (error) {
+    console.warn('Erro ao carregar AuthService:', error);
+  }
+
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers,
     body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
+    credentials: "include", // Manter para compatibilidade
   });
 
   await throwIfResNotOk(res);
@@ -54,8 +70,20 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    // 🚀 ADICIONAR HEADERS JWT AUTOMATICAMENTE
+    let headers: Record<string, string> = {};
+    
+    try {
+      const { AuthService } = await import('@/services/authService');
+      const authHeaders = AuthService.getAuthHeader();
+      headers = { ...headers, ...authHeaders };
+    } catch (error) {
+      console.warn('Erro ao carregar AuthService para query:', error);
+    }
+
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
+      headers,
     });
 
     // 🔧 Para rotas de autenticação, 401 significa "não autenticado" (não é erro)

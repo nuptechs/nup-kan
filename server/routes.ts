@@ -46,39 +46,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // 🔧 FORÇAR SALVAMENTO DA SESSÃO
-      req.session = req.session || {};
-      req.session.user = {
-        id: user.id,
+      // 🚀 GERAR TOKENS JWT
+      const { JWTService } = await import('./services/jwtService');
+      const tokens = JWTService.generateTokenPair({
+        userId: user.id,
+        email: user.email,
         name: user.name,
-        email: user.email
-      };
+        profileId: user.profileId
+      });
 
-      // 🔧 SALVAR SESSÃO EXPLICITAMENTE
-      req.session.save((err) => {
-        if (err) {
-          console.error('❌ [LOGIN] Erro ao salvar sessão:', err);
-          return res.status(500).json({ message: "Erro ao salvar sessão" });
-        }
-        
-        console.log('✅ [LOGIN] Sessão salva com sucesso:', {
-          sessionId: (req as any).sessionID,
-          userId: user.id,
-          userName: user.name
-        });
-        
-        // Retornar dados reais do usuário
-        res.json({
+      console.log('✅ [LOGIN-JWT] Login bem-sucedido:', {
+        userId: user.id,
+        userName: user.name,
+        tokenGenerated: true
+      });
+
+      // Retornar tokens e dados do usuário
+      res.json({
+        user: {
           id: user.id,
           name: user.name,
           email: user.email,
           role: user.role,
           avatar: user.avatar,
-          profileId: user.profileId,
-          isAuthenticated: true
-        });
+          profileId: user.profileId
+        },
+        tokens: {
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+          expiresIn: tokens.expiresIn
+        },
+        isAuthenticated: true
       });
+      
     } catch (error) {
+      console.error('❌ [LOGIN-JWT] Erro:', error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
@@ -117,56 +119,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // 🔐 Auth routes - CORRIGIDO COM DEBUG DETALHADO
+  // 🚀 Auth routes - JWT IMPLEMENTATION
   app.get("/api/auth/current-user", async (req, res) => {
     try {
-      console.log('🔍 [CURRENT-USER] Debug da sessão:', {
-        sessionExists: !!req.session,
-        sessionId: (req as any).sessionID,
-        sessionUser: req.session?.user,
-        sessionUserId: req.session?.user?.id,
-        hasSession: !!req.session?.user?.id
-      });
+      // 🔧 TENTAR AUTENTICAÇÃO JWT PRIMEIRO
+      const { AuthServiceJWT } = await import('./microservices/authServiceJWT');
+      const authJWT = await AuthServiceJWT.verifyAuth(req);
+      
+      if (authJWT && authJWT.isAuthenticated) {
+        console.log('✅ [CURRENT-USER-JWT] Usuário autenticado via JWT:', authJWT.userId);
+        return res.json({
+          userId: authJWT.userId,
+          userName: authJWT.userName,
+          userEmail: authJWT.userEmail,
+          profileId: authJWT.profileId,
+          profileName: authJWT.profileName,
+          avatar: authJWT.tokenPayload.email, // Placeholder
+          permissions: authJWT.permissions,
+          isAuthenticated: true,
+          lastActivity: authJWT.lastActivity,
+          authMethod: 'jwt'
+        });
+      }
 
-      // 🔧 PRIMEIRA TENTATIVA: AuthService
-      const auth = await AuthService.verifyAuth(req);
-      console.log('🔍 [CURRENT-USER] AuthService result:', !!auth);
-      
-      if (auth && auth.isAuthenticated) {
-        console.log('🔍 [CURRENT-USER] Retornando auth service');
-        return res.json(auth);
+      // 🔧 FALLBACK: Tentar autenticação por sessão (compatibilidade)
+      const authSession = await AuthService.verifyAuth(req);
+      if (authSession && authSession.isAuthenticated) {
+        console.log('✅ [CURRENT-USER-SESSION] Usuário autenticado via sessão:', authSession.userId);
+        return res.json({
+          ...authSession,
+          authMethod: 'session'
+        });
       }
       
-      // 🔧 SEGUNDA TENTATIVA: Sessão direta (FALLBACK MELHORADO)
-      const sessionUserId = req.session?.user?.id;
-      console.log('🔍 [CURRENT-USER] Tentando fallback com userId:', sessionUserId);
-      
-      if (sessionUserId) {
-        const user = await storage.getUser(sessionUserId);
-        console.log('🔍 [CURRENT-USER] User encontrado:', !!user);
-        
-        if (user) {
-          const userPermissions = await storage.getUserPermissions(sessionUserId);
-          console.log('🔍 [CURRENT-USER] Permissões encontradas:', userPermissions?.length || 0);
-          
-          const response = {
-            userId: user.id,
-            userName: user.name,
-            userEmail: user.email,
-            profileId: user.profileId,
-            profileName: user.role || 'Usuário',
-            avatar: user.avatar,
-            permissions: userPermissions || [],
-            isAuthenticated: true,
-            lastActivity: new Date(),
-          };
-          
-          console.log('🔍 [CURRENT-USER] Retornando fallback bem-sucedido');
-          return res.json(response);
-        }
-      }
-      
-      console.log('🔍 [CURRENT-USER] Falha total - retornando 401');
+      console.log('🔍 [CURRENT-USER] Usuário não autenticado');
       return res.status(401).json({ error: "Not authenticated" });
       
     } catch (error) {
@@ -2117,26 +2103,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/logout", async (req, res) => {
     try {
-      console.log('🔍 [LOGOUT] Fazendo logout do usuário:', req.session?.user?.id);
+      // 🚀 JWT LOGOUT - Token será invalidado no frontend
+      const { JWTService } = await import('./services/jwtService');
+      const token = JWTService.extractTokenFromRequest(req);
       
-      // Clear the session completely
-      if (req.session) {
-        req.session.destroy((err) => {
-          if (err) {
-            console.error('❌ [LOGOUT] Erro ao destruir sessão:', err);
-          } else {
-            console.log('✅ [LOGOUT] Sessão destruída com sucesso');
-          }
+      if (token) {
+        const payload = JWTService.decodeToken(token);
+        console.log('✅ [LOGOUT-JWT] Logout bem-sucedido:', {
+          userId: payload?.userId,
+          userName: payload?.name
         });
       }
       
-      // Clear cookies
-      res.clearCookie('connect.sid', { path: '/' });
+      // TODO: Implementar blacklist de tokens se necessário
+      res.json({ 
+        message: "Logout realizado com sucesso",
+        timestamp: new Date().toISOString()
+      });
       
-      res.json({ message: "Logout realizado com sucesso" });
     } catch (error) {
-      console.error('❌ [LOGOUT] Erro:', error);
+      console.error('❌ [LOGOUT-JWT] Erro:', error);
       res.status(500).json({ message: "Erro ao fazer logout" });
+    }
+  });
+
+  // 🚀 Rota para refresh de tokens JWT
+  app.post("/api/auth/refresh", async (req, res) => {
+    try {
+      const { JWTService } = await import('./services/jwtService');
+      const refreshToken = JWTService.extractTokenFromRequest(req);
+      
+      if (!refreshToken) {
+        return res.status(401).json({ message: "Refresh token requerido" });
+      }
+
+      // Função auxiliar para buscar dados do usuário
+      const getUserData = async (userId: string) => {
+        return await storage.getUser(userId);
+      };
+
+      const newTokens = await JWTService.refreshAccessToken(refreshToken, getUserData);
+      
+      if (!newTokens) {
+        return res.status(401).json({ message: "Refresh token inválido ou expirado" });
+      }
+
+      console.log('✅ [REFRESH-JWT] Tokens renovados com sucesso');
+      res.json(newTokens);
+      
+    } catch (error) {
+      console.error('❌ [REFRESH-JWT] Erro:', error);
+      res.status(500).json({ message: "Erro ao renovar tokens" });
     }
   });
 

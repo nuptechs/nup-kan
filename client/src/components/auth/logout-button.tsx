@@ -29,7 +29,21 @@ export function LogoutButton({
   const logoutMutation = useMutation({
     mutationFn: async () => {
       setIsLoggingOut(true);
-      await apiRequest("POST", "/api/auth/logout");
+      
+      // 🚀 LOGOUT JWT - Limpar tokens locais
+      const { AuthService } = await import('@/services/authService');
+      
+      try {
+        // Tentar notificar o servidor sobre o logout
+        await apiRequest("POST", "/api/auth/logout");
+      } catch (error) {
+        console.warn('⚠️ [LOGOUT-JWT] Erro ao notificar servidor:', error);
+        // Continuar com logout local mesmo se servidor falhar
+      }
+      
+      // Limpar tokens locais sempre
+      AuthService.logout();
+      console.log('✅ [LOGOUT-JWT] Tokens removidos do localStorage');
     },
     onSuccess: () => {
       // Clear ALL cache data
@@ -49,11 +63,18 @@ export function LogoutButton({
       }, 100);
     },
     onError: (error: any) => {
+      // Mesmo em caso de erro, limpar dados locais
+      queryClient.clear();
+      
       toast({
-        title: "Erro no logout",
-        description: error.message || "Erro ao fazer logout",
-        variant: "destructive",
+        title: "Logout realizado",
+        description: "Você foi desconectado localmente.",
+        variant: "default",
       });
+      
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 100);
     },
     onSettled: () => {
       setIsLoggingOut(false);

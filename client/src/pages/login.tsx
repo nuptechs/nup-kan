@@ -179,18 +179,48 @@ export default function LoginPage() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
+      console.log('🔐 [LOGIN-JWT] Iniciando login:', { email: data.email });
       const response = await apiRequest("POST", "/api/auth/login", data);
-      return response.json();
+      const result = await response.json();
+      console.log('🔐 [LOGIN-JWT] Login bem-sucedido:', result);
+      return result;
     },
-    onSuccess: (user) => {
-      queryClient.setQueryData(["/api/auth/current-user"], user);
-      toast({
-        title: "Login realizado!",
-        description: `Bem-vindo(a), ${user.name}!`,
-      });
-      setLocation("/boards");
+    onSuccess: async (data) => {
+      console.log('🔐 [LOGIN-JWT] Processando resposta do login...');
+      
+      // 🚀 SALVAR TOKENS JWT E DADOS DO USUÁRIO
+      const { AuthService } = await import('@/services/authService');
+      
+      if (data.tokens && data.user) {
+        // Nova estrutura JWT
+        AuthService.setAuthData({
+          user: data.user,
+          tokens: data.tokens,
+          isAuthenticated: true
+        });
+        console.log('✅ [LOGIN-JWT] Tokens salvos no localStorage');
+        
+        toast({
+          title: "Login realizado!",
+          description: `Bem-vindo(a), ${data.user.name}!`,
+        });
+        
+        // Invalidar e recarregar dados de autenticação
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] });
+        setLocation("/boards");
+      } else {
+        // Fallback para estrutura antiga (sessão) 
+        console.warn('⚠️ [LOGIN-JWT] Resposta não contém tokens JWT, usando fallback');
+        queryClient.setQueryData(["/api/auth/current-user"], data);
+        toast({
+          title: "Login realizado!",
+          description: `Bem-vindo(a), ${data.name}!`,
+        });
+        setLocation("/boards");
+      }
     },
     onError: (error: any) => {
+      console.error('❌ [LOGIN-JWT] Erro:', error);
       toast({
         title: "Erro no login",
         description: error.message || "Email ou senha incorretos",
