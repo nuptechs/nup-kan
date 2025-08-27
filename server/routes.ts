@@ -102,33 +102,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // 🔐 Auth routes - SIMPLIFICADO com FALLBACK
+  // 🔐 Auth routes - CORRIGIDO COM DEBUG DETALHADO
   app.get("/api/auth/current-user", async (req, res) => {
     try {
+      console.log('🔍 [CURRENT-USER] Debug da sessão:', {
+        sessionExists: !!req.session,
+        sessionId: (req as any).sessionID,
+        sessionUser: req.session?.user,
+        sessionUserId: req.session?.user?.id,
+        hasSession: !!req.session?.user?.id
+      });
+
+      // 🔧 PRIMEIRA TENTATIVA: AuthService
       const auth = await AuthService.verifyAuth(req);
+      console.log('🔍 [CURRENT-USER] AuthService result:', !!auth);
       
-      if (!auth) {
-        // 🔧 FALLBACK: Se não há auth mas há usuário na sessão, reconstruir
-        const sessionUserId = req.session?.user?.id;
-        if (sessionUserId) {
-          const user = await storage.getUser(sessionUserId);
-          if (user) {
-            return res.json({
-              userId: user.id,
-              userName: user.name,
-              userEmail: user.email,
-              isAuthenticated: true,
-              lastActivity: new Date(),
-            });
-          }
-        }
-        
-        return res.status(401).json({ error: "Not authenticated" });
+      if (auth && auth.isAuthenticated) {
+        console.log('🔍 [CURRENT-USER] Retornando auth service');
+        return res.json(auth);
       }
       
-      res.json(auth);
+      // 🔧 SEGUNDA TENTATIVA: Sessão direta (FALLBACK MELHORADO)
+      const sessionUserId = req.session?.user?.id;
+      console.log('🔍 [CURRENT-USER] Tentando fallback com userId:', sessionUserId);
+      
+      if (sessionUserId) {
+        const user = await storage.getUser(sessionUserId);
+        console.log('🔍 [CURRENT-USER] User encontrado:', !!user);
+        
+        if (user) {
+          const userPermissions = await storage.getUserPermissions(sessionUserId);
+          console.log('🔍 [CURRENT-USER] Permissões encontradas:', userPermissions?.length || 0);
+          
+          const response = {
+            userId: user.id,
+            userName: user.name,
+            userEmail: user.email,
+            profileId: user.profileId,
+            profileName: user.role || 'Usuário',
+            avatar: user.avatar,
+            permissions: userPermissions || [],
+            isAuthenticated: true,
+            lastActivity: new Date(),
+          };
+          
+          console.log('🔍 [CURRENT-USER] Retornando fallback bem-sucedido');
+          return res.json(response);
+        }
+      }
+      
+      console.log('🔍 [CURRENT-USER] Falha total - retornando 401');
+      return res.status(401).json({ error: "Not authenticated" });
+      
     } catch (error) {
-      console.error("❌ [DEBUG] Erro em current-user:", error);
+      console.error("❌ [CURRENT-USER] Erro:", error);
       res.status(401).json({ error: "Not authenticated" });
     }
   });
