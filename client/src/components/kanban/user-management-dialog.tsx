@@ -108,31 +108,31 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       return response.json();
     },
     onSuccess: () => {
-      // SOLUÇÃO ISOLADA: Ações imediatas e forçadas
-      console.log("🟢 [USER-EDIT] Sucesso na atualização, aplicando solução isolada");
+      console.log("🟢 [USER-EDIT] Sucesso! Executando solução anti-rehydration");
       
-      // 1. RESETAR ESTADO IMEDIATAMENTE - NÃO AGUARDAR CACHE
-      setEditingUser(null);
-      editForm.reset();
+      // SOLUÇÃO DEFINITIVA: Prevenir rehydration automática
       
-      // 2. FORÇAR FECHAMENTO DO MODAL
-      onClose();
+      // 1. CANCELAR EDICAO PRIMEIRO (limpa estado)
+      cancelEdit();
       
-      // 3. INVALIDAR EM BACKGROUND (não bloqueia UI)
+      // 2. FORÇAR FECHAMENTO COM DELAY (garantir limpeza)
       setTimeout(() => {
-        Promise.all([
-          queryClient.invalidateQueries({ queryKey: ["/api/users"] }),
-          queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] })
-        ]);
-      }, 100);
+        console.log("🚪 [USER-EDIT] Forçando fechamento do modal");
+        onClose();
+      }, 50);
       
-      // 4. Toast de confirmação
+      // 3. INVALIDAR CACHE EM BACKGROUND  
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      }, 200);
+      
+      // 4. TOAST DE SUCESSO
       toast({
         title: "Sucesso",
         description: "Usuário atualizado com sucesso!",
       });
       
-      console.log("✅ [USER-EDIT] Modal fechado e estado resetado");
+      console.log("✅ [USER-EDIT] Solução anti-rehydration aplicada");
     },
     onError: () => {
       toast({
