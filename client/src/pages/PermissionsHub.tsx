@@ -1216,7 +1216,7 @@ export default function PermissionsHub() {
                 Novo Perfil
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[60vh] overflow-hidden">
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Criar Perfil</DialogTitle>
                 <DialogDescription>Defina um conjunto de funcionalidades do sistema</DialogDescription>
@@ -1235,8 +1235,8 @@ export default function PermissionsHub() {
                   }
                   
                   setSelectedPermissions([]);
-                })} className="space-y-4 flex flex-col h-full">
-                  <div className="flex-1 overflow-y-auto space-y-4">
+                })} className="space-y-4">
+                  <div className="space-y-4">
                   <FormField
                     control={profileForm.control}
                     name="name"
@@ -1357,7 +1357,7 @@ export default function PermissionsHub() {
                         <Edit className="w-4 h-4" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-3xl max-h-[70vh] overflow-hidden">
+                    <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>Editar Perfil</DialogTitle>
                         <DialogDescription>Altere as informações do perfil e gerencie suas permissões</DialogDescription>
@@ -1609,7 +1609,7 @@ export default function PermissionsHub() {
                             <Edit className="w-4 h-4" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="max-w-md max-h-[70vh] overflow-y-auto">
                           <DialogHeader>
                             <DialogTitle>Editar Perfil do Usuário</DialogTitle>
                             <DialogDescription>Altere o perfil de {user.name}</DialogDescription>
@@ -1699,7 +1699,7 @@ export default function PermissionsHub() {
                           <Edit className="w-4 h-4" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="max-w-md max-h-[70vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>Editar Perfil do Time</DialogTitle>
                           <DialogDescription>Altere o perfil de {item.team?.name}</DialogDescription>
