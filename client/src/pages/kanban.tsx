@@ -74,18 +74,18 @@ export default function KanbanPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4" data-testid="header">
         <div className="flex items-center justify-between">
-          <Link href="/">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-              data-testid="button-back-to-boards"
-              title="Voltar aos Boards"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-          </Link>
           <div className="flex items-center space-x-3">
+            <Link href="/">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                data-testid="button-back-to-boards"
+                title="Voltar aos Boards"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+            </Link>
             <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full flex-shrink-0"></div>
             <h1 className="text-2xl font-semibold text-gray-900 truncate" data-testid="page-title" title={board.name}>
               {board.name}
