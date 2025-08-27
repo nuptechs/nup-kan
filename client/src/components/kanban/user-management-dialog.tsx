@@ -66,18 +66,19 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       const response = await apiRequest("POST", "/api/users", data);
       return response.json();
     },
-    onSuccess: () => {
-      // Fechar modal IMEDIATAMENTE
-      form.reset();
-      onClose();
-      
-      // Invalidações e toast em paralelo (não bloqueia UI)
-      Promise.all([
+    onSuccess: async () => {
+      // 1. INVALIDAR CACHE PRIMEIRO
+      await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["/api/users"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] })
       ]);
       
+      // 2. AGORA fechar modal
+      form.reset();
+      onClose();
+      
+      // 3. Toast por último
       toast({
         title: "Sucesso",
         description: "Usuário criado com sucesso!",
@@ -97,21 +98,20 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       const response = await apiRequest("PATCH", `/api/users/${id}`, data);
       return response.json();
     },
-    onSuccess: () => {
-      // Sair do modo edição IMEDIATAMENTE
-      setEditingUser(null);
-      editForm.reset();
-      
-      // Fechar modal IMEDIATAMENTE
-      onClose();
-      
-      // Invalidações e toast em paralelo (não bloqueia UI)
-      Promise.all([
+    onSuccess: async () => {
+      // 1. INVALIDAR CACHE PRIMEIRO para garantir dados atualizados
+      await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["/api/users"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] })
       ]);
       
+      // 2. AGORA sair do modo edição e fechar
+      setEditingUser(null);
+      editForm.reset();
+      onClose();
+      
+      // 3. Toast por último
       toast({
         title: "Sucesso",
         description: "Usuário atualizado com sucesso!",
