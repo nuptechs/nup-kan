@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { getPermissionsData, invalidatePermissionsCache } from './permissions-data';
+// import { getPermissionsData, invalidatePermissionsCache } from './permissions-data'; // REMOVIDO: API consolidada
 import bcrypt from "bcryptjs";
 import { promises as fs } from 'fs';
 import { join } from 'path';
@@ -804,8 +804,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userData = req.body;
       const user = await storage.updateUser(req.params.id, userData);
       
-      // 🔥 CRÍTICO: Invalidar cache permissions-data para atualização imediata
-      invalidatePermissionsCache();
+      // Cache individual será invalidado automaticamente pelo TanStack Query
       
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Atualizar usuário "${user.name}" (${user.email})`, 'success', null, duration);
@@ -833,8 +832,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.deleteUser(req.params.id);
       
-      // 🔥 CRÍTICO: Invalidar cache permissions-data para atualização imediata
-      invalidatePermissionsCache();
+      // Cache individual será invalidado automaticamente pelo TanStack Query
       
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Deletar usuário (ID: ${req.params.id})`, 'success', null, duration);
@@ -1653,8 +1651,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const teamData = req.body;
       const team = await storage.updateTeam(req.params.id, teamData);
       
-      // 🔥 CRÍTICO: Invalidar cache permissions-data para atualização imediata
-      invalidatePermissionsCache();
+      // Cache individual será invalidado automaticamente pelo TanStack Query
       
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Atualizar time "${team.name}"`, 'success', null, duration);
@@ -1753,8 +1750,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const profileData = updateProfileSchema.parse(req.body);
       const profile = await storage.updateProfile(req.params.id, profileData);
       
-      // 🔥 CRÍTICO: Invalidar cache permissions-data para atualização imediata
-      invalidatePermissionsCache();
+      // Cache individual será invalidado automaticamente pelo TanStack Query
       
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Atualizar perfil "${profile.name}"`, 'success', null, duration);
@@ -1801,7 +1797,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // 🚀 CONSOLIDATED PERMISSIONS DATA - Single optimized endpoint
-  app.get("/api/permissions-data", getPermissionsData);
+  // REMOVIDO: API consolidada permissions-data - usando APIs individuais
 
   // Permission routes
   app.get("/api/permissions", async (req, res) => {

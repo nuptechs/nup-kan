@@ -37,36 +37,44 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // 🚀 SINGLE OPTIMIZED QUERY - All data in one request
-  const { data: permissionsData, isLoading: dataLoading } = useQuery({
-    queryKey: ["/api/permissions-data"],
-    select: (data: any) => data || {
-      permissions: [],
-      profiles: [],
-      users: [],
-      teams: [],
-      userTeams: [],
-      teamProfiles: [],
-      profilePermissions: []
-    }
+  // 🔄 APIS INDIVIDUAIS - Cache granular e debugging simples
+  const { data: permissions = [], isLoading: permissionsLoading } = useQuery<Permission[]>({
+    queryKey: ["/api/permissions"],
+    staleTime: 300000, // 5 minutos (raramente muda)
   });
 
-  // Extract data from consolidated response
-  const permissions = permissionsData?.permissions || [];
-  const profiles = permissionsData?.profiles || [];
-  const permissionsLoading = dataLoading;
-  const profilesLoading = dataLoading;
+  const { data: profiles = [], isLoading: profilesLoading } = useQuery<Profile[]>({
+    queryKey: ["/api/profiles"],
+    staleTime: 60000, // 1 minuto
+  });
 
-  // Extract all data from consolidated response  
-  const users = permissionsData?.users || [];
-  const teams = permissionsData?.teams || [];
-  const userTeams = permissionsData?.userTeams || [];
-  const teamProfiles = permissionsData?.teamProfiles || [];
-  const profilePermissions = permissionsData?.profilePermissions || [];
+  const { data: users = [] } = useQuery<UserType[]>({
+    queryKey: ["/api/users"],
+    staleTime: 60000, // 1 minuto
+  });
+
+  const { data: teams = [] } = useQuery<Team[]>({
+    queryKey: ["/api/teams"],
+    staleTime: 60000, // 1 minuto
+  });
+
+  const { data: userTeams = [] } = useQuery<UserTeam[]>({
+    queryKey: ["/api/user-teams"],
+    staleTime: 60000, // 1 minuto
+  });
+
+  const { data: teamProfiles = [] } = useQuery<TeamProfile[]>({
+    queryKey: ["/api/team-profiles"],
+    staleTime: 60000, // 1 minuto
+  });
+
+  const { data: profilePermissions = [] } = useQuery<ProfilePermission[]>({
+    queryKey: ["/api/profile-permissions"],
+    staleTime: 60000, // 1 minuto
+  });
 
   // Keep for UI state (not data fetching)
   const [selectedUser, setSelectedUser] = useState<string>("");
-  const [selectedProfile, setSelectedProfile] = useState<string>("");
 
   // Target-specific permissions
   const { data: targetPermissions = [] } = useQuery<Permission[]>({
