@@ -1650,6 +1650,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const teamData = req.body;
       const team = await storage.updateTeam(req.params.id, teamData);
       
+      // 🔥 CRÍTICO: Invalidar cache permissions-data para atualização imediata
+      invalidatePermissionsCache();
+      
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Atualizar time "${team.name}"`, 'success', null, duration);
       
@@ -1746,6 +1749,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const profileData = updateProfileSchema.parse(req.body);
       const profile = await storage.updateProfile(req.params.id, profileData);
+      
+      // 🔥 CRÍTICO: Invalidar cache permissions-data para atualização imediata
+      invalidatePermissionsCache();
       
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Atualizar perfil "${profile.name}"`, 'success', null, duration);

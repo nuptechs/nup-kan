@@ -272,10 +272,14 @@ export default function PermissionsHub() {
 
   const updateTeam = useMutation({
     mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/teams/${id}`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
+    onSuccess: async (data) => {
+      // Aguarda atualização completa dos dados ANTES de fechar modal
+      await queryClient.refetchQueries({ queryKey: ["/api/permissions-data"] });
+      
+      // Só agora fecha modal (dados já atualizados)
       setEditingId(null);
       teamForm.reset();
+      
       toast({ title: "Time atualizado" });
     }
   });
@@ -299,10 +303,14 @@ export default function PermissionsHub() {
 
   const updateProfile = useMutation({
     mutationFn: ({ id, ...data }: any) => apiRequest("PATCH", `/api/profiles/${id}`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] });
+    onSuccess: async (data) => {
+      // Aguarda atualização completa dos dados ANTES de fechar modal
+      await queryClient.refetchQueries({ queryKey: ["/api/permissions-data"] });
+      
+      // Só agora fecha modal (dados já atualizados)
       setEditingId(null);
       profileForm.reset();
+      
       toast({ title: "Perfil atualizado" });
     }
   });
