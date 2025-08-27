@@ -1,13 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import type { User } from "@shared/schema";
 import { AuthService } from "@/services/authService";
 
 export function useAuth() {
-  // 🚀 VERIFICAR AUTENTICAÇÃO LOCAL PRIMEIRO
+  // 🚀 VERIFICAR AUTENTICAÇÃO LOCAL - REATIVO A MUDANÇAS
+  const [authVersion, setAuthVersion] = useState(0);
+  
+  // Ouvir mudanças de autenticação
+  useEffect(() => {
+    const cleanup = AuthService.onAuthChange(() => {
+      setAuthVersion(prev => prev + 1);
+    });
+    
+    return cleanup;
+  }, []);
+
   const isLocallyAuthenticated = useMemo(() => {
     return AuthService.isAuthenticated();
-  }, []);
+  }, [authVersion]); // Re-avalia quando authVersion muda
 
   // 🔧 CALLBACK ESTÁVEL PARA QUERY FUNCTION
   const queryFn = useCallback(async () => {
@@ -50,15 +61,15 @@ export function useAuth() {
   }, []);
 
   const { data: authResponse, isLoading, error } = useQuery<any>({
-    queryKey: ["/api/auth/current-user", AuthService.getAccessToken()], // Incluir token na chave para revalidar
+    queryKey: ["/api/auth/current-user", authVersion], // Usar authVersion na chave
     queryFn,
     retry: (failureCount, error) => {
       // Não tentar novamente para erros 401
       if (error?.message?.includes('401')) return false;
       return failureCount < 1; // Apenas 1 tentativa para JWT
     },
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    gcTime: 10 * 60 * 1000, // 10 minutos
+    staleTime: 0, // Sempre considerar stale para forçar re-fetch quando necessário
+    gcTime: 5 * 60 * 1000, // 5 minutos
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

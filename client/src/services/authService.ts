@@ -27,6 +27,9 @@ export class AuthService {
   private static readonly TOKEN_KEY = 'nupkan_access_token';
   private static readonly REFRESH_TOKEN_KEY = 'nupkan_refresh_token';
   private static readonly USER_KEY = 'nupkan_user_data';
+  
+  // Event para notificar mudanças de autenticação
+  private static readonly AUTH_CHANGE_EVENT = 'auth-state-changed';
 
   /**
    * Armazenar tokens e dados do usuário
@@ -35,6 +38,9 @@ export class AuthService {
     localStorage.setItem(this.TOKEN_KEY, loginResponse.tokens.accessToken);
     localStorage.setItem(this.REFRESH_TOKEN_KEY, loginResponse.tokens.refreshToken);
     localStorage.setItem(this.USER_KEY, JSON.stringify(loginResponse.user));
+    
+    // Notificar mudança de autenticação
+    this.notifyAuthChange();
   }
 
   /**
@@ -93,6 +99,27 @@ export class AuthService {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
+    
+    // Notificar mudança de autenticação
+    this.notifyAuthChange();
+  }
+
+  /**
+   * Notificar mudança no estado de autenticação
+   */
+  private static notifyAuthChange(): void {
+    window.dispatchEvent(new CustomEvent(this.AUTH_CHANGE_EVENT));
+  }
+
+  /**
+   * Ouvir mudanças no estado de autenticação
+   */
+  static onAuthChange(callback: () => void): () => void {
+    const handler = () => callback();
+    window.addEventListener(this.AUTH_CHANGE_EVENT, handler);
+    
+    // Retornar função de cleanup
+    return () => window.removeEventListener(this.AUTH_CHANGE_EVENT, handler);
   }
 
   /**

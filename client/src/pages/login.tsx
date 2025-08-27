@@ -205,9 +205,13 @@ export default function LoginPage() {
           description: `Bem-vindo(a), ${data.user.name}!`,
         });
         
-        // Invalidar e recarregar dados de autenticação
-        queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] });
-        setLocation("/boards");
+        // Invalidar cache e forçar recarga da página para garantir que o estado seja atualizado
+        queryClient.clear();
+        
+        // Usar window.location para garantir recarga completa
+        setTimeout(() => {
+          window.location.href = "/boards";
+        }, 500);
       } else {
         // Fallback para estrutura antiga (sessão) 
         console.warn('⚠️ [LOGIN-JWT] Resposta não contém tokens JWT, usando fallback');
