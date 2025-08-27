@@ -46,22 +46,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Store user info in session (ESTRUTURA PADRONIZADA)
+      // 🔧 FORÇAR SALVAMENTO DA SESSÃO
       req.session = req.session || {};
       req.session.user = {
         id: user.id,
         name: user.name,
         email: user.email
       };
-      
-      // Retornar dados reais do usuário
-      res.json({
-        id: user.id, // ✅ ID REAL
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar,
-        profileId: user.profileId // ✅ PROFILE ID REAL
+
+      // 🔧 SALVAR SESSÃO EXPLICITAMENTE
+      req.session.save((err) => {
+        if (err) {
+          console.error('❌ [LOGIN] Erro ao salvar sessão:', err);
+          return res.status(500).json({ message: "Erro ao salvar sessão" });
+        }
+        
+        console.log('✅ [LOGIN] Sessão salva com sucesso:', {
+          sessionId: (req as any).sessionID,
+          userId: user.id,
+          userName: user.name
+        });
+        
+        // Retornar dados reais do usuário
+        res.json({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          avatar: user.avatar,
+          profileId: user.profileId,
+          isAuthenticated: true
+        });
       });
     } catch (error) {
       res.status(500).json({ message: "Erro interno do servidor" });
@@ -2102,22 +2117,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/logout", async (req, res) => {
     try {
+      console.log('🔍 [LOGOUT] Fazendo logout do usuário:', req.session?.user?.id);
+      
       // Clear the session completely
       if (req.session) {
         req.session.destroy((err) => {
           if (err) {
-            console.error("Session destroy error:", err);
+            console.error('❌ [LOGOUT] Erro ao destruir sessão:', err);
+          } else {
+            console.log('✅ [LOGOUT] Sessão destruída com sucesso');
           }
         });
       }
       
       // Clear cookies
-      res.clearCookie('session', { path: '/' });
-      res.clearCookie('session.sig', { path: '/' });
+      res.clearCookie('connect.sid', { path: '/' });
       
       res.json({ message: "Logout realizado com sucesso" });
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error('❌ [LOGOUT] Erro:', error);
       res.status(500).json({ message: "Erro ao fazer logout" });
     }
   });
