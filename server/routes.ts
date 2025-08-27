@@ -4,9 +4,12 @@ import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import { storage } from "./storage";
+import { storage } from "./storage"; // TODO: Será removido - apenas DAO
 import { db } from "./db";
 import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema, insertTaskAssigneeSchema, insertCustomFieldSchema, updateCustomFieldSchema, insertTaskCustomValueSchema, updateTaskCustomValueSchema, customFields, taskCustomValues, insertNotificationSchema, updateNotificationSchema } from "@shared/schema";
+
+// 🏗️ SERVICES - Camada única oficial de persistência
+import { boardService, taskService, userService, teamService, notificationService } from "./services";
 import { eq, sql, and } from "drizzle-orm";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 import { PermissionSyncService } from "./permissionSync";
@@ -14,12 +17,32 @@ import { PermissionSyncService } from "./permissionSync";
 import { OptimizedQueries, PerformanceStats } from "./optimizedQueries";
 import { cache } from "./cache";
 
-// 🚀 NÍVEL 3: MICROSERVIÇOS IMPORTADOS
-import { APIGateway } from './microservices/apiGateway'; // RouteHandlers REMOVIDO - SIMPLIFICAÇÃO
+// 🚀 MICROSERVIÇOS IMPORTADOS
+import { APIGateway } from './microservices/apiGateway';
 import { AuthMiddleware, AuthService } from './microservices/authService';
-import { BoardService } from './microservices/boardService';
+import { BoardService } from './microservices/boardService'; // Legacy - será removido
 import { mongoStore } from './mongodb';
 import { QueryHandlers } from './cqrs/queries';
+
+// Helper para criar AuthContext a partir da request
+function createAuthContextFromRequest(req: any): any {
+  const userId = req.session?.user?.id || req.session?.userId;
+  const user = req.user;
+  const permissions = req.userPermissions || [];
+  
+  return {
+    userId: userId,
+    userName: user?.name || 'Unknown',
+    userEmail: user?.email || '',
+    permissions: permissions.map((p: any) => p.name),
+    permissionCategories: [...new Set(permissions.map((p: any) => p.category))],
+    profileId: user?.profileId,
+    profileName: 'User',
+    teams: [],
+    isAuthenticated: !!userId,
+    lastActivity: new Date()
+  };
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req, res) => {
@@ -30,8 +53,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email e senha são obrigatórios" });
       }
 
-      // Find user by email no banco
-      const users = await storage.getUsers();
+      // Find user by email através do UserService
+      const users = await storage.getUsers(); // TODO: Refatorar para userService quando implementar login
       const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
       
       if (!user) {
@@ -90,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🆘 ENDPOINT EMERGENCIAL: Auto-login para desenvolvimento (TEMPORÁRIO)
   app.post("/api/auth/dev-login", async (req, res) => {
     try {
-      const users = await storage.getUsers();
+      const users = await storage.getUsers(); // TODO: Refatorar para userService
       const firstUser = users[0];
       
       if (!firstUser) {
@@ -201,8 +224,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 20;
         
-        // 🚀 ACESSO DIRETO AO STORAGE - SEM COMPLEXIDADE
-        const boards = await storage.getBoards();
+        // 🎯 USAR BOARDSERVICE PARA LISTAGEM
+        const authContext = createAuthContextFromRequest(req);
+        const result = await boardService.getBoards(authContext, { page, limit });
+        const boards = result.data || [];
         
         // Paginação simples
         const startIndex = (page - 1) * limit;
@@ -232,12 +257,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requirePermissions("Criar Boards"),
     async (req, res) => {
       try {
-        const boardData = insertBoardSchema.parse({
-          ...req.body,
-          createdById: req.body.createdById || "system"
-        });
-        const board = await storage.createBoard(boardData);
-        await cache.invalidatePattern('boards*');
+        const authContext = createAuthContextFromRequest(req);
+        const board = await boardService.createBoard(authContext, req.body);
         res.status(201).json(board);
       } catch (error) {
         console.error("Board creation error:", error);
@@ -251,7 +272,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requirePermissions("Visualizar Boards"), 
     async (req, res) => {
       try {
-        const board = await storage.getBoard(req.params.id);
+        const authContext = createAuthContextFromRequest(req);
+        const board = await boardService.getBoard(authContext, req.params.id);
         if (!board) {
           return res.status(404).json({ error: "Board not found" });
         }
@@ -273,23 +295,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const boardId = req.params.id;
         
-        // Get current board status
-        const currentBoard = await storage.getBoard(boardId);
-        if (!currentBoard) {
-          return res.status(404).json({ error: "Board não encontrado" });
-        }
-        
-        // Toggle status
-        const newStatus = currentBoard.isActive === "true" ? "false" : "true";
-        
-        // Update board status
-        const updatedBoard = await storage.updateBoard(boardId, {
-          isActive: newStatus
-        });
-        
-        // 🚀 CACHE SIMPLES - UMA ÚNICA CAMADA
-        await cache.invalidatePattern('boards*');
-        await cache.invalidatePattern(`board:${boardId}`);
+        const authContext = createAuthContextFromRequest(req);
+        const updatedBoard = await boardService.toggleBoardStatus(authContext, boardId);
         
         res.json(updatedBoard);
       } catch (error) {
@@ -457,17 +464,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requirePermissions("Editar Boards"), 
     async (req, res) => {
     try {
-      const boardData = updateBoardSchema.parse(req.body);
-      const board = await storage.updateBoard(req.params.id, boardData);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await boardService.updateBoard(authContext, req.params.id, req.body);
       
-      // 🔄 INVALIDAR CACHE - CORRIGIR PROBLEMA DE 304 NOT MODIFIED
-      await Promise.all([
-        cache.invalidatePattern(`board_*:${req.params.id}:*`), // Invalida cache específico do board
-        cache.invalidatePattern('boards_*'), // Invalida todas as listagens de boards
-      ]);
+      if (!result.success) {
+        const status = result.error === 'Board not found' ? 404 : 400;
+        return res.status(status).json({ message: result.error });
+      }
       
-      
-      res.json(board);
+      res.json(result.data);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "Board not found" });
@@ -481,15 +486,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requirePermissions("Excluir Boards"), 
     async (req, res) => {
     try {
-      await storage.deleteBoard(req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await boardService.deleteBoard(authContext, req.params.id);
       
-      // 🔄 INVALIDAR CACHE - CORRIGIR PROBLEMA DE 304 NOT MODIFIED
-      await Promise.all([
-        cache.invalidatePattern(`board_*:${req.params.id}:*`), // Invalida cache específico do board
-        cache.invalidatePattern('boards_*'), // Invalida todas as listagens de boards  
-        cache.del('boards_count_db') // Invalida o contador de boards
-      ]);
-      
+      if (!result.success) {
+        const status = result.error === 'Board not found' ? 404 : 500;
+        return res.status(status).json({ message: result.error });
+      }
       
       res.status(204).send();
     } catch (error) {
@@ -508,8 +511,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requirePermissions("Listar Tasks"),
     async (req, res) => {
     try {
-      const tasks = await storage.getBoardTasks(req.params.boardId);
-      res.json(tasks);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await taskService.getBoardTasks(authContext, req.params.boardId);
+      
+      if (!result.success) {
+        return res.status(500).json({ message: result.error });
+      }
+      
+      res.json(result.data);
     } catch (error) {
       console.error("Error fetching board tasks:", error);
       res.status(500).json({ message: "Failed to fetch board tasks" });
@@ -522,9 +531,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requirePermissions("Criar Tasks"),
     async (req, res) => {
     try {
-      const taskData = insertTaskSchema.parse(req.body);
-      const task = await storage.createTask(taskData);
-      res.status(201).json(task);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await taskService.createTask(authContext, req.body);
+      
+      if (!result.success) {
+        return res.status(400).json({ message: result.error });
+      }
+      
+      res.status(201).json(result.data);
     } catch (error) {
       console.error("Error creating task:", error);
       res.status(400).json({ message: "Invalid task data" });
@@ -561,7 +575,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("✅ [REORDER] All validations passed, calling storage.reorderTasks");
       
-      await storage.reorderTasks(reorderedTasks);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await taskService.reorderTasks(authContext, reorderedTasks);
+      
+      if (!result.success) {
+        return res.status(400).json({ message: result.error });
+      }
       
       console.log("✅ [REORDER] Storage reorder completed successfully");
       
@@ -581,9 +600,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requirePermissions("Editar Tasks"),
     async (req, res) => {
     try {
-      const taskData = updateTaskSchema.parse(req.body);
-      const task = await storage.updateTask(req.params.id, taskData);
-      res.json(task);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await taskService.updateTask(authContext, req.params.id, req.body);
+      
+      if (!result.success) {
+        const status = result.error === 'Task not found' ? 404 : 400;
+        return res.status(status).json({ message: result.error });
+      }
+      
+      res.json(result.data);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "Task not found" });
@@ -599,7 +624,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requirePermissions("Excluir Tasks"),
     async (req, res) => {
     try {
-      await storage.deleteTask(req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await taskService.deleteTask(authContext, req.params.id);
+      
+      if (!result.success) {
+        const status = result.error === 'Task not found' ? 404 : 500;
+        return res.status(status).json({ message: result.error });
+      }
+      
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -848,8 +880,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users/me", async (req, res) => {
     try {
       // For development, return the first user as current user
-      const users = await storage.getUsers();
-      const currentUser = users[0];
+      const authContext = createAuthContextFromRequest(req);
+      const result = await userService.getUsers(authContext);
+      const currentUser = result.data?.[0];
       if (currentUser) {
         res.json(currentUser);
       } else {
@@ -861,35 +894,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users", async (req, res) => {
+  app.get("/api/users", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
     try {
-      const users = await storage.getUsers();
+      const authContext = createAuthContextFromRequest(req);
+      const users = await userService.getUsers(authContext);
       res.json(users);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch users" });
+      console.error('Error in GET /api/users:', error);
+      const message = error instanceof Error ? error.message : "Failed to fetch users";
+      res.status(500).json({ message });
     }
   });
 
-  app.get("/api/users/:id", async (req, res) => {
+  app.get("/api/users/:id", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
     try {
-      const user = await storage.getUser(req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      const user = await userService.getUser(authContext, req.params.id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       res.json(user);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch user" });
+      console.error('Error in GET /api/users/:id:', error);
+      const message = error instanceof Error ? error.message : "Failed to fetch user";
+      res.status(500).json({ message });
     }
   });
 
-  app.post("/api/users", async (req, res) => {
+  app.post("/api/users", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.user?.id || 'system';
-    const userName = req.session?.user?.name || 'Sistema';
     
     try {
-      const userData = insertUserSchema.parse(req.body);
-      const user = await storage.createUser(userData);
+      const authContext = createAuthContextFromRequest(req);
+      const user = await userService.createUser(authContext, req.body);
       
       // Enviar email de boas-vindas
       if (user.email) {
@@ -1698,7 +1741,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/users/:userId/teams/:teamId", async (req, res) => {
     try {
-      await storage.removeUserFromTeam(req.params.userId, req.params.teamId);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await teamService.removeUserFromTeam(authContext, req.params.userId, req.params.teamId);
+      
+      if (!result.success) {
+        const status = result.error === 'User not found in team' ? 404 : 500;
+        return res.status(status).json({ message: result.error });
+      }
+      
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -1710,9 +1760,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/users/:userId/teams/:teamId", async (req, res) => {
     try {
+      const authContext = createAuthContextFromRequest(req);
       const { role } = req.body;
-      const userTeam = await storage.updateUserTeamRole(req.params.userId, req.params.teamId, role);
-      res.json(userTeam);
+      const result = await teamService.updateUserTeamRole(authContext, req.params.userId, req.params.teamId, role);
+      
+      if (!result.success) {
+        const status = result.error === 'User not found in team' ? 404 : 400;
+        return res.status(status).json({ message: result.error });
+      }
+      
+      res.json(result.data);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "User not found in team" });
@@ -1724,8 +1781,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Team routes
   app.get("/api/teams", async (req, res) => {
     try {
-      const teams = await storage.getTeams();
-      res.json(teams);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await teamService.getTeams(authContext);
+      
+      if (!result.success) {
+        return res.status(500).json({ message: result.error });
+      }
+      
+      res.json(result.data);
     } catch (error) {
       console.error("Error fetching teams:", error);
       res.status(500).json({ message: "Failed to fetch teams" });
@@ -1734,11 +1797,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/teams/:id", async (req, res) => {
     try {
-      const team = await storage.getTeam(req.params.id);
-      if (!team) {
-        return res.status(404).json({ message: "Team not found" });
+      const authContext = createAuthContextFromRequest(req);
+      const result = await teamService.getTeam(authContext, req.params.id);
+      
+      if (!result.success) {
+        const status = result.error === 'Team not found' ? 404 : 500;
+        return res.status(status).json({ message: result.error });
       }
-      res.json(team);
+      
+      res.json(result.data);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch team" });
     }
@@ -1750,13 +1817,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
-      const teamData = insertTeamSchema.parse(req.body);
-      const team = await storage.createTeam(teamData);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await teamService.createTeam(authContext, req.body);
+      
+      if (!result.success) {
+        const duration = Date.now() - startTime;
+        addUserActionLog(userId, userName, `Criar time "${req.body.name || 'sem nome'}"`, 'error', { error: result.error }, duration);
+        return res.status(400).json({ message: result.error });
+      }
       
       const duration = Date.now() - startTime;
-      addUserActionLog(userId, userName, `Criar time "${team.name}"`, 'success', null, duration);
+      addUserActionLog(userId, userName, `Criar time "${result.data.name}"`, 'success', null, duration);
       
-      res.status(201).json(team);
+      res.status(201).json(result.data);
     } catch (error) {
       const duration = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
@@ -1768,9 +1841,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/teams/:id", async (req, res) => {
     try {
-      const teamData = updateTeamSchema.parse(req.body);
-      const team = await storage.updateTeam(req.params.id, teamData);
-      res.json(team);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await teamService.updateTeam(authContext, req.params.id, req.body);
+      
+      if (!result.success) {
+        const status = result.error === 'Team not found' ? 404 : 400;
+        return res.status(status).json({ message: result.error });
+      }
+      
+      res.json(result.data);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "Team not found" });
@@ -1785,13 +1864,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
-      const teamData = req.body;
-      const team = await storage.updateTeam(req.params.id, teamData);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await teamService.updateTeam(authContext, req.params.id, req.body);
       
-      // Cache individual será invalidado automaticamente pelo TanStack Query
+      if (!result.success) {
+        const duration = Date.now() - startTime;
+        const errorMessage = result.error || 'Erro desconhecido';
+        
+        if (result.error === 'Team not found') {
+          addUserActionLog(userId, userName, `Atualizar time (ID: ${req.params.id})`, 'error', { error: 'Time não encontrado' }, duration);
+          return res.status(404).json({ message: "Team not found" });
+        }
+        
+        addUserActionLog(userId, userName, `Atualizar time (ID: ${req.params.id})`, 'error', { error: errorMessage }, duration);
+        return res.status(400).json({ message: result.error });
+      }
       
       const duration = Date.now() - startTime;
-      addUserActionLog(userId, userName, `Atualizar time "${team.name}"`, 'success', null, duration);
+      addUserActionLog(userId, userName, `Atualizar time "${result.data.name}"`, 'success', null, duration);
       
       res.json(team);
     } catch (error) {
@@ -1814,7 +1904,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
-      await storage.deleteTeam(req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await teamService.deleteTeam(authContext, req.params.id);
+      
+      if (!result.success) {
+        const duration = Date.now() - startTime;
+        const errorMessage = result.error || 'Erro desconhecido';
+        
+        if (result.error === 'Team not found') {
+          addUserActionLog(userId, userName, `Deletar time (ID: ${req.params.id})`, 'error', { error: 'Time não encontrado' }, duration);
+          return res.status(404).json({ message: "Team not found" });
+        }
+        
+        addUserActionLog(userId, userName, `Deletar time (ID: ${req.params.id})`, 'error', { error: errorMessage }, duration);
+        return res.status(500).json({ message: result.error });
+      }
       
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Deletar time (ID: ${req.params.id})`, 'success', null, duration);
@@ -2057,8 +2161,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Nome, email e senha são obrigatórios" });
       }
 
-      // Check if user already exists
-      const users = await storage.getUsers();
+      // Check if user already exists - TODO: usar userService.findByEmail quando implementar
+      const users = await storage.getUsers(); // Temporário - será refatorado  
       const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
       
       if (existingUser) {
@@ -2078,7 +2182,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "offline"
       };
 
-      const newUser = await storage.createUser(userData);
+      const authContext = { userId: 'system', userName: 'System', userEmail: '', permissions: [], permissionCategories: [], profileId: null, profileName: 'System', teams: [], isAuthenticated: true, lastActivity: new Date() };
+      const result = await userService.createUser(authContext, userData);
+      
+      if (!result.success) {
+        return res.status(400).json({ message: result.error });
+      }
+      
+      const newUser = result.data;
       
       // Send welcome email if configured
       try {
@@ -2951,10 +3062,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "User not authenticated" });
       }
 
-      const notifications = await storage.getNotifications(userId);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await notificationService.getNotifications(authContext);
       res.json({
-        notifications,
-        count: notifications.length
+        notifications: result.data || [],
+        count: result.data?.length || 0
       });
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -2972,8 +3084,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "User not authenticated" });
       }
 
-      const count = await storage.getUnreadNotificationCount(userId);
-      res.json({ count });
+      const authContext = createAuthContextFromRequest(req);
+      const result = await notificationService.getUnreadCount(authContext);
+      res.json({ count: result.data?.count || 0 });
     } catch (error) {
       console.error("Error fetching unread count:", error);
       res.status(500).json({ error: "Failed to get unread count" });
@@ -2986,19 +3099,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
     try {
       const { id } = req.params;
-      const notification = await storage.getNotification(id);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await notificationService.getNotification(authContext, id);
       
-      if (!notification) {
-        return res.status(404).json({ error: "Notification not found" });
+      if (!result.success) {
+        const status = result.error === 'Notification not found' ? 404 : 500;
+        return res.status(status).json({ error: result.error });
       }
 
-      // Verificar se a notificação pertence ao usuário
-      const userId = req.session?.user?.id;
-      if (notification.userId !== userId) {
-        return res.status(403).json({ error: "Access denied" });
-      }
-
-      res.json(notification);
+      res.json(result.data);
     } catch (error) {
       console.error("Error fetching notification:", error);
       res.status(500).json({ error: "Failed to get notification" });
@@ -3010,14 +3119,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requireAuth,
     async (req, res) => {
     try {
-      // Validar dados usando schema Zod
-      const validatedData = insertNotificationSchema.parse(req.body);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await notificationService.createNotification(authContext, req.body);
       
-      const notification = await storage.createNotification(validatedData);
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
       
       res.status(201).json({
         success: true,
-        notification
+        notification: result.data
       });
     } catch (error) {
       console.error("Error creating notification:", error);

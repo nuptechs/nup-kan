@@ -20,7 +20,17 @@ export type { BoardCreateRequest, BoardUpdateRequest, BoardWithStats } from './b
 export { taskService } from './taskServiceNew';
 export type { TaskCreateRequest, TaskUpdateRequest, TaskWithDetails } from './taskServiceNew';
 
+// User Service
+export { userService } from './userService';
+export type { UserCreateRequest, UserUpdateRequest, UserWithDetails } from './userService';
+
+// Team Service
+export { teamService } from './teamService';
+export type { TeamCreateRequest, TeamUpdateRequest, TeamWithMembers } from './teamService';
+
+// Notification Service
+export { notificationService } from './notificationService';
+export type { NotificationCreateRequest, NotificationUpdateRequest, NotificationWithDetails } from './notificationService';
+
 // Future services exports...
-// export { userService } from './userService';
-// export { teamService } from './teamService';
 // export { analyticsService } from './analyticsService';

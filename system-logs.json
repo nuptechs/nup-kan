@@ -1,15 +1,63 @@
 [
   {
-    "id": "log_1756337464290_fwmtjby82",
-    "timestamp": "2025-08-27T23:31:04.290Z",
+    "id": "log_1756338220804_twhh3mgr6",
+    "timestamp": "2025-08-27T23:43:40.804Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338220375_1ekjss3mu",
+    "timestamp": "2025-08-27T23:43:40.375Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338220341_0uizpnflx",
+    "timestamp": "2025-08-27T23:43:40.341Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338219649_f3bs5jyor",
+    "timestamp": "2025-08-27T23:43:39.649Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: notification.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338218276_4gz56ok70",
+    "timestamp": "2025-08-27T23:43:38.276Z",
+    "level": "error",
+    "message": "Error fetching boards: Error: Permissão insuficiente: 'Listar Boards' necessária para listar boards",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338218267_qphxzejba",
+    "timestamp": "2025-08-27T23:43:38.267Z",
+    "level": "error",
+    "message": "❌ [BOARD-SERVICE] Erro em getBoards: Error: Permissão insuficiente: 'Listar Boards' necessária para listar boards",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756338204303_ecqn2ks3r",
+    "timestamp": "2025-08-27T23:43:24.303Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756337461958_zqmlvd95v",
-    "timestamp": "2025-08-27T23:31:01.958Z",
+    "id": "log_1756338202664_agl0w677v",
+    "timestamp": "2025-08-27T23:43:22.664Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

@@ -38,8 +38,8 @@ export interface TaskUpdateRequest {
 }
 
 export interface TaskWithDetails extends Task {
-  assigneeName?: string | null;
-  assigneeAvatar?: string | null;
+  assigneeName: string | null;
+  assigneeAvatar: string | null;
   boardName?: string;
   columnTitle?: string;
   recentActivity: Array<{
@@ -99,8 +99,8 @@ export class TaskService extends BaseService {
 
           return {
             ...task,
-            assigneeName: assigneeInfo?.name,
-            assigneeAvatar: assigneeInfo?.avatar,
+            assigneeName: assigneeInfo?.name || null,
+            assigneeAvatar: assigneeInfo?.avatar || null,
             boardName: board?.name || 'Board',
             columnTitle: task.status, // Por enquanto usa o status como nome da coluna
             recentActivity: [{
@@ -164,8 +164,8 @@ export class TaskService extends BaseService {
 
       const enrichedTask: TaskWithDetails = {
         ...task,
-        assigneeName: assigneeInfo?.name,
-        assigneeAvatar: assigneeInfo?.avatar,
+        assigneeName: assigneeInfo?.name || null,
+        assigneeAvatar: assigneeInfo?.avatar || null,
         boardName: board?.name || 'Board',
         columnTitle: task.status,
         recentActivity: [{
