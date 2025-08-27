@@ -1,14 +1,10 @@
 // CQRS Command handlers for write operations
-
-import { db } from "../db";
-import { eventBus } from "./events";
-import { PreparedStatements } from "../preparedStatements";
-import { z } from "zod";
-import { boards, tasks, boardShares } from "@shared/schema";
-import { randomUUID } from "crypto";
-import { eq } from "drizzle-orm";
+// NOVA ARQUITETURA: Commands usam DatabaseStorage ao invés de acesso direto ao DB
 
 import { storage } from "../storage";
+import { eventBus } from "./events";
+import { z } from "zod";
+import { randomUUID } from "crypto";
 
 // Schemas para validação de commands
 export const createBoardCommandSchema = z.object({
