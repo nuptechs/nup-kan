@@ -246,10 +246,10 @@ export default function PermissionsHub() {
       
       // C) Atualização otimista - lista atualiza na hora
       queryClient.setQueryData(['/api/permissions-data'], (old: any) => {
-        if (!old) return old;
+        if (!old || !old.users) return old;
         return {
           ...old,
-          users: old.users?.map((u: any) => u.id === data.id ? data : u) || []
+          users: old.users.map((u: any) => u.id === data.id ? { ...u, ...data } : u)
         };
       });
       
