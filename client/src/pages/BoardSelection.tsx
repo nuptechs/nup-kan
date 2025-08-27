@@ -419,12 +419,13 @@ export default function BoardSelection() {
                           e.preventDefault();
                           e.stopPropagation();
                           if (canEdit("Boards")) {
+                            console.log('🔧 TOGGLE DEBUG:', { boardId: board.id, currentStatus: board.isActive, type: typeof board.isActive });
                             toggleBoardStatusMutation.mutate(board.id);
                           }
                         }}
                         className={`
                           flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-all duration-200 
-                          ${board.isActive === "true" 
+                          ${(board.isActive === true || board.isActive === "true" || board.isActive === 1)
                             ? "bg-green-500 text-white hover:bg-green-600" 
                             : "bg-red-500 text-white hover:bg-red-600"
                           }
@@ -436,11 +437,11 @@ export default function BoardSelection() {
                         `}
                         data-testid={`status-toggle-${board.id}`}
                         title={canEdit("Boards") 
-                          ? `Clique para ${board.isActive === "true" ? "inativar" : "ativar"} o board`
+                          ? `Clique para ${(board.isActive === true || board.isActive === "true" || board.isActive === 1) ? "inativar" : "ativar"} o board`
                           : "Você não tem permissão para alterar o status"
                         }
                       >
-                        {board.isActive === "true" ? (
+                        {(board.isActive === true || board.isActive === "true" || board.isActive === 1) ? (
                           <>
                             <Power className="w-3 h-3" />
                             <span>Ativo</span>
@@ -451,6 +452,9 @@ export default function BoardSelection() {
                             <span>Inativo</span>
                           </>
                         )}
+                        <span className="ml-1 text-xs opacity-50">
+                          [{typeof board.isActive}:{String(board.isActive)}]
+                        </span>
                       </div>
                     </div>
                     
