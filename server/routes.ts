@@ -2904,6 +2904,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ✅ ROTA FALTANTE: Permissions Data - Dados consolidados de permissões
+  app.get("/api/permissions-data", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
+    try {
+      const userId = req.session?.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      // Buscar permissões do usuário atual
+      const userPermissions = await storage.getUserPermissions(userId);
+      
+      res.json({
+        permissions: userPermissions,
+        timestamp: new Date().toISOString(),
+        userId
+      });
+    } catch (error) {
+      console.error("Error fetching permissions data:", error);
+      res.status(500).json({ error: "Failed to fetch permissions data" });
+    }
+  });
+
+  // ✅ ROTA FALTANTE: Bulk Assignees - Buscar assignees de múltiplas tasks
+  app.post("/api/tasks/assignees/bulk", 
+    AuthMiddleware.requireAuth,
+    async (req, res) => {
+    try {
+      const { taskIds } = req.body;
+      
+      if (!Array.isArray(taskIds) || taskIds.length === 0) {
+        return res.status(400).json({ error: "taskIds must be a non-empty array" });
+      }
+
+      // Buscar assignees para todas as tasks em paralelo
+      const assigneesPromises = taskIds.map(async (taskId: string) => {
+        try {
+          const assignees = await storage.getTaskAssignees(taskId);
+          return { taskId, assignees };
+        } catch (error) {
+          console.error(`Error fetching assignees for task ${taskId}:`, error);
+          return { taskId, assignees: [] };
+        }
+      });
+
+      const results = await Promise.all(assigneesPromises);
+      
+      // Converter para formato esperado: Record<string, assignees[]>
+      const assigneesData: Record<string, any[]> = {};
+      results.forEach(({ taskId, assignees }) => {
+        assigneesData[taskId] = assignees;
+      });
+
+      res.json(assigneesData);
+    } catch (error) {
+      console.error("Error fetching bulk assignees:", error);
+      res.status(500).json({ error: "Failed to fetch bulk assignees" });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Sincronizar permissões automaticamente na inicialização
