@@ -187,6 +187,8 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
             <div className="flex items-center gap-2 min-w-[300px]">
               <Search className="w-4 h-4" />
               <Input
+                id="logs-search"
+                name="logs-search"
                 placeholder="Buscar por usuário, ação ou mensagem..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -197,7 +199,7 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
               <Filter className="w-4 h-4" />
               <span className="text-sm font-medium">Nível:</span>
               <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger id="logs-level-filter" className="w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -213,7 +215,7 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Tipo:</span>
               <Select value={selectedType} onValueChange={setSelectedType}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger id="logs-type-filter" className="w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

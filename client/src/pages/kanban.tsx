@@ -164,6 +164,8 @@ export default function KanbanPage() {
             <div className="relative w-48 ml-4">
               <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
               <Input
+                id="kanban-search"
+                name="kanban-search"
                 type="text"
                 placeholder="tarefa ou responsável..."
                 value={searchQuery}

@@ -104,6 +104,8 @@ function PasswordChangeDialog({ userId, userName }: { userId: string; userName: 
           <div>
             <label className="text-sm font-medium mb-2 block">Nova Senha</label>
             <Input
+              id="new-password"
+              name="new-password"
               type="password"
               placeholder="••••••••"
               value={newPassword}
@@ -115,6 +117,8 @@ function PasswordChangeDialog({ userId, userName }: { userId: string; userName: 
           <div>
             <label className="text-sm font-medium mb-2 block">Confirmar Nova Senha</label>
             <Input
+              id="confirm-password"
+              name="confirm-password"
               type="password"
               placeholder="••••••••"
               value={confirmPassword}
