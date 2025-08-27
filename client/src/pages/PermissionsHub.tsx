@@ -1216,7 +1216,7 @@ export default function PermissionsHub() {
                 Novo Perfil
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[60vh] overflow-hidden">
               <DialogHeader>
                 <DialogTitle>Criar Perfil</DialogTitle>
                 <DialogDescription>Defina um conjunto de funcionalidades do sistema</DialogDescription>
@@ -1235,7 +1235,8 @@ export default function PermissionsHub() {
                   }
                   
                   setSelectedPermissions([]);
-                })} className="space-y-4">
+                })} className="space-y-4 flex flex-col h-full">
+                  <div className="flex-1 overflow-y-auto space-y-4">
                   <FormField
                     control={profileForm.control}
                     name="name"
@@ -1281,7 +1282,7 @@ export default function PermissionsHub() {
                         {selectedPermissions.length === permissions.length ? "Desmarcar Todas" : "Selecionar Todas"}
                       </Button>
                     </div>
-                    <div className="border rounded-md p-2 max-h-48 overflow-y-auto">
+                    <div className="border rounded-md p-2 h-48 overflow-y-auto">
                       {permissions.map((permission) => (
                         <div key={permission.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
                           <Checkbox
@@ -1309,6 +1310,7 @@ export default function PermissionsHub() {
                         {selectedPermissions.length} permissão{selectedPermissions.length > 1 ? 'ões' : ''} selecionada{selectedPermissions.length > 1 ? 's' : ''}
                       </p>
                     )}
+                  </div>
                   </div>
 
                   <DialogFooter>
@@ -1355,7 +1357,7 @@ export default function PermissionsHub() {
                         <Edit className="w-4 h-4" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                    <DialogContent className="max-w-3xl max-h-[70vh] overflow-hidden">
                       <DialogHeader>
                         <DialogTitle>Editar Perfil</DialogTitle>
                         <DialogDescription>Altere as informações do perfil e gerencie suas permissões</DialogDescription>
@@ -1373,7 +1375,7 @@ export default function PermissionsHub() {
                           }
                           
                           setSelectedPermissions([]);
-                        })} className="space-y-4">
+                        })} className="space-y-4 flex flex-col h-full overflow-y-auto">
                           <FormField
                             control={profileForm.control}
                             name="name"
