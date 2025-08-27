@@ -104,35 +104,49 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
 
   const updateUserMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: FormData }) => {
+      console.log("🔴 [TRACE-1] updateUserMutation.mutationFn INICIADO");
+      console.log("🔴 [TRACE-1] ID:", id);
+      console.log("🔴 [TRACE-1] Data:", data);
+      console.log("🔴 [TRACE-1] Enviando PATCH para /api/users/" + id);
+      
       const response = await apiRequest("PATCH", `/api/users/${id}`, data);
-      return response.json();
+      
+      console.log("🔴 [TRACE-2] Response recebida - Status:", response.status);
+      const result = await response.json();
+      console.log("🔴 [TRACE-2] Response JSON:", result);
+      
+      return result;
     },
-    onSuccess: () => {
-      console.log("🟢 [USER-EDIT] Sucesso! Executando solução anti-rehydration");
+    onSuccess: (data) => {
+      console.log("🔴 [TRACE-3] updateUserMutation.onSuccess INICIADO");
+      console.log("🔴 [TRACE-3] Data recebida:", data);
+      console.log("🔴 [TRACE-3] editingUser atual:", editingUser);
+      console.log("🔴 [TRACE-3] isOpen atual:", isOpen);
+      console.log("🔴 [TRACE-3] Dialog state antes das ações");
       
-      // SOLUÇÃO DEFINITIVA: Prevenir rehydration automática
-      
-      // 1. CANCELAR EDICAO PRIMEIRO (limpa estado)
+      // 1. Cancelar edição primeiro
+      console.log("🔴 [TRACE-4] Executando cancelEdit()");
       cancelEdit();
       
-      // 2. FORÇAR FECHAMENTO COM DELAY (garantir limpeza)
-      setTimeout(() => {
-        console.log("🚪 [USER-EDIT] Forçando fechamento do modal");
-        onClose();
-      }, 50);
+      // 2. Forçar fechamento
+      console.log("🔴 [TRACE-5] Executando onClose()");
+      onClose();
       
-      // 3. INVALIDAR CACHE EM BACKGROUND  
+      // 3. Invalidar cache em background
+      console.log("🔴 [TRACE-6] Agendando invalidação de cache");
       setTimeout(() => {
+        console.log("🔴 [TRACE-7] Invalidando cache /api/users");
         queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      }, 200);
+        console.log("🔴 [TRACE-7] Cache invalidado");
+      }, 100);
       
-      // 4. TOAST DE SUCESSO
+      // 4. Toast de sucesso
       toast({
         title: "Sucesso",
         description: "Usuário atualizado com sucesso!",
       });
       
-      console.log("✅ [USER-EDIT] Solução anti-rehydration aplicada");
+      console.log("🔴 [TRACE-8] updateUserMutation.onSuccess CONCLUÍDO");
     },
     onError: () => {
       toast({
@@ -175,27 +189,50 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
   };
 
   const onEditSubmit = (data: FormData) => {
+    console.log("🔴 [TRACE-SUBMIT] onEditSubmit INICIADO");
+    console.log("🔴 [TRACE-SUBMIT] Data do form:", data);
+    console.log("🔴 [TRACE-SUBMIT] editingUser:", editingUser);
+    
     if (editingUser) {
+      console.log("🔴 [TRACE-SUBMIT] Chamando updateUserMutation.mutate com:");
+      console.log("🔴 [TRACE-SUBMIT] - ID:", editingUser.id);
+      console.log("🔴 [TRACE-SUBMIT] - Data:", data);
       updateUserMutation.mutate({ id: editingUser.id, data });
+    } else {
+      console.log("🔴 [TRACE-SUBMIT] ERRO: editingUser é null!");
     }
   };
 
   const startEdit = (user: User) => {
-    console.log("✏️ [DEBUG] Iniciando edição do usuário:", user.name);
+    console.log("🔴 [TRACE-START] startEdit INICIADO para:", user.name);
+    console.log("🔴 [TRACE-START] User completo:", user);
+    
     setEditingUser(user);
-    editForm.reset({
+    console.log("🔴 [TRACE-START] editingUser setado");
+    
+    const formData = {
       name: user.name,
       email: user.email,
       role: user.role || "",
       avatar: user.avatar || "",
       status: user.status || "offline",
-    });
-    console.log("✏️ [DEBUG] Usuário definido para edição e form resetado");
+    };
+    
+    editForm.reset(formData);
+    console.log("🔴 [TRACE-START] Form resetado com dados:", formData);
+    console.log("🔴 [TRACE-START] startEdit CONCLUÍDO");
   };
 
   const cancelEdit = () => {
+    console.log("🔴 [TRACE-CANCEL] cancelEdit INICIADO");
+    console.log("🔴 [TRACE-CANCEL] editingUser antes:", editingUser?.name || "null");
+    
     setEditingUser(null);
+    console.log("🔴 [TRACE-CANCEL] editingUser setado para null");
+    
     editForm.reset();
+    console.log("🔴 [TRACE-CANCEL] editForm resetado");
+    console.log("🔴 [TRACE-CANCEL] cancelEdit CONCLUÍDO");
   };
 
   const handleDelete = (userId: string) => {

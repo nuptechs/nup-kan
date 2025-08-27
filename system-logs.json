@@ -1,5 +1,47 @@
 [
   {
+    "id": "action_1756257068427_k2irjkdv8",
+    "timestamp": "2025-08-27T01:11:08.427Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar usuário \"TOP\" (asd@m.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário \"TOP\" (asd@m.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 74
+  },
+  {
+    "id": "action_1756257045330_5wlago2uv",
+    "timestamp": "2025-08-27T01:10:45.330Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar usuário \"lop\" (asd@m.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário \"lop\" (asd@m.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 310
+  },
+  {
+    "id": "action_1756256946901_ppbbv0lhc",
+    "timestamp": "2025-08-27T01:09:06.901Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Atualizar usuário \"mk\" (asd@m.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Atualizar usuário \"mk\" (asd@m.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 81
+  },
+  {
     "id": "log_1756256904666_alyeucf7s",
     "timestamp": "2025-08-27T01:08:24.666Z",
     "level": "warn",
