@@ -80,7 +80,10 @@ export class UserService extends BaseService {
     this.log('user-service', 'getUser', { requestingUserId: authContext.userId, targetUserId: userId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Users', 'visualizar usuário');
+      // Bypass de permissão para usuário 'system' (usado em refresh tokens)
+      if (authContext.userId !== 'system') {
+        this.requirePermission(authContext, 'Visualizar Users', 'visualizar usuário');
+      }
 
       const cacheKey = `user:${userId}:full`;
       const cached = await this.cache.get<UserWithDetails>(cacheKey);

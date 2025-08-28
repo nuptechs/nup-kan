@@ -2226,10 +2226,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Refresh token requerido" });
       }
 
-      // Função auxiliar para buscar dados do usuário
+      // Função auxiliar para buscar dados do usuário para refresh (sem validação de permissões)
       const getUserData = async (userId: string) => {
-        const authContext = createAuthContextFromRequest(req);
-        return await userService.getUser(authContext, userId);
+        const systemContext = { userId: 'system', permissions: ['*'], profileId: 'system' };
+        return await userService.getUser(systemContext, userId);
       };
 
       const newTokens = await JWTService.refreshAccessToken(refreshToken, getUserData);
