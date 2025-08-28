@@ -66,16 +66,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const users = await userService.getUsers(authContextTemp);
       const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
       
+      console.log(`🔍 [LOGIN-DEBUG] Tentativa de login para: ${email}`);
+      console.log(`🔍 [LOGIN-DEBUG] Usuário encontrado:`, user ? 'SIM' : 'NÃO');
+      
       if (!user) {
         return res.status(401).json({ message: "Email ou senha incorretos" });
       }
 
+      console.log(`🔍 [LOGIN-DEBUG] Dados do usuário:`, {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        hasPassword: !!user.password,
+        firstLogin: user.firstLogin
+      });
+
       // Check password
       if (user.password) {
+        console.log(`🔍 [LOGIN-DEBUG] Comparando senhas...`);
         const isPasswordValid = await bcrypt.compare(password, user.password);
+        console.log(`🔍 [LOGIN-DEBUG] Senha válida:`, isPasswordValid);
+        
         if (!isPasswordValid) {
           return res.status(401).json({ message: "Email ou senha incorretos" });
         }
+      } else {
+        console.log(`🔍 [LOGIN-DEBUG] Usuário sem senha cadastrada`);
       }
       
       // 🚀 GERAR TOKENS JWT
@@ -101,18 +117,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: user.email,
           role: user.role,
           avatar: user.avatar,
-          profileId: user.profileId
+          profileId: user.profileId,
+          firstLogin: user.firstLogin // Incluir flag de primeiro login
         },
         tokens: {
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
           expiresIn: tokens.expiresIn
         },
-        isAuthenticated: true
+        isAuthenticated: true,
+        requiresPasswordChange: user.firstLogin || false // Indicar se precisa trocar senha
       });
       
     } catch (error) {
       console.error('❌ [LOGIN-JWT] Erro:', error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Endpoint para troca de senha no primeiro login
+  app.post("/api/auth/change-first-password", async (req, res) => {
+    try {
+      const { email, currentPassword, newPassword } = req.body;
+      
+      if (!email || !currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Email, senha atual e nova senha são obrigatórios" });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "Nova senha deve ter pelo menos 6 caracteres" });
+      }
+
+      // Buscar usuário
+      const authContextTemp = { userId: 'system', permissions: ['Listar Users'] } as any;
+      const users = await userService.getUsers(authContextTemp);
+      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      // Verificar se é realmente o primeiro login
+      if (!user.firstLogin) {
+        return res.status(400).json({ message: "Este usuário já alterou sua senha inicial" });
+      }
+
+      // Verificar senha atual
+      if (user.password) {
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isPasswordValid) {
+          return res.status(401).json({ message: "Senha atual incorreta" });
+        }
+      }
+
+      // Atualizar senha e marcar firstLogin como false
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      await storage.updateUser(user.id, {
+        password: hashedNewPassword,
+        firstLogin: false
+      });
+
+      console.log(`🔐 [FIRST-LOGIN] Senha alterada com sucesso para ${user.email}`);
+
+      res.json({
+        success: true,
+        message: "Senha alterada com sucesso! Você pode fazer login normalmente agora."
+      });
+      
+    } catch (error) {
+      console.error('❌ [CHANGE-FIRST-PASSWORD] Erro:', error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
@@ -953,10 +1026,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = authContext.userId;
       const userName = authContext.userName || 'Usuário desconhecido';
       
-      // Adicionar senha padrão se não fornecida
+      // Não adicionar senha padrão aqui - deixar o UserService gerar dinamicamente
       const userData = {
-        ...req.body,
-        password: req.body.password || '123456' // Senha padrão para novos usuários
+        ...req.body
+        // password será gerado dinamicamente no UserService se não fornecida
       };
       
       console.log('🔍 [DEBUG-CREATE-USER] Data received:', JSON.stringify({

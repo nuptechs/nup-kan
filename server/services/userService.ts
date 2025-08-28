@@ -122,6 +122,31 @@ export class UserService extends BaseService {
   }
 
   /**
+   * Gerar senha padrão baseada no email e nome do usuário
+   */
+  private generateDefaultPassword(name: string, email: string): string {
+    // Pegar primeiras letras do nome (maiúsculas)
+    const nameInitials = name
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase())
+      .join('');
+    
+    // Pegar primeiros 3 caracteres do email antes do @
+    const emailPrefix = email.split('@')[0].substring(0, 3).toLowerCase();
+    
+    // Gerar 3 números baseados no email (determinístico)
+    let hash = 0;
+    for (let i = 0; i < email.length; i++) {
+      const char = email.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    const numbers = Math.abs(hash).toString().substring(0, 3).padStart(3, '0');
+    
+    return `${nameInitials}${emailPrefix}${numbers}`;
+  }
+
+  /**
    * Criar novo usuário
    */
   async createUser(authContext: AuthContext, request: UserCreateRequest): Promise<User> {
@@ -130,18 +155,30 @@ export class UserService extends BaseService {
     try {
       this.requirePermission(authContext, 'Criar Users', 'criar usuário');
 
-      // Validar dados
-      const validatedData = insertUserSchema.parse({
-        ...request,
-        password: await bcrypt.hash(request.password, 10)
-      });
-
       // Verificar se email já existe
       const existingUsers = await this.storage.getUsers();
       const emailExists = existingUsers.some(u => u.email.toLowerCase() === request.email.toLowerCase());
       if (emailExists) {
         throw new Error('Email já está em uso');
       }
+
+      // Gerar senha padrão se não foi fornecida ou estiver vazia
+      const defaultPassword = this.generateDefaultPassword(request.name, request.email);
+      const passwordToUse = (request.password && request.password.trim()) ? request.password : defaultPassword;
+      
+      console.log(`🔍 [PASSWORD-DEBUG] request.password:`, request.password);
+      console.log(`🔍 [PASSWORD-DEBUG] defaultPassword:`, defaultPassword);
+      console.log(`🔍 [PASSWORD-DEBUG] passwordToUse:`, passwordToUse);
+      
+      const hashedPassword = await bcrypt.hash(passwordToUse, 10);
+      console.log(`🔍 [PASSWORD-DEBUG] hashedPassword:`, hashedPassword.substring(0, 20) + '...');
+
+      // Validar dados
+      const validatedData = insertUserSchema.parse({
+        ...request,
+        password: hashedPassword,
+        firstLogin: true // Marcar como primeiro login
+      });
 
       const user = await this.storage.createUser(validatedData);
 
@@ -151,11 +188,19 @@ export class UserService extends BaseService {
         `user:${user.id}:*`
       ]);
 
+      // Log da senha utilizada (apenas para desenvolvimento)
+      if (passwordToUse === defaultPassword) {
+        console.log(`🔐 [USER-PASSWORD] Nova senha gerada para ${user.email}: ${defaultPassword}`);
+      } else {
+        console.log(`🔐 [USER-PASSWORD] Senha fornecida utilizada para ${user.email}`);
+      }
+
       // Emitir evento
       this.emitEvent('user.created', {
         userId: user.id,
         createdBy: authContext.userId,
-        user: user
+        user: user,
+        generatedPassword: defaultPassword
       });
 
       return user;

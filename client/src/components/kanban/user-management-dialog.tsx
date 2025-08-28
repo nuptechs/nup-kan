@@ -93,10 +93,21 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       
       console.log("✅ [USER-CREATE] Modal fechado com sucesso");
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("❌ [USER-CREATE] Erro na criação:", error);
+      
+      // Tratar erro específico de email duplicado
+      let errorMessage = "Falha ao criar usuário. Tente novamente.";
+      
+      if (error?.message?.includes("já está em uso") || 
+          error?.message?.includes("already exists") ||
+          error?.message?.includes("Email já está em uso")) {
+        errorMessage = "Este email já está sendo usado por outro usuário. Escolha um email diferente.";
+      }
+      
       toast({
-        title: "Erro",
-        description: "Falha ao criar usuário. Tente novamente.",
+        title: "Erro na criação",
+        description: errorMessage,
         variant: "destructive",
       });
     },
