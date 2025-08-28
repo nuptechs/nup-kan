@@ -9,7 +9,7 @@ import { db } from "./db";
 import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema, insertTaskAssigneeSchema, insertCustomFieldSchema, updateCustomFieldSchema, insertTaskCustomValueSchema, updateTaskCustomValueSchema, customFields, taskCustomValues, insertNotificationSchema, updateNotificationSchema } from "@shared/schema";
 
 // 🏗️ SERVICES - Camada única oficial de persistência
-import { boardService, taskService, userService, teamService, notificationService, columnService, tagService, profileService, permissionService, boardShareService, taskStatusService, userTeamService, taskEventService, exportService, teamProfileService } from "./services";
+import { boardService, taskService, userService, teamService, notificationService, columnService, tagService, profileService, permissionService, boardShareService, taskStatusService, userTeamService, taskEventService, exportService, teamProfileService, assigneeService, hierarchyService } from "./services";
 import { eq, sql, and } from "drizzle-orm";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 import { PermissionSyncService } from "./permissionSync";
@@ -744,37 +744,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Team member routes
+  // 🗑️ DEPRECATED: Team member routes - migrated to userTeamService
   app.get("/api/team-members", async (req, res) => {
-    try {
-      const members = await teamMemberService.getTeamMembers(req.authContext);
-      res.json(members);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch team members" });
-    }
+    res.status(410).json({ 
+      message: "Endpoint deprecated. Use /api/teams/{teamId}/users or userTeamService methods",
+      migration: "Use userTeamService.getTeamUsers() instead"
+    });
   });
 
   app.post("/api/team-members", async (req, res) => {
-    try {
-      const memberData = insertTeamMemberSchema.parse(req.body);
-      const member = await teamMemberService.createTeamMember(req.authContext, memberData);
-      res.status(201).json(member);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid team member data" });
-    }
+    res.status(410).json({ 
+      message: "Endpoint deprecated. Use POST /api/users/{userId}/teams/{teamId}",
+      migration: "Use userTeamService.addUserToTeam() instead"
+    });
   });
 
   app.patch("/api/team-members/:id/status", async (req, res) => {
-    try {
-      const { status } = req.body;
-      const member = await teamMemberService.updateTeamMemberStatus(req.authContext, req.params.id, status);
-      res.json(member);
-    } catch (error) {
-      if (error instanceof Error && error.message.includes("not found")) {
-        return res.status(404).json({ message: "Team member not found" });
-      }
-      res.status(400).json({ message: "Invalid status data" });
-    }
+    res.status(410).json({ 
+      message: "Endpoint deprecated. Use PATCH /api/users/{userId}/teams/{teamId}",
+      migration: "Use userTeamService.updateUserTeamRole() instead"
+    });
   });
 
   // Analytics endpoint - MIGRADO PARA NÍVEL 3
@@ -3307,6 +3296,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching bulk assignees:", error);
       res.status(500).json({ error: "Failed to fetch bulk assignees" });
+    }
+  });
+
+  // 🏗️ HIERARCHY SERVICE - Resolução formal de hierarquia
+  app.get("/api/users/:userId/hierarchy", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Visualizar Users"), 
+    async (req, res) => {
+    try {
+      const authContext = createAuthContextFromRequest(req);
+      const hierarchy = await hierarchyService.resolveUserHierarchy(authContext, req.params.userId);
+      res.json(hierarchy);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to resolve user hierarchy" });
+    }
+  });
+
+  // 🎯 ASSIGNEE SERVICE - Gestão centralizada de assignees
+  app.get("/api/tasks/:taskId/assignees", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Visualizar Tasks"), 
+    async (req, res) => {
+    try {
+      const authContext = createAuthContextFromRequest(req);
+      const assignees = await assigneeService.getTaskAssignees(authContext, req.params.taskId);
+      res.json(assignees);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get task assignees" });
+    }
+  });
+
+  app.post("/api/tasks/:taskId/assignees", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Atribuir Membros"), 
+    async (req, res) => {
+    try {
+      const authContext = createAuthContextFromRequest(req);
+      const assignee = await assigneeService.addTaskAssignee(authContext, {
+        taskId: req.params.taskId,
+        userId: req.body.userId
+      });
+      res.status(201).json(assignee);
+    } catch (error) {
+      res.status(400).json({ message: error instanceof Error ? error.message : "Failed to add assignee" });
     }
   });
 
