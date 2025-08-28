@@ -1,6 +1,6 @@
 import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type TeamMember, type InsertTeamMember, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type BoardShare, type InsertBoardShare, type UpdateBoardShare, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory, type TaskStatus, type InsertTaskStatus, type UpdateTaskStatus, type TaskPriority, type InsertTaskPriority, type UpdateTaskPriority, type TaskAssignee, type InsertTaskAssignee, type Notification, type InsertNotification, type UpdateNotification } from "@shared/schema";
 import { db } from "./db";
-import { boards, tasks, columns, teamMembers, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory, taskStatuses, taskPriorities, taskAssignees, notifications } from "@shared/schema";
+import { boards, tasks, columns, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory, taskStatuses, taskPriorities, taskAssignees, notifications } from "@shared/schema";
 import { eq, desc, and, inArray, sql, or } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
@@ -41,10 +41,7 @@ export interface IStorage {
   reorderColumns(reorderedColumns: { id: string; position: number }[]): Promise<void>;
   reorderTasks(reorderedTasks: { id: string; position: number }[]): Promise<void>;
   
-  // Team Members
-  getTeamMembers(): Promise<TeamMember[]>;
-  createTeamMember(member: InsertTeamMember): Promise<TeamMember>;
-  updateTeamMemberStatus(id: string, status: string): Promise<TeamMember>;
+  // 🗑️ REMOVIDO: Team Members (consolidado em UserTeams)
   
   // Tags
   getTags(): Promise<Tag[]>;
@@ -657,32 +654,8 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  // Team Members methods
-  async getTeamMembers(): Promise<TeamMember[]> {
-    return await db.select().from(teamMembers);
-  }
-
-  async createTeamMember(member: InsertTeamMember): Promise<TeamMember> {
-    const [newMember] = await db
-      .insert(teamMembers)
-      .values(member)
-      .returning();
-    return newMember;
-  }
-
-  async updateTeamMemberStatus(id: string, status: string): Promise<TeamMember> {
-    const [member] = await db
-      .update(teamMembers)
-      .set({ status })
-      .where(eq(teamMembers.id, id))
-      .returning();
-    
-    if (!member) {
-      throw new Error(`Team member with id ${id} not found`);
-    }
-    
-    return member;
-  }
+  // 🗑️ REMOVIDO: Team Members methods (consolidado em user_teams)
+  // Use getUserTeams() e getTeamUsers() em vez disso
 
   // Tags methods
   async getTags(): Promise<Tag[]> {

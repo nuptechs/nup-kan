@@ -48,9 +48,7 @@ export type { ProfileCreateRequest, ProfileUpdateRequest } from './profileServic
 export { permissionService } from './permissionService';
 export type { PermissionCreateRequest, PermissionUpdateRequest } from './permissionService';
 
-// Team Member Service
-export { teamMemberService } from './teamMemberService';
-export type { TeamMemberCreateRequest } from './teamMemberService';
+// 🗑️ REMOVIDO: Team Member Service (consolidado em UserTeamService)
 
 // Board Share Service
 export { boardShareService } from './boardShareService';
@@ -75,6 +73,14 @@ export type { ExportCreateRequest } from './exportService';
 // Team Profile Service
 export { teamProfileService } from './teamProfileService';
 export type { TeamProfileRequest } from './teamProfileService';
+
+// 🎯 CENTRALIZADO: Assignee Service (consolidação completa)
+export { assigneeService } from './assigneeService';
+export type { AssigneeRequest, AssigneeWithUser } from './assigneeService';
+
+// 🏗️ HIERARQUIA: Hierarchy Service (formalização de acesso)
+export { hierarchyService } from './hierarchyService';
+export type { UserHierarchy, PermissionResolution } from './hierarchyService';
 
 // Future services exports...
 // export { analyticsService } from './analyticsService';

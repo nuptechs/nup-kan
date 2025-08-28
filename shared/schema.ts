@@ -41,13 +41,8 @@ export const columns = pgTable("columns", {
   color: text("color").notNull(),
 });
 
-export const teamMembers = pgTable("team_members", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull(),
-  role: text("role").default(""),
-  avatar: text("avatar").default(""),
-  status: text("status").default("offline"),
-});
+// 🗑️ REMOVIDO: teamMembers table (redundante com user_teams)
+// Consolidated: Usar apenas user_teams + users para membros de equipe
 
 export const tags = pgTable("tags", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -233,9 +228,7 @@ export const insertColumnSchema = createInsertSchema(columns).omit({
 
 export const updateColumnSchema = insertColumnSchema.partial();
 
-export const insertTeamMemberSchema = createInsertSchema(teamMembers).omit({
-  id: true,
-});
+// 🗑️ REMOVIDO: insertTeamMemberSchema (consolidado em UserTeam)
 
 export const insertTagSchema = createInsertSchema(tags).omit({
   id: true,
@@ -309,8 +302,7 @@ export type UpdateTask = z.infer<typeof updateTaskSchema>;
 export type Column = typeof columns.$inferSelect;
 export type InsertColumn = z.infer<typeof insertColumnSchema>;
 export type UpdateColumn = z.infer<typeof updateColumnSchema>;
-export type TeamMember = typeof teamMembers.$inferSelect;
-export type InsertTeamMember = z.infer<typeof insertTeamMemberSchema>;
+// 🗑️ REMOVIDO: TeamMember types (usar UserTeam + User em vez disso)
 export type Tag = typeof tags.$inferSelect;
 export type InsertTag = z.infer<typeof insertTagSchema>;
 export type Team = typeof teams.$inferSelect;

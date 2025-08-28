@@ -250,22 +250,30 @@ export class TeamService extends BaseService {
     }
   }
 
+  // 🗑️ REMOVIDO: addUserToTeam duplicado - Use userTeamService.addUserToTeam() em vez disso
   /**
-   * Adicionar usuário ao time
+   * [DEPRECATED] Método movido para userTeamService
    */
   async addUserToTeam(authContext: AuthContext, userId: string, teamId: string, role: string = 'member'): Promise<UserTeam> {
-    this.log('team-service', 'addUserToTeam', { requestingUser: authContext.userId, userId, teamId, role });
+    throw new Error('DEPRECATED: Use userTeamService.addUserToTeam() em vez disso. Este método foi consolidado para evitar duplicação.');
+  }
+
+  /**
+   * Remover usuário do time
+   */
+  async removeUserFromTeam(authContext: AuthContext, userId: string, teamId: string): Promise<void> {
+    this.log('team-service', 'removeUserFromTeam', { requestingUser: authContext.userId, userId, teamId });
     
     try {
-      this.requirePermission(authContext, 'Atribuir Membros', 'adicionar membro ao time');
+      this.requirePermission(authContext, 'Atribuir Membros', 'remover membro do time');
 
       // Verificar se o usuário tem permissão para gerenciar este time
       const hasTeamAccess = await this.hasTeamAdminAccess(authContext.userId, teamId);
       if (!hasTeamAccess && !this.hasPermission(authContext, 'Gerenciar Times')) {
-        throw new Error('Acesso negado para adicionar membros neste time');
+        throw new Error('Acesso negado para remover membros neste time');
       }
 
-      // Verificar se o usuário existe
+      await this.storage.removeUserFromTeam(userId, teamId);
       const user = await this.storage.getUser(userId);
       if (!user) {
         throw new Error('Usuário não encontrado');
