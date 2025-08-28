@@ -35,11 +35,33 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  // Debug - rastrear mudanças de estado
+  // Reset form when dialog opens to ensure clean state for creating new user
   useEffect(() => {
     console.log("📱 [DEBUG] isOpen mudou para:", isOpen);
     console.log("📱 [DEBUG] editingUser atual:", editingUser?.name || "null");
-  }, [isOpen, editingUser]);
+    
+    // 🔧 FIX: Always reset create form when dialog opens
+    if (isOpen) {
+      console.log("🧹 [FORM-RESET] Resetando formulário de criação ao abrir diálogo");
+      form.reset({
+        name: "",
+        email: "",
+        role: "",
+        avatar: "",
+        status: "offline",
+      });
+      
+      // Also clear editing state to ensure we start fresh
+      setEditingUser(null);
+      editForm.reset({
+        name: "",
+        email: "",
+        role: "",
+        avatar: "",
+        status: "offline",
+      });
+    }
+  }, [isOpen]);
 
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
