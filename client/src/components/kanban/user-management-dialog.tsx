@@ -35,16 +35,12 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  // CLEAN SEPARATION: Clear editing state when dialog opens/closes  
+  // SINGLE FORM: Reset clean when dialog closes
   useEffect(() => {
-    console.log("📱 [DIALOG] isOpen mudou para:", isOpen);
-    console.log("📱 [DIALOG] editingUser atual:", editingUser?.name || "null");
-    
     if (!isOpen) {
-      // Dialog closed: clear any editing state to prevent contamination
-      console.log("🧹 [DIALOG-CLOSE] Limpando estado de edição");
+      console.log("🧹 [DIALOG-CLOSE] Limpando estado de edição e formulário");
       setEditingUser(null);
-      editForm.reset({
+      form.reset({
         name: "",
         email: "",
         role: "",
@@ -52,7 +48,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
         status: "offline",
       });
     }
-  }, [isOpen, editForm]);
+  }, [isOpen, form]);
 
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
@@ -69,16 +65,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
     },
   });
 
-  const editForm = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      role: "",
-      avatar: "",
-      status: "offline",
-    },
-  });
+  // SINGLE FORM PATTERN: Um formulário para criar E editar
 
   const createUserMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -160,13 +147,17 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
         console.log("🔴 [TRACE-3] isOpen atual:", isOpen);
         console.log("🔴 [TRACE-3] Dialog state antes das ações");
         
-        // 1. FECHAR MODAL PRIMEIRO (com contexto intacto)
-        console.log("🔴 [TRACE-4] Executando onClose() - FECHANDO MODAL");
+        // SINGLE FORM: Reset após sucesso
+        console.log("🔴 [UPDATE-SUCCESS] Limpando formulário e fechando modal");
+        setEditingUser(null);
+        form.reset({
+          name: "",
+          email: "",
+          role: "",
+          avatar: "",
+          status: "offline",
+        });
         onClose();
-        
-        // 2. LIMPAR ESTADO DEPOIS (modal já fechado)
-        console.log("🔴 [TRACE-5] Executando cancelEdit() - LIMPANDO ESTADO");
-        cancelEdit();
         
         // 3. Invalidar cache em background
         console.log("🔴 [TRACE-6] Agendando invalidação de cache");
@@ -226,59 +217,42 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
     },
   });
 
-  const onCreateSubmit = (data: FormData) => {
-    createUserMutation.mutate(data);
-  };
-
-  const onEditSubmit = (data: FormData) => {
-    console.log("🔴 [TRACE-SUBMIT] onEditSubmit INICIADO");
-    console.log("🔴 [TRACE-SUBMIT] Data do form:", data);
-    console.log("🔴 [TRACE-SUBMIT] editingUser:", editingUser);
-    console.log("🔴 [TRACE-SUBMIT] updateUserMutation object:", updateUserMutation);
-    
+  // SINGLE FORM: Um handler para criar E editar
+  const handleSubmit = (data: FormData) => {
     if (editingUser) {
-      console.log("🔴 [TRACE-SUBMIT] Chamando updateUserMutation.mutate com:");
-      console.log("🔴 [TRACE-SUBMIT] - ID:", editingUser.id);
-      console.log("🔴 [TRACE-SUBMIT] - Data:", data);
-      console.log("🔴 [TRACE-SUBMIT] - Mutation status:", updateUserMutation.status);
-      console.log("🔴 [TRACE-SUBMIT] - Executando mutation AGORA...");
-      
+      console.log("🔴 [SUBMIT] Atualizando usuário:", editingUser.name);
       updateUserMutation.mutate({ id: editingUser.id, data });
-      
-      console.log("🔴 [TRACE-SUBMIT] Mutation.mutate() executado");
     } else {
-      console.log("🔴 [TRACE-SUBMIT] ERRO: editingUser é null!");
+      console.log("🜢 [SUBMIT] Criando novo usuário");
+      createUserMutation.mutate(data);
     }
   };
 
-  const startEdit = (user: User) => {
-    console.log("🔴 [TRACE-START] startEdit INICIADO para:", user.name);
-    console.log("🔴 [TRACE-START] User completo:", user);
+  const handleEdit = (user: User) => {
+    console.log("🔴 [EDIT] Iniciando edição para:", user.name);
     
     setEditingUser(user);
-    console.log("🔴 [TRACE-START] editingUser setado");
     
-    const formData = {
+    // SINGLE FORM: Reset com dados do usuário
+    form.reset({
       name: user.name,
       email: user.email,
       role: user.role || "",
       avatar: user.avatar || "",
       status: user.status || "offline",
-    };
+    });
     
-    editForm.reset(formData);
-    console.log("🔴 [TRACE-START] Form resetado com dados:", formData);
-    console.log("🔴 [TRACE-START] startEdit CONCLUÍDO");
+    console.log("🔴 [EDIT] Formulário preenchido com dados do usuário");
   };
 
   const cancelEdit = () => {
     console.log("🔴 [CANCEL] Cancelando edição para:", editingUser?.name || "null");
     
-    // Clear editing state completely
+    // SINGLE FORM: Limpar estado de edição
     setEditingUser(null);
     
-    // Reset edit form to pristine state
-    editForm.reset({
+    // Reset para estado limpo de criação
+    form.reset({
       name: "",
       email: "",
       role: "",
@@ -286,7 +260,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       status: "offline",
     });
     
-    console.log("🔴 [CANCEL] Estado de edição limpo");
+    console.log("🔴 [CANCEL] Voltou para modo criação");
   };
 
   const handleDelete = (userId: string) => {
