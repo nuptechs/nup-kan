@@ -278,9 +278,7 @@ export default function BoardSelection() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Kanban
-                </h1>
+                <h1 className="text-2xl text-gray-900 dark:text-white font-semibold">NuP-Kan</h1>
                 {currentUser && (
                   <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
                     <User className="w-3 h-3 mr-1" />
@@ -313,7 +311,6 @@ export default function BoardSelection() {
           </div>
         </div>
       </div>
-
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
@@ -476,7 +473,6 @@ export default function BoardSelection() {
           </div>
         )}
       </div>
-
       {/* Create Board Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="sm:max-w-md" data-testid="dialog-create-board">
@@ -604,7 +600,6 @@ export default function BoardSelection() {
           </Form>
         </DialogContent>
       </Dialog>
-
       {/* Edit Board Dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="sm:max-w-[500px]" data-testid="edit-board-dialog">
@@ -708,7 +703,6 @@ export default function BoardSelection() {
           </Form>
         </DialogContent>
       </Dialog>
-
       {/* Delete Board Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent className="sm:max-w-[400px]" data-testid="delete-board-dialog">
