@@ -1715,12 +1715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/users/:userId/teams/:teamId", async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
-      const result = await teamService.removeUserFromTeam(authContext, req.params.userId, req.params.teamId);
-      
-      if (!result.success) {
-        const status = result.error === 'User not found in team' ? 404 : 500;
-        return res.status(status).json({ message: result.error });
-      }
+      await teamService.removeUserFromTeam(authContext, req.params.userId, req.params.teamId);
       
       res.status(204).send();
     } catch (error) {
@@ -1737,12 +1732,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { role } = req.body;
       const result = await teamService.updateUserTeamRole(authContext, req.params.userId, req.params.teamId, role);
       
-      if (!result.success) {
-        const status = result.error === 'User not found in team' ? 404 : 400;
-        return res.status(status).json({ message: result.error });
-      }
-      
-      res.json(result.data);
+      res.json(result);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "User not found in team" });
@@ -1757,11 +1747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const authContext = createAuthContextFromRequest(req);
       const result = await teamService.getTeams(authContext);
       
-      if (!result.success) {
-        return res.status(500).json({ message: result.error });
-      }
-      
-      res.json(result.data);
+      res.json(result);
     } catch (error) {
       console.error("Error fetching teams:", error);
       res.status(500).json({ message: "Failed to fetch teams" });
@@ -1773,12 +1759,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const authContext = createAuthContextFromRequest(req);
       const result = await teamService.getTeam(authContext, req.params.id);
       
-      if (!result.success) {
-        const status = result.error === 'Team not found' ? 404 : 500;
-        return res.status(status).json({ message: result.error });
+      if (!result) {
+        return res.status(404).json({ message: 'Team not found' });
       }
       
-      res.json(result.data);
+      res.json(result);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch team" });
     }
@@ -1793,16 +1778,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const authContext = createAuthContextFromRequest(req);
       const result = await teamService.createTeam(authContext, req.body);
       
-      if (!result.success) {
-        const duration = Date.now() - startTime;
-        addUserActionLog(userId, userName, `Criar time "${req.body.name || 'sem nome'}"`, 'error', { error: result.error }, duration);
-        return res.status(400).json({ message: result.error });
-      }
-      
       const duration = Date.now() - startTime;
-      addUserActionLog(userId, userName, `Criar time "${result.data.name}"`, 'success', null, duration);
+      addUserActionLog(userId, userName, `Criar time "${result.name}"`, 'success', null, duration);
       
-      res.status(201).json(result.data);
+      res.status(201).json(result);
     } catch (error) {
       const duration = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
@@ -1817,12 +1796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const authContext = createAuthContextFromRequest(req);
       const result = await teamService.updateTeam(authContext, req.params.id, req.body);
       
-      if (!result.success) {
-        const status = result.error === 'Team not found' ? 404 : 400;
-        return res.status(status).json({ message: result.error });
-      }
-      
-      res.json(result.data);
+      res.json(result);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "Team not found" });
@@ -1840,23 +1814,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const authContext = createAuthContextFromRequest(req);
       const result = await teamService.updateTeam(authContext, req.params.id, req.body);
       
-      if (!result.success) {
-        const duration = Date.now() - startTime;
-        const errorMessage = result.error || 'Erro desconhecido';
-        
-        if (result.error === 'Team not found') {
-          addUserActionLog(userId, userName, `Atualizar time (ID: ${req.params.id})`, 'error', { error: 'Time não encontrado' }, duration);
-          return res.status(404).json({ message: "Team not found" });
-        }
-        
-        addUserActionLog(userId, userName, `Atualizar time (ID: ${req.params.id})`, 'error', { error: errorMessage }, duration);
-        return res.status(400).json({ message: result.error });
-      }
-      
       const duration = Date.now() - startTime;
-      addUserActionLog(userId, userName, `Atualizar time "${result.data.name}"`, 'success', null, duration);
+      addUserActionLog(userId, userName, `Atualizar time "${result.name}"`, 'success', null, duration);
       
-      res.json(result.data);
+      res.json(result);
     } catch (error) {
       const duration = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
