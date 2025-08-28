@@ -35,7 +35,7 @@ function createAuthContextFromRequest(req: any): any {
     userName: user?.name || 'Unknown',
     userEmail: user?.email || '',
     permissions: permissions.map((p: any) => p.name),
-    permissionCategories: [...new Set(permissions.map((p: any) => p.category))],
+    permissionCategories: Array.from(new Set(permissions.map((p: any) => p.category))),
     profileId: user?.profileId,
     profileName: 'User',
     teams: [],
@@ -900,6 +900,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requireAuth,
     async (req, res) => {
     const startTime = Date.now();
+    const userId = req.session?.user?.id || 'unknown';
+    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -1854,7 +1856,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Atualizar time "${result.data.name}"`, 'success', null, duration);
       
-      res.json(team);
+      res.json(result.data);
     } catch (error) {
       const duration = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
