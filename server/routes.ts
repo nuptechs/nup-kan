@@ -2371,7 +2371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/profiles/:id/permissions", async (req, res) => {
+  app.get("/api/profiles/:id/permissions", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const profilePermissions = await profileService.getProfilePermissions(authContext, req.params.id);
@@ -2381,7 +2381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/profiles/:profileId/permissions", async (req, res) => {
+  app.post("/api/profiles/:profileId/permissions", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const { permissionId } = req.body;
       const authContext = createAuthContextFromRequest(req);
@@ -2392,7 +2392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/profiles/:profileId/permissions/:permissionId", async (req, res) => {
+  app.post("/api/profiles/:profileId/permissions/:permissionId", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const profilePermission = await profileService.addPermissionToProfile(authContext, req.params.profileId, req.params.permissionId);
@@ -2402,7 +2402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/profiles/:profileId/permissions/:permissionId", async (req, res) => {
+  app.delete("/api/profiles/:profileId/permissions/:permissionId", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       await profileService.removePermissionFromProfile(authContext, req.params.profileId, req.params.permissionId);

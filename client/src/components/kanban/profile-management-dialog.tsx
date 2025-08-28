@@ -468,17 +468,17 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
                       <span className="font-medium">{selectedProfile.name}</span>
                     </div>
                     
-                    {/* Interface de Duas Colunas para Permissões */}
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* Interface Responsiva para Permissões */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {/* Coluna Esquerda - Permissões Ativas */}
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <h4 className="font-medium text-sm text-green-600">Permissões Ativas</h4>
-                          <Badge variant="secondary" className="bg-green-100 text-green-800">
+                          <h4 className="font-medium text-base text-green-600">Permissões Ativas</h4>
+                          <Badge variant="secondary" className="bg-green-100 text-green-800 text-sm px-3 py-1">
                             {profilePermissions.length}
                           </Badge>
                         </div>
-                        <div className="border rounded-md p-3 max-h-64 overflow-y-auto">
+                        <div className="border rounded-lg p-4 max-h-80 overflow-y-auto bg-gray-50/50">
                           {profilePermissionsLoading ? (
                             <div className="text-sm text-muted-foreground">Carregando...</div>
                           ) : profilePermissions.length > 0 ? (
@@ -486,14 +486,15 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
                               const permission = permissions.find(p => p.id === pp.permissionId);
                               if (!permission) return null;
                               return (
-                                <div key={permission.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
-                                  <div className="flex items-center space-x-2 flex-1">
-                                    <CheckCircle className="w-4 h-4 text-green-500" />
-                                    <div>
-                                      <p className="text-sm font-medium text-green-700">{permission.name}</p>
+                                <div key={permission.id} className="flex items-start justify-between p-3 hover:bg-white/80 rounded-lg border border-green-200 bg-green-50/30 mb-2">
+                                  <div className="flex items-start space-x-3 flex-1">
+                                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-sm font-medium text-green-700 break-words">{permission.name}</p>
                                       {permission.description && (
-                                        <p className="text-xs text-muted-foreground">{permission.description}</p>
+                                        <p className="text-xs text-muted-foreground mt-1 break-words">{permission.description}</p>
                                       )}
+                                      <p className="text-xs text-green-600 mt-1">tasks</p>
                                     </div>
                                   </div>
                                   <Button
@@ -502,6 +503,8 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
                                     size="sm"
                                     onClick={() => togglePermission(permission.id)}
                                     data-testid={`button-remove-permission-${permission.id}`}
+                                    className="ml-2 flex-shrink-0"
+                                    title="Remover permissão"
                                   >
                                     <XCircle className="w-4 h-4 text-red-500" />
                                   </Button>
@@ -514,28 +517,30 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
                         </div>
                       </div>
 
-                      {/* Coluna Direita - Permissões Disponíveis */}
-                      <div className="space-y-3">
+                      {/* Coluna Direita - Disponíveis para Adicionar */}
+                      <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <h4 className="font-medium text-sm text-blue-600">Permissões Disponíveis</h4>
-                          <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                            {permissions.filter(p => !profilePermissions.some(pp => pp.permissionId === p.id)).length}
-                          </Badge>
+                          <h4 className="font-medium text-base text-blue-600">Disponíveis para Adicionar</h4>
+                          <div className="flex items-center">
+                            <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-sm px-3 py-1">
+                              {permissions.filter(p => !profilePermissions.some(pp => pp.permissionId === p.id)).length}
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="border rounded-md p-3 max-h-64 overflow-y-auto">
+                        <div className="border rounded-lg p-4 max-h-80 overflow-y-auto bg-gray-50/50">
                           {profilePermissionsLoading ? (
                             <div className="text-sm text-muted-foreground">Carregando...</div>
                           ) : (
                             permissions
                               .filter(p => !profilePermissions.some(pp => pp.permissionId === p.id))
                               .map((permission) => (
-                                <div key={permission.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
-                                  <div className="flex items-center space-x-2 flex-1">
-                                    <XCircle className="w-4 h-4 text-gray-400" />
-                                    <div>
-                                      <p className="text-sm font-medium text-blue-700">{permission.name}</p>
+                                <div key={permission.id} className="flex items-start justify-between p-3 hover:bg-white/80 rounded-lg border border-blue-200 bg-blue-50/30 mb-2">
+                                  <div className="flex items-start space-x-3 flex-1">
+                                    <XCircle className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-sm font-medium text-blue-700 break-words">{permission.name}</p>
                                       {permission.description && (
-                                        <p className="text-xs text-muted-foreground">{permission.description}</p>
+                                        <p className="text-xs text-muted-foreground mt-1 break-words">{permission.description}</p>
                                       )}
                                     </div>
                                   </div>
@@ -545,8 +550,10 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
                                     size="sm"
                                     onClick={() => togglePermission(permission.id)}
                                     data-testid={`button-add-permission-${permission.id}`}
+                                    className="ml-2 flex-shrink-0"
+                                    title="Adicionar permissão"
                                   >
-                                    <CheckCircle className="w-4 h-4 text-green-500" />
+                                    <CheckCircle className="w-5 h-5 text-green-500" />
                                   </Button>
                                 </div>
                               ))
