@@ -35,33 +35,36 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  // Reset form when dialog opens to ensure clean state for creating new user
+  // ROBUST FORM RESET: Force clean state when dialog opens
   useEffect(() => {
     console.log("📱 [DEBUG] isOpen mudou para:", isOpen);
     console.log("📱 [DEBUG] editingUser atual:", editingUser?.name || "null");
     
-    // 🔧 FIX: Always reset create form when dialog opens
     if (isOpen) {
-      console.log("🧹 [FORM-RESET] Resetando formulário de criação ao abrir diálogo");
-      form.reset({
-        name: "",
-        email: "",
-        role: "",
-        avatar: "",
-        status: "offline",
-      });
+      console.log("🧹 [FORM-RESET] FORÇA COMPLETA - Limpando tudo");
       
-      // Also clear editing state to ensure we start fresh
+      // 1. Clear editing state first
       setEditingUser(null);
-      editForm.reset({
+      
+      // 2. Force reset both forms with clean values
+      const cleanValues = {
         name: "",
         email: "",
         role: "",
         avatar: "",
         status: "offline",
-      });
+      };
+      
+      form.reset(cleanValues);
+      editForm.reset(cleanValues);
+      
+      // 3. Force re-render by updating a dummy state
+      setTimeout(() => {
+        form.reset(cleanValues);
+        console.log("🧹 [FORM-RESET] Reset duplo aplicado - formulário deve estar limpo");
+      }, 10);
     }
-  }, [isOpen]);
+  }, [isOpen, form, editForm]);
 
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
@@ -383,10 +386,10 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Status</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
+                        <Select onValueChange={field.onChange} value={field.value || ""} key={`create-status-${field.value || 'empty'}`}>
                           <FormControl>
                             <SelectTrigger data-testid="select-user-status">
-                              <SelectValue placeholder="Status" />
+                              <SelectValue placeholder="Selecione o status" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
