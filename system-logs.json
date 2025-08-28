@@ -1,5 +1,21 @@
 [
   {
+    "id": "log_1756341898424_i69onrx93",
+    "timestamp": "2025-08-28T00:44:58.424Z",
+    "level": "error",
+    "message": "Board creation error: Error: Permissão insuficiente: 'Criar Boards' necessária para criar boards",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756341898413_890tyk9cx",
+    "timestamp": "2025-08-28T00:44:58.413Z",
+    "level": "error",
+    "message": "❌ [BOARD-SERVICE] Erro em createBoard: Error: Permissão insuficiente: 'Criar Boards' necessária para criar boards",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756341882172_vzxa821i2",
     "timestamp": "2025-08-28T00:44:42.172Z",
     "level": "warn",
