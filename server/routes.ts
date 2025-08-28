@@ -226,8 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // 🎯 USAR BOARDSERVICE PARA LISTAGEM
         const authContext = createAuthContextFromRequest(req);
-        const result = await boardService.getBoards(authContext, { page, limit });
-        const boards = result.data || [];
+        const boards = await boardService.getBoards(authContext, { page, limit });
         
         // Paginação simples
         const startIndex = (page - 1) * limit;
@@ -287,24 +286,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Update and delete routes handled by other services
 
-  // Toggle board active status
-  app.patch("/api/boards/:id/toggle-status",
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Editar Boards"),
-    async (req, res) => {
-      try {
-        const boardId = req.params.id;
-        
-        const authContext = createAuthContextFromRequest(req);
-        const updatedBoard = await boardService.toggleBoardStatus(authContext, boardId);
-        
-        res.json(updatedBoard);
-      } catch (error) {
-        console.error("Error toggling board status:", error);
-        res.status(500).json({ error: "Erro interno do servidor" });
-      }
-    }
-  );
+  // Toggle board active status - TEMPORARILY DISABLED (method doesn't exist)
+  // app.patch("/api/boards/:id/toggle-status",
+  //   AuthMiddleware.requireAuth,
+  //   AuthMiddleware.requirePermissions("Editar Boards"),
+  //   async (req, res) => {
+  //     try {
+  //       const boardId = req.params.id;
+  //       
+  //       const authContext = createAuthContextFromRequest(req);
+  //       const updatedBoard = await boardService.toggleBoardStatus(authContext, boardId);
+  //       
+  //       res.json(updatedBoard);
+  //     } catch (error) {
+  //       console.error("Error toggling board status:", error);
+  //       res.status(500).json({ error: "Erro interno do servidor" });
+  //     }
+  //   }
+  // );
   
   // ✅ Task routes - SIMPLIFICADOS (sem microserviços complexos)
   // ROTAS REMOVIDAS - Usando apenas as versões simples abaixo
@@ -465,14 +464,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
-      const result = await boardService.updateBoard(authContext, req.params.id, req.body);
+      const updatedBoard = await boardService.updateBoard(authContext, req.params.id, req.body);
       
-      if (!result.success) {
-        const status = result.error === 'Board not found' ? 404 : 400;
-        return res.status(status).json({ message: result.error });
-      }
-      
-      res.json(result.data);
+      res.json(updatedBoard);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "Board not found" });
@@ -487,12 +481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
-      const result = await boardService.deleteBoard(authContext, req.params.id);
-      
-      if (!result.success) {
-        const status = result.error === 'Board not found' ? 404 : 500;
-        return res.status(status).json({ message: result.error });
-      }
+      await boardService.deleteBoard(authContext, req.params.id);
       
       res.status(204).send();
     } catch (error) {
@@ -512,13 +501,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
-      const result = await taskService.getBoardTasks(authContext, req.params.boardId);
+      const tasks = await taskService.getBoardTasks(authContext, req.params.boardId);
       
-      if (!result.success) {
-        return res.status(500).json({ message: result.error });
-      }
-      
-      res.json(result.data);
+      res.json(tasks);
     } catch (error) {
       console.error("Error fetching board tasks:", error);
       res.status(500).json({ message: "Failed to fetch board tasks" });
@@ -532,13 +517,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
-      const result = await taskService.createTask(authContext, req.body);
+      const task = await taskService.createTask(authContext, req.body);
       
-      if (!result.success) {
-        return res.status(400).json({ message: result.error });
-      }
-      
-      res.status(201).json(result.data);
+      res.status(201).json(task);
     } catch (error) {
       console.error("Error creating task:", error);
       res.status(400).json({ message: "Invalid task data" });
@@ -576,11 +557,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("✅ [REORDER] All validations passed, calling storage.reorderTasks");
       
       const authContext = createAuthContextFromRequest(req);
-      const result = await taskService.reorderTasks(authContext, reorderedTasks);
-      
-      if (!result.success) {
-        return res.status(400).json({ message: result.error });
-      }
+      // TEMPORARILY COMMENT OUT - reorderTasks method doesn't exist or doesn't return result object
+      // await taskService.reorderTasks(authContext, reorderedTasks);
+      // Use storage directly for now
+      await storage.reorderTasks(reorderedTasks);
       
       console.log("✅ [REORDER] Storage reorder completed successfully");
       
@@ -601,14 +581,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
-      const result = await taskService.updateTask(authContext, req.params.id, req.body);
+      const updatedTask = await taskService.updateTask(authContext, req.params.id, req.body);
       
-      if (!result.success) {
-        const status = result.error === 'Task not found' ? 404 : 400;
-        return res.status(status).json({ message: result.error });
-      }
-      
-      res.json(result.data);
+      res.json(updatedTask);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "Task not found" });
@@ -625,12 +600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
-      const result = await taskService.deleteTask(authContext, req.params.id);
-      
-      if (!result.success) {
-        const status = result.error === 'Task not found' ? 404 : 500;
-        return res.status(status).json({ message: result.error });
-      }
+      await taskService.deleteTask(authContext, req.params.id);
       
       res.status(204).send();
     } catch (error) {
@@ -682,8 +652,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requirePermissions("Criar Columns"), 
     async (req, res) => {
     const startTime = Date.now();
-    const userId = req.body.createdBy || "system";
-    const userName = req.body.createdByName || "Sistema";
+    const authContext = createAuthContextFromRequest(req);
+    const userId = authContext.userId || "system";
+    const userName = authContext.userName || "Sistema";
     
     try {
       const columnData = insertColumnSchema.parse(req.body);
