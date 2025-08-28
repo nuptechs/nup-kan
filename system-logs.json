@@ -1,5 +1,37 @@
 [
   {
+    "id": "log_1756348372452_ysm1ls301",
+    "timestamp": "2025-08-28T02:32:52.452Z",
+    "level": "error",
+    "message": "Error fetching board: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756348372451_7f60yy0o7",
+    "timestamp": "2025-08-28T02:32:52.451Z",
+    "level": "error",
+    "message": "❌ [BOARD-SERVICE] Erro em getBoard: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756348370536_vuz50n9iy",
+    "timestamp": "2025-08-28T02:32:50.536Z",
+    "level": "error",
+    "message": "Error fetching board: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756348370535_xk34z4qnn",
+    "timestamp": "2025-08-28T02:32:50.535Z",
+    "level": "error",
+    "message": "❌ [BOARD-SERVICE] Erro em getBoard: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756348368463_asf4zpv4a",
     "timestamp": "2025-08-28T02:32:48.463Z",
     "level": "error",
