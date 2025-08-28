@@ -359,6 +359,120 @@ export class TaskService extends BaseService {
   }
 
   /**
+   * Listar todas as tasks (sem filtro de board)
+   */
+  async getAllTasks(authContext: AuthContext, options: PaginationOptions = {}): Promise<TaskWithDetails[]> {
+    this.log('task-service', 'getAllTasks', { userId: authContext.userId });
+    
+    try {
+      this.requirePermission(authContext, 'Listar Tasks', 'listar tasks');
+
+      // Buscar todas as tasks do DAO
+      const tasks = await this.storage.getTasks();
+      
+      // Enriquecer com detalhes
+      const enrichedTasks: TaskWithDetails[] = await Promise.all(
+        tasks.map(async (task) => {
+          const assigneeInfo = await this.getAssigneeInfo(task.assigneeId);
+          
+          return {
+            ...task,
+            assigneeName: assigneeInfo.name,
+            assigneeAvatar: assigneeInfo.avatar,
+            recentActivity: [], // Pode ser implementado depois
+            permissions: {
+              canEdit: this.hasPermission(authContext, 'Editar Tasks'),
+              canDelete: this.hasPermission(authContext, 'Excluir Tasks'),
+              canAssign: this.hasPermission(authContext, 'Editar Tasks'),
+              canChangeStatus: this.hasPermission(authContext, 'Editar Tasks'),
+            }
+          };
+        })
+      );
+
+      return enrichedTasks;
+    } catch (error) {
+      this.logError('task-service', 'getAllTasks', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obter assignees de uma task
+   */
+  async getTaskAssignees(authContext: AuthContext, taskId: string): Promise<any[]> {
+    this.log('task-service', 'getTaskAssignees', { userId: authContext.userId, taskId });
+    
+    try {
+      this.requirePermission(authContext, 'Visualizar Tasks', 'visualizar assignees');
+      return await this.storage.getTaskAssignees(taskId);
+    } catch (error) {
+      this.logError('task-service', 'getTaskAssignees', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Adicionar assignee a uma task
+   */
+  async addTaskAssignee(authContext: AuthContext, taskId: string, userId: string): Promise<any> {
+    this.log('task-service', 'addTaskAssignee', { userId: authContext.userId, taskId });
+    
+    try {
+      this.requirePermission(authContext, 'Editar Tasks', 'adicionar assignee');
+      return await this.storage.addTaskAssignee({ taskId, userId });
+    } catch (error) {
+      this.logError('task-service', 'addTaskAssignee', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remover assignee de uma task
+   */
+  async removeTaskAssignee(authContext: AuthContext, taskId: string, userId: string): Promise<void> {
+    this.log('task-service', 'removeTaskAssignee', { userId: authContext.userId, taskId });
+    
+    try {
+      this.requirePermission(authContext, 'Editar Tasks', 'remover assignee');
+      return await this.storage.removeTaskAssignee(taskId, userId);
+    } catch (error) {
+      this.logError('task-service', 'removeTaskAssignee', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Definir assignees de uma task
+   */
+  async setTaskAssignees(authContext: AuthContext, taskId: string, userIds: string[]): Promise<void> {
+    this.log('task-service', 'setTaskAssignees', { userId: authContext.userId, taskId });
+    
+    try {
+      this.requirePermission(authContext, 'Editar Tasks', 'definir assignees');
+      return await this.storage.setTaskAssignees(taskId, userIds);
+    } catch (error) {
+      this.logError('task-service', 'setTaskAssignees', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Reordenar tasks
+   */
+  async reorderTasks(authContext: AuthContext, reorderedTasks: { id: string; position: number }[]): Promise<void> {
+    this.log('task-service', 'reorderTasks', { userId: authContext.userId });
+    
+    try {
+      this.requirePermission(authContext, 'Editar Tasks', 'reordenar tasks');
+      return await this.storage.reorderTasks(reorderedTasks);
+    } catch (error) {
+      this.logError('task-service', 'reorderTasks', error);
+      throw error;
+    }
+  }
+
+  /**
    * Atribuir task para usuário
    */
   async assignTask(authContext: AuthContext, taskId: string, assigneeId: string): Promise<Task> {

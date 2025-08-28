@@ -54,7 +54,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Find user by email através do UserService
-      const users = await storage.getUsers(); // TODO: Refatorar para userService quando implementar login
+      const authContextTemp = { userId: 'system', permissions: ['Listar Users'] } as any;
+      const users = await userService.getUsers(authContextTemp);
       const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
       
       if (!user) {
@@ -113,7 +114,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🆘 ENDPOINT EMERGENCIAL: Auto-login para desenvolvimento (TEMPORÁRIO)
   app.post("/api/auth/dev-login", async (req, res) => {
     try {
-      const users = await storage.getUsers(); // TODO: Refatorar para userService
+      const authContextTemp = { userId: 'system', permissions: ['Listar Users'] } as any;
+      const users = await userService.getUsers(authContextTemp);
       const firstUser = users[0];
       
       if (!firstUser) {
@@ -196,14 +198,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(403).json({ error: "Access denied to other user's permissions" });
         }
         
-        const permissionsArray = await storage.getUserPermissions(targetUserId);
-        console.log(`🔍 [DEBUG] Permissões raw do storage:`, permissionsArray);
+        const authContextTemp = { userId: targetUserId, permissions: ['Visualizar Users'] } as any;
+        const userWithDetails = await userService.getUser(authContextTemp, targetUserId);
+        const permissionsArray = userWithDetails?.permissions || [];
+        console.log(`🔍 [DEBUG] Permissões raw do userService:`, permissionsArray);
         
-        // 🔧 CONVERTER Permission[] para { permissions: string[] }
+        // 🔧 Permissões já estão como string[] do userService
         const permissionsResponse = {
-          permissions: Array.isArray(permissionsArray) 
-            ? permissionsArray.map(p => typeof p === 'string' ? p : p.name || p)
-            : []
+          permissions: Array.isArray(permissionsArray) ? permissionsArray : []
         };
         
         console.log(`🔍 [DEBUG] Permissões formatadas:`, permissionsResponse);
@@ -349,8 +351,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const validLimit = Math.min(100, Math.max(1, limit));
         const offset = (validPage - 1) * validLimit;
         
-        // Buscar tasks paginadas (sem suporte ainda, retornando todas)
-        const allTasks = await storage.getTasks();
+        // Buscar tasks paginadas através do TaskService
+        const authContext = createAuthContextFromRequest(req);
+        const allTasksDetails = await taskService.getAllTasks(authContext);
+        const allTasks = allTasksDetails; // O TaskService já retorna tasks enriquecidas
         const tasks = allTasks.slice(offset, offset + validLimit);
         const total = allTasks.length;
         
@@ -367,7 +371,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } else {
         // Retornar todas as tasks (sem paginação)
-        const tasks = await storage.getTasks();
+        const authContext = createAuthContextFromRequest(req);
+        const tasks = await taskService.getAllTasks(authContext);
         res.json(tasks);
       }
     } catch (error) {
@@ -411,7 +416,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Task Assignee routes
   app.get("/api/tasks/:taskId/assignees", async (req, res) => {
     try {
-      const assignees = await storage.getTaskAssignees(req.params.taskId);
+      const authContext = createAuthContextFromRequest(req);
+      const assignees = await taskService.getTaskAssignees(authContext, req.params.taskId);
       res.json(assignees);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch task assignees" });
@@ -424,7 +430,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         taskId: req.params.taskId,
         userId: req.body.userId,
       });
-      const assignee = await storage.addTaskAssignee(assigneeData);
+      const authContext = createAuthContextFromRequest(req);
+      const assignee = await taskService.addTaskAssignee(authContext, req.params.taskId, req.body.userId);
       res.status(201).json(assignee);
     } catch (error) {
       res.status(400).json({ message: "Invalid assignee data" });
@@ -433,7 +440,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/tasks/:taskId/assignees/:userId", async (req, res) => {
     try {
-      await storage.removeTaskAssignee(req.params.taskId, req.params.userId);
+      const authContext = createAuthContextFromRequest(req);
+      await taskService.removeTaskAssignee(authContext, req.params.taskId, req.params.userId);
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -449,7 +457,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!Array.isArray(userIds)) {
         return res.status(400).json({ message: "userIds must be an array" });
       }
-      await storage.setTaskAssignees(req.params.taskId, userIds);
+      const authContext = createAuthContextFromRequest(req);
+      await taskService.setTaskAssignees(authContext, req.params.taskId, userIds);
       res.status(204).send();
     } catch (error) {
       res.status(400).json({ message: "Failed to set task assignees" });
@@ -560,7 +569,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // TEMPORARILY COMMENT OUT - reorderTasks method doesn't exist or doesn't return result object
       // await taskService.reorderTasks(authContext, reorderedTasks);
       // Use storage directly for now
-      await storage.reorderTasks(reorderedTasks);
+      const authContext = createAuthContextFromRequest(req);
+      await taskService.reorderTasks(authContext, reorderedTasks);
       
       console.log("✅ [REORDER] Storage reorder completed successfully");
       
