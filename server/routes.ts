@@ -28,9 +28,22 @@ import { QueryHandlers } from './cqrs/queries';
 // Helper para criar AuthContext a partir da request
 function createAuthContextFromRequest(req: any): any {
   // JWT Auth: usar dados do authContext configurado pelo middleware JWT
-  const authContext = req.authContext;
-  if (authContext) {
-    return authContext;
+  const authContextJWT = req.authContext;
+  if (authContextJWT) {
+    // Converter AuthContextJWT para AuthContext adicionando sessionId
+    return {
+      userId: authContextJWT.userId,
+      userName: authContextJWT.userName,
+      userEmail: authContextJWT.userEmail,
+      permissions: authContextJWT.permissions,
+      permissionCategories: authContextJWT.permissionCategories,
+      profileId: authContextJWT.profileId || '',
+      profileName: authContextJWT.profileName,
+      teams: authContextJWT.teams,
+      sessionId: `jwt-${authContextJWT.userId}-${Date.now()}`, // Fake sessionId for JWT
+      isAuthenticated: authContextJWT.isAuthenticated,
+      lastActivity: authContextJWT.lastActivity
+    };
   }
   
   // Fallback para session auth (compatibilidade)
@@ -44,9 +57,10 @@ function createAuthContextFromRequest(req: any): any {
     userEmail: user?.email || '',
     permissions: permissions.map((p: any) => p.name),
     permissionCategories: Array.from(new Set(permissions.map((p: any) => p.category))),
-    profileId: user?.profileId,
+    profileId: user?.profileId || '',
     profileName: 'User',
     teams: [],
+    sessionId: req.session?.id || 'no-session',
     isAuthenticated: !!userId,
     lastActivity: new Date()
   };
