@@ -539,9 +539,12 @@ export class BoardService extends BaseService {
       isActive: newStatus
     });
 
-    // Invalidar caches relevantes
-    await this.cache.del(`boards_user_access:${authContext.userId}:20:0`);
-    await this.cache.del(`board:${boardId}`);
+    // Invalidar caches relevantes - CORRIGIDO!
+    await this.invalidateCache([
+      `boards:user:${authContext.userId}:*`,
+      `board:${boardId}:*`,
+      'boards:all'
+    ]);
     
     console.log(`✅ [BOARD-SERVICE] Board ${boardId} status alterado para ${newStatus}`);
     

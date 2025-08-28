@@ -141,10 +141,10 @@ export class TaskService {
           userName: authContext.userName,
         }],
         permissions: {
-          canEdit: authContext.permissions.includes('Editar Tasks'),
+          canEdit: authContext.permissions.includes('Editar Tarefas'),
           canDelete: authContext.permissions.includes('Excluir Tasks'),
           canAssign: authContext.permissions.includes('Atribuir Membros'),
-          canChangeStatus: authContext.permissions.includes('Editar Tasks'),
+          canChangeStatus: authContext.permissions.includes('Editar Tarefas'),
         },
       };
 
@@ -184,10 +184,10 @@ export class TaskService {
         columnTitle: task.columnTitle || task.status,
         recentActivity: task.recentActivity || [],
         permissions: {
-          canEdit: authContext.permissions.includes('Editar Tasks'),
+          canEdit: authContext.permissions.includes('Editar Tarefas'),
           canDelete: authContext.permissions.includes('Excluir Tasks'),
           canAssign: authContext.permissions.includes('Atribuir Membros'),
-          canChangeStatus: authContext.permissions.includes('Editar Tasks'),
+          canChangeStatus: authContext.permissions.includes('Editar Tarefas'),
         },
       }));
 
@@ -239,7 +239,7 @@ export class TaskService {
 
     try {
       // Verificar permissões
-      if (!authContext.permissions.includes('Editar Tasks')) {
+      if (!authContext.permissions.includes('Editar Tarefas')) {
         throw new Error('Permissão insuficiente para editar tasks');
       }
 
@@ -284,10 +284,10 @@ export class TaskService {
           userName: authContext.userName,
         }],
         permissions: {
-          canEdit: authContext.permissions.includes('Editar Tasks'),
+          canEdit: authContext.permissions.includes('Editar Tarefas'),
           canDelete: authContext.permissions.includes('Excluir Tasks'),
           canAssign: authContext.permissions.includes('Atribuir Membros'),
-          canChangeStatus: authContext.permissions.includes('Editar Tasks'),
+          canChangeStatus: authContext.permissions.includes('Editar Tarefas'),
         },
       };
 

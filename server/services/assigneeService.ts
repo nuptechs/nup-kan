@@ -38,7 +38,7 @@ export class AssigneeService extends BaseService {
     this.log('assignee-service', 'getTaskAssignees', { userId: authContext.userId, taskId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Tasks', 'visualizar assignees de task');
+      this.requirePermission(authContext, 'Visualizar Tarefas', 'visualizar assignees de task');
 
       const cacheKey = `assignees:task:${taskId}`;
       const cached = await this.cache.get<AssigneeWithUser[]>(cacheKey);
@@ -83,7 +83,7 @@ export class AssigneeService extends BaseService {
       // Usar hierarchyService para verificar se usuário pode ser assignee da task
       const userHierarchy = await hierarchyService.resolveUserHierarchy(authContext, request.userId);
       const canBeAssigned = userHierarchy.allPermissions.some(p => 
-        p.name === 'Visualizar Tasks' || p.name === 'Editar Tasks'
+        p.name === 'Visualizar Tarefas' || p.name === 'Editar Tarefas'
       );
       
       if (!canBeAssigned) {
@@ -165,7 +165,7 @@ export class AssigneeService extends BaseService {
     this.log('assignee-service', 'getUserAssignments', { userId: authContext.userId, targetUserId: userId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Tasks', 'visualizar assignments do usuário');
+      this.requirePermission(authContext, 'Visualizar Tarefas', 'visualizar assignments do usuário');
 
       const cacheKey = `user:${userId}:assignments`;
       const cached = await this.cache.get<AssigneeWithUser[]>(cacheKey);

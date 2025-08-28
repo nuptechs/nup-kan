@@ -34,7 +34,7 @@ export class TaskStatusService extends BaseService {
     this.log('task-status-service', 'getTaskStatuses', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Tasks', 'listar status de tasks');
+      this.requirePermission(authContext, 'Listar Tarefas', 'listar status de tasks');
 
       const cacheKey = 'task_statuses:all';
       const cached = await this.cache.get<TaskStatus[]>(cacheKey);
@@ -56,7 +56,7 @@ export class TaskStatusService extends BaseService {
     this.log('task-status-service', 'getTaskStatus', { userId: authContext.userId, statusId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Tasks', 'visualizar status');
+      this.requirePermission(authContext, 'Visualizar Tarefas', 'visualizar status');
 
       const status = await this.storage.getTaskStatus(statusId);
       return status || null;
@@ -70,7 +70,7 @@ export class TaskStatusService extends BaseService {
     this.log('task-status-service', 'createTaskStatus', { userId: authContext.userId, name: request.name });
     
     try {
-      this.requirePermission(authContext, 'Criar Tasks', 'criar status de task');
+      this.requirePermission(authContext, 'Criar Tarefas', 'criar status de task');
 
       const validData = insertTaskStatusSchema.parse(request);
       const status = await this.storage.createTaskStatus(validData);
@@ -94,7 +94,7 @@ export class TaskStatusService extends BaseService {
     this.log('task-status-service', 'updateTaskStatus', { userId: authContext.userId, statusId });
     
     try {
-      this.requirePermission(authContext, 'Editar Tasks', 'editar status de task');
+      this.requirePermission(authContext, 'Editar Tarefas', 'editar status de task');
 
       const validData = updateTaskStatusSchema.parse(request);
       const status = await this.storage.updateTaskStatus(statusId, validData);
@@ -200,7 +200,7 @@ export class TaskStatusService extends BaseService {
     this.log('task-status-service', 'updateTaskPriority', { userId: authContext.userId, priorityId });
     
     try {
-      this.requirePermission(authContext, 'Editar Tasks', 'editar prioridade de task');
+      this.requirePermission(authContext, 'Editar Tarefas', 'editar prioridade de task');
 
       const validData = updateTaskPrioritySchema.parse(request);
       const priority = await this.storage.updateTaskPriority(priorityId, validData);

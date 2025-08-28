@@ -348,7 +348,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'updateTaskStatus', { userId: authContext.userId, taskId, newStatus });
     
     try {
-      this.requirePermission(authContext, 'Editar Tasks', 'alterar status da task');
+      this.requirePermission(authContext, 'Editar Tarefas', 'alterar status da task');
 
       return this.updateTask(authContext, taskId, { status: newStatus });
 
@@ -381,10 +381,10 @@ export class TaskService extends BaseService {
             assigneeAvatar: assigneeInfo.avatar,
             recentActivity: [], // Pode ser implementado depois
             permissions: {
-              canEdit: this.hasPermission(authContext, 'Editar Tasks'),
+              canEdit: this.hasPermission(authContext, 'Editar Tarefas'),
               canDelete: this.hasPermission(authContext, 'Excluir Tasks'),
-              canAssign: this.hasPermission(authContext, 'Editar Tasks'),
-              canChangeStatus: this.hasPermission(authContext, 'Editar Tasks'),
+              canAssign: this.hasPermission(authContext, 'Editar Tarefas'),
+              canChangeStatus: this.hasPermission(authContext, 'Editar Tarefas'),
             }
           };
         })
@@ -419,7 +419,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'addTaskAssignee', { userId: authContext.userId, taskId });
     
     try {
-      this.requirePermission(authContext, 'Editar Tasks', 'adicionar assignee');
+      this.requirePermission(authContext, 'Editar Tarefas', 'adicionar assignee');
       return await this.storage.addTaskAssignee({ taskId, userId });
     } catch (error) {
       this.logError('task-service', 'addTaskAssignee', error);
@@ -434,7 +434,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'removeTaskAssignee', { userId: authContext.userId, taskId });
     
     try {
-      this.requirePermission(authContext, 'Editar Tasks', 'remover assignee');
+      this.requirePermission(authContext, 'Editar Tarefas', 'remover assignee');
       return await this.storage.removeTaskAssignee(taskId, userId);
     } catch (error) {
       this.logError('task-service', 'removeTaskAssignee', error);
@@ -449,7 +449,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'setTaskAssignees', { userId: authContext.userId, taskId });
     
     try {
-      this.requirePermission(authContext, 'Editar Tasks', 'definir assignees');
+      this.requirePermission(authContext, 'Editar Tarefas', 'definir assignees');
       return await this.storage.setTaskAssignees(taskId, userIds);
     } catch (error) {
       this.logError('task-service', 'setTaskAssignees', error);
@@ -464,7 +464,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'reorderTasks', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Editar Tasks', 'reordenar tasks');
+      this.requirePermission(authContext, 'Editar Tarefas', 'reordenar tasks');
       return await this.storage.reorderTasks(reorderedTasks);
     } catch (error) {
       this.logError('task-service', 'reorderTasks', error);
@@ -508,10 +508,10 @@ export class TaskService extends BaseService {
 
   private calculateTaskPermissions(authContext: AuthContext, task: Task) {
     return {
-      canEdit: this.hasPermission(authContext, 'Editar Tasks'),
+      canEdit: this.hasPermission(authContext, 'Editar Tarefas'),
       canDelete: this.hasPermission(authContext, 'Excluir Tasks'),
       canAssign: this.hasPermission(authContext, 'Atribuir Membros'),
-      canChangeStatus: this.hasPermission(authContext, 'Editar Tasks'),
+      canChangeStatus: this.hasPermission(authContext, 'Editar Tarefas'),
     };
   }
 
