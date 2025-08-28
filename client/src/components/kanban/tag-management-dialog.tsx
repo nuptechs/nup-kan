@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
     queryKey: ["/api/tags"],
   });
 
+  // SINGLE FORM: Um único formulário para criar e editar
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,13 +40,16 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
     },
   });
 
-  const editForm = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      color: "#3B82F6",
-    },
-  });
+  // Limpar estado quando o dialog fecha
+  useEffect(() => {
+    if (!isOpen) {
+      setEditingTag(null);
+      form.reset({
+        name: "",
+        color: "#3B82F6",
+      });
+    }
+  }, [isOpen, form]);
 
   const createTagMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -59,7 +63,9 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
         description: "Tag criada com sucesso!",
         duration: 2500,
       });
-      form.reset();
+      if (!editingTag) {
+        form.reset();
+      }
     },
     onError: () => {
       toast({
@@ -83,7 +89,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
         duration: 2500,
       });
       setEditingTag(null);
-      editForm.reset();
+      form.reset();
       onClose(); // Fecha a modal automaticamente
     },
     onError: () => {
@@ -128,7 +134,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
 
   const startEdit = (tag: Tag) => {
     setEditingTag(tag);
-    editForm.reset({
+    form.reset({
       name: tag.name,
       color: tag.color,
     });
@@ -136,7 +142,10 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
 
   const cancelEdit = () => {
     setEditingTag(null);
-    editForm.reset();
+    form.reset({
+      name: "",
+      color: "#3B82F6",
+    });
   };
 
   const handleDelete = (tagId: string) => {
@@ -242,13 +251,13 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
                     data-testid={`tag-item-${tag.id}`}
                   >
                     {editingTag?.id === tag.id ? (
-                      <Form {...editForm}>
+                      <Form {...form}>
                         <form 
-                          onSubmit={editForm.handleSubmit(onEditSubmit)} 
+                          onSubmit={form.handleSubmit(onEditSubmit)} 
                           className="flex items-center space-x-2 flex-1"
                         >
                           <FormField
-                            control={editForm.control}
+                            control={form.control}
                             name="name"
                             render={({ field }) => (
                               <FormItem className="flex-1">
@@ -264,7 +273,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
                           />
 
                           <FormField
-                            control={editForm.control}
+                            control={form.control}
                             name="color"
                             render={({ field }) => (
                               <FormItem>

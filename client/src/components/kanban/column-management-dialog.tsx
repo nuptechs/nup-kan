@@ -36,6 +36,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
   });
   
 
+  // SINGLE FORM: Um único formulário para criar e editar
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -47,21 +48,11 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
     },
   });
 
-  const editForm = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      position: 0,
-      wipLimit: null,
-      color: "#3b82f6",
-    },
-  });
-
   // Quando uma coluna externa for passada para edição, configure o formulário
   useEffect(() => {
     if (externalEditingColumn && isOpen) {
       setEditingColumn(externalEditingColumn);
-      editForm.reset({
+      form.reset({
         title: externalEditingColumn.title,
         position: externalEditingColumn.position,
         wipLimit: externalEditingColumn.wipLimit,
@@ -75,9 +66,15 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
       }, 100);
     } else if (!isOpen) {
       setEditingColumn(null);
-      editForm.reset();
+      form.reset({
+        title: "",
+        boardId: boardId,
+        position: 0,
+        wipLimit: null,
+        color: "#3b82f6",
+      });
     }
-  }, [externalEditingColumn, isOpen, editForm]);
+  }, [externalEditingColumn, isOpen, form, boardId]);
 
   const createColumnMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -122,7 +119,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
         duration: 3000,
       });
       setEditingColumn(null);
-      editForm.reset();
+      form.reset();
       onClose(); // Fecha a modal automaticamente
     },
     onError: () => {
@@ -199,17 +196,24 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
 
   const startEdit = (column: Column) => {
     setEditingColumn(column);
-    editForm.reset({
+    form.reset({
       title: column.title,
       position: column.position,
       wipLimit: column.wipLimit,
       color: column.color,
+      boardId: column.boardId,
     });
   };
 
   const cancelEdit = () => {
     setEditingColumn(null);
-    editForm.reset();
+    form.reset({
+      title: "",
+      boardId: boardId,
+      position: 0,
+      wipLimit: null,
+      color: "#3b82f6",
+    });
   };
 
   const handleDelete = (columnId: string) => {
@@ -377,13 +381,13 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
                     data-testid={`column-item-${column.id}`}
                   >
                     {editingColumn?.id === column.id ? (
-                      <Form {...editForm}>
+                      <Form {...form}>
                         <form 
-                          onSubmit={editForm.handleSubmit(onEditSubmit)} 
+                          onSubmit={form.handleSubmit(onEditSubmit)} 
                           className="flex items-center space-x-3 flex-1"
                         >
                           <FormField
-                            control={editForm.control}
+                            control={form.control}
                             name="title"
                             render={({ field }) => (
                               <FormItem className="flex-1">
@@ -401,7 +405,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
                           />
 
                           <FormField
-                            control={editForm.control}
+                            control={form.control}
                             name="color"
                             render={({ field }) => (
                               <FormItem className="w-16">
@@ -418,7 +422,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
                           />
 
                           <FormField
-                            control={editForm.control}
+                            control={form.control}
                             name="wipLimit"
                             render={({ field }) => (
                               <FormItem className="w-20">
