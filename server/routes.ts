@@ -9,7 +9,7 @@ import { db } from "./db";
 import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTeamMemberSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema, insertTaskAssigneeSchema, insertCustomFieldSchema, updateCustomFieldSchema, insertTaskCustomValueSchema, updateTaskCustomValueSchema, customFields, taskCustomValues, insertNotificationSchema, updateNotificationSchema } from "@shared/schema";
 
 // 🏗️ SERVICES - Camada única oficial de persistência
-import { boardService, taskService, userService, teamService, notificationService } from "./services";
+import { boardService, taskService, userService, teamService, notificationService, columnService, tagService, profileService, permissionService } from "./services";
 import { eq, sql, and } from "drizzle-orm";
 import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
 import { PermissionSyncService } from "./permissionSync";
@@ -563,12 +563,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      console.log("✅ [REORDER] All validations passed, calling storage.reorderTasks");
+      console.log("✅ [REORDER] All validations passed, calling taskService.reorderTasks");
       
-      const authContext = createAuthContextFromRequest(req);
-      // TEMPORARILY COMMENT OUT - reorderTasks method doesn't exist or doesn't return result object
-      // await taskService.reorderTasks(authContext, reorderedTasks);
-      // Use storage directly for now
       const authContext = createAuthContextFromRequest(req);
       await taskService.reorderTasks(authContext, reorderedTasks);
       
@@ -624,7 +620,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/boards/:boardId/columns", async (req, res) => {
     try {
-      const columns = await storage.getBoardColumns(req.params.boardId);
+      const authContext = createAuthContextFromRequest(req);
+      const columns = await columnService.getBoardColumns(authContext, req.params.boardId);
       res.json(columns);
     } catch (error) {
       console.error("Error fetching board columns:", error);
@@ -638,7 +635,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requirePermissions("Listar Columns"), 
     async (req, res) => {
     try {
-      const columns = await storage.getColumns();
+      const authContext = createAuthContextFromRequest(req);
+      const columns = await columnService.getColumns(authContext);
       res.json(columns);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch columns" });
@@ -647,7 +645,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/columns/:id", async (req, res) => {
     try {
-      const column = await storage.getColumn(req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      const column = await columnService.getColumn(authContext, req.params.id);
       if (!column) {
         return res.status(404).json({ message: "Column not found" });
       }
@@ -668,7 +667,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const columnData = insertColumnSchema.parse(req.body);
-      const column = await storage.createColumn(columnData);
+      const authContext = createAuthContextFromRequest(req);
+      const column = await columnService.createColumn(authContext, columnData);
       
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Criar coluna "${column.title}"`, 'success', null, duration);
@@ -686,7 +686,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/columns/:id", async (req, res) => {
     try {
       const columnData = updateColumnSchema.parse(req.body);
-      const column = await storage.updateColumn(req.params.id, columnData);
+      const authContext = createAuthContextFromRequest(req);
+      const column = await columnService.updateColumn(authContext, req.params.id, columnData);
       res.json(column);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -702,7 +703,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
     try {
       const columnData = updateColumnSchema.parse(req.body);
-      const column = await storage.updateColumn(req.params.id, columnData);
+      const authContext = createAuthContextFromRequest(req);
+      const column = await columnService.updateColumn(authContext, req.params.id, columnData);
       res.json(column);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -717,7 +719,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requirePermissions("Excluir Columns"), 
     async (req, res) => {
     try {
-      await storage.deleteColumn(req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      await columnService.deleteColumn(authContext, req.params.id);
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -733,7 +736,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
     try {
       const reorderedColumns = req.body.columns;
-      await storage.reorderColumns(reorderedColumns);
+      const authContext = createAuthContextFromRequest(req);
+      await columnService.reorderColumns(authContext, reorderedColumns);
       res.status(200).json({ message: "Columns reordered successfully" });
     } catch (error) {
       res.status(400).json({ message: "Failed to reorder columns" });
@@ -803,7 +807,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Tag routes
   app.get("/api/tags", async (req, res) => {
     try {
-      const tags = await storage.getTags();
+      const authContext = createAuthContextFromRequest(req);
+      const tags = await tagService.getTags(authContext);
       res.json(tags);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch tags" });
@@ -812,7 +817,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/tags/:id", async (req, res) => {
     try {
-      const tag = await storage.getTag(req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      const tag = await tagService.getTag(authContext, req.params.id);
       if (!tag) {
         return res.status(404).json({ message: "Tag not found" });
       }
@@ -825,7 +831,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/tags", async (req, res) => {
     try {
       const tagData = insertTagSchema.parse(req.body);
-      const tag = await storage.createTag(tagData);
+      const authContext = createAuthContextFromRequest(req);
+      const tag = await tagService.createTag(authContext, tagData);
       res.status(201).json(tag);
     } catch (error) {
       res.status(400).json({ message: "Invalid tag data" });
@@ -835,7 +842,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/tags/:id", async (req, res) => {
     try {
       const tagData = insertTagSchema.parse(req.body);
-      const tag = await storage.updateTag(req.params.id, tagData);
+      const authContext = createAuthContextFromRequest(req);
+      const tag = await tagService.updateTag(authContext, req.params.id, tagData);
       res.json(tag);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -847,7 +855,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/tags/:id", async (req, res) => {
     try {
-      await storage.deleteTag(req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      await tagService.deleteTag(authContext, req.params.id);
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -1885,7 +1894,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Profile routes
   app.get("/api/profiles", async (req, res) => {
     try {
-      const profiles = await storage.getProfiles();
+      const authContext = createAuthContextFromRequest(req);
+      const profiles = await profileService.getProfiles(authContext);
       res.json(profiles);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch profiles" });
@@ -1894,7 +1904,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/profiles/:id", async (req, res) => {
     try {
-      const profile = await storage.getProfile(req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      const profile = await profileService.getProfile(authContext, req.params.id);
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
@@ -1911,7 +1922,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const profileData = insertProfileSchema.parse(req.body);
-      const profile = await storage.createProfile(profileData);
+      const authContext = createAuthContextFromRequest(req);
+      const profile = await profileService.createProfile(authContext, profileData);
       
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Criar perfil "${profile.name}"`, 'success', null, duration);
@@ -1933,7 +1945,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const profileData = updateProfileSchema.parse(req.body);
-      const profile = await storage.updateProfile(req.params.id, profileData);
+      const authContext = createAuthContextFromRequest(req);
+      const profile = await profileService.updateProfile(authContext, req.params.id, profileData);
       
       // Cache individual será invalidado automaticamente pelo TanStack Query
       
@@ -1961,7 +1974,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
-      await storage.deleteProfile(req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      await profileService.deleteProfile(authContext, req.params.id);
       
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Deletar perfil (ID: ${req.params.id})`, 'success', null, duration);
@@ -1987,7 +2001,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Permission routes
   app.get("/api/permissions", async (req, res) => {
     try {
-      const permissions = await storage.getPermissions();
+      const authContext = createAuthContextFromRequest(req);
+      const permissions = await permissionService.getPermissions(authContext);
       res.json(permissions);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch permissions" });
@@ -1996,7 +2011,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/permissions/:id", async (req, res) => {
     try {
-      const permission = await storage.getPermission(req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      const permission = await permissionService.getPermission(authContext, req.params.id);
       if (!permission) {
         return res.status(404).json({ message: "Permission not found" });
       }
@@ -2009,7 +2025,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/permissions", async (req, res) => {
     try {
       const permissionData = insertPermissionSchema.parse(req.body);
-      const permission = await storage.createPermission(permissionData);
+      const authContext = createAuthContextFromRequest(req);
+      const permission = await permissionService.createPermission(authContext, permissionData);
       // Cache invalidation handled automatically
       res.status(201).json(permission);
     } catch (error) {
@@ -2020,7 +2037,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/permissions/:id", async (req, res) => {
     try {
       const permissionData = req.body;
-      const permission = await storage.updatePermission(req.params.id, permissionData);
+      const authContext = createAuthContextFromRequest(req);
+      const permission = await permissionService.updatePermission(authContext, req.params.id, permissionData);
       res.json(permission);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -2032,7 +2050,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/permissions/:id", async (req, res) => {
     try {
-      await storage.deletePermission(req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      await permissionService.deletePermission(authContext, req.params.id);
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -2054,7 +2073,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/profiles/:id/permissions", async (req, res) => {
     try {
-      const profilePermissions = await storage.getProfilePermissions(req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      const profilePermissions = await profileService.getProfilePermissions(authContext, req.params.id);
       res.json(profilePermissions);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch profile permissions" });
@@ -2064,7 +2084,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/profiles/:profileId/permissions", async (req, res) => {
     try {
       const { permissionId } = req.body;
-      const profilePermission = await storage.addPermissionToProfile(req.params.profileId, permissionId);
+      const authContext = createAuthContextFromRequest(req);
+      const profilePermission = await profileService.addPermissionToProfile(authContext, req.params.profileId, permissionId);
       res.status(201).json(profilePermission);
     } catch (error) {
       res.status(400).json({ message: "Failed to add permission to profile" });
@@ -2073,7 +2094,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/profiles/:profileId/permissions/:permissionId", async (req, res) => {
     try {
-      const profilePermission = await storage.addPermissionToProfile(req.params.profileId, req.params.permissionId);
+      const authContext = createAuthContextFromRequest(req);
+      const profilePermission = await profileService.addPermissionToProfile(authContext, req.params.profileId, req.params.permissionId);
       res.status(201).json(profilePermission);
     } catch (error) {
       res.status(400).json({ message: "Failed to add permission to profile" });
@@ -2082,7 +2104,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/profiles/:profileId/permissions/:permissionId", async (req, res) => {
     try {
-      await storage.removePermissionFromProfile(req.params.profileId, req.params.permissionId);
+      const authContext = createAuthContextFromRequest(req);
+      await profileService.removePermissionFromProfile(authContext, req.params.profileId, req.params.permissionId);
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {

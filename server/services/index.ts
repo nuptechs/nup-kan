@@ -32,5 +32,21 @@ export type { TeamCreateRequest, TeamUpdateRequest, TeamWithMembers } from './te
 export { notificationService } from './notificationService';
 export type { NotificationCreateRequest, NotificationUpdateRequest, NotificationWithDetails } from './notificationService';
 
+// Column Service
+export { columnService } from './columnService';
+export type { ColumnCreateRequest, ColumnUpdateRequest } from './columnService';
+
+// Tag Service
+export { tagService } from './tagService';
+export type { TagCreateRequest, TagUpdateRequest } from './tagService';
+
+// Profile Service
+export { profileService } from './profileService';
+export type { ProfileCreateRequest, ProfileUpdateRequest } from './profileService';
+
+// Permission Service
+export { permissionService } from './permissionService';
+export type { PermissionCreateRequest, PermissionUpdateRequest } from './permissionService';
+
 // Future services exports...
 // export { analyticsService } from './analyticsService';
