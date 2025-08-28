@@ -3553,8 +3553,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Notification not found" });
       }
 
-      const userId = req.session?.user?.id;
-      if (existingNotification.userId !== userId) {
+      if (existingNotification.userId !== authContext.userId) {
         return res.status(403).json({ error: "Access denied" });
       }
       
@@ -3575,13 +3574,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
-      const userId = req.session?.user?.id;
-      if (!userId) {
+      const authContext = createAuthContextFromRequest(req);
+      if (!authContext || !authContext.userId) {
         return res.status(401).json({ error: "User not authenticated" });
       }
       
-      const authContext = createAuthContextFromRequest(req);
-      const updatedCount = await notificationService.markAllNotificationsAsRead(authContext, userId);
+      const updatedCount = await notificationService.markAllNotificationsAsRead(authContext, authContext.userId);
       
       res.json({
         success: true,
