@@ -1,31 +1,31 @@
 [
   {
-    "id": "log_1756351811818_ni9x7hbpm",
-    "timestamp": "2025-08-28T03:30:11.818Z",
+    "id": "log_1756351997383_hylrvpr2w",
+    "timestamp": "2025-08-28T03:33:17.383Z",
     "level": "error",
     "message": "❌ [PERMISSION SYNC] Não foi possível identificar o perfil administrador",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756351811803_s0fnxjh18",
-    "timestamp": "2025-08-28T03:30:11.803Z",
+    "id": "log_1756351997368_x2d5l8jlk",
+    "timestamp": "2025-08-28T03:33:17.368Z",
     "level": "error",
     "message": "❌ [PERMISSION SYNC] Erro ao buscar perfil administrador: error: The endpoint has been disabled. Enable it using Neon API and retry.",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756351807492_jdg08bs3s",
-    "timestamp": "2025-08-28T03:30:07.492Z",
+    "id": "log_1756351992921_21xp86awz",
+    "timestamp": "2025-08-28T03:33:12.921Z",
     "level": "error",
     "message": "error: The endpoint has been disabled. Enable it using Neon API and retry.\n    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async PGStore._asyncQuery (/home/runner/workspace/node_modules/connect-pg-simple/index.js:322:21)\n    at async PGStore._rawEnsureSessionStoreTable (/home/runner/workspace/node_modules/connect-pg-simple/index.js:177:19)\n    at async PGStore._asyncQuery (/home/runner/workspace/node_modules/connect-pg-simple/index.js:315:7)",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756351806463_bkz7dmc2n",
-    "timestamp": "2025-08-28T03:30:06.463Z",
+    "id": "log_1756351992074_u7hs7hntf",
+    "timestamp": "2025-08-28T03:33:12.074Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

@@ -6,6 +6,7 @@ import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 import { cache, CacheKeys, TTL } from "./cache";
 import { OptimizedQueries, PerformanceStats } from "./optimizedQueries";
+import { resilience } from "./resilience/databaseResilience";
 
 export interface IStorage {
   // Boards
