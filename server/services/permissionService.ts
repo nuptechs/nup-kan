@@ -162,6 +162,134 @@ export class PermissionService extends BaseService {
       throw error;
     }
   }
+
+  /**
+   * Buscar todas as permissões de perfil
+   */
+  async getAllProfilePermissions(authContext: AuthContext) {
+    this.log('permission-service', 'getAllProfilePermissions', { userId: authContext.userId });
+    
+    try {
+      this.requirePermission(authContext, 'Listar Permissions', 'listar permissões de perfil');
+
+      const profilePermissions = await this.storage.getAllProfilePermissions();
+      return profilePermissions;
+    } catch (error) {
+      this.logError('permission-service', 'getAllProfilePermissions', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Adicionar permissão a usuário
+   */
+  async addPermissionToUser(authContext: AuthContext, userId: string, permissionId: string) {
+    this.log('permission-service', 'addPermissionToUser', { userId: authContext.userId, targetUserId: userId, permissionId });
+    
+    try {
+      this.requirePermission(authContext, 'Editar Permissions', 'adicionar permissão ao usuário');
+
+      const result = await this.storage.addPermissionToUser(userId, permissionId);
+
+      this.emitEvent('user_permission.added', {
+        userId,
+        permissionId,
+        addedBy: authContext.userId,
+      });
+
+      return result;
+    } catch (error) {
+      this.logError('permission-service', 'addPermissionToUser', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remover permissão de usuário
+   */
+  async removePermissionFromUser(authContext: AuthContext, userId: string, permissionId: string) {
+    this.log('permission-service', 'removePermissionFromUser', { userId: authContext.userId, targetUserId: userId, permissionId });
+    
+    try {
+      this.requirePermission(authContext, 'Editar Permissions', 'remover permissão do usuário');
+
+      await this.storage.removePermissionFromUser(userId, permissionId);
+
+      this.emitEvent('user_permission.removed', {
+        userId,
+        permissionId,
+        removedBy: authContext.userId,
+      });
+
+    } catch (error) {
+      this.logError('permission-service', 'removePermissionFromUser', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Buscar permissões de equipe
+   */
+  async getTeamPermissions(authContext: AuthContext, teamId: string) {
+    this.log('permission-service', 'getTeamPermissions', { userId: authContext.userId, teamId });
+    
+    try {
+      this.requirePermission(authContext, 'Visualizar Teams', 'visualizar permissões da equipe');
+
+      const permissions = await this.storage.getTeamPermissions(teamId);
+      return permissions;
+    } catch (error) {
+      this.logError('permission-service', 'getTeamPermissions', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Adicionar permissão a equipe
+   */
+  async addPermissionToTeam(authContext: AuthContext, teamId: string, permissionId: string) {
+    this.log('permission-service', 'addPermissionToTeam', { userId: authContext.userId, teamId, permissionId });
+    
+    try {
+      this.requirePermission(authContext, 'Editar Teams', 'adicionar permissão à equipe');
+
+      const result = await this.storage.addPermissionToTeam(teamId, permissionId);
+
+      this.emitEvent('team_permission.added', {
+        teamId,
+        permissionId,
+        addedBy: authContext.userId,
+      });
+
+      return result;
+    } catch (error) {
+      this.logError('permission-service', 'addPermissionToTeam', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remover permissão de equipe
+   */
+  async removePermissionFromTeam(authContext: AuthContext, teamId: string, permissionId: string) {
+    this.log('permission-service', 'removePermissionFromTeam', { userId: authContext.userId, teamId, permissionId });
+    
+    try {
+      this.requirePermission(authContext, 'Editar Teams', 'remover permissão da equipe');
+
+      await this.storage.removePermissionFromTeam(teamId, permissionId);
+
+      this.emitEvent('team_permission.removed', {
+        teamId,
+        permissionId,
+        removedBy: authContext.userId,
+      });
+
+    } catch (error) {
+      this.logError('permission-service', 'removePermissionFromTeam', error);
+      throw error;
+    }
+  }
 }
 
 // Export singleton instance

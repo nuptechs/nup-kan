@@ -48,5 +48,33 @@ export type { ProfileCreateRequest, ProfileUpdateRequest } from './profileServic
 export { permissionService } from './permissionService';
 export type { PermissionCreateRequest, PermissionUpdateRequest } from './permissionService';
 
+// Team Member Service
+export { teamMemberService } from './teamMemberService';
+export type { TeamMemberCreateRequest } from './teamMemberService';
+
+// Board Share Service
+export { boardShareService } from './boardShareService';
+export type { BoardShareCreateRequest } from './boardShareService';
+
+// Task Status Service
+export { taskStatusService } from './taskStatusService';
+export type { TaskStatusCreateRequest, TaskPriorityCreateRequest } from './taskStatusService';
+
+// User Team Service
+export { userTeamService } from './userTeamService';
+export type { UserTeamRequest } from './userTeamService';
+
+// Task Event Service
+export { taskEventService } from './taskEventService';
+export type { TaskEventCreateRequest } from './taskEventService';
+
+// Export Service
+export { exportService } from './exportService';
+export type { ExportCreateRequest } from './exportService';
+
+// Team Profile Service
+export { teamProfileService } from './teamProfileService';
+export type { TeamProfileRequest } from './teamProfileService';
+
 // Future services exports...
 // export { analyticsService } from './analyticsService';

@@ -236,6 +236,13 @@ export class UserService extends BaseService {
   }
 
   /**
+   * Atualizar senha do usuário (alias para compatibility)
+   */
+  async updateUserPassword(authContext: AuthContext, userId: string, newPassword: string): Promise<void> {
+    return this.updatePassword(authContext, userId, newPassword);
+  }
+
+  /**
    * Atualizar senha do usuário
    */
   async updatePassword(authContext: AuthContext, userId: string, newPassword: string): Promise<void> {

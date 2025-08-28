@@ -355,6 +355,131 @@ export class NotificationService extends BaseService {
     const months = Math.floor(days / 30);
     return `${months} meses atrás`;
   }
+
+  /**
+   * Buscar uma notificação específica
+   */
+  async getNotification(authContext: AuthContext, notificationId: string): Promise<Notification | null> {
+    this.log('notification-service', 'getNotification', { userId: authContext.userId, notificationId });
+    
+    try {
+      const notification = await this.storage.getNotification(notificationId);
+      return notification;
+    } catch (error) {
+      this.logError('notification-service', 'getNotification', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Atualizar uma notificação
+   */
+  async updateNotification(authContext: AuthContext, notificationId: string, data: any): Promise<Notification> {
+    this.log('notification-service', 'updateNotification', { userId: authContext.userId, notificationId });
+    
+    try {
+      const notification = await this.storage.updateNotification(notificationId, data);
+      await this.invalidateCache([`notifications:user:${authContext.userId}`]);
+      
+      this.emitEvent('notification.updated', {
+        notificationId,
+        userId: authContext.userId,
+      });
+
+      return notification;
+    } catch (error) {
+      this.logError('notification-service', 'updateNotification', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Excluir uma notificação
+   */
+  async deleteNotification(authContext: AuthContext, notificationId: string): Promise<void> {
+    this.log('notification-service', 'deleteNotification', { userId: authContext.userId, notificationId });
+    
+    try {
+      await this.storage.deleteNotification(notificationId);
+      await this.invalidateCache([`notifications:user:${authContext.userId}`]);
+      
+      this.emitEvent('notification.deleted', {
+        notificationId,
+        userId: authContext.userId,
+      });
+    } catch (error) {
+      this.logError('notification-service', 'deleteNotification', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Marcar notificação como lida
+   */
+  async markNotificationAsRead(authContext: AuthContext, notificationId: string): Promise<Notification> {
+    this.log('notification-service', 'markNotificationAsRead', { userId: authContext.userId, notificationId });
+    
+    try {
+      const notification = await this.storage.markNotificationAsRead(notificationId);
+      await this.invalidateCache([`notifications:user:${authContext.userId}`]);
+      
+      this.emitEvent('notification.read', {
+        notificationId,
+        userId: authContext.userId,
+      });
+
+      return notification;
+    } catch (error) {
+      this.logError('notification-service', 'markNotificationAsRead', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Marcar todas as notificações como lidas
+   */
+  async markAllNotificationsAsRead(authContext: AuthContext, userId: string): Promise<number> {
+    this.log('notification-service', 'markAllNotificationsAsRead', { userId: authContext.userId, targetUserId: userId });
+    
+    try {
+      const count = await this.storage.markAllNotificationsAsRead(userId);
+      await this.invalidateCache([`notifications:user:${userId}`]);
+      
+      this.emitEvent('notifications.all_read', {
+        userId,
+        count,
+        markedBy: authContext.userId,
+      });
+
+      return count;
+    } catch (error) {
+      this.logError('notification-service', 'markAllNotificationsAsRead', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Excluir notificações expiradas
+   */
+  async deleteExpiredNotifications(authContext: AuthContext): Promise<number> {
+    this.log('notification-service', 'deleteExpiredNotifications', { userId: authContext.userId });
+    
+    try {
+      this.requirePermission(authContext, 'Excluir System', 'limpar notificações expiradas');
+      
+      const count = await this.storage.deleteExpiredNotifications();
+      
+      this.emitEvent('notifications.expired_deleted', {
+        count,
+        deletedBy: authContext.userId,
+      });
+
+      return count;
+    } catch (error) {
+      this.logError('notification-service', 'deleteExpiredNotifications', error);
+      throw error;
+    }
+  }
 }
 
 // Instância singleton
