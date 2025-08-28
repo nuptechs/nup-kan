@@ -1,5 +1,37 @@
 [
   {
+    "id": "log_1756355564107_8xad9l2f7",
+    "timestamp": "2025-08-28T04:32:44.107Z",
+    "level": "error",
+    "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756355564106_u6steqan5",
+    "timestamp": "2025-08-28T04:32:44.106Z",
+    "level": "error",
+    "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756355557171_t4tggwpra",
+    "timestamp": "2025-08-28T04:32:37.171Z",
+    "level": "error",
+    "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756355557162_3tgnd02sa",
+    "timestamp": "2025-08-28T04:32:37.162Z",
+    "level": "error",
+    "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756355492673_rpj44indt",
     "timestamp": "2025-08-28T04:31:32.673Z",
     "level": "warn",
