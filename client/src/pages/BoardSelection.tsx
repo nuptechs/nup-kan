@@ -220,7 +220,9 @@ export default function BoardSelection() {
       await queryClient.refetchQueries({ queryKey: ["/api/boards"] });
       await queryClient.refetchQueries({ queryKey: ["/api/boards", updatedBoard.id] });
       
-      const statusText = updatedBoard.isActive === "true" ? "ativado" : "inativado";
+      // Garantir compatibilidade com string e booleano
+      const isActive = updatedBoard.isActive === "true" || updatedBoard.isActive === true;
+      const statusText = isActive ? "ativado" : "inativado";
       toast({
         title: `Board ${statusText}`,
         description: `O board "${updatedBoard.name}" foi ${statusText} com sucesso!`,
@@ -425,7 +427,7 @@ export default function BoardSelection() {
                         }}
                         className={`
                           flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-all duration-200 
-                          ${board.isActive === "true"
+                          ${(board.isActive === "true" || board.isActive === true)
                             ? "bg-green-500 text-white hover:bg-green-600" 
                             : "bg-red-500 text-white hover:bg-red-600"
                           }
@@ -437,11 +439,11 @@ export default function BoardSelection() {
                         `}
                         data-testid={`status-toggle-${board.id}`}
                         title={canEdit("Boards") 
-                          ? `Clique para ${board.isActive === "true" ? "inativar" : "ativar"} o board`
+                          ? `Clique para ${(board.isActive === "true" || board.isActive === true) ? "inativar" : "ativar"} o board`
                           : "Você não tem permissão para alterar o status"
                         }
                       >
-                        {board.isActive === "true" ? (
+                        {(board.isActive === "true" || board.isActive === true) ? (
                           <>
                             <Power className="w-3 h-3" />
                             <span>Ativo</span>
