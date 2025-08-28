@@ -22,13 +22,14 @@ export interface AuthContextJWT {
   userEmail: string;
   permissions: string[];
   permissionCategories: string[];
-  profileId?: string;
+  profileId: string;
   profileName: string;
   teams: Array<{
     id: string;
     name: string;
     role: string;
   }>;
+  sessionId: string;
   isAuthenticated: boolean;
   lastActivity: Date;
   tokenPayload: JWTPayload;
@@ -79,9 +80,10 @@ export class AuthServiceJWT {
         userEmail: userData.email,
         permissions: userData.permissions || [],
         permissionCategories: userData.permissionCategories || [],
-        profileId: userData.profileId,
+        profileId: userData.profileId || '',
         profileName: userData.profileName || 'Usuário',
         teams: userData.teams || [],
+        sessionId: `jwt-${tokenPayload.userId}-${tokenPayload.iat}`,
         isAuthenticated: true,
         lastActivity: new Date(),
         tokenPayload

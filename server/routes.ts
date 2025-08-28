@@ -981,7 +981,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For development, return the first user as current user
       const authContext = createAuthContextFromRequest(req);
       const result = await userService.getUsers(authContext);
-      const currentUser = result.data?.[0];
+      const currentUser = result[0];
       if (currentUser) {
         res.json(currentUser);
       } else {
@@ -2012,6 +2012,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/teams", async (req, res) => {
     const startTime = Date.now();
+    let userId = 'unknown';
+    let userName = 'Usuário desconhecido';
     
     try {
       // Verificar JWT
@@ -2023,8 +2025,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const userId = authContext.userId;
-      const userName = authContext.userName || 'Usuário desconhecido';
+      userId = authContext.userId;
+      userName = authContext.userName || 'Usuário desconhecido';
       const result = await teamService.createTeam(authContext, req.body);
       
       const duration = Date.now() - startTime;
