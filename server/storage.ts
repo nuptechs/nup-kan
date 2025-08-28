@@ -310,29 +310,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async initializeBoardWithDefaults(boardId: string): Promise<void> {
-    console.log(`Initializing database board ${boardId} with default data`);
+    console.log(`🔄 [TRANSACTION] Initializing board ${boardId} with default data`);
     
     // Check if board already has columns
     const existingColumns = await this.getBoardColumns(boardId);
     if (existingColumns.length > 0) {
+      console.log(`⚠️ [TRANSACTION] Board ${boardId} already has columns, skipping initialization`);
       return; // Already initialized
     }
     
-    // Create default columns for the board
-    const defaultColumns = [
-      { boardId, title: "Backlog", position: 0, wipLimit: null, color: "gray" },
-      { boardId, title: "To Do", position: 1, wipLimit: 5, color: "blue" },
-      { boardId, title: "In Progress", position: 2, wipLimit: 3, color: "yellow" },
-      { boardId, title: "Review", position: 3, wipLimit: 4, color: "purple" },
-      { boardId, title: "Done", position: 4, wipLimit: null, color: "green" },
-    ];
-    
-    // Insert default columns
-    for (const column of defaultColumns) {
-      await db.insert(columns).values(column);
-    }
-    
-    console.log(`Board ${boardId} initialized with ${defaultColumns.length} default columns`);
+    // 🔒 TRANSAÇÃO: Garantir que todas as colunas sejam criadas ou nenhuma
+    await db.transaction(async (tx) => {
+      console.log(`🔒 [TRANSACTION] Iniciando transação para board ${boardId}`);
+      
+      const defaultColumns = [
+        { boardId, title: "Backlog", position: 0, wipLimit: null, color: "gray" },
+        { boardId, title: "To Do", position: 1, wipLimit: 5, color: "blue" },
+        { boardId, title: "In Progress", position: 2, wipLimit: 3, color: "yellow" },
+        { boardId, title: "Review", position: 3, wipLimit: 4, color: "purple" },
+        { boardId, title: "Done", position: 4, wipLimit: null, color: "green" },
+      ];
+      
+      // Insert todas as colunas em uma única transação
+      for (const column of defaultColumns) {
+        await tx.insert(columns).values(column);
+        console.log(`✅ [TRANSACTION] Coluna "${column.title}" inserida para board ${boardId}`);
+      }
+      
+      console.log(`✅ [TRANSACTION] Board ${boardId} inicializado com ${defaultColumns.length} colunas (transação concluída)`);
+    });
   }
 
   // Task methods
@@ -589,45 +595,66 @@ export class DatabaseStorage implements IStorage {
   }
 
   async reorderColumns(reorderedColumns: { id: string; position: number }[]): Promise<void> {
-    for (const { id, position } of reorderedColumns) {
-      await db
-        .update(columns)
-        .set({ position })
-        .where(eq(columns.id, id));
-    }
+    console.log("🔄 [TRANSACTION] Reordenando columns:", reorderedColumns.map(c => ({ id: c.id, position: c.position })));
+    
+    // 🔒 TRANSAÇÃO: Garantir que todas as posições sejam atualizadas ou nenhuma
+    await db.transaction(async (tx) => {
+      console.log(`🔒 [TRANSACTION] Iniciando transação para reordenar ${reorderedColumns.length} columns`);
+      
+      for (const { id, position } of reorderedColumns) {
+        const result = await tx
+          .update(columns)
+          .set({ position })
+          .where(eq(columns.id, id));
+        
+        console.log(`✅ [TRANSACTION] Column ${id} -> position ${position}, rowCount: ${result.rowCount}`);
+        
+        if (result.rowCount === 0) {
+          console.log(`❌ [TRANSACTION] Column ${id} não foi atualizada`);
+          throw new Error(`Column with id ${id} not found during transaction`);
+        }
+      }
+      
+      console.log("✅ [TRANSACTION] Todas as columns reordenadas com sucesso (transação concluída)");
+    });
   }
 
   async reorderTasks(reorderedTasks: { id: string; position: number }[]): Promise<void> {
-    console.log("🔍 [STORAGE] Reordenando tasks:", reorderedTasks.map(t => ({ id: t.id, position: t.position })));
+    console.log("🔄 [TRANSACTION] Reordenando tasks:", reorderedTasks.map(t => ({ id: t.id, position: t.position })));
     
-    // First, let's check which tasks exist
+    // Validar se todas as tasks existem antes da transação
     const taskIds = reorderedTasks.map(t => t.id);
     const existingTasks = await db.select({ id: tasks.id, title: tasks.title }).from(tasks).where(inArray(tasks.id, taskIds));
-    console.log("🔍 [STORAGE] Tasks existentes no DB:", existingTasks);
+    console.log("🔍 [TRANSACTION] Tasks existentes no DB:", existingTasks);
     
     const foundTaskIds = existingTasks.map(t => t.id);
     const missingTaskIds = taskIds.filter(id => !foundTaskIds.includes(id));
     
     if (missingTaskIds.length > 0) {
-      console.log("❌ [STORAGE] Tasks não encontradas:", missingTaskIds);
+      console.log("❌ [TRANSACTION] Tasks não encontradas:", missingTaskIds);
       throw new Error(`Tasks not found: ${missingTaskIds.join(', ')}`);
     }
     
-    for (const { id, position } of reorderedTasks) {
-      const result = await db
-        .update(tasks)
-        .set({ position })
-        .where(eq(tasks.id, id));
+    // 🔒 TRANSAÇÃO: Garantir que todas as posições sejam atualizadas ou nenhuma
+    await db.transaction(async (tx) => {
+      console.log(`🔒 [TRANSACTION] Iniciando transação para reordenar ${reorderedTasks.length} tasks`);
       
-      console.log(`🔍 [STORAGE] Update task ${id} -> position ${position}, rowCount: ${result.rowCount}`);
-      
-      if (result.rowCount === 0) {
-        console.log(`❌ [STORAGE] Task ${id} não foi atualizada - pode não existir`);
-        throw new Error(`Task with id ${id} not found`);
+      for (const { id, position } of reorderedTasks) {
+        const result = await tx
+          .update(tasks)
+          .set({ position })
+          .where(eq(tasks.id, id));
+        
+        console.log(`✅ [TRANSACTION] Task ${id} -> position ${position}, rowCount: ${result.rowCount}`);
+        
+        if (result.rowCount === 0) {
+          console.log(`❌ [TRANSACTION] Task ${id} não foi atualizada`);
+          throw new Error(`Task with id ${id} not found during transaction`);
+        }
       }
-    }
-    
-    console.log("✅ [STORAGE] Todas as tasks foram reordenadas com sucesso");
+      
+      console.log("✅ [TRANSACTION] Todas as tasks reordenadas com sucesso (transação concluída)");
+    });
   }
 
   // Team Members methods
