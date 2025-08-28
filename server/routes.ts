@@ -2066,6 +2066,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/teams/:id", async (req, res) => {
     const startTime = Date.now();
+    let userId = 'unknown';
+    let userName = 'Usuário desconhecido';
     
     try {
       // Verificar JWT
@@ -2077,8 +2079,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const userId = authContext.userId;
-      const userName = authContext.userName || 'Usuário desconhecido';
+      userId = authContext.userId;
+      userName = authContext.userName || 'Usuário desconhecido';
       const result = await teamService.updateTeam(authContext, req.params.id, req.body);
       
       const duration = Date.now() - startTime;
@@ -2101,6 +2103,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/teams/:id", async (req, res) => {
     const startTime = Date.now();
+    let userId = 'unknown';
+    let userName = 'Usuário desconhecido';
     
     try {
       // Verificar JWT
@@ -2112,22 +2116,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const userId = authContext.userId;
-      const userName = authContext.userName || 'Usuário desconhecido';
-      const result = await teamService.deleteTeam(authContext, req.params.id);
-      
-      if (!result.success) {
-        const duration = Date.now() - startTime;
-        const errorMessage = result.error || 'Erro desconhecido';
-        
-        if (result.error === 'Team not found') {
-          addUserActionLog(userId, userName, `Deletar time (ID: ${req.params.id})`, 'error', { error: 'Time não encontrado' }, duration);
-          return res.status(404).json({ message: "Team not found" });
-        }
-        
-        addUserActionLog(userId, userName, `Deletar time (ID: ${req.params.id})`, 'error', { error: errorMessage }, duration);
-        return res.status(500).json({ message: result.error });
-      }
+      userId = authContext.userId;
+      userName = authContext.userName || 'Usuário desconhecido';
+      await teamService.deleteTeam(authContext, req.params.id);
       
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Deletar time (ID: ${req.params.id})`, 'success', null, duration);
@@ -2237,6 +2228,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/profiles/:id", async (req, res) => {
     const startTime = Date.now();
+    let userId = 'unknown';
+    let userName = 'Usuário desconhecido';
     
     try {
       // Verificar JWT
@@ -2248,8 +2241,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const userId = authContext.userId;
-      const userName = authContext.userName || 'Usuário desconhecido';
+      userId = authContext.userId;
+      userName = authContext.userName || 'Usuário desconhecido';
       
       const profileData = updateProfileSchema.parse(req.body);
       const profile = await profileService.updateProfile(authContext, req.params.id, profileData);
@@ -2276,6 +2269,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/profiles/:id", async (req, res) => {
     const startTime = Date.now();
+    let userId = 'unknown';
+    let userName = 'Usuário desconhecido';
     
     try {
       // Verificar JWT
@@ -2287,8 +2282,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const userId = authContext.userId;
-      const userName = authContext.userName || 'Usuário desconhecido';
+      userId = authContext.userId;
+      userName = authContext.userName || 'Usuário desconhecido';
       
       await profileService.deleteProfile(authContext, req.params.id);
       
@@ -3392,12 +3387,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
-      const userId = req.session?.user?.id;
-      if (!userId) {
+      const authContext = createAuthContextFromRequest(req);
+      if (!authContext || !authContext.userId) {
         return res.status(401).json({ error: "User not authenticated" });
       }
 
-      const authContext = createAuthContextFromRequest(req);
       const result = await notificationService.getNotifications(authContext);
       res.json({
         notifications: result.data || [],
@@ -3414,14 +3408,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
-      const userId = req.session?.user?.id;
-      if (!userId) {
+      const authContext = createAuthContextFromRequest(req);
+      if (!authContext || !authContext.userId) {
         return res.status(401).json({ error: "User not authenticated" });
       }
 
-      const authContext = createAuthContextFromRequest(req);
       const result = await notificationService.getUnreadCount(authContext);
-      res.json({ count: result.data?.count || 0 });
+      res.json({ count: result.data || 0 });
     } catch (error) {
       console.error("Error fetching unread count:", error);
       res.status(500).json({ error: "Failed to get unread count" });
@@ -3491,15 +3484,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Notification not found" });
       }
 
-      const userId = req.session?.user?.id;
-      if (existingNotification.userId !== userId) {
+      if (existingNotification.userId !== authContext.userId) {
         return res.status(403).json({ error: "Access denied" });
       }
 
       // Validar dados
       const validatedData = updateNotificationSchema.parse(req.body);
       
-      const notification = await notificationService.updateNotification(req.authContext, id, validatedData);
+      const notification = await notificationService.updateNotification(authContext, id, validatedData);
       
       res.json({
         success: true,
@@ -3531,8 +3523,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Notification not found" });
       }
 
-      const userId = req.session?.user?.id;
-      if (existingNotification.userId !== userId) {
+      if (existingNotification.userId !== authContext.userId) {
         return res.status(403).json({ error: "Access denied" });
       }
       
