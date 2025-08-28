@@ -267,7 +267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/users/:userId/permissions", async (req, res) => {
+  app.get("/api/users/:userId/permissions", AuthMiddlewareJWT.requireAuth, async (req, res) => {
       try {
         // 🔐 VERIFICAR SE O USUÁRIO PODE ACESSAR SUAS PRÓPRIAS PERMISSÕES
         const requestingUserId = req.session?.user?.id;
@@ -297,7 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
   
   // 📋 Board routes - SIMPLIFICADO (sem microserviços)
-  app.get("/api/boards", async (req, res) => {
+  app.get("/api/boards", AuthMiddlewareJWT.requireAuth, async (req, res) => {
       try {
         // Verificar JWT
         const authContext = await AuthServiceJWT.verifyAuth(req);
@@ -350,7 +350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
   
-  app.get("/api/boards/:id", async (req, res) => {
+  app.get("/api/boards/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
       try {
         // Verificar JWT
         const authContext = await AuthServiceJWT.verifyAuth(req);
@@ -514,7 +514,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/tasks/:taskId/assignees", async (req, res) => {
+  app.post("/api/tasks/:taskId/assignees", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const assigneeData = insertTaskAssigneeSchema.parse({
         taskId: req.params.taskId,
@@ -528,7 +528,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/tasks/:taskId/assignees/:userId", async (req, res) => {
+  app.delete("/api/tasks/:taskId/assignees/:userId", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       await taskService.removeTaskAssignee(authContext, req.params.taskId, req.params.userId);
@@ -741,7 +741,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/columns/:id", async (req, res) => {
+  app.get("/api/columns/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       // Verificar JWT
       const authContext = await AuthServiceJWT.verifyAuth(req);
@@ -1324,7 +1324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Endpoint para obter logs
-  app.get("/api/system/logs", async (req, res) => {
+  app.get("/api/system/logs", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const { level, type, search, limit = "100" } = req.query;
       let filteredLogs = systemLogs;
@@ -1362,7 +1362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Endpoint para limpar logs
-  app.delete("/api/system/logs", async (req, res) => {
+  app.delete("/api/system/logs", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       systemLogs = [];
       await saveLogs(); // Salvar imediatamente após limpar
@@ -3094,7 +3094,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Custom Fields Routes
-  app.get("/api/custom-fields", async (req, res) => {
+  app.get("/api/custom-fields", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const boardId = req.query.boardId as string;
       
@@ -3119,7 +3119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/custom-fields", async (req, res) => {
+  app.post("/api/custom-fields", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     const startTime = Date.now();
     try {
       console.log("🔵 [DEBUG] Raw request body:", JSON.stringify(req.body, null, 2));
@@ -3162,7 +3162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/custom-fields/:id", async (req, res) => {
+  app.patch("/api/custom-fields/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     const startTime = Date.now();
     try {
       const userId = req.session?.user?.id;
@@ -3204,7 +3204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/custom-fields/:id", async (req, res) => {
+  app.delete("/api/custom-fields/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     const startTime = Date.now();
     try {
       const userId = req.session?.user?.id;
