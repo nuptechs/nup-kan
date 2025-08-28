@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { NotificationSystem } from "@/components/NotificationSystem";
 import LoginPage from "@/pages/login";
+import ChangePasswordPage from "@/pages/change-password";
 import BoardSelection from "@/pages/BoardSelection";
 import KanbanPage from "@/pages/kanban";
 import UserSettingsPage from "@/pages/user-settings";
@@ -26,6 +27,13 @@ function Router() {
       <Route path="/login">
         <ProtectedRoute requireAuth={false}>
           <LoginPage />
+        </ProtectedRoute>
+      </Route>
+
+      {/* Change password route - Protected */}
+      <Route path="/change-password">
+        <ProtectedRoute>
+          <ChangePasswordPage />
         </ProtectedRoute>
       </Route>
 

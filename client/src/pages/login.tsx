@@ -208,10 +208,18 @@ export default function LoginPage() {
         // Invalidar cache e forçar recarga da página para garantir que o estado seja atualizado
         queryClient.clear();
         
-        // Usar window.location para garantir recarga completa
-        setTimeout(() => {
-          window.location.href = "/boards";
-        }, 500);
+        // ✅ VERIFICAR SE PRECISA TROCAR SENHA (PRIMEIRO LOGIN)
+        if (data.requiresPasswordChange || data.user.firstLogin) {
+          console.log('🔄 [LOGIN-JWT] Primeiro login detectado - redirecionando para troca de senha');
+          setTimeout(() => {
+            window.location.href = "/change-password";
+          }, 500);
+        } else {
+          // Login normal - ir para boards
+          setTimeout(() => {
+            window.location.href = "/boards";
+          }, 500);
+        }
       } else {
         // Fallback para estrutura antiga (sessão) 
         console.warn('⚠️ [LOGIN-JWT] Resposta não contém tokens JWT, usando fallback');
