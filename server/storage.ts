@@ -18,6 +18,7 @@ export interface IStorage {
   getBoardColumns(boardId: string): Promise<Column[]>;
   getBoardsPaginated(limit: number, offset: number): Promise<Board[]>;
   getBoardsByCreator(creatorId: string, limit: number, offset: number): Promise<Board[]>;
+  getBoardsForUser(userId: string, limit: number, offset: number): Promise<Board[]>;
   
   // Tasks
   getTasks(): Promise<Task[]>;
@@ -243,6 +244,48 @@ export class DatabaseStorage implements IStorage {
     
     // Cache por 30 segundos
     await cache.set(cacheKey, result, TTL.SHORT / 2);
+    return result;
+  }
+
+  // 🔒 SECURITY: Buscar apenas boards que o usuário pode acessar (criados ou compartilhados)
+  async getBoardsForUser(userId: string, limit: number, offset: number): Promise<Board[]> {
+    const cacheKey = `boards_user_access:${userId}:${limit}:${offset}`;
+    const cached = await cache.get<Board[]>(cacheKey);
+    if (cached) {
+      console.log("🚀 [CACHE HIT] Boards do usuário servidos do cache");
+      return cached;
+    }
+
+    console.log("🔍 [CACHE MISS] Buscando boards acessíveis do usuário:", userId);
+    
+    // Buscar IDs de boards compartilhados com o usuário
+    const sharedBoardIds = await db
+      .select({ boardId: boardShares.boardId })
+      .from(boardShares)
+      .where(and(
+        eq(boardShares.shareWithId, userId),
+        eq(boardShares.shareType, 'user')
+      ));
+
+    const sharedIds = sharedBoardIds.map(s => s.boardId);
+
+    // Buscar boards criados pelo usuário OU compartilhados com ele
+    const result = await db
+      .select()
+      .from(boards)
+      .where(
+        or(
+          eq(boards.createdById, userId), // Criados pelo usuário
+          sharedIds.length > 0 ? inArray(boards.id, sharedIds) : sql`false` // Compartilhados com o usuário
+        )
+      )
+      .orderBy(desc(boards.createdAt))
+      .limit(limit)
+      .offset(offset);
+    
+    // Cache por 30 segundos
+    await cache.set(cacheKey, result, TTL.SHORT / 2);
+    console.log(`🔒 [SECURITY] Usuário ${userId} pode acessar ${result.length} boards`);
     return result;
   }
 

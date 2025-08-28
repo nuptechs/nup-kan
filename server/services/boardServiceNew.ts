@@ -90,16 +90,10 @@ export class BoardService extends BaseService {
       
       console.log('💫 [BOARD-SERVICE] Cache desabilitado para debug - forçando busca nova');
 
-      // Buscar boards básicos do DAO - filtrar por criador se não tem permissão geral
-      const hasGeneralPermission = this.hasPermission(authContext, 'Listar Boards');
-      let boards;
-      
-      if (hasGeneralPermission) {
-        boards = await this.storage.getBoardsPaginated(limit, offset);
-      } else {
-        // Se não tem permissão geral, buscar apenas os boards criados pelo usuário
-        boards = await this.storage.getBoardsByCreator(authContext.userId, limit, offset);
-      }
+      // 🔒 SECURITY FIX: Usuários só veem boards próprios ou compartilhados
+      // Independente das permissões gerais, aplicar controle de acesso por usuário
+      console.log('🔒 [BOARD-SERVICE] Aplicando controle de acesso - usuário só vê boards próprios ou compartilhados');
+      const boards = await this.storage.getBoardsForUser(authContext.userId, limit, offset);
       
       // Enriquecer com estatísticas e permissões de forma defensiva
       const enrichedBoards: BoardWithStats[] = [];
