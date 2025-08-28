@@ -413,11 +413,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Task Assignee routes
-  app.get("/api/tasks/:taskId/assignees", async (req, res) => {
+  // Task Assignee routes (deprecated - migrated to assigneeService)
+  app.get("/api/tasks/:taskId/assignees", 
+    AuthMiddleware.requireAuth,
+    AuthMiddleware.requirePermissions("Visualizar Tasks"), 
+    async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
-      const assignees = await taskService.getTaskAssignees(authContext, req.params.taskId);
+      const assignees = await assigneeService.getTaskAssignees(authContext, req.params.taskId);
       res.json(assignees);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch task assignees" });
@@ -945,8 +948,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/users/:id", async (req, res) => {
     try {
+      const authContext = createAuthContextFromRequest(req);
       const userData = updateUserSchema.parse(req.body);
-      const user = await userService.updateUser(req.authContext, req.params.id, userData);
+      const user = await userService.updateUser(authContext, req.params.id, userData);
       res.json(user);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -963,7 +967,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const userData = req.body;
-      const user = await userService.updateUser(req.authContext, req.params.id, userData);
+      const authContext = createAuthContextFromRequest(req);
+      const user = await userService.updateUser(authContext, req.params.id, userData);
       
       // Cache individual será invalidado automaticamente pelo TanStack Query
       
@@ -991,7 +996,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
-      await userService.deleteUser(req.authContext, req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      await userService.deleteUser(authContext, req.params.id);
       
       // Cache individual será invalidado automaticamente pelo TanStack Query
       
@@ -1667,7 +1673,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Nova senha deve ter pelo menos 6 caracteres" });
       }
 
-      await userService.updateUserPassword(req.authContext, req.params.id, newPassword);
+      const authContext = createAuthContextFromRequest(req);
+      await userService.updateUserPassword(authContext, req.params.id, newPassword);
       res.json({ message: "Senha alterada com sucesso" });
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -1681,7 +1688,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User Teams routes
   app.get("/api/user-teams", async (req, res) => {
     try {
-      const userTeams = await userTeamService.getAllUserTeams(req.authContext);
+      const authContext = createAuthContextFromRequest(req);
+      const userTeams = await userTeamService.getAllUserTeams(authContext);
       res.json(userTeams);
     } catch (error) {
       res.status(500).json({ message: "Failed to get user teams" });
@@ -1690,7 +1698,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/users/:userId/teams", async (req, res) => {
     try {
-      const userTeams = await userTeamService.getUserTeams(req.authContext, req.params.userId);
+      const authContext = createAuthContextFromRequest(req);
+      const userTeams = await userTeamService.getUserTeams(authContext, req.params.userId);
       res.json(userTeams);
     } catch (error) {
       res.status(500).json({ message: "Failed to get user teams" });
@@ -1699,7 +1708,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/teams/:teamId/users", async (req, res) => {
     try {
-      const teamUsers = await userTeamService.getTeamUsers(req.authContext, req.params.teamId);
+      const authContext = createAuthContextFromRequest(req);
+      const teamUsers = await userTeamService.getTeamUsers(authContext, req.params.teamId);
       res.json(teamUsers);
     } catch (error) {
       res.status(500).json({ message: "Failed to get team users" });
@@ -1709,7 +1719,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/users/:userId/teams/:teamId", async (req, res) => {
     try {
       const { role = "member" } = req.body;
-      const userTeam = await userTeamService.addUserToTeam(req.authContext, {
+      const authContext = createAuthContextFromRequest(req);
+      const userTeam = await userTeamService.addUserToTeam(authContext, {
         userId: req.params.userId,
         teamId: req.params.teamId,
         role,
@@ -2053,7 +2064,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Profile Permissions routes
   app.get("/api/profile-permissions", async (req, res) => {
     try {
-      const profilePermissions = await permissionService.getAllProfilePermissions(req.authContext);
+      const authContext = createAuthContextFromRequest(req);
+      const profilePermissions = await permissionService.getAllProfilePermissions(authContext);
       res.json(profilePermissions);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch profile permissions" });
@@ -2118,7 +2130,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user already exists - TODO: usar userService.findByEmail quando implementar
-      const users = await userService.getUsers(req.authContext);
+      const authContext = createAuthContextFromRequest(req);
+      const users = await userService.getUsers(authContext);
       const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
       
       if (existingUser) {
@@ -2138,14 +2151,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "offline"
       };
 
-      const authContext = { userId: 'system', userName: 'System', userEmail: '', permissions: [], permissionCategories: [], profileId: null, profileName: 'System', teams: [], isAuthenticated: true, lastActivity: new Date() };
-      const result = await userService.createUser(authContext, userData);
-      
-      if (!result.success) {
-        return res.status(400).json({ message: result.error });
-      }
-      
-      const newUser = result.data;
+      // Criar contexto de sistema para registro
+      const systemContext = { userId: 'system', userName: 'System', userEmail: '', permissions: [], permissionCategories: [], profileId: null, profileName: 'System', teams: [], isAuthenticated: true, lastActivity: new Date(), sessionId: 'system-register' };
+      const newUser = await userService.createUser(systemContext, userData);
       
       // Send welcome email if configured
       try {
@@ -2206,7 +2214,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Função auxiliar para buscar dados do usuário
       const getUserData = async (userId: string) => {
-        return await userService.getUser(req.authContext, userId);
+        const authContext = createAuthContextFromRequest(req);
+        return await userService.getUser(authContext, userId);
       };
 
       const newTokens = await JWTService.refreshAccessToken(refreshToken, getUserData);
@@ -2230,7 +2239,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Team Profiles routes
   app.get("/api/team-profiles", async (req, res) => {
     try {
-      const teamProfiles = await teamProfileService.getAllTeamProfiles(req.authContext);
+      const authContext = createAuthContextFromRequest(req);
+      const teamProfiles = await teamProfileService.getAllTeamProfiles(authContext);
       res.json(teamProfiles);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch team profiles" });
@@ -2239,7 +2249,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/teams/:id/profiles", async (req, res) => {
     try {
-      const teamProfiles = await teamProfileService.getTeamProfiles(req.authContext, req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      const teamProfiles = await teamProfileService.getTeamProfiles(authContext, req.params.id);
       res.json(teamProfiles);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch team profiles" });
@@ -2249,7 +2260,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/team-profiles", async (req, res) => {
     try {
       const { teamId, profileId } = req.body;
-      const teamProfile = await teamProfileService.assignProfileToTeam(req.authContext, teamId, profileId);
+      const authContext = createAuthContextFromRequest(req);
+      const teamProfile = await teamProfileService.assignProfileToTeam(authContext, teamId, profileId);
       res.status(201).json(teamProfile);
     } catch (error) {
       res.status(400).json({ message: "Failed to assign profile to team" });
@@ -2258,7 +2270,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/teams/:teamId/profiles/:profileId", async (req, res) => {
     try {
-      const teamProfile = await teamProfileService.assignProfileToTeam(req.authContext, req.params.teamId, req.params.profileId);
+      const authContext = createAuthContextFromRequest(req);
+      const teamProfile = await teamProfileService.assignProfileToTeam(authContext, req.params.teamId, req.params.profileId);
       res.status(201).json(teamProfile);
     } catch (error) {
       res.status(400).json({ message: "Failed to assign profile to team" });
@@ -2267,7 +2280,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/team-profiles/:id", async (req, res) => {
     try {
-      await teamProfileService.deleteTeamProfile(req.authContext, req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      await teamProfileService.deleteTeamProfile(authContext, req.params.id);
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -2279,7 +2293,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/teams/:teamId/profiles/:profileId", async (req, res) => {
     try {
-      await teamProfileService.removeProfileFromTeam(req.authContext, req.params.teamId, req.params.profileId);
+      const authContext = createAuthContextFromRequest(req);
+      await teamProfileService.removeProfileFromTeam(authContext, req.params.teamId, req.params.profileId);
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -2293,7 +2308,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tasks/:taskId/events", async (req, res) => {
     try {
       const { taskId } = req.params;
-      const events = await taskEventService.getTaskEvents(req.authContext, taskId);
+      const authContext = createAuthContextFromRequest(req);
+      const events = await taskEventService.getTaskEvents(authContext, taskId);
       res.json(events);
     } catch (error) {
       console.error("Error fetching task events:", error);
@@ -2306,7 +2322,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { taskId } = req.params;
       const eventData = req.body;
       
-      const event = await taskEventService.createTaskEvent(req.authContext, {
+      const authContext = createAuthContextFromRequest(req);
+      const event = await taskEventService.createTaskEvent(authContext, {
         ...eventData,
         taskId
       });
@@ -2393,7 +2410,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/exports/:userId", async (req, res) => {
     try {
       const { userId } = req.params;
-      const exports = await exportService.getExportHistory(req.authContext, userId);
+      const authContext = createAuthContextFromRequest(req);
+      const exports = await exportService.getExportHistory(authContext, userId);
       res.json(exports);
     } catch (error) {
       console.error("Error fetching export history:", error);
@@ -3106,7 +3124,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       
       // Verificar se a notificação existe e pertence ao usuário
-      const existingNotification = await notificationService.getNotification(req.authContext, id);
+      const authContext = createAuthContextFromRequest(req);
+      const existingNotification = await notificationService.getNotification(authContext, id);
       if (!existingNotification) {
         return res.status(404).json({ error: "Notification not found" });
       }
@@ -3145,7 +3164,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       
       // Verificar se a notificação existe e pertence ao usuário
-      const existingNotification = await notificationService.getNotification(req.authContext, id);
+      const authContext = createAuthContextFromRequest(req);
+      const existingNotification = await notificationService.getNotification(authContext, id);
       if (!existingNotification) {
         return res.status(404).json({ error: "Notification not found" });
       }
@@ -3155,7 +3175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "Access denied" });
       }
       
-      await notificationService.deleteNotification(req.authContext, id);
+      await notificationService.deleteNotification(authContext, id);
       
       res.json({
         success: true,
@@ -3175,7 +3195,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       
       // Verificar se a notificação existe e pertence ao usuário
-      const existingNotification = await notificationService.getNotification(req.authContext, id);
+      const authContext = createAuthContextFromRequest(req);
+      const existingNotification = await notificationService.getNotification(authContext, id);
       if (!existingNotification) {
         return res.status(404).json({ error: "Notification not found" });
       }
@@ -3185,7 +3206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "Access denied" });
       }
       
-      const notification = await notificationService.markNotificationAsRead(req.authContext, id);
+      const notification = await notificationService.markNotificationAsRead(authContext, id);
       
       res.json({
         success: true,
@@ -3207,7 +3228,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "User not authenticated" });
       }
       
-      const updatedCount = await notificationService.markAllNotificationsAsRead(req.authContext, userId);
+      const authContext = createAuthContextFromRequest(req);
+      const updatedCount = await notificationService.markAllNotificationsAsRead(authContext, userId);
       
       res.json({
         success: true,
@@ -3225,7 +3247,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddleware.requireAuth,
     async (req, res) => {
     try {
-      const deletedCount = await notificationService.deleteExpiredNotifications(req.authContext);
+      const authContext = createAuthContextFromRequest(req);
+      const deletedCount = await notificationService.deleteExpiredNotifications(authContext);
       
       res.json({
         success: true,
@@ -3249,7 +3272,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Buscar permissões do usuário atual
-      const userPermissions = await userService.getUserPermissions(req.authContext, userId);
+      const authContext = createAuthContextFromRequest(req);
+      const userPermissions = await userService.getUserPermissions(authContext, userId);
       
       res.json({
         permissions: userPermissions,
