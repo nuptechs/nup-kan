@@ -93,6 +93,11 @@ export class BoardService extends BaseService {
       // 🔒 SECURITY FIX: Usuários só veem boards próprios ou compartilhados
       // Independente das permissões gerais, aplicar controle de acesso por usuário
       console.log('🔒 [BOARD-SERVICE] Aplicando controle de acesso - usuário só vê boards próprios ou compartilhados');
+      
+      // TEMP: Invalidar cache específico para debug
+      await this.cache.del(`boards_user_access:${authContext.userId}:${limit}:${offset}`);
+      console.log(`🔧 [DEBUG] Cache invalidado para usuário ${authContext.userId}`);
+      
       const boards = await this.storage.getBoardsForUser(authContext.userId, limit, offset);
       
       // Enriquecer com estatísticas e permissões de forma defensiva
