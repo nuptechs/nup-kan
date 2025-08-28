@@ -1,15 +1,39 @@
 [
   {
-    "id": "log_1756353102953_thnp6ha32",
-    "timestamp": "2025-08-28T03:51:42.953Z",
+    "id": "log_1756353251337_n139m5jxu",
+    "timestamp": "2025-08-28T03:54:11.337Z",
+    "level": "error",
+    "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756353251336_dccxajhxh",
+    "timestamp": "2025-08-28T03:54:11.336Z",
+    "level": "error",
+    "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756353251326_fytp8egg2",
+    "timestamp": "2025-08-28T03:54:11.326Z",
+    "level": "error",
+    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756353238541_fn68jkk5c",
+    "timestamp": "2025-08-28T03:53:58.541Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756353100858_qexmljt66",
-    "timestamp": "2025-08-28T03:51:40.858Z",
+    "id": "log_1756353236212_bzmtzn4kc",
+    "timestamp": "2025-08-28T03:53:56.212Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

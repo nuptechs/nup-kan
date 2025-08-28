@@ -214,9 +214,11 @@ export default function BoardSelection() {
       return response.json();
     },
     onSuccess: async (updatedBoard) => {
-      // 🔄 INVALIDAÇÃO DE CACHE SIMPLES
+      // 🔄 INVALIDAÇÃO COMPLETA DE CACHE - Lista e board individual
       await queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/boards", updatedBoard.id] });
       await queryClient.refetchQueries({ queryKey: ["/api/boards"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/boards", updatedBoard.id] });
       
       const statusText = updatedBoard.isActive === "true" ? "ativado" : "inativado";
       toast({
