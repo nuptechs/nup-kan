@@ -1,5 +1,525 @@
 [
   {
+    "id": "log_1756354296404_r68rv92te",
+    "timestamp": "2025-08-28T04:11:36.404Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354296132_9xb7l2xdc",
+    "timestamp": "2025-08-28T04:11:36.132Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354295864_74q5eav3e",
+    "timestamp": "2025-08-28T04:11:35.864Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354295605_0iebhmdwm",
+    "timestamp": "2025-08-28T04:11:35.605Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354295331_lua6ajhtb",
+    "timestamp": "2025-08-28T04:11:35.331Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354295064_e6flmwdqi",
+    "timestamp": "2025-08-28T04:11:35.064Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354294805_7012ta7xr",
+    "timestamp": "2025-08-28T04:11:34.805Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354294532_sz5ltes8q",
+    "timestamp": "2025-08-28T04:11:34.532Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354294266_xfsym9r0d",
+    "timestamp": "2025-08-28T04:11:34.266Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354294003_65fpyy91u",
+    "timestamp": "2025-08-28T04:11:34.003Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354293732_6aib28kwa",
+    "timestamp": "2025-08-28T04:11:33.732Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354293454_gfwqq8y8a",
+    "timestamp": "2025-08-28T04:11:33.454Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354293177_k40s625ll",
+    "timestamp": "2025-08-28T04:11:33.177Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354292904_fa2yilg67",
+    "timestamp": "2025-08-28T04:11:32.904Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354292644_upz8b0brn",
+    "timestamp": "2025-08-28T04:11:32.644Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354292373_jq1xcreo8",
+    "timestamp": "2025-08-28T04:11:32.373Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354292094_0u561uhh4",
+    "timestamp": "2025-08-28T04:11:32.094Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354291822_pslvyw7pq",
+    "timestamp": "2025-08-28T04:11:31.822Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354291544_90sieliua",
+    "timestamp": "2025-08-28T04:11:31.544Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354291284_1tgknjlah",
+    "timestamp": "2025-08-28T04:11:31.284Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354291016_g12mczq7s",
+    "timestamp": "2025-08-28T04:11:31.016Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354290744_o12t0ohhr",
+    "timestamp": "2025-08-28T04:11:30.744Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354290484_ydwjj2z90",
+    "timestamp": "2025-08-28T04:11:30.484Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354290212_tn6oavbeh",
+    "timestamp": "2025-08-28T04:11:30.212Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354289946_eflxfp6ao",
+    "timestamp": "2025-08-28T04:11:29.946Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354289683_dn9pwtj4k",
+    "timestamp": "2025-08-28T04:11:29.683Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354289412_js9lnnzat",
+    "timestamp": "2025-08-28T04:11:29.412Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354289144_whi0nq3uv",
+    "timestamp": "2025-08-28T04:11:29.144Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354288884_zqb2ovp70",
+    "timestamp": "2025-08-28T04:11:28.884Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354288612_ssftyldvr",
+    "timestamp": "2025-08-28T04:11:28.612Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354288335_h34m17hwq",
+    "timestamp": "2025-08-28T04:11:28.335Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354288052_dyzyuotjg",
+    "timestamp": "2025-08-28T04:11:28.052Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354287789_ft8jt6uy0",
+    "timestamp": "2025-08-28T04:11:27.789Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354287534_363uagsbb",
+    "timestamp": "2025-08-28T04:11:27.534Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354287275_u0vgviv1p",
+    "timestamp": "2025-08-28T04:11:27.275Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354287005_qqi3xac7d",
+    "timestamp": "2025-08-28T04:11:27.005Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354286777_73h15qznm",
+    "timestamp": "2025-08-28T04:11:26.777Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354286541_pw7rydefm",
+    "timestamp": "2025-08-28T04:11:26.541Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354286298_5sys0w2r0",
+    "timestamp": "2025-08-28T04:11:26.298Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354286051_3t0vfox7i",
+    "timestamp": "2025-08-28T04:11:26.051Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354285822_xprlyscts",
+    "timestamp": "2025-08-28T04:11:25.822Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354285577_9fhpjwc5u",
+    "timestamp": "2025-08-28T04:11:25.577Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354285345_hbvr3fylj",
+    "timestamp": "2025-08-28T04:11:25.345Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354285105_p07kufu61",
+    "timestamp": "2025-08-28T04:11:25.105Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354284864_gj9g4288d",
+    "timestamp": "2025-08-28T04:11:24.864Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354284621_6c48umj0d",
+    "timestamp": "2025-08-28T04:11:24.621Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354284369_clat3fv69",
+    "timestamp": "2025-08-28T04:11:24.369Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354284131_g0oue8ap2",
+    "timestamp": "2025-08-28T04:11:24.131Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354283893_baz3rin88",
+    "timestamp": "2025-08-28T04:11:23.893Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354283652_0v7wtel5b",
+    "timestamp": "2025-08-28T04:11:23.652Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354283406_7eie773zu",
+    "timestamp": "2025-08-28T04:11:23.406Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354283172_uq3olc36v",
+    "timestamp": "2025-08-28T04:11:23.172Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354282918_rln71b1lx",
+    "timestamp": "2025-08-28T04:11:22.918Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354282675_rt1f4qavq",
+    "timestamp": "2025-08-28T04:11:22.675Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354282433_zhhb4grtn",
+    "timestamp": "2025-08-28T04:11:22.433Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354282208_bntmijx8s",
+    "timestamp": "2025-08-28T04:11:22.208Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354281977_c7n9fp8pp",
+    "timestamp": "2025-08-28T04:11:21.977Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354281737_85ce9372g",
+    "timestamp": "2025-08-28T04:11:21.737Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354281501_lnjvcc32t",
+    "timestamp": "2025-08-28T04:11:21.501Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354281264_xseq2wp3m",
+    "timestamp": "2025-08-28T04:11:21.264Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354281010_c8azgan3z",
+    "timestamp": "2025-08-28T04:11:21.010Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354273910_qo0duce1u",
+    "timestamp": "2025-08-28T04:11:13.910Z",
+    "level": "error",
+    "message": "❌ [TEAM-PROFILE-SERVICE] Erro em getAllTeamProfiles: Error: Permissão insuficiente: 'Listar Teams' necessária para listar perfis de equipes",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354273908_taqltim3f",
+    "timestamp": "2025-08-28T04:11:13.908Z",
+    "level": "error",
+    "message": "❌ [PERMISSION-SERVICE] Erro em getPermissions: Error: Permissão insuficiente: 'Listar Permissions' necessária para listar permissões",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354273905_qa74hzzcv",
+    "timestamp": "2025-08-28T04:11:13.905Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756354273902_19lb3v02o",
+    "timestamp": "2025-08-28T04:11:13.902Z",
+    "level": "error",
+    "message": "❌ [PERMISSION-SERVICE] Erro em getAllProfilePermissions: Error: Permissão insuficiente: 'Listar Permissions' necessária para listar permissões de perfil",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756354266844_mii8zydd9",
     "timestamp": "2025-08-28T04:11:06.844Z",
     "level": "error",
