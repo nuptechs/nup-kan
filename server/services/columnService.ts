@@ -40,7 +40,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'getColumns', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Columns', 'listar colunas');
+      this.requirePermission(authContext, 'Listar Colunas', 'listar colunas');
 
       const cacheKey = 'columns:all';
       const cached = await this.cache.get<Column[]>(cacheKey);
@@ -65,7 +65,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'getBoardColumns', { userId: authContext.userId, boardId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Columns', 'visualizar colunas');
+      this.requirePermission(authContext, 'Visualizar Colunas', 'visualizar colunas');
 
       const cacheKey = `board_columns:${boardId}`;
       const cached = await this.cache.get<Column[]>(cacheKey);
@@ -107,7 +107,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'createColumn', { userId: authContext.userId, title: request.title });
     
     try {
-      this.requirePermission(authContext, 'Criar Columns', 'criar colunas');
+      this.requirePermission(authContext, 'Criar Colunas', 'criar colunas');
 
       const validData = insertColumnSchema.parse(request);
       const column = await this.storage.createColumn(validData);
@@ -138,7 +138,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'updateColumn', { userId: authContext.userId, columnId });
     
     try {
-      this.requirePermission(authContext, 'Editar Columns', 'editar colunas');
+      this.requirePermission(authContext, 'Editar Colunas', 'editar colunas');
 
       const existingColumn = await this.storage.getColumn(columnId);
       if (!existingColumn) {
@@ -175,7 +175,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'deleteColumn', { userId: authContext.userId, columnId });
     
     try {
-      this.requirePermission(authContext, 'Excluir Columns', 'excluir colunas');
+      this.requirePermission(authContext, 'Excluir Colunas', 'excluir colunas');
 
       const column = await this.storage.getColumn(columnId);
       if (!column) {

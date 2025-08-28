@@ -35,7 +35,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'getProfiles', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Profiles', 'listar perfis');
+      this.requirePermission(authContext, 'Listar Perfis', 'listar perfis');
 
       const cacheKey = 'profiles:all';
       const cached = await this.cache.get<Profile[]>(cacheKey);
@@ -60,7 +60,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'getProfile', { userId: authContext.userId, profileId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Profiles', 'visualizar perfil');
+      this.requirePermission(authContext, 'Visualizar Perfis', 'visualizar perfil');
 
       const profile = await this.storage.getProfile(profileId);
       return profile || null;
@@ -77,7 +77,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'createProfile', { userId: authContext.userId, name: request.name });
     
     try {
-      this.requirePermission(authContext, 'Criar Profiles', 'criar perfis');
+      this.requirePermission(authContext, 'Criar Perfis', 'criar perfis');
 
       const validData = insertProfileSchema.parse(request);
       const profile = await this.storage.createProfile(validData);
@@ -105,7 +105,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'updateProfile', { userId: authContext.userId, profileId });
     
     try {
-      this.requirePermission(authContext, 'Editar Profiles', 'editar perfis');
+      this.requirePermission(authContext, 'Editar Perfis', 'editar perfis');
 
       const existingProfile = await this.storage.getProfile(profileId);
       if (!existingProfile) {
@@ -138,7 +138,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'deleteProfile', { userId: authContext.userId, profileId });
     
     try {
-      this.requirePermission(authContext, 'Excluir Profiles', 'excluir perfis');
+      this.requirePermission(authContext, 'Excluir Perfis', 'excluir perfis');
 
       const profile = await this.storage.getProfile(profileId);
       if (!profile) {

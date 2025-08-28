@@ -426,7 +426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ✅ RESTAURADA - Rota GET /api/tasks necessária para funcionalidades de export
   app.get("/api/tasks", 
     AuthMiddlewareJWT.requireAuth,
-    AuthMiddlewareJWT.requirePermissions("Listar Tasks"),
+    AuthMiddlewareJWT.requirePermissions("Listar Tarefas"),
     async (req, res) => {
     try {
       // Paginação opcional
@@ -503,7 +503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Task Assignee routes (deprecated - migrated to assigneeService)
   app.get("/api/tasks/:taskId/assignees", 
     AuthMiddlewareJWT.requireAuth,
-    AuthMiddlewareJWT.requirePermissions("Visualizar Tasks"), 
+    AuthMiddlewareJWT.requirePermissions("Visualizar Tarefas"), 
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -596,7 +596,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Buscar tasks de um board
   app.get("/api/boards/:boardId/tasks", 
     AuthMiddlewareJWT.requireAuth,
-    AuthMiddlewareJWT.requirePermissions("Listar Tasks"),
+    AuthMiddlewareJWT.requirePermissions("Listar Tarefas"),
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -612,7 +612,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Criar nova task
   app.post("/api/tasks",
     AuthMiddlewareJWT.requireAuth,
-    AuthMiddlewareJWT.requirePermissions("Criar Tasks"),
+    AuthMiddlewareJWT.requirePermissions("Criar Tarefas"),
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -673,7 +673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Atualizar task
   app.patch("/api/tasks/:id",
     AuthMiddlewareJWT.requireAuth,
-    AuthMiddlewareJWT.requirePermissions("Editar Tasks"),
+    AuthMiddlewareJWT.requirePermissions("Editar Tarefas"),
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -692,7 +692,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Deletar task
   app.delete("/api/tasks/:id",
     AuthMiddlewareJWT.requireAuth,
-    AuthMiddlewareJWT.requirePermissions("Excluir Tasks"),
+    AuthMiddlewareJWT.requirePermissions("Excluir Tarefas"),
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -730,7 +730,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Column routes - Protegidas com permissões
   app.get("/api/columns", 
     AuthMiddlewareJWT.requireAuth,
-    AuthMiddlewareJWT.requirePermissions("Listar Columns"), 
+    AuthMiddlewareJWT.requirePermissions("Listar Colunas"), 
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -764,7 +764,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/columns", 
     AuthMiddlewareJWT.requireAuth,
-    AuthMiddlewareJWT.requirePermissions("Criar Columns"), 
+    AuthMiddlewareJWT.requirePermissions("Criar Colunas"), 
     async (req, res) => {
     const startTime = Date.now();
     const authContext = createAuthContextFromRequest(req);
@@ -805,7 +805,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/columns/:id", 
     AuthMiddlewareJWT.requireAuth,
-    AuthMiddlewareJWT.requirePermissions("Editar Columns"), 
+    AuthMiddlewareJWT.requirePermissions("Editar Colunas"), 
     async (req, res) => {
     try {
       const columnData = updateColumnSchema.parse(req.body);
@@ -822,7 +822,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/columns/:id", 
     AuthMiddlewareJWT.requireAuth,
-    AuthMiddlewareJWT.requirePermissions("Excluir Columns"), 
+    AuthMiddlewareJWT.requirePermissions("Excluir Colunas"), 
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -838,7 +838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/columns/reorder", 
     AuthMiddlewareJWT.requireAuth,
-    AuthMiddlewareJWT.requirePermissions("Editar Columns"), 
+    AuthMiddlewareJWT.requirePermissions("Editar Colunas"), 
     async (req, res) => {
     try {
       const reorderedColumns = req.body.columns;

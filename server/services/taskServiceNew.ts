@@ -66,7 +66,7 @@ export class TaskService extends BaseService {
     
     try {
       // Verificar permissões
-      this.requirePermission(authContext, 'Listar Tasks', 'listar tasks');
+      this.requirePermission(authContext, 'Listar Tarefas', 'listar tasks');
 
       // Verificar acesso ao board
       const boardAccess = await this.checkBoardAccess(authContext.userId, boardId);
@@ -133,7 +133,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'getTask', { userId: authContext.userId, taskId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Tasks', 'visualizar task');
+      this.requirePermission(authContext, 'Visualizar Tarefas', 'visualizar task');
 
       // Tentar cache primeiro
       const cacheKey = `task:${taskId}:full`;
@@ -195,7 +195,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'createTask', { userId: authContext.userId, title: request.title });
     
     try {
-      this.requirePermission(authContext, 'Criar Tasks', 'criar tasks');
+      this.requirePermission(authContext, 'Criar Tarefas', 'criar tasks');
 
       // Verificar acesso ao board
       const boardAccess = await this.checkBoardAccess(authContext.userId, request.boardId);
@@ -250,7 +250,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'updateTask', { userId: authContext.userId, taskId });
     
     try {
-      this.requirePermission(authContext, 'Editar Tasks', 'editar tasks');
+      this.requirePermission(authContext, 'Editar Tarefas', 'editar tasks');
 
       // Verificar se task existe
       const existingTask = await this.storage.getTask(taskId);
@@ -301,7 +301,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'deleteTask', { userId: authContext.userId, taskId });
     
     try {
-      this.requirePermission(authContext, 'Excluir Tasks', 'excluir tasks');
+      this.requirePermission(authContext, 'Excluir Tarefas', 'excluir tasks');
 
       // Verificar se task existe
       const task = await this.storage.getTask(taskId);
@@ -365,7 +365,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'getAllTasks', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Tasks', 'listar tasks');
+      this.requirePermission(authContext, 'Listar Tarefas', 'listar tasks');
 
       // Buscar todas as tasks do DAO
       const tasks = await this.storage.getTasks();

@@ -50,7 +50,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'getTeams', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Teams', 'listar times');
+      this.requirePermission(authContext, 'Listar Times', 'listar times');
 
       const cacheKey = 'teams:all';
       const cached = await this.cache.get<Team[]>(cacheKey);
@@ -76,7 +76,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'getTeam', { userId: authContext.userId, teamId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Teams', 'visualizar time');
+      this.requirePermission(authContext, 'Visualizar Times', 'visualizar time');
 
       const cacheKey = `team:${teamId}:full`;
       const cached = await this.cache.get<TeamWithMembers>(cacheKey);
