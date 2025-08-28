@@ -889,7 +889,7 @@ export default function PermissionsHub() {
                           }
                         }}
                       >
-                        {selectedUsers.length === users.length ? "Desmarcar Todos" : "Selecionar Todos"}
+{selectedUsers.length === users.length ? "Desmarcar Todos" : `Selecionar Todos (${users.length})`}
                       </Button>
                     </div>
 
@@ -1086,7 +1086,7 @@ export default function PermissionsHub() {
                                   }
                                 }}
                               >
-                                Selecionar/Desmarcar Todos
+{selectedUsers.length === 0 ? `Selecionar Todos (${users.length})` : "Desmarcar Todos"}
                               </Button>
                             </div>
 
@@ -1285,7 +1285,7 @@ export default function PermissionsHub() {
                           }
                         }}
                       >
-                        {selectedPermissions.length === permissions.length ? "Desmarcar Todas" : "Selecionar Todas"}
+{selectedPermissions.length === permissions.length ? "Desmarcar Todas" : `Selecionar Todas (${permissions.length})`}
                       </Button>
                     </div>
                     <div className="border rounded-md p-2 h-48 overflow-y-auto">
@@ -1465,24 +1465,30 @@ export default function PermissionsHub() {
                                 {/* Permissões Disponíveis */}
                                 <div className="space-y-3">
                                   <div className="flex items-center justify-between">
-                                    <FormLabel className="text-blue-600">Disponíveis para Adicionar</FormLabel>
-                                    <div className="flex space-x-2">
-                                      <Badge variant="secondary">{availablePermissions.length}</Badge>
-                                      <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                          if (selectedPermissions.length === availablePermissions.length) {
-                                            setSelectedPermissions([]);
-                                          } else {
-                                            setSelectedPermissions(availablePermissions.map(p => p.id));
-                                          }
-                                        }}
-                                      >
-                                        {selectedPermissions.length === availablePermissions.length ? "Desmarcar" : "Todas"}
-                                      </Button>
+                                    <div className="flex items-center space-x-2">
+                                      <FormLabel className="text-blue-600">Disponíveis para Adicionar</FormLabel>
+                                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                                        {availablePermissions.length}
+                                      </Badge>
                                     </div>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      className="flex items-center space-x-1"
+                                      onClick={() => {
+                                        if (selectedPermissions.length === availablePermissions.length) {
+                                          setSelectedPermissions([]);
+                                        } else {
+                                          setSelectedPermissions(availablePermissions.map(p => p.id));
+                                        }
+                                      }}
+                                    >
+                                      {selectedPermissions.length === availablePermissions.length 
+                                        ? "Desmarcar Todas" 
+                                        : `Selecionar Todas (${availablePermissions.length})`
+                                      }
+                                    </Button>
                                   </div>
                                   <div className="border rounded-md p-2 max-h-48 overflow-y-auto">
                                     {availablePermissions.map((permission: Permission) => (

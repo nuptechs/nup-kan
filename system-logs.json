@@ -1,47 +1,31 @@
 [
   {
-    "id": "log_1756355564107_8xad9l2f7",
-    "timestamp": "2025-08-28T04:32:44.107Z",
+    "id": "log_1756355954955_oya6b2xdw",
+    "timestamp": "2025-08-28T04:39:14.955Z",
     "level": "error",
     "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756355564106_u6steqan5",
-    "timestamp": "2025-08-28T04:32:44.106Z",
+    "id": "log_1756355954942_cq58omfxz",
+    "timestamp": "2025-08-28T04:39:14.942Z",
     "level": "error",
     "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756355557171_t4tggwpra",
-    "timestamp": "2025-08-28T04:32:37.171Z",
-    "level": "error",
-    "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756355557162_3tgnd02sa",
-    "timestamp": "2025-08-28T04:32:37.162Z",
-    "level": "error",
-    "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756355492673_rpj44indt",
-    "timestamp": "2025-08-28T04:31:32.673Z",
+    "id": "log_1756355938184_z5e6lmaar",
+    "timestamp": "2025-08-28T04:38:58.184Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756355490810_bizyzcwzm",
-    "timestamp": "2025-08-28T04:31:30.810Z",
+    "id": "log_1756355935803_03f69bpv5",
+    "timestamp": "2025-08-28T04:38:55.803Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",
