@@ -1,63 +1,31 @@
 [
   {
-    "id": "log_1756348055935_qbe2kvs8d",
-    "timestamp": "2025-08-28T02:27:35.935Z",
-    "level": "error",
-    "message": "Error fetching board member count: TypeError: Cannot read properties of undefined (reading 'userId')",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756348055932_rlv7o426m",
-    "timestamp": "2025-08-28T02:27:35.932Z",
+    "id": "log_1756348368463_asf4zpv4a",
+    "timestamp": "2025-08-28T02:32:48.463Z",
     "level": "error",
     "message": "Error fetching board: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756348055931_ql1011egf",
-    "timestamp": "2025-08-28T02:27:35.931Z",
+    "id": "log_1756348368450_rpgecgaqs",
+    "timestamp": "2025-08-28T02:32:48.450Z",
     "level": "error",
     "message": "❌ [BOARD-SERVICE] Erro em getBoard: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756348016103_zsk5pav2l",
-    "timestamp": "2025-08-28T02:26:56.103Z",
-    "level": "error",
-    "message": "Error fetching board member count: TypeError: Cannot read properties of undefined (reading 'userId')",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756348016101_tgxs3trkp",
-    "timestamp": "2025-08-28T02:26:56.101Z",
-    "level": "error",
-    "message": "Error fetching board: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756348016093_skaqzn7gx",
-    "timestamp": "2025-08-28T02:26:56.093Z",
-    "level": "error",
-    "message": "❌ [BOARD-SERVICE] Erro em getBoard: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756348004002_bmj434pqm",
-    "timestamp": "2025-08-28T02:26:44.002Z",
+    "id": "log_1756348356640_lm5cp1eyh",
+    "timestamp": "2025-08-28T02:32:36.640Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756348001896_76tgrqppj",
-    "timestamp": "2025-08-28T02:26:41.896Z",
+    "id": "log_1756348354730_3fn8lhz37",
+    "timestamp": "2025-08-28T02:32:34.730Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

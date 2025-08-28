@@ -20,13 +20,20 @@ import { cache } from "./cache";
 // 🚀 MICROSERVIÇOS IMPORTADOS
 import { APIGateway } from './microservices/apiGateway';
 import { AuthMiddleware, AuthService } from './microservices/authService';
-import { AuthServiceJWT } from './microservices/authServiceJWT';
+import { AuthServiceJWT, AuthMiddlewareJWT } from './microservices/authServiceJWT';
 import { BoardService } from './microservices/boardService'; // Legacy - será removido
 import { mongoStore } from './mongodb';
 import { QueryHandlers } from './cqrs/queries';
 
 // Helper para criar AuthContext a partir da request
 function createAuthContextFromRequest(req: any): any {
+  // JWT Auth: usar dados do authContext configurado pelo middleware JWT
+  const authContext = req.authContext;
+  if (authContext) {
+    return authContext;
+  }
+  
+  // Fallback para session auth (compatibilidade)
   const userId = req.session?.user?.id || req.session?.userId;
   const user = req.user;
   const permissions = req.userPermissions || [];
@@ -187,9 +194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/users/:userId/permissions", 
-    AuthMiddleware.requireAuth,
-    async (req, res) => {
+  app.get("/api/users/:userId/permissions", async (req, res) => {
       try {
         // 🔐 VERIFICAR SE O USUÁRIO PODE ACESSAR SUAS PRÓPRIAS PERMISSÕES
         const requestingUserId = req.session?.user?.id;
@@ -219,10 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
   
   // 📋 Board routes - SIMPLIFICADO (sem microserviços)
-  app.get("/api/boards",
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Listar Boards"),
-    async (req, res) => {
+  app.get("/api/boards", async (req, res) => {
       try {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 20;
@@ -254,10 +256,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
   
-  app.post("/api/boards",
-    AuthMiddleware.requireAuth, 
-    AuthMiddleware.requirePermissions("Criar Boards"),
-    async (req, res) => {
+  app.post("/api/boards", async (req, res) => {
       try {
         const authContext = createAuthContextFromRequest(req);
         const board = await boardService.createBoard(authContext, req.body);
@@ -269,10 +268,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
   
-  app.get("/api/boards/:id",
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Visualizar Boards"), 
-    async (req, res) => {
+  app.get("/api/boards/:id", async (req, res) => {
       try {
         const authContext = createAuthContextFromRequest(req);
         const board = await boardService.getBoard(authContext, req.params.id);
@@ -2542,18 +2538,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Board Sharing routes
-  app.get("/api/boards/:boardId/shares", async (req, res) => {
+  app.get("/api/boards/:boardId/shares", 
+    AuthMiddlewareJWT.requireAuth,
+    async (req, res) => {
     try {
-      const shares = await boardShareService.getBoardShares(req.authContext, req.params.boardId);
+      const authContext = createAuthContextFromRequest(req);
+      const shares = await boardShareService.getBoardShares(authContext, req.params.boardId);
       res.json(shares);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch board shares" });
     }
   });
 
-  app.get("/api/boards/:boardId/members", async (req, res) => {
+  app.get("/api/boards/:boardId/members", 
+    AuthMiddlewareJWT.requireAuth,
+    async (req, res) => {
     try {
-      const members = await boardShareService.getBoardMembers(req.authContext, req.params.boardId);
+      const authContext = createAuthContextFromRequest(req);
+      const members = await boardShareService.getBoardMembers(authContext, req.params.boardId);
       res.json(members);
     } catch (error) {
       console.error("Error fetching board members:", error);
@@ -2561,9 +2563,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/boards/:boardId/member-count", async (req, res) => {
+  app.get("/api/boards/:boardId/member-count", 
+    AuthMiddlewareJWT.requireAuth,
+    async (req, res) => {
     try {
-      const count = await boardShareService.getBoardMemberCount(req.authContext, req.params.boardId);
+      const authContext = createAuthContextFromRequest(req);
+      const count = await boardShareService.getBoardMemberCount(authContext, req.params.boardId);
       res.json({ count });
     } catch (error) {
       console.error("Error fetching board member count:", error);
@@ -2571,27 +2576,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/board-shares", async (req, res) => {
+  app.get("/api/board-shares", 
+    AuthMiddlewareJWT.requireAuth,
+    async (req, res) => {
     try {
-      const shares = await boardShareService.getAllBoardShares(req.authContext);
+      const authContext = createAuthContextFromRequest(req);
+      const shares = await boardShareService.getAllBoardShares(authContext);
       res.json(shares);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch board shares" });
     }
   });
 
-  app.get("/api/users/:userId/shared-boards", async (req, res) => {
+  app.get("/api/users/:userId/shared-boards", 
+    AuthMiddlewareJWT.requireAuth,
+    async (req, res) => {
     try {
-      const shares = await boardShareService.getUserSharedBoards(req.authContext, req.params.userId);
+      const authContext = createAuthContextFromRequest(req);
+      const shares = await boardShareService.getUserSharedBoards(authContext, req.params.userId);
       res.json(shares);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch user shared boards" });
     }
   });
 
-  app.get("/api/teams/:teamId/shared-boards", async (req, res) => {
+  app.get("/api/teams/:teamId/shared-boards", 
+    AuthMiddlewareJWT.requireAuth,
+    async (req, res) => {
     try {
-      const shares = await boardShareService.getTeamSharedBoards(req.authContext, req.params.teamId);
+      const authContext = createAuthContextFromRequest(req);
+      const shares = await boardShareService.getTeamSharedBoards(authContext, req.params.teamId);
       res.json(shares);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch team shared boards" });
