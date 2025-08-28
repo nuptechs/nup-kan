@@ -253,6 +253,25 @@ export class BoardService extends BaseService {
   }
 
   /**
+   * Verificar se já existe board com mesmo nome acessível ao usuário
+   */
+  async checkBoardNameExists(userId: string, boardName: string, excludeBoardId?: string): Promise<boolean> {
+    try {
+      // Buscar todos os boards acessíveis ao usuário
+      const userBoards = await this.storage.getBoardsForUser(userId, 1000, 0);
+      
+      // Verificar se algum board tem o mesmo nome (ignorando o board atual se estiver editando)
+      return userBoards.some(board => 
+        board.name.toLowerCase().trim() === boardName.toLowerCase().trim() && 
+        board.id !== excludeBoardId
+      );
+    } catch (error) {
+      this.logError('board-service', 'checkBoardNameExists', error);
+      return false; // Se houver erro, permitir a operação
+    }
+  }
+
+  /**
    * Criar novo board
    */
   async createBoard(authContext: AuthContext, request: BoardCreateRequest): Promise<Board> {
@@ -261,9 +280,15 @@ export class BoardService extends BaseService {
     try {
       this.requirePermission(authContext, 'Criar Boards', 'criar boards');
 
+      // Validar se já existe board com mesmo nome
+      const nameExists = await this.checkBoardNameExists(authContext.userId, request.name);
+      if (nameExists) {
+        throw new Error('Já existe um board com este nome acessível à você');
+      }
+
       // Validar dados
       const validData = insertBoardSchema.parse({
-        name: request.name,
+        name: request.name.trim(),
         description: request.description || '',
         color: request.color || '#3B82F6',
         createdById: authContext.userId,
@@ -320,8 +345,19 @@ export class BoardService extends BaseService {
         throw new Error('Acesso negado ao board');
       }
 
+      // Validar se novo nome já existe (apenas se nome foi alterado)
+      if (request.name && request.name.trim() !== existingBoard.name) {
+        const nameExists = await this.checkBoardNameExists(authContext.userId, request.name, boardId);
+        if (nameExists) {
+          throw new Error('Já existe um board com este nome acessível à você');
+        }
+      }
+
       // Validar dados de atualização
-      const validData = updateBoardSchema.parse(request);
+      const validData = updateBoardSchema.parse({
+        ...request,
+        name: request.name?.trim() || existingBoard.name
+      });
       
       // Atualizar via DAO
       const updatedBoard = await this.storage.updateBoard(boardId, validData);
