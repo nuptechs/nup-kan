@@ -490,6 +490,40 @@ export class BoardService extends BaseService {
       return false;
     }
   }
+
+  async toggleBoardStatus(authContext: AuthContext, boardId: string): Promise<Board> {
+    console.log(`🔄 [BOARD-SERVICE] toggleBoardStatus { userId: '${authContext.userId}', boardId: '${boardId}' }`);
+    
+    // Buscar board atual
+    const currentBoard = await this.storage.getBoard(boardId);
+    if (!currentBoard) {
+      throw new Error("Board not found");
+    }
+
+    // Verificar se o usuário pode editar este board
+    const canEdit = currentBoard.createdById === authContext.userId || 
+                   this.hasPermission(authContext, 'Editar Boards');
+    
+    if (!canEdit) {
+      throw new Error("Permission denied");
+    }
+
+    // Toggle do status
+    const newStatus = currentBoard.isActive === "true" ? "false" : "true";
+    
+    // Atualizar no banco
+    const updatedBoard = await this.storage.updateBoard(boardId, {
+      isActive: newStatus
+    });
+
+    // Invalidar caches relevantes
+    await this.cache.del(`boards_user_access:${authContext.userId}:20:0`);
+    await this.cache.del(`board:${boardId}`);
+    
+    console.log(`✅ [BOARD-SERVICE] Board ${boardId} status alterado para ${newStatus}`);
+    
+    return updatedBoard;
+  }
 }
 
 // Export singleton instance

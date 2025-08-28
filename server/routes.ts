@@ -375,24 +375,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Update and delete routes handled by other services
 
-  // Toggle board active status - TEMPORARILY DISABLED (method doesn't exist)
-  // app.patch("/api/boards/:id/toggle-status",
-  //   AuthMiddlewareJWT.requireAuth,
-  //   AuthMiddlewareJWT.requirePermissions("Editar Boards"),
-  //   async (req, res) => {
-  //     try {
-  //       const boardId = req.params.id;
-  //       
-  //       const authContext = createAuthContextFromRequest(req);
-  //       const updatedBoard = await boardService.toggleBoardStatus(authContext, boardId);
-  //       
-  //       res.json(updatedBoard);
-  //     } catch (error) {
-  //       console.error("Error toggling board status:", error);
-  //       res.status(500).json({ error: "Erro interno do servidor" });
-  //     }
-  //   }
-  // );
+  // Toggle board active status
+  app.patch("/api/boards/:id/toggle-status",
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Editar Boards"),
+    async (req, res) => {
+      try {
+        const boardId = req.params.id;
+        
+        const authContext = createAuthContextFromRequest(req);
+        const updatedBoard = await boardService.toggleBoardStatus(authContext, boardId);
+        
+        res.json(updatedBoard);
+      } catch (error) {
+        console.error("Error toggling board status:", error);
+        res.status(500).json({ error: "Erro interno do servidor" });
+      }
+    }
+  );
   
   // ✅ Task routes - SIMPLIFICADOS (sem microserviços complexos)
   // ROTAS REMOVIDAS - Usando apenas as versões simples abaixo
