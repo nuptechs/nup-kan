@@ -7,22 +7,17 @@ export function usePermissions() {
   // ✅ USAR DADOS CENTRALIZADOS - Evita request duplicado
   const { user: currentUser, isLoading: userLoading, error: userError } = useAuth();
 
-  // Buscar permissões do usuário baseado no seu perfil - usando endpoint correto que funciona
-  const { data: userPermissionsData, isLoading: permissionsLoading, error: permissionsError } = useQuery<{permissions: string[]}>({
-    queryKey: [`/api/users/${currentUser?.id}/permissions`],
-    enabled: !!currentUser?.id,
-    staleTime: 300000, // Cache por 5 minutos - permissões mudam raramente
-    gcTime: 600000, // Manter em cache por 10 minutos
-    refetchOnWindowFocus: false,
-    retry: 3, // Aumentar tentativas
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-  });
+  // ✅ USAR PERMISSÕES DO useAuth - Elas já estão carregadas corretamente!
+  // O currentUser do useAuth já tem as permissões como array de strings
+  const userPermissionsData = (currentUser as any)?.permissions ? { permissions: (currentUser as any).permissions } : null;
+  const permissionsLoading = false;
+  const permissionsError = null;
 
   // Converter array de strings para array de objetos Permission
   const userPermissions: Permission[] = useMemo(() => {
     if (!userPermissionsData?.permissions) return [];
     
-    return userPermissionsData.permissions.map(permissionName => ({
+    return userPermissionsData.permissions.map((permissionName: string) => ({
       id: permissionName.toLowerCase().replace(/\s+/g, '-'),
       name: permissionName,
       category: permissionName.includes('Board') ? 'boards' : 
@@ -41,14 +36,13 @@ export function usePermissions() {
 
   // Log de segurança - detectar tentativas de acesso sem permissão
   useEffect(() => {
-    if (userError || permissionsError) {
+    if (userError) {
       console.warn("🔐 [SECURITY] Falha ao carregar permissões do usuário:", {
         userError: userError?.message,
-        permissionsError: permissionsError?.message,
         userId: currentUser?.id
       });
     }
-  }, [userError, permissionsError, currentUser?.id]);
+  }, [userError, currentUser?.id]);
 
   const permissionMap = useMemo(() => {
     const map = new Map<string, Permission>();

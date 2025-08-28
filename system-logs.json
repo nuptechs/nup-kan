@@ -1,47 +1,47 @@
 [
   {
-    "id": "log_1756351026406_quuq7q5yp",
-    "timestamp": "2025-08-28T03:17:06.406Z",
+    "id": "log_1756351204334_dj5zlrf43",
+    "timestamp": "2025-08-28T03:20:04.334Z",
     "level": "error",
     "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756351025575_v6zz04b43",
-    "timestamp": "2025-08-28T03:17:05.575Z",
+    "id": "log_1756351203786_uoo6vqbvf",
+    "timestamp": "2025-08-28T03:20:03.786Z",
     "level": "error",
     "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756351025573_st6hxvpxp",
-    "timestamp": "2025-08-28T03:17:05.573Z",
+    "id": "log_1756351203784_rrnpx1426",
+    "timestamp": "2025-08-28T03:20:03.784Z",
     "level": "error",
     "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756351025417_hf9ifmmzp",
-    "timestamp": "2025-08-28T03:17:05.417Z",
+    "id": "log_1756351203312_v875vnp8m",
+    "timestamp": "2025-08-28T03:20:03.312Z",
     "level": "error",
     "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756351011672_qp1qiu6g4",
-    "timestamp": "2025-08-28T03:16:51.672Z",
+    "id": "log_1756351190276_t4vuagcn4",
+    "timestamp": "2025-08-28T03:19:50.276Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756351010370_w2sqe290b",
-    "timestamp": "2025-08-28T03:16:50.370Z",
+    "id": "log_1756351188461_v5e612l0p",
+    "timestamp": "2025-08-28T03:19:48.461Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",
