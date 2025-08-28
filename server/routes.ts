@@ -937,16 +937,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/users", 
-    AuthMiddlewareJWT.requireAuth,
-    async (req, res) => {
+  app.post("/api/users", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.user?.id || 'unknown';
-    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
-      const authContext = createAuthContextFromRequest(req);
-      const user = await userService.createUser(authContext, req.body);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
+      const userId = authContext.userId;
+      const userName = authContext.userName || 'Usuário desconhecido';
+      
+      // Adicionar senha padrão se não fornecida
+      const userData = {
+        ...req.body,
+        password: req.body.password || '123456' // Senha padrão para novos usuários
+      };
+      
+      console.log('🔍 [DEBUG-CREATE-USER] Data received:', JSON.stringify({
+        name: userData.name,
+        email: userData.email,
+        hasPassword: !!userData.password,
+        role: userData.role,
+        profileId: userData.profileId
+      }));
+      
+      const user = await userService.createUser(authContext, userData);
       
       // Enviar email de boas-vindas
       if (user.email) {
@@ -970,9 +991,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       const duration = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      
+      // Tentar obter informações do usuário para o log, mesmo com erro
+      let userId = 'unknown';
+      let userName = 'Usuário desconhecido';
+      try {
+        const authContext = await AuthServiceJWT.verifyAuth(req);
+        if (authContext) {
+          userId = authContext.userId;
+          userName = authContext.userName || 'Usuário desconhecido';
+        }
+      } catch (authError) {
+        // Ignore auth error for logging
+      }
+      
       addUserActionLog(userId, userName, `Criar usuário "${req.body.name || 'sem nome'}"`, 'error', { error: errorMessage, details: error }, duration);
       
-      res.status(400).json({ message: "Invalid user data" });
+      console.error('Error in POST /api/users:', error);
+      const message = error instanceof Error ? error.message : "Invalid user data";
+      res.status(400).json({ message });
     }
   });
 
@@ -1845,7 +1882,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Team routes
   app.get("/api/teams", async (req, res) => {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
       const result = await teamService.getTeams(authContext);
       
       res.json(result);
@@ -1857,7 +1902,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/teams/:id", async (req, res) => {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
       const result = await teamService.getTeam(authContext, req.params.id);
       
       if (!result) {
@@ -1872,11 +1925,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/teams", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.user?.id || 'unknown';
-    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
+      const userId = authContext.userId;
+      const userName = authContext.userName || 'Usuário desconhecido';
       const result = await teamService.createTeam(authContext, req.body);
       
       const duration = Date.now() - startTime;
@@ -1894,7 +1955,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/teams/:id", async (req, res) => {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
       const result = await teamService.updateTeam(authContext, req.params.id, req.body);
       
       res.json(result);
@@ -1908,11 +1977,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/teams/:id", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.user?.id || 'unknown';
-    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
+      const userId = authContext.userId;
+      const userName = authContext.userName || 'Usuário desconhecido';
       const result = await teamService.updateTeam(authContext, req.params.id, req.body);
       
       const duration = Date.now() - startTime;
@@ -1935,11 +2012,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/teams/:id", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.user?.id || 'unknown';
-    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
+      const userId = authContext.userId;
+      const userName = authContext.userName || 'Usuário desconhecido';
       const result = await teamService.deleteTeam(authContext, req.params.id);
       
       if (!result.success) {
@@ -1976,7 +2061,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Profile routes
   app.get("/api/profiles", async (req, res) => {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
       const profiles = await profileService.getProfiles(authContext);
       res.json(profiles);
     } catch (error) {
@@ -1986,7 +2079,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/profiles/:id", async (req, res) => {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
       const profile = await profileService.getProfile(authContext, req.params.id);
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
@@ -1999,12 +2100,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/profiles", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.user?.id || 'unknown';
-    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
+      const userId = authContext.userId;
+      const userName = authContext.userName || 'Usuário desconhecido';
+      
       const profileData = insertProfileSchema.parse(req.body);
-      const authContext = createAuthContextFromRequest(req);
       const profile = await profileService.createProfile(authContext, profileData);
       
       const duration = Date.now() - startTime;
@@ -2014,20 +2124,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       const duration = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
-      addUserActionLog(userId, userName, `Criar perfil "${req.body.name || 'sem nome'}"`, 'error', { error: errorMessage, details: error }, duration);
       
-      res.status(400).json({ message: "Invalid profile data" });
+      // Tentar obter informações do usuário para o log, mesmo com erro
+      let logUserId = 'unknown';
+      let logUserName = 'Usuário desconhecido';
+      try {
+        const authContextLog = await AuthServiceJWT.verifyAuth(req);
+        if (authContextLog) {
+          logUserId = authContextLog.userId;
+          logUserName = authContextLog.userName || 'Usuário desconhecido';
+        }
+      } catch (authError) {
+        // Ignore auth error for logging
+      }
+      
+      addUserActionLog(logUserId, logUserName, `Criar perfil "${req.body.name || 'sem nome'}"`, 'error', { error: errorMessage, details: error }, duration);
+      
+      console.error('Error in POST /api/profiles:', error);
+      const message = error instanceof Error ? error.message : "Invalid profile data";
+      res.status(400).json({ message });
     }
   });
 
   app.patch("/api/profiles/:id", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.user?.id || 'unknown';
-    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
+      const userId = authContext.userId;
+      const userName = authContext.userName || 'Usuário desconhecido';
+      
       const profileData = updateProfileSchema.parse(req.body);
-      const authContext = createAuthContextFromRequest(req);
       const profile = await profileService.updateProfile(authContext, req.params.id, profileData);
       
       // Cache individual será invalidado automaticamente pelo TanStack Query
@@ -2052,11 +2187,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/profiles/:id", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.user?.id || 'unknown';
-    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
+      const userId = authContext.userId;
+      const userName = authContext.userName || 'Usuário desconhecido';
+      
       await profileService.deleteProfile(authContext, req.params.id);
       
       const duration = Date.now() - startTime;
