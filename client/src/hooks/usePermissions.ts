@@ -5,19 +5,22 @@ import { useAuth } from "./useAuth"; // ✅ Usar hook centralizado
 
 export function usePermissions() {
   // ✅ USAR DADOS CENTRALIZADOS - Evita request duplicado
-  const { user: currentUser, isLoading: userLoading, error: userError } = useAuth();
+  const authData = useAuth();
+  const { user: currentUser, isLoading: userLoading, error: userError } = authData;
 
-  // ✅ USAR PERMISSÕES DO useAuth - Elas já estão carregadas corretamente!
-  // O currentUser do useAuth já tem as permissões como array de strings
+
+  // ✅ AGORA AS PERMISSÕES ESTÃO NO currentUser
   const userPermissionsData = (currentUser as any)?.permissions ? { permissions: (currentUser as any).permissions } : null;
   const permissionsLoading = false;
   const permissionsError = null;
 
   // Converter array de strings para array de objetos Permission
   const userPermissions: Permission[] = useMemo(() => {
-    if (!userPermissionsData?.permissions) return [];
+    // Usar diretamente currentUser.permissions
+    const permissionsArray = (currentUser as any)?.permissions;
+    if (!permissionsArray || !Array.isArray(permissionsArray)) return [];
     
-    return userPermissionsData.permissions.map((permissionName: string) => ({
+    return permissionsArray.map((permissionName: string) => ({
       id: permissionName.toLowerCase().replace(/\s+/g, '-'),
       name: permissionName,
       category: permissionName.includes('Board') ? 'boards' : 
@@ -125,7 +128,7 @@ export function usePermissions() {
       };
     }
     
-    return {
+    const result = {
       canCreateTasks: hasPermission("Criar Tarefas"),
       canEditTasks: hasPermission("Editar Tarefas"),
       canDeleteTasks: hasPermission("Excluir Tarefas"),
@@ -137,6 +140,8 @@ export function usePermissions() {
       canViewAnalytics: hasPermission("Visualizar Analytics"),
       canExportData: hasPermission("Exportar Dados"),
     };
+    
+    return result;
   }, [permissionMap, currentUser]);
 
   return {

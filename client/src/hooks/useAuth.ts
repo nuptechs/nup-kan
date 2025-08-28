@@ -116,7 +116,9 @@ export function useAuth() {
         password: null,
         status: null,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        // ✅ INCLUIR PERMISSÕES NO OBJETO USER
+        ...(authResponse.permissions && { permissions: authResponse.permissions })
       };
     }
 
