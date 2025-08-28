@@ -210,10 +210,16 @@ export default function BoardSelection() {
   // Toggle board status mutation
   const toggleBoardStatusMutation = useMutation({
     mutationFn: async (boardId: string) => {
+      console.log("🚀 [DEBUG] Fazendo request para toggle-status...");
       const response = await apiRequest("PATCH", `/api/boards/${boardId}/toggle-status`);
-      return response.json();
+      const data = await response.json();
+      console.log("🚀 [DEBUG] Resposta recebida:", data);
+      return data;
     },
     onSuccess: async (updatedBoard) => {
+      console.log("🚀 [DEBUG] onSuccess chamado com:", updatedBoard);
+      console.log("🚀 [DEBUG] updatedBoard.isActive:", updatedBoard.isActive, typeof updatedBoard.isActive);
+      console.log("🚀 [DEBUG] updatedBoard.name:", updatedBoard.name);
       
       // 🔄 INVALIDAÇÃO COMPLETA DE CACHE - Lista e board individual
       await queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
@@ -224,13 +230,17 @@ export default function BoardSelection() {
       // Converter para string e comparar (resolve problema de conversão automática)
       const isActive = String(updatedBoard.isActive) === "true";
       const statusText = isActive ? "ativado" : "inativado";
+      console.log("🚀 [DEBUG] isActive final:", isActive, "statusText:", statusText);
       
+      console.log("🚀 [DEBUG] Chamando toast...");
       toast({
         title: `Board ${statusText}`,
         description: `O board "${updatedBoard.name}" foi ${statusText} com sucesso!`,
       });
+      console.log("🚀 [DEBUG] Toast chamado com sucesso!");
     },
-    onError: () => {
+    onError: (error) => {
+      console.log("❌ [DEBUG] Erro na mutation:", error);
       toast({
         title: "Erro",
         description: "Erro ao alterar status do board. Tente novamente.",
