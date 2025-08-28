@@ -1878,7 +1878,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User Teams routes
-  app.get("/api/user-teams", async (req, res) => {
+  app.get("/api/user-teams", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const userTeams = await userTeamService.getAllUserTeams(authContext);
@@ -1888,7 +1888,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/:userId/teams", async (req, res) => {
+  app.get("/api/users/:userId/teams", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const userTeams = await userTeamService.getUserTeams(authContext, req.params.userId);
@@ -1898,7 +1898,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/teams/:teamId/users", async (req, res) => {
+  app.get("/api/teams/:teamId/users", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const teamUsers = await userTeamService.getTeamUsers(authContext, req.params.teamId);
@@ -2361,7 +2361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Profile Permissions routes
-  app.get("/api/profile-permissions", async (req, res) => {
+  app.get("/api/profile-permissions", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const profilePermissions = await permissionService.getAllProfilePermissions(authContext);
