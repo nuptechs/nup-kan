@@ -96,11 +96,12 @@ export function NotificationCenter({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <div className={cn("inline-flex", className)}>
+        <div className={cn("fixed bottom-4 right-4 z-50", className)}>
           <NotificationBadge 
             count={unreadCount}
             onClick={() => setIsOpen(true)}
             data-testid="notification-center-trigger"
+            className="shadow-lg hover:shadow-xl transition-shadow"
           />
         </div>
       </SheetTrigger>

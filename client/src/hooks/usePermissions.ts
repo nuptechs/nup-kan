@@ -139,7 +139,7 @@ export function usePermissions() {
       canManageColumns: hasAnyPermission(["Criar Colunas", "Editar Colunas", "Excluir Colunas"]),
       canManageTeams: hasPermission("Gerenciar Times"),
       canManageUsers: hasAnyPermission(["Criar Usuários", "Editar Usuários", "Excluir Usuários"]),
-      canManageProfiles: hasAnyPermission(["Criar Perfis", "Editar Perfis", "Excluir Perfis"]),
+      canManageProfiles: hasAnyPermission(["Criar Perfis", "Editar Perfis", "Excluir Perfis", "Gerenciar Permissões"]),
       canViewAnalytics: hasPermission("Visualizar Analytics"),
       canExportData: hasPermission("Exportar Dados"),
     };
