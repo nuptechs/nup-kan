@@ -20,6 +20,7 @@ import { cache } from "./cache";
 // 🚀 MICROSERVIÇOS IMPORTADOS
 import { APIGateway } from './microservices/apiGateway';
 import { AuthMiddleware, AuthService } from './microservices/authService';
+import { AuthServiceJWT } from './microservices/authServiceJWT';
 import { BoardService } from './microservices/boardService'; // Legacy - será removido
 import { mongoStore } from './mongodb';
 import { QueryHandlers } from './cqrs/queries';
@@ -3324,12 +3325,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // 🏗️ HIERARCHY SERVICE - Resolução formal de hierarquia
-  app.get("/api/users/:userId/hierarchy", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Visualizar Users"), 
-    async (req, res) => {
+  app.get("/api/users/:userId/hierarchy", async (req, res) => {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar autenticação JWT manualmente
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
       const hierarchy = await hierarchyService.resolveUserHierarchy(authContext, req.params.userId);
       res.json(hierarchy);
     } catch (error) {
@@ -3338,12 +3341,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // 🎯 ASSIGNEE SERVICE - Gestão centralizada de assignees
-  app.get("/api/tasks/:taskId/assignees", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Visualizar Tasks"), 
-    async (req, res) => {
+  app.get("/api/tasks/:taskId/assignees", async (req, res) => {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar autenticação JWT manualmente
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
       const assignees = await assigneeService.getTaskAssignees(authContext, req.params.taskId);
       res.json(assignees);
     } catch (error) {
@@ -3351,12 +3356,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/tasks/:taskId/assignees", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Atribuir Membros"), 
-    async (req, res) => {
+  app.post("/api/tasks/:taskId/assignees", async (req, res) => {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar autenticação JWT manualmente
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
       const assignee = await assigneeService.addTaskAssignee(authContext, {
         taskId: req.params.taskId,
         userId: req.body.userId
