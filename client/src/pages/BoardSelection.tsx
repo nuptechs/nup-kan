@@ -214,8 +214,6 @@ export default function BoardSelection() {
       return response.json();
     },
     onSuccess: async (updatedBoard) => {
-      console.log(`🚀 [DEBUG] onSuccess chamado com:`, updatedBoard);
-      console.log(`🚀 [DEBUG] isActive original:`, updatedBoard.isActive, typeof updatedBoard.isActive);
       
       // 🔄 INVALIDAÇÃO COMPLETA DE CACHE - Lista e board individual
       await queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
@@ -231,29 +229,6 @@ export default function BoardSelection() {
         title: `Board ${statusText}`,
         description: `O board "${updatedBoard.name}" foi ${statusText} com sucesso!`,
       });
-
-      // 🧪 TESTE TEMPORÁRIO - Toast DOM forçado
-      setTimeout(() => {
-        const testToast = document.createElement('div');
-        testToast.style.cssText = `
-          position: fixed !important;
-          top: 20px !important;
-          right: 20px !important;
-          z-index: 9999 !important;
-          background: #10b981 !important;
-          color: white !important;
-          padding: 16px !important;
-          border-radius: 8px !important;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
-          font-weight: bold !important;
-          font-size: 14px !important;
-          max-width: 300px !important;
-          pointer-events: none !important;
-        `;
-        testToast.innerHTML = `<div><strong>TESTE DOM:</strong><br>Board "${updatedBoard.name}" ${statusText}!</div>`;
-        document.body.appendChild(testToast);
-        setTimeout(() => testToast.remove(), 3000);
-      }, 100);
     },
     onError: () => {
       toast({
