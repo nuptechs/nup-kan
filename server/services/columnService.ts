@@ -209,7 +209,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'reorderColumns', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Editar Columns', 'reordenar colunas');
+      this.requirePermission(authContext, 'Editar Colunas', 'reordenar colunas');
 
       await this.storage.reorderColumns(reorderedColumns);
 
