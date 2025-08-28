@@ -1,5 +1,101 @@
 [
   {
+    "id": "log_1756349431698_hfe4xjcuj",
+    "timestamp": "2025-08-28T02:50:31.698Z",
+    "level": "error",
+    "message": "Error fetching teams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar times",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349431685_l1pas82ds",
+    "timestamp": "2025-08-28T02:50:31.685Z",
+    "level": "error",
+    "message": "❌ [TEAM-SERVICE] Erro em getTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar times",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349431677_o0ej4zbir",
+    "timestamp": "2025-08-28T02:50:31.677Z",
+    "level": "error",
+    "message": "❌ [TEAM-PROFILE-SERVICE] Erro em getAllTeamProfiles: Error: Permissão insuficiente: 'Listar Teams' necessária para listar perfis de equipes",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349431675_3ukfqtotp",
+    "timestamp": "2025-08-28T02:50:31.675Z",
+    "level": "error",
+    "message": "❌ [PROFILE-SERVICE] Erro em getProfiles: Error: Permissão insuficiente: 'Listar Profiles' necessária para listar perfis",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349431674_mwa00ndd4",
+    "timestamp": "2025-08-28T02:50:31.674Z",
+    "level": "error",
+    "message": "❌ [PERMISSION-SERVICE] Erro em getPermissions: Error: Permissão insuficiente: 'Listar Permissions' necessária para listar permissões",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349431671_9cbodks1c",
+    "timestamp": "2025-08-28T02:50:31.671Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349431667_d5sjwn9mr",
+    "timestamp": "2025-08-28T02:50:31.667Z",
+    "level": "error",
+    "message": "❌ [PERMISSION-SERVICE] Erro em getAllProfilePermissions: Error: Permissão insuficiente: 'Listar Permissions' necessária para listar permissões de perfil",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349424568_taj0grxk4",
+    "timestamp": "2025-08-28T02:50:24.568Z",
+    "level": "error",
+    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349424407_71xrkjuem",
+    "timestamp": "2025-08-28T02:50:24.407Z",
+    "level": "error",
+    "message": "Error fetching teams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar times",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349424405_skjypfc21",
+    "timestamp": "2025-08-28T02:50:24.405Z",
+    "level": "error",
+    "message": "❌ [TEAM-SERVICE] Erro em getTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar times",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349424394_2cjad08qz",
+    "timestamp": "2025-08-28T02:50:24.394Z",
+    "level": "error",
+    "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349424382_wyfd8h9q6",
+    "timestamp": "2025-08-28T02:50:24.382Z",
+    "level": "error",
+    "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756349408067_6h6ylb707",
     "timestamp": "2025-08-28T02:50:08.067Z",
     "level": "warn",
