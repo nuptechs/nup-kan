@@ -44,6 +44,7 @@ export abstract class BaseService {
    */
   protected async invalidateCache(patterns: string[]): Promise<void> {
     try {
+      console.log('🧹 [BASE-SERVICE] Invalidando cache com padrões:', patterns);
       await Promise.all(
         patterns.map(pattern => {
           if (pattern.includes('*')) {

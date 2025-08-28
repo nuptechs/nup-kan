@@ -25,6 +25,7 @@ class CacheManager {
         data: value,
         expires: Date.now() + (ttlSeconds * 1000)
       });
+      console.log(`💾 [CACHE] Salvando chave: '${key}' (TTL: ${ttlSeconds}s)`);
       this.cleanMemoryCache();
     } catch (error) {
       console.error('❌ [CACHE] Erro ao salvar:', error);
@@ -43,11 +44,16 @@ class CacheManager {
     try {
       // Remove chaves que batem com o padrão (simplicado e estável)
       const searchPattern = pattern.replace('*', '');
+      const keysToDelete: string[] = [];
+      
       for (const key of Array.from(this.memoryCache.keys())) {
         if (key.includes(searchPattern)) {
+          keysToDelete.push(key);
           this.memoryCache.delete(key);
         }
       }
+      
+      console.log(`🧹 [CACHE] Invalidando padrão '${pattern}' -> removeu ${keysToDelete.length} chaves:`, keysToDelete);
     } catch (error) {
       console.error('❌ [CACHE] Erro ao invalidar padrão:', error);
     }
