@@ -1,42 +1,18 @@
 [
   {
-    "id": "log_1756353609231_55p930857",
-    "timestamp": "2025-08-28T04:00:09.231Z",
-    "level": "error",
-    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756353608623_n3dl6rx06",
-    "timestamp": "2025-08-28T04:00:08.623Z",
-    "level": "error",
-    "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756353608621_ozqrsqwh8",
-    "timestamp": "2025-08-28T04:00:08.621Z",
-    "level": "error",
-    "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756353608401_nh0pegkuc",
-    "timestamp": "2025-08-28T04:00:08.401Z",
-    "level": "error",
-    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756353596171_f6dyzr7u1",
-    "timestamp": "2025-08-28T03:59:56.171Z",
+    "id": "log_1756353835593_gh2611y4d",
+    "timestamp": "2025-08-28T04:03:55.593Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756353833708_h9w5zwzv9",
+    "timestamp": "2025-08-28T04:03:53.708Z",
+    "level": "info",
+    "message": "Sistema de logs iniciado",
+    "context": "SYSTEM",
     "actionType": "system"
   }
 ]

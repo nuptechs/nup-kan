@@ -35,36 +35,24 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  // ROBUST FORM RESET: Force clean state when dialog opens
+  // CLEAN SEPARATION: Clear editing state when dialog opens/closes  
   useEffect(() => {
-    console.log("📱 [DEBUG] isOpen mudou para:", isOpen);
-    console.log("📱 [DEBUG] editingUser atual:", editingUser?.name || "null");
+    console.log("📱 [DIALOG] isOpen mudou para:", isOpen);
+    console.log("📱 [DIALOG] editingUser atual:", editingUser?.name || "null");
     
-    if (isOpen) {
-      console.log("🧹 [FORM-RESET] FORÇA COMPLETA - Limpando tudo");
-      
-      // 1. Clear editing state first
+    if (!isOpen) {
+      // Dialog closed: clear any editing state to prevent contamination
+      console.log("🧹 [DIALOG-CLOSE] Limpando estado de edição");
       setEditingUser(null);
-      
-      // 2. Force reset both forms with clean values
-      const cleanValues = {
+      editForm.reset({
         name: "",
         email: "",
         role: "",
         avatar: "",
         status: "offline",
-      };
-      
-      form.reset(cleanValues);
-      editForm.reset(cleanValues);
-      
-      // 3. Force re-render by updating a dummy state
-      setTimeout(() => {
-        form.reset(cleanValues);
-        console.log("🧹 [FORM-RESET] Reset duplo aplicado - formulário deve estar limpo");
-      }, 10);
+      });
     }
-  }, [isOpen, form, editForm]);
+  }, [isOpen, editForm]);
 
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
@@ -98,25 +86,30 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       return response.json();
     },
     onSuccess: () => {
-      // SOLUÇÃO ISOLADA: Ações imediatas
-      console.log("🟢 [USER-CREATE] Sucesso na criação, aplicando solução isolada");
+      console.log("🟢 [USER-CREATE] Sucesso na criação");
       
-      // 1. RESETAR E FECHAR IMEDIATAMENTE
-      form.reset();
+      // 1. Reset create form to clean state
+      form.reset({
+        name: "",
+        email: "",
+        role: "",
+        avatar: "",
+        status: "offline",
+      });
+      
+      // 2. Close dialog
       onClose();
       
-      // 2. INVALIDAR EM BACKGROUND
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      }, 100);
+      // 3. Update cache
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       
-      // 3. Toast de confirmação
+      // 4. Success message
       toast({
         title: "Sucesso",
         description: "Usuário criado com sucesso!",
       });
       
-      console.log("✅ [USER-CREATE] Modal fechado com sucesso");
+      console.log("✅ [USER-CREATE] Formulário resetado e modal fechado");
     },
     onError: (error: any) => {
       console.error("❌ [USER-CREATE] Erro na criação:", error);
@@ -279,15 +272,21 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
   };
 
   const cancelEdit = () => {
-    console.log("🔴 [TRACE-CANCEL] cancelEdit INICIADO");
-    console.log("🔴 [TRACE-CANCEL] editingUser antes:", editingUser?.name || "null");
+    console.log("🔴 [CANCEL] Cancelando edição para:", editingUser?.name || "null");
     
+    // Clear editing state completely
     setEditingUser(null);
-    console.log("🔴 [TRACE-CANCEL] editingUser setado para null");
     
-    editForm.reset();
-    console.log("🔴 [TRACE-CANCEL] editForm resetado");
-    console.log("🔴 [TRACE-CANCEL] cancelEdit CONCLUÍDO");
+    // Reset edit form to pristine state
+    editForm.reset({
+      name: "",
+      email: "",
+      role: "",
+      avatar: "",
+      status: "offline",
+    });
+    
+    console.log("🔴 [CANCEL] Estado de edição limpo");
   };
 
   const handleDelete = (userId: string) => {
@@ -386,7 +385,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Status</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || ""} key={`create-status-${field.value || 'empty'}`}>
+                        <Select onValueChange={field.onChange} value={field.value || "offline"}>
                           <FormControl>
                             <SelectTrigger data-testid="select-user-status">
                               <SelectValue placeholder="Selecione o status" />
