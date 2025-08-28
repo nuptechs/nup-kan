@@ -129,7 +129,12 @@ export class BoardService extends BaseService {
           }
           
           // Buscar membros ativos (com fallback)
-          let members;
+          let members: Array<{
+            id: string;
+            name: string;
+            avatar: string;
+            role: string;
+          }>;
           try {
             members = await this.getBoardMembers(board.id);
             console.log(`✅ [BOARD-SERVICE] Membros encontrados para ${board.id}:`, members.length);
@@ -139,7 +144,14 @@ export class BoardService extends BaseService {
           }
           
           // Buscar colunas (com fallback)
-          let columns;
+          let columns: Array<{
+            id: string;
+            title: string;
+            color: string;
+            position: number;
+            wipLimit: number;
+            taskCount: number;
+          }>;
           try {
             columns = await this.getBoardColumns(board.id);
             console.log(`✅ [BOARD-SERVICE] Colunas encontradas para ${board.id}:`, columns.length);
