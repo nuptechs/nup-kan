@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Users, Edit, Trash2, X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { insertUserSchema, type User } from "@shared/schema";
+import { Plus, Edit2, Trash2, Check, X, Users, Mail, UserCircle, Activity } from "lucide-react";
+import { z } from "zod";
 
 interface UserManagementDialogProps {
   isOpen: boolean;
@@ -23,16 +26,15 @@ type FormData = z.infer<typeof formSchema>;
 
 const statusOptions = [
   { value: "online", label: "Online", color: "bg-green-500" },
-  { value: "offline", label: "Offline", color: "bg-gray-500" },
-  { value: "away", label: "Ausente", color: "bg-yellow-500" },
-  { value: "busy", label: "Ocupado", color: "bg-red-500" },
+  { value: "busy", label: "Ocupado", color: "bg-yellow-500" },
+  { value: "offline", label: "Offline", color: "bg-gray-500" }
 ];
 
 export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogProps) {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
+  
   // SINGLE FORM: Reset clean when dialog closes
   useEffect(() => {
     if (!isOpen) {
@@ -46,7 +48,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
         status: "offline",
       });
     }
-  }, [isOpen]);
+  }, [isOpen, form]);
 
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
@@ -99,6 +101,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
     onError: (error: any) => {
       console.error("❌ [USER-CREATE] Erro na criação:", error);
       
+      // Tratar erro específico de email duplicado
       let errorMessage = "Falha ao criar usuário. Tente novamente.";
       
       if (error?.message?.includes("já está em uso") || 
@@ -120,6 +123,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       console.log("🔴 [TRACE-1] updateUserMutation.mutationFn INICIADO");
       console.log("🔴 [TRACE-1] ID:", id);
       console.log("🔴 [TRACE-1] Data:", data);
+      console.log("🔴 [TRACE-1] Enviando PATCH para /api/users/" + id);
       
       try {
         const response = await apiRequest("PATCH", `/api/users/${id}`, data);
@@ -127,6 +131,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
         console.log("🔴 [TRACE-2] Response recebida - Status:", response.status);
         const result = await response.json();
         console.log("🔴 [TRACE-2] Response JSON:", result);
+        console.log("🔴 [TRACE-2] Returning result para onSuccess...");
         
         return result;
       } catch (error) {
@@ -136,7 +141,11 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
     },
     onSuccess: (data) => {
       try {
-        console.log("🔴 [UPDATE-SUCCESS] updateUserMutation.onSuccess INICIADO");
+        console.log("🔴 [TRACE-3] updateUserMutation.onSuccess INICIADO");
+        console.log("🔴 [TRACE-3] Data recebida:", data);
+        console.log("🔴 [TRACE-3] editingUser atual:", editingUser);
+        console.log("🔴 [TRACE-3] isOpen atual:", isOpen);
+        console.log("🔴 [TRACE-3] Dialog state antes das ações");
         
         // SINGLE FORM: Reset após sucesso
         console.log("🔴 [UPDATE-SUCCESS] Limpando formulário e fechando modal");
@@ -151,8 +160,11 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
         onClose();
         
         // 3. Invalidar cache em background
+        console.log("🔴 [TRACE-6] Agendando invalidação de cache");
         setTimeout(() => {
+          console.log("🔴 [TRACE-7] Invalidando cache /api/users");
           queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+          console.log("🔴 [TRACE-7] Cache invalidado");
         }, 100);
         
         // 4. Toast de sucesso
@@ -161,12 +173,14 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
           description: "Usuário atualizado com sucesso!",
         });
         
+        console.log("🔴 [TRACE-8] updateUserMutation.onSuccess CONCLUÍDO");
       } catch (error) {
         console.log("🔴 [TRACE-ERROR-SUCCESS] Erro no onSuccess:", error);
       }
     },
     onError: (error) => {
       console.log("🔴 [TRACE-ERROR-MUTATION] updateUserMutation.onError EXECUTADO");
+      console.log("🔴 [TRACE-ERROR-MUTATION] Error:", error);
       
       toast({
         title: "Erro",
@@ -182,6 +196,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       return response.json();
     },
     onSuccess: () => {
+      // Invalidações e toast em paralelo (não bloqueia UI)
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ["/api/users"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/auth/current-user"] }),
@@ -208,7 +223,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       console.log("🔴 [SUBMIT] Atualizando usuário:", editingUser.name);
       updateUserMutation.mutate({ id: editingUser.id, data });
     } else {
-      console.log("🟢 [SUBMIT] Criando novo usuário");
+      console.log("🜢 [SUBMIT] Criando novo usuário");
       createUserMutation.mutate(data);
     }
   };
@@ -276,46 +291,21 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Formulário ÚNICO para criar OU editar */}
+          {/* Formulário para criar novo usuário */}
           <div className="border rounded-lg p-4 space-y-4">
-            <h3 className="text-lg font-medium">
-              {editingUser ? `Editar Usuário: ${editingUser.name}` : "Criar Novo Usuário"}
-            </h3>
-            
-            {editingUser && (
-              <div className="bg-blue-50 border border-blue-200 rounded p-3">
-                <p className="text-sm text-blue-800">
-                  <strong>Editando:</strong> {editingUser.email}
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={cancelEdit}
-                  className="mt-2"
-                  data-testid="button-cancel-edit"
-                >
-                  <X className="w-4 h-4 mr-1" />
-                  Cancelar Edição
-                </Button>
-              </div>
-            )}
-            
+            <h3 className="text-lg font-medium">Criar Novo Usuário</h3>
             <Form {...form}>
-              <form 
-                onSubmit={form.handleSubmit(handleSubmit)}
-                className="space-y-4"
-                data-testid={editingUser ? "edit-user-form" : "create-user-form"}
-              >
-                <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={form.handleSubmit(onCreateSubmit)} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nome</FormLabel>
+                        <FormLabel>Nome Completo</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Nome do usuário"
+                            placeholder="Nome"
                             {...field}
                             data-testid="input-user-name"
                           />
@@ -324,6 +314,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="email"
@@ -332,8 +323,8 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                         <FormLabel>Email</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="email@exemplo.com"
                             type="email"
+                            placeholder="Email"
                             {...field}
                             data-testid="input-user-email"
                           />
@@ -342,19 +333,18 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                       </FormItem>
                     )}
                   />
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="role"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Cargo/Função</FormLabel>
+                        <FormLabel>Cargo</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Cargo/Função"
+                            placeholder="Cargo"
                             {...field}
+                            value={field.value || ""}
                             data-testid="input-user-role"
                           />
                         </FormControl>
@@ -362,6 +352,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="status"
@@ -393,25 +384,24 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
 
                 <Button
                   type="submit"
+                  disabled={createUserMutation.isPending}
                   className="w-full"
-                  disabled={createUserMutation.isPending || updateUserMutation.isPending}
-                  data-testid={editingUser ? "button-submit-edit-user" : "button-submit-create-user"}
+                  data-testid="button-create-user"
                 >
-                  {(createUserMutation.isPending || updateUserMutation.isPending) 
-                    ? (editingUser ? "Atualizando..." : "Criando...")
-                    : (editingUser ? "Atualizar Usuário" : "Criar Usuário")
-                  }
+                  <Plus className="w-4 h-4 mr-2" />
+                  {createUserMutation.isPending ? "Criando..." : "Criar Usuário"}
                 </Button>
               </form>
             </Form>
           </div>
 
           {/* Lista de usuários existentes */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium mb-4">Usuários Existentes</h3>
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Usuários Existentes</h3>
+            
             {isLoading ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <p className="text-sm">Carregando usuários...</p>
+              <div className="text-center py-4 text-gray-500">
+                Carregando usuários...
               </div>
             ) : users.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
@@ -422,55 +412,197 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                 {users.map((user) => (
                   <div
                     key={user.id}
-                    className={`flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 ${
-                      editingUser?.id === user.id ? 'bg-blue-50 border-blue-200' : ''
-                    }`}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
                     data-testid={`user-item-${user.id}`}
                   >
                     {editingUser?.id === user.id ? (
-                      <div className="flex-1 text-blue-800">
-                        <p className="font-medium">
-                          ✏️ Este usuário está sendo editado no formulário acima
-                        </p>
-                        <p className="text-sm text-blue-600">
-                          Use o formulário no topo da tela para fazer as alterações
-                        </p>
-                      </div>
+                      <Form {...editForm}>
+                        <form 
+                          onSubmit={editForm.handleSubmit(onEditSubmit)} 
+                          className="flex items-center space-x-3 flex-1"
+                        >
+                          <FormField
+                            control={editForm.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem className="flex-1">
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    className="h-8"
+                                    placeholder="Nome"
+                                    data-testid={`input-edit-user-name-${user.id}`}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={editForm.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem className="flex-1">
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    type="email"
+                                    className="h-8"
+                                    placeholder="Email"
+                                    data-testid={`input-edit-user-email-${user.id}`}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={editForm.control}
+                            name="role"
+                            render={({ field }) => (
+                              <FormItem className="w-40">
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    value={field.value || ""}
+                                    className="h-8"
+                                    placeholder="Cargo"
+                                    data-testid={`input-edit-user-role-${user.id}`}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={editForm.control}
+                            name="status"
+                            render={({ field }) => (
+                              <FormItem className="w-32">
+                                <Select onValueChange={field.onChange} value={field.value || ""}>
+                                  <FormControl>
+                                    <SelectTrigger className="h-8" data-testid={`select-edit-user-status-${user.id}`}>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {statusOptions.map((option) => (
+                                      <SelectItem key={option.value} value={option.value}>
+                                        <div className="flex items-center gap-2">
+                                          <div className={`w-2 h-2 rounded-full ${option.color}`} />
+                                          {option.label}
+                                        </div>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormItem>
+                            )}
+                          />
+
+                          <div className="flex space-x-1">
+                            <Button
+                              type="submit"
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-green-600 hover:text-green-800"
+                              disabled={updateUserMutation.isPending}
+                              data-testid={`button-save-user-${user.id}`}
+                            >
+                              <Check className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-gray-600 hover:text-gray-800"
+                              onClick={cancelEdit}
+                              data-testid={`button-cancel-edit-user-${user.id}`}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </form>
+                      </Form>
                     ) : (
                       <>
                         <div className="flex items-center space-x-4 flex-1">
-                          <div className="flex flex-col">
-                            <span className="font-medium text-sm">{user.name}</span>
-                            <span className="text-xs text-muted-foreground">{user.email}</span>
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback className="bg-blue-100 text-blue-600">
+                              {user.avatar || user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center gap-3">
+                              <span className="font-medium">{user.name}</span>
+                              {getStatusIcon(user.status || "offline")}
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                              <div className="flex items-center gap-1">
+                                <Mail className="w-3 h-3" />
+                                {user.email}
+                              </div>
+                              {user.role && (
+                                <div className="flex items-center gap-1">
+                                  <UserCircle className="w-3 h-3" />
+                                  {user.role}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            {user.role || "Sem cargo"}
-                          </div>
-                          {getStatusIcon(user.status || "offline")}
                         </div>
 
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-1">
                           <Button
-                            variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-800"
                             onClick={() => {
-                              console.log("🟡 [BUTTON-CLICK] Editando usuário:", user.name);
-                              handleEdit(user);
+                              console.log("🟡 [BUTTON-CLICK] Lápis clicado para usuário:", user.name);
+                              console.log("🟡 [BUTTON-CLICK] User ID:", user.id);
+                              console.log("🟡 [BUTTON-CLICK] Chamando startEdit...");
+                              startEdit(user);
                             }}
                             data-testid={`button-edit-user-${user.id}`}
                           >
-                            <Edit className="w-4 h-4" />
+                            <Edit2 className="w-4 h-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-red-600 hover:text-red-800"
-                            onClick={() => handleDelete(user.id)}
-                            data-testid={`button-delete-user-${user.id}`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-800"
+                                data-testid={`button-delete-user-${user.id}`}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent data-testid={`dialog-delete-user-${user.id}`}>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir Usuário</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir o usuário "{user.name}"? 
+                                  Esta ação não pode ser desfeita e o usuário será removido de todas as tarefas atribuídas.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel data-testid={`button-cancel-delete-user-${user.id}`}>
+                                  Cancelar
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(user.id)}
+                                  disabled={deleteUserMutation.isPending}
+                                  className="bg-red-600 hover:bg-red-700"
+                                  data-testid={`button-confirm-delete-user-${user.id}`}
+                                >
+                                  {deleteUserMutation.isPending ? "Excluindo..." : "Excluir"}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </>
                     )}
