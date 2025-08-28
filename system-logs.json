@@ -1,5 +1,13 @@
 [
   {
+    "id": "log_1756351206879_7yc6un7x2",
+    "timestamp": "2025-08-28T03:20:06.879Z",
+    "level": "error",
+    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756351204334_dj5zlrf43",
     "timestamp": "2025-08-28T03:20:04.334Z",
     "level": "error",
