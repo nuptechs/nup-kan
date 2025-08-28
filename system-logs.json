@@ -1,367 +1,63 @@
 [
   {
-    "id": "log_1756349050461_9e8lgei4k",
-    "timestamp": "2025-08-28T02:44:10.461Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349050459_43on2jrim",
-    "timestamp": "2025-08-28T02:44:10.459Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349050457_ev4y369la",
-    "timestamp": "2025-08-28T02:44:10.457Z",
+    "id": "log_1756349218052_qoxqh2zvu",
+    "timestamp": "2025-08-28T02:46:58.052Z",
     "level": "error",
     "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756349050143_k7hnsshxc",
-    "timestamp": "2025-08-28T02:44:10.143Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349050142_pm23vimn3",
-    "timestamp": "2025-08-28T02:44:10.142Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349050139_8r80hu6rc",
-    "timestamp": "2025-08-28T02:44:10.139Z",
-    "level": "error",
-    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349049821_wvr8urdkt",
-    "timestamp": "2025-08-28T02:44:09.821Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349049820_gs0fe93uu",
-    "timestamp": "2025-08-28T02:44:09.820Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349049506_02xvyfjq3",
-    "timestamp": "2025-08-28T02:44:09.506Z",
-    "level": "error",
-    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349049503_22y333mt6",
-    "timestamp": "2025-08-28T02:44:09.503Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349049502_9xmwl8ile",
-    "timestamp": "2025-08-28T02:44:09.502Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349049182_awivm1ttn",
-    "timestamp": "2025-08-28T02:44:09.182Z",
-    "level": "error",
-    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349049179_glz6za134",
-    "timestamp": "2025-08-28T02:44:09.179Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349049174_0seejyev9",
-    "timestamp": "2025-08-28T02:44:09.174Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349048853_1vp87xlgq",
-    "timestamp": "2025-08-28T02:44:08.853Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349048852_8hdw0h5x0",
-    "timestamp": "2025-08-28T02:44:08.852Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349048548_hfso2qjze",
-    "timestamp": "2025-08-28T02:44:08.548Z",
-    "level": "error",
-    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349048541_cxtddd6ij",
-    "timestamp": "2025-08-28T02:44:08.541Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349048539_5zoni61fr",
-    "timestamp": "2025-08-28T02:44:08.539Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349048234_5tjj4t9v3",
-    "timestamp": "2025-08-28T02:44:08.234Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349048233_61iyl7ety",
-    "timestamp": "2025-08-28T02:44:08.233Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349048230_70hsysu25",
-    "timestamp": "2025-08-28T02:44:08.230Z",
-    "level": "error",
-    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349047920_0tb3oyj26",
-    "timestamp": "2025-08-28T02:44:07.920Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349047919_9obega2uj",
-    "timestamp": "2025-08-28T02:44:07.919Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349047604_0acw980v9",
-    "timestamp": "2025-08-28T02:44:07.604Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349047603_t5340jzfi",
-    "timestamp": "2025-08-28T02:44:07.603Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349047587_db2m8kygh",
-    "timestamp": "2025-08-28T02:44:07.587Z",
-    "level": "error",
-    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349047263_8xnww9285",
-    "timestamp": "2025-08-28T02:44:07.263Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349047262_p6aurs1yi",
-    "timestamp": "2025-08-28T02:44:07.262Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349046962_024u0bcfk",
-    "timestamp": "2025-08-28T02:44:06.962Z",
-    "level": "error",
-    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349046958_pha7dp0j4",
-    "timestamp": "2025-08-28T02:44:06.958Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349046957_rnodymf03",
-    "timestamp": "2025-08-28T02:44:06.957Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349046650_qy7lpmc4t",
-    "timestamp": "2025-08-28T02:44:06.650Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349046649_q1o1osmht",
-    "timestamp": "2025-08-28T02:44:06.649Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349046335_nipdeml6b",
-    "timestamp": "2025-08-28T02:44:06.335Z",
-    "level": "error",
-    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349046332_9g9gjtdtu",
-    "timestamp": "2025-08-28T02:44:06.332Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349046331_4ktwvm2uz",
-    "timestamp": "2025-08-28T02:44:06.331Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349045402_izhpeki6y",
-    "timestamp": "2025-08-28T02:44:05.402Z",
+    "id": "log_1756349217657_q1mgiyas7",
+    "timestamp": "2025-08-28T02:46:57.657Z",
     "level": "error",
     "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756349045401_2xiz9tlw6",
-    "timestamp": "2025-08-28T02:44:05.401Z",
+    "id": "log_1756349217656_8u6lk8519",
+    "timestamp": "2025-08-28T02:46:57.656Z",
     "level": "error",
     "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756349045395_79uyrjvp2",
-    "timestamp": "2025-08-28T02:44:05.395Z",
+    "id": "log_1756349217652_elwj5fesf",
+    "timestamp": "2025-08-28T02:46:57.652Z",
     "level": "error",
     "message": "Error fetching teams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar times",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756349045394_8pcnszwnn",
-    "timestamp": "2025-08-28T02:44:05.394Z",
+    "id": "log_1756349217650_1m3zw7as5",
+    "timestamp": "2025-08-28T02:46:57.650Z",
     "level": "error",
     "message": "❌ [TEAM-SERVICE] Erro em getTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar times",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756349045102_y2v3e7sk5",
-    "timestamp": "2025-08-28T02:44:05.102Z",
+    "id": "log_1756349217309_frpr3p1vm",
+    "timestamp": "2025-08-28T02:46:57.309Z",
     "level": "error",
     "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756349045100_31sjhi93p",
-    "timestamp": "2025-08-28T02:44:05.100Z",
-    "level": "error",
-    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349045091_n0p7bspgi",
-    "timestamp": "2025-08-28T02:44:05.091Z",
-    "level": "error",
-    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349028884_tdmwh6nwo",
-    "timestamp": "2025-08-28T02:43:48.884Z",
+    "id": "log_1756349203976_dgttwdess",
+    "timestamp": "2025-08-28T02:46:43.976Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756349027009_dbf5xcyh9",
-    "timestamp": "2025-08-28T02:43:47.009Z",
+    "id": "log_1756349202109_sppkxja98",
+    "timestamp": "2025-08-28T02:46:42.109Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

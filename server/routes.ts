@@ -304,8 +304,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Toggle board active status - TEMPORARILY DISABLED (method doesn't exist)
   // app.patch("/api/boards/:id/toggle-status",
-  //   AuthMiddleware.requireAuth,
-  //   AuthMiddleware.requirePermissions("Editar Boards"),
+  //   AuthMiddlewareJWT.requireAuth,
+  //   AuthMiddlewareJWT.requirePermissions("Editar Boards"),
   //   async (req, res) => {
   //     try {
   //       const boardId = req.params.id;
@@ -335,8 +335,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.get("/api/system/metrics",
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Visualizar Analytics"),
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Visualizar Analytics"),
     async (req, res) => {
       try {
         const metrics = await APIGateway.getGatewayMetrics();
@@ -352,8 +352,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Task routes - Protegidas com permissões
   // ✅ RESTAURADA - Rota GET /api/tasks necessária para funcionalidades de export
   app.get("/api/tasks", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Listar Tasks"),
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Listar Tasks"),
     async (req, res) => {
     try {
       // Paginação opcional
@@ -405,8 +405,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // 🚀 ENDPOINT DE PERFORMANCE STATISTICS
   app.get("/api/performance-stats", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Visualizar Analytics"), 
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Visualizar Analytics"), 
     async (req, res) => {
     try {
       const stats = PerformanceStats.getQueryStats();
@@ -429,8 +429,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Task Assignee routes (deprecated - migrated to assigneeService)
   app.get("/api/tasks/:taskId/assignees", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Visualizar Tasks"), 
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Visualizar Tasks"), 
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -485,8 +485,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ❌ ROTAS DUPLICADAS REMOVIDAS - Usando apenas as versões originais acima
 
   app.patch("/api/boards/:id", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Editar Boards"), 
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Editar Boards"), 
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -502,8 +502,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete("/api/boards/:id", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Excluir Boards"), 
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Excluir Boards"), 
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -522,8 +522,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Buscar tasks de um board
   app.get("/api/boards/:boardId/tasks", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Listar Tasks"),
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Listar Tasks"),
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -538,8 +538,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Criar nova task
   app.post("/api/tasks",
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Criar Tasks"),
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Criar Tasks"),
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -554,8 +554,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ✅ Reorder tasks - DEVE VIR ANTES da rota /:id 
   app.patch("/api/tasks/reorder", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Editar Tarefas"), 
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Editar Tarefas"), 
     async (req, res) => {
     console.log("🔍 [REORDER] Request received at /api/tasks/reorder");
     console.log("🔍 [REORDER] Method:", req.method);
@@ -599,8 +599,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Atualizar task
   app.patch("/api/tasks/:id",
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Editar Tasks"),
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Editar Tasks"),
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -618,8 +618,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Deletar task
   app.delete("/api/tasks/:id",
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Excluir Tasks"),
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Excluir Tasks"),
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -637,7 +637,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/boards/:boardId/columns", async (req, res) => {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
       const columns = await columnService.getBoardColumns(authContext, req.params.boardId);
       res.json(columns);
     } catch (error) {
@@ -648,8 +656,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Column routes - Protegidas com permissões
   app.get("/api/columns", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Listar Columns"), 
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Listar Columns"), 
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -662,7 +670,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/columns/:id", async (req, res) => {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
       const column = await columnService.getColumn(authContext, req.params.id);
       if (!column) {
         return res.status(404).json({ message: "Column not found" });
@@ -674,8 +690,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/columns", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Criar Columns"), 
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Criar Columns"), 
     async (req, res) => {
     const startTime = Date.now();
     const authContext = createAuthContextFromRequest(req);
@@ -715,8 +731,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.patch("/api/columns/:id", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Editar Columns"), 
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Editar Columns"), 
     async (req, res) => {
     try {
       const columnData = updateColumnSchema.parse(req.body);
@@ -732,8 +748,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete("/api/columns/:id", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Excluir Columns"), 
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Excluir Columns"), 
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -748,8 +764,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/columns/reorder", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Editar Columns"), 
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Editar Columns"), 
     async (req, res) => {
     try {
       const reorderedColumns = req.body.columns;
@@ -785,8 +801,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Analytics endpoint - MIGRADO PARA NÍVEL 3
   app.get("/api/analytics", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Listar Analytics"), 
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Listar Analytics"), 
     async (req, res) => {
     try {
       const { boardId } = req.query;
@@ -891,7 +907,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/users", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -905,7 +921,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/users/:id", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -922,7 +938,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/users", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     const startTime = Date.now();
     const userId = req.session?.user?.id || 'unknown';
@@ -3031,8 +3047,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Rota para sincronização manual de permissões (admin) - Protegida
   app.post("/api/permissions/sync", 
-    AuthMiddleware.requireAuth,
-    AuthMiddleware.requirePermissions("Gerenciar Permissões"), 
+    AuthMiddlewareJWT.requireAuth,
+    AuthMiddlewareJWT.requirePermissions("Gerenciar Permissões"), 
     async (req, res) => {
     try {
       const permissionSyncService = PermissionSyncService.getInstance();
@@ -3073,7 +3089,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // GET /api/notifications - Buscar notificações do usuário logado
   app.get("/api/notifications", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
       const userId = req.session?.user?.id;
@@ -3095,7 +3111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // GET /api/notifications/unread-count - Contar notificações não lidas
   app.get("/api/notifications/unread-count", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
       const userId = req.session?.user?.id;
@@ -3114,7 +3130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // GET /api/notifications/:id - Buscar notificação específica
   app.get("/api/notifications/:id", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
       const { id } = req.params;
@@ -3135,7 +3151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // POST /api/notifications - Criar nova notificação
   app.post("/api/notifications", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -3163,7 +3179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // PUT /api/notifications/:id - Atualizar notificação
   app.put("/api/notifications/:id", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
       const { id } = req.params;
@@ -3203,7 +3219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // DELETE /api/notifications/:id - Excluir notificação
   app.delete("/api/notifications/:id", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
       const { id } = req.params;
@@ -3234,7 +3250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // PATCH /api/notifications/:id/read - Marcar notificação como lida
   app.patch("/api/notifications/:id/read", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
       const { id } = req.params;
@@ -3265,7 +3281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // PATCH /api/notifications/mark-all-read - Marcar todas as notificações como lidas
   app.patch("/api/notifications/mark-all-read", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
       const userId = req.session?.user?.id;
@@ -3289,7 +3305,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Limpeza automática de notificações expiradas (executar periodicamente)
   app.post("/api/notifications/cleanup-expired", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -3308,7 +3324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ✅ ROTA FALTANTE: Permissions Data - Dados consolidados de permissões
   app.get("/api/permissions-data", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
       const userId = req.session?.user?.id;
@@ -3333,7 +3349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ✅ ROTA FALTANTE: Bulk Assignees - Buscar assignees de múltiplas tasks
   app.post("/api/tasks/assignees/bulk", 
-    AuthMiddleware.requireAuth,
+    AuthMiddlewareJWT.requireAuth,
     async (req, res) => {
     try {
       const { taskIds } = req.body;
