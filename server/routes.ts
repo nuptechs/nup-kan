@@ -900,7 +900,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tag routes
-  app.get("/api/tags", async (req, res) => {
+  app.get("/api/tags", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const tags = await tagService.getTags(authContext);
@@ -910,7 +910,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/tags/:id", async (req, res) => {
+  app.get("/api/tags/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const tag = await tagService.getTag(authContext, req.params.id);
@@ -923,7 +923,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/tags", async (req, res) => {
+  app.post("/api/tags", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const tagData = insertTagSchema.parse(req.body);
       const authContext = createAuthContextFromRequest(req);
@@ -934,7 +934,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/tags/:id", async (req, res) => {
+  app.put("/api/tags/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const tagData = insertTagSchema.parse(req.body);
       const authContext = createAuthContextFromRequest(req);
@@ -948,7 +948,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/tags/:id", async (req, res) => {
+  app.delete("/api/tags/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       await tagService.deleteTag(authContext, req.params.id);
@@ -2298,7 +2298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // REMOVIDO: API consolidada permissions-data - usando APIs individuais
 
   // Permission routes
-  app.get("/api/permissions", async (req, res) => {
+  app.get("/api/permissions", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const permissions = await permissionService.getPermissions(authContext);
@@ -2308,7 +2308,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/permissions/:id", async (req, res) => {
+  app.get("/api/permissions/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const permission = await permissionService.getPermission(authContext, req.params.id);
@@ -2321,7 +2321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/permissions", async (req, res) => {
+  app.post("/api/permissions", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const permissionData = insertPermissionSchema.parse(req.body);
       const authContext = createAuthContextFromRequest(req);
@@ -2333,7 +2333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/permissions/:id", async (req, res) => {
+  app.patch("/api/permissions/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const permissionData = req.body;
       const authContext = createAuthContextFromRequest(req);
@@ -2347,7 +2347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/permissions/:id", async (req, res) => {
+  app.delete("/api/permissions/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       await permissionService.deletePermission(authContext, req.params.id);
@@ -2549,7 +2549,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // A rota correta está definida na linha 82 usando RouteHandlers.authRoutes.currentUser
 
   // Team Profiles routes
-  app.get("/api/team-profiles", async (req, res) => {
+  app.get("/api/team-profiles", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const teamProfiles = await teamProfileService.getAllTeamProfiles(authContext);
@@ -2569,7 +2569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/team-profiles", async (req, res) => {
+  app.post("/api/team-profiles", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const { teamId, profileId } = req.body;
       const authContext = createAuthContextFromRequest(req);
@@ -2590,7 +2590,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/team-profiles/:id", async (req, res) => {
+  app.delete("/api/team-profiles/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       await teamProfileService.deleteTeamProfile(authContext, req.params.id);
