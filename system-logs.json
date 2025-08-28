@@ -1,63 +1,39 @@
 [
   {
-    "id": "log_1756348372452_ysm1ls301",
-    "timestamp": "2025-08-28T02:32:52.452Z",
+    "id": "log_1756349045102_y2v3e7sk5",
+    "timestamp": "2025-08-28T02:44:05.102Z",
     "level": "error",
-    "message": "Error fetching board: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
+    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756348372451_7f60yy0o7",
-    "timestamp": "2025-08-28T02:32:52.451Z",
+    "id": "log_1756349045100_31sjhi93p",
+    "timestamp": "2025-08-28T02:44:05.100Z",
     "level": "error",
-    "message": "❌ [BOARD-SERVICE] Erro em getBoard: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
+    "message": "Error fetching board columns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756348370536_vuz50n9iy",
-    "timestamp": "2025-08-28T02:32:50.536Z",
+    "id": "log_1756349045091_n0p7bspgi",
+    "timestamp": "2025-08-28T02:44:05.091Z",
     "level": "error",
-    "message": "Error fetching board: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
+    "message": "❌ [COLUMN-SERVICE] Erro em getBoardColumns: Error: Permissão insuficiente: 'Visualizar Columns' necessária para visualizar colunas",
     "context": "ERROR",
     "actionType": "system"
   },
   {
-    "id": "log_1756348370535_xk34z4qnn",
-    "timestamp": "2025-08-28T02:32:50.535Z",
-    "level": "error",
-    "message": "❌ [BOARD-SERVICE] Erro em getBoard: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756348368463_asf4zpv4a",
-    "timestamp": "2025-08-28T02:32:48.463Z",
-    "level": "error",
-    "message": "Error fetching board: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756348368450_rpgecgaqs",
-    "timestamp": "2025-08-28T02:32:48.450Z",
-    "level": "error",
-    "message": "❌ [BOARD-SERVICE] Erro em getBoard: Error: Permissão insuficiente: 'Visualizar Boards' necessária para visualizar board",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756348356640_lm5cp1eyh",
-    "timestamp": "2025-08-28T02:32:36.640Z",
+    "id": "log_1756349028884_tdmwh6nwo",
+    "timestamp": "2025-08-28T02:43:48.884Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756348354730_3fn8lhz37",
-    "timestamp": "2025-08-28T02:32:34.730Z",
+    "id": "log_1756349027009_dbf5xcyh9",
+    "timestamp": "2025-08-28T02:43:47.009Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

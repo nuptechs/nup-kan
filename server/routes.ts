@@ -226,11 +226,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 📋 Board routes - SIMPLIFICADO (sem microserviços)
   app.get("/api/boards", async (req, res) => {
       try {
+        // Verificar JWT
+        const authContext = await AuthServiceJWT.verifyAuth(req);
+        if (!authContext) {
+          return res.status(401).json({ 
+            error: 'Authentication required',
+            message: 'Valid JWT token required to access this resource'
+          });
+        }
+        
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 20;
         
-        // 🎯 USAR BOARDSERVICE PARA LISTAGEM
-        const authContext = createAuthContextFromRequest(req);
         const boards = await boardService.getBoards(authContext, { page, limit });
         
         // Paginação simples
@@ -256,7 +263,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
   
-  app.post("/api/boards", async (req, res) => {
+  app.post("/api/boards", 
+    AuthMiddlewareJWT.requireAuth,
+    async (req, res) => {
       try {
         const authContext = createAuthContextFromRequest(req);
         const board = await boardService.createBoard(authContext, req.body);
@@ -270,7 +279,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/boards/:id", async (req, res) => {
       try {
-        const authContext = createAuthContextFromRequest(req);
+        // Verificar JWT
+        const authContext = await AuthServiceJWT.verifyAuth(req);
+        if (!authContext) {
+          return res.status(401).json({ 
+            error: 'Authentication required',
+            message: 'Valid JWT token required to access this resource'
+          });
+        }
+        
         const board = await boardService.getBoard(authContext, req.params.id);
         if (!board) {
           return res.status(404).json({ error: "Board not found" });
