@@ -227,16 +227,10 @@ export default function BoardSelection() {
       const isActive = String(updatedBoard.isActive) === "true";
       const statusText = isActive ? "ativado" : "inativado";
       
-      console.log(`🚀 [DEBUG] String conversion: String(${updatedBoard.isActive}) === "true" = ${isActive}`);
-      console.log(`🚀 [DEBUG] Status text: ${statusText}`);
-      console.log(`🚀 [DEBUG] Calling toast...`);
-      
       toast({
         title: `Board ${statusText}`,
         description: `O board "${updatedBoard.name}" foi ${statusText} com sucesso!`,
       });
-      
-      console.log(`🚀 [DEBUG] Toast called successfully`);
     },
     onError: () => {
       toast({
@@ -749,22 +743,6 @@ export default function BoardSelection() {
         </DialogContent>
       </Dialog>
 
-      {/* 🧪 TESTE TEMPORÁRIO - Botão para testar toast */}
-      <div className="fixed top-4 right-4 z-50">
-        <button
-          onClick={() => {
-            console.log("🧪 [TEST] Testando toast...");
-            toast({
-              title: "Teste de Toast",
-              description: "Este é um toast de teste para verificar se está funcionando!",
-            });
-            console.log("🧪 [TEST] Toast de teste chamado");
-          }}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-        >
-          🧪 Testar Toast
-        </button>
-      </div>
     </div>
   );
 }
