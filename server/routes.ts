@@ -786,7 +786,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userName = authContext.userName || "Sistema";
     
     try {
-      const columnData = insertColumnSchema.parse(req.body);
+      // Converter null para undefined para compatibilidade com schema
+      const bodyData = { ...req.body };
+      if (bodyData.wipLimit === null) bodyData.wipLimit = undefined;
+      
+      const columnData = insertColumnSchema.parse(bodyData);
       const authContext = createAuthContextFromRequest(req);
       const column = await columnService.createColumn(authContext, columnData);
       
@@ -805,7 +809,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/columns/:id", async (req, res) => {
     try {
-      const columnData = updateColumnSchema.parse(req.body);
+      // Converter null para undefined para compatibilidade com schema  
+      const bodyData = { ...req.body };
+      if (bodyData.wipLimit === null) bodyData.wipLimit = undefined;
+      
+      const columnData = updateColumnSchema.parse(bodyData);
       const authContext = createAuthContextFromRequest(req);
       const column = await columnService.updateColumn(authContext, req.params.id, columnData);
       res.json(column);
@@ -822,7 +830,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     AuthMiddlewareJWT.requirePermissions("Editar Colunas"), 
     async (req, res) => {
     try {
-      const columnData = updateColumnSchema.parse(req.body);
+      // Converter null para undefined para compatibilidade com schema  
+      const bodyData = { ...req.body };
+      if (bodyData.wipLimit === null) bodyData.wipLimit = undefined;
+      
+      const columnData = updateColumnSchema.parse(bodyData);
       const authContext = createAuthContextFromRequest(req);
       const column = await columnService.updateColumn(authContext, req.params.id, columnData);
       res.json(column);
@@ -1111,7 +1123,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const userData = updateUserSchema.parse(req.body);
+      // Converter null para undefined para compatibilidade com schema
+      const bodyData = { ...req.body };
+      if (bodyData.role === null) bodyData.role = undefined;
+      if (bodyData.status === null) bodyData.status = undefined;
+      if (bodyData.password === null) bodyData.password = undefined;
+      if (bodyData.profileId === null) bodyData.profileId = undefined;
+      
+      const userData = updateUserSchema.parse(bodyData);
       const user = await userService.updateUser(authContext, req.params.id, userData);
       res.json(user);
     } catch (error) {
@@ -2194,7 +2213,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = authContext.userId;
       const userName = authContext.userName || 'Usuário desconhecido';
       
-      const profileData = insertProfileSchema.parse(req.body);
+      // Converter null para undefined para compatibilidade com schema
+      const bodyData = { ...req.body };
+      if (bodyData.description === null) bodyData.description = undefined;
+      if (bodyData.isDefault === null) bodyData.isDefault = undefined;
+      
+      const profileData = insertProfileSchema.parse(bodyData);
       const profile = await profileService.createProfile(authContext, profileData);
       
       const duration = Date.now() - startTime;
@@ -2244,7 +2268,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       userId = authContext.userId;
       userName = authContext.userName || 'Usuário desconhecido';
       
-      const profileData = updateProfileSchema.parse(req.body);
+      // Converter null para undefined para compatibilidade com schema
+      const bodyData = { ...req.body };
+      if (bodyData.description === null) bodyData.description = undefined;
+      if (bodyData.isDefault === null) bodyData.isDefault = undefined;
+      
+      const profileData = updateProfileSchema.parse(bodyData);
       const profile = await profileService.updateProfile(authContext, req.params.id, profileData);
       
       // Cache individual será invalidado automaticamente pelo TanStack Query
@@ -2334,7 +2363,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/permissions", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
-      const permissionData = insertPermissionSchema.parse(req.body);
+      // Converter null para undefined para compatibilidade com schema
+      const bodyData = { ...req.body };
+      if (bodyData.description === null) bodyData.description = undefined;
+      
+      const permissionData = insertPermissionSchema.parse(bodyData);
       const authContext = createAuthContextFromRequest(req);
       const permission = await permissionService.createPermission(authContext, permissionData);
       // Cache invalidation handled automatically
@@ -3075,7 +3108,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/task-priorities", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
-      const priorityData = insertTaskPrioritySchema.parse(req.body);
+      // Converter null para undefined e garantir que level tenha valor
+      const bodyData = { ...req.body };
+      if (bodyData.isDefault === null) bodyData.isDefault = undefined;
+      if (bodyData.level === undefined || bodyData.level === null) bodyData.level = 1; // Valor padrão
+      
+      const priorityData = insertTaskPrioritySchema.parse(bodyData);
       const authContext = createAuthContextFromRequest(req);
       const priority = await taskStatusService.createTaskPriority(authContext, priorityData);
       res.status(201).json(priority);
