@@ -1,0 +1,343 @@
+
+57
+Editar Tarefas
+
+Permite editar tarefas existentes
+
+tasks
+
+Excluir Tarefas
+
+Permite excluir tarefas do sistema
+
+tasks
+
+Gerenciar Times
+
+Permite criar, editar e excluir times
+
+teams
+
+Atribuir Membros
+
+Permite atribuir membros aos times
+
+teams
+
+Editar Perfis
+
+Permite editar perfis existentes
+
+profiles
+
+Excluir Perfis
+
+Permite excluir perfis do sistema
+
+profiles
+
+Gerenciar Permissões
+
+Permite atribuir e remover permissões de perfis
+
+profiles
+
+Exportar Dados
+
+Permite exportar dados do sistema
+
+analytics
+
+Criar Tarefas
+
+Permite criar novas tarefas no sistema
+
+tasks
+
+Listar Analytics
+
+Permitir listar analytics
+
+analytics
+
+Criar Auth
+
+Permitir criar auth
+
+auth
+
+Criar Custom-fields
+
+Permitir criar custom-fields
+
+custom-fields
+
+Editar Custom-fields
+
+Permitir editar custom-fields
+
+custom-fields
+
+Excluir Custom-fields
+
+Permitir excluir custom-fields
+
+custom-fields
+
+Editar Permissions
+
+Permitir editar permissions
+
+permissions
+
+Criar Tags
+
+Permitir criar tags
+
+tags
+
+Visualizar Teams
+
+Permitir visualizar teams
+
+teams
+
+Listar Users
+
+Permitir listar users
+
+users
+
+Visualizar Users
+
+Permitir visualizar users
+
+users
+
+Listar Notifications
+
+Permitir listar notifications
+
+notifications
+
+Criar Notifications
+
+Permitir criar notifications
+
+notifications
+
+Visualizar Tarefas
+
+Permite visualizar todas as tarefas
+
+tasks
+
+Visualizar Analytics
+
+Permite visualizar métricas e relatórios
+
+analytics
+
+Listar Boards
+
+Permitir listar boards
+
+boards
+
+Listar Columns
+
+Permitir listar columns
+
+columns
+
+Listar Teams
+
+Permitir listar teams
+
+teams
+
+Listar Permissions
+
+Permitir listar permissions
+
+permissions
+
+Visualizar Tags
+
+Permitir visualizar tags
+
+tags
+
+Listar Custom-fields
+
+Permitir listar custom-fields
+
+custom-fields
+
+Listar System
+
+Permitir listar system
+
+system
+
+Listar Auth
+
+Permitir listar auth
+
+auth
+
+Criar Boards
+
+Permitir criar boards
+
+boards
+
+Editar Boards
+
+Permitir editar boards
+
+boards
+
+Excluir Boards
+
+Permitir excluir boards
+
+boards
+
+Visualizar Columns
+
+Permitir visualizar columns
+
+columns
+
+Criar Permissions
+
+Permitir criar permissions
+
+permissions
+
+Listar Profiles
+
+Permitir listar profiles
+
+profiles
+
+Visualizar Profiles
+
+Permitir visualizar profiles
+
+profiles
+
+Editar Tags
+
+Permitir editar tags
+
+tags
+
+Criar Teams
+
+Permitir criar teams
+
+teams
+
+Editar Teams
+
+Permitir editar teams
+
+teams
+
+Excluir Teams
+
+Permitir excluir teams
+
+teams
+
+Criar Usuários
+
+Permite criar novos usuários no sistema
+
+users
+
+Criar Perfis
+
+Permite criar novos perfis de usuário
+
+profiles
+
+Criar Colunas
+
+Permite criar novas colunas no board
+
+columns
+
+Editar Colunas
+
+Permite editar configurações das colunas
+
+columns
+
+Excluir Colunas
+
+Permite excluir colunas do board
+
+columns
+
+Visualizar Boards
+
+Permitir visualizar boards
+
+boards
+
+Criar Export
+
+Permitir criar export
+
+export
+
+Listar Export
+
+Permitir listar export
+
+export
+
+Excluir Permissions
+
+Permitir excluir permissions
+
+permissions
+
+Excluir System
+
+Permitir excluir system
+
+system
+
+Excluir Tags
+
+Permitir excluir tags
+
+tags
+
+Listar Tags
+
+Permitir listar tags
+
+tags
+
+Listar Tasks
+
+Permitir listar tasks
+
+tasks
+
+Editar Usuários
+
+Permite editar dados dos usuários
+
+users
+
+Excluir Usuários
+
+Permite excluir usuários do sistema
+
+users
