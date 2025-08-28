@@ -1,5 +1,235 @@
 [
   {
+    "id": "log_1756351591954_h5pfpjbwq",
+    "timestamp": "2025-08-28T03:26:31.954Z",
+    "level": "error",
+    "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351591953_ev2hc8fyd",
+    "timestamp": "2025-08-28T03:26:31.953Z",
+    "level": "error",
+    "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351591936_vmnusmb4i",
+    "timestamp": "2025-08-28T03:26:31.936Z",
+    "level": "error",
+    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "action_1756351571656_ltrpdqcre",
+    "timestamp": "2025-08-28T03:26:11.656Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Criar usuário \"asdasdf\" (asd#@saf.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Criar usuário \"asdasdf\" (asd#@saf.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 224
+  },
+  {
+    "id": "log_1756351571655_m9zrhlpoz",
+    "timestamp": "2025-08-28T03:26:11.655Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: user.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351569836_zahkkyjab",
+    "timestamp": "2025-08-28T03:26:09.836Z",
+    "level": "error",
+    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "action_1756351569690_knekqskhb",
+    "timestamp": "2025-08-28T03:26:09.690Z",
+    "level": "info",
+    "message": "Yuri Francis executou: Criar usuário \"João Silva\" (joao.silva@test.com)",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Criar usuário \"João Silva\" (joao.silva@test.com)",
+    "status": "success",
+    "errorDetails": null,
+    "duration": 234
+  },
+  {
+    "id": "log_1756351569689_7ner1qlmi",
+    "timestamp": "2025-08-28T03:26:09.689Z",
+    "level": "warn",
+    "message": "⚠️ [EVENT] Handler não encontrado para: user.created",
+    "context": "WARNING",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351569491_tuvqtgejn",
+    "timestamp": "2025-08-28T03:26:09.491Z",
+    "level": "error",
+    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351568990_qkih3xqhu",
+    "timestamp": "2025-08-28T03:26:08.990Z",
+    "level": "error",
+    "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351568989_9cxjvv2su",
+    "timestamp": "2025-08-28T03:26:08.989Z",
+    "level": "error",
+    "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351568872_9rzhqf659",
+    "timestamp": "2025-08-28T03:26:08.872Z",
+    "level": "error",
+    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351568496_xqyc64tvl",
+    "timestamp": "2025-08-28T03:26:08.496Z",
+    "level": "error",
+    "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351568496_jjvhi0vr5",
+    "timestamp": "2025-08-28T03:26:08.496Z",
+    "level": "error",
+    "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351568493_bw28s2p8f",
+    "timestamp": "2025-08-28T03:26:08.493Z",
+    "level": "error",
+    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351561937_zm45mafmv",
+    "timestamp": "2025-08-28T03:26:01.937Z",
+    "level": "error",
+    "message": "Error in POST /api/users: Error: Email já está em uso",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "action_1756351561936_xz6xsw44m",
+    "timestamp": "2025-08-28T03:26:01.936Z",
+    "level": "error",
+    "message": "Yuri Francis executou: Criar usuário \"asdasdf\"",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Criar usuário \"asdasdf\"",
+    "status": "error",
+    "errorDetails": {
+      "error": "Email já está em uso",
+      "details": {}
+    },
+    "duration": 73
+  },
+  {
+    "id": "log_1756351561935_ma189k2vl",
+    "timestamp": "2025-08-28T03:26:01.935Z",
+    "level": "error",
+    "message": "❌ [USER-SERVICE] Erro em createUser: Error: Email já está em uso",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351560046_aw7g5onej",
+    "timestamp": "2025-08-28T03:26:00.046Z",
+    "level": "error",
+    "message": "Error in POST /api/users: Error: Email já está em uso",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "action_1756351560046_ddb2cgy7h",
+    "timestamp": "2025-08-28T03:26:00.046Z",
+    "level": "error",
+    "message": "Yuri Francis executou: Criar usuário \"asdasdf\"",
+    "context": "USER_ACTION",
+    "actionType": "user_action",
+    "userId": "f681d9f3-c71c-4ac6-ab8d-082e8f501aed",
+    "userName": "Yuri Francis",
+    "action": "Criar usuário \"asdasdf\"",
+    "status": "error",
+    "errorDetails": {
+      "error": "Email já está em uso",
+      "details": {}
+    },
+    "duration": 75
+  },
+  {
+    "id": "log_1756351560044_cf17w34t2",
+    "timestamp": "2025-08-28T03:26:00.044Z",
+    "level": "error",
+    "message": "❌ [USER-SERVICE] Erro em createUser: Error: Email já está em uso",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351546063_017k6t7co",
+    "timestamp": "2025-08-28T03:25:46.063Z",
+    "level": "error",
+    "message": "❌ [PERMISSION-SERVICE] Erro em getAllProfilePermissions: Error: Permissão insuficiente: 'Listar Permissions' necessária para listar permissões de perfil",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351546062_ef6ejn66f",
+    "timestamp": "2025-08-28T03:25:46.062Z",
+    "level": "error",
+    "message": "❌ [PERMISSION-SERVICE] Erro em getPermissions: Error: Permissão insuficiente: 'Listar Permissions' necessária para listar permissões",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351546056_hidutj01m",
+    "timestamp": "2025-08-28T03:25:46.056Z",
+    "level": "error",
+    "message": "❌ [TEAM-PROFILE-SERVICE] Erro em getAllTeamProfiles: Error: Permissão insuficiente: 'Listar Teams' necessária para listar perfis de equipes",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756351546052_53ejp1al8",
+    "timestamp": "2025-08-28T03:25:46.052Z",
+    "level": "error",
+    "message": "❌ [USER-TEAM-SERVICE] Erro em getAllUserTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar relações usuário-time",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756351532115_k5e2gnwqu",
     "timestamp": "2025-08-28T03:25:32.115Z",
     "level": "error",
