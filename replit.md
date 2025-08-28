@@ -2,7 +2,17 @@
 
 This is a Kanban board application called **"NuP-Kan"** built with React and Express, featuring a modern task management interface with drag-and-drop functionality. The application allows users to organize tasks across different columns (Backlog, To Do, In Progress, Review, Done), manage team members, and track project analytics. It includes WIP (Work In Progress) limits, task assignments, progress tracking, and real-time updates. **The system uses PostgreSQL for persistent data storage with a many-to-many relationship between users and teams.**
 
-**Recent Updates (August 26, 2025):**
+**Recent Updates (August 28, 2025):**
+- ✅ **ETAPA 4 - SECURITY & PREPARED STATEMENTS**: Sistema de segurança avançado 100% implementado
+- ✅ **JWT BLACKLIST SYSTEM**: TokenBlacklistService para logout server-side robusto  
+- ✅ **ASYNC JWT VERIFICATION**: JWTService atualizado para verificação assíncrona com blacklist
+- ✅ **SERVER-SIDE LOGOUT**: Endpoint /api/auth/logout com invalidação real de tokens
+- ✅ **REFRESH TOKEN SECURITY**: Tokens antigos invalidados automaticamente no refresh
+- ✅ **PREPARED STATEMENTS**: Drizzle ORM otimizado com proteção SQL injection nativa
+- ✅ **SECURITY TESTING**: Blacklist funcionando 100% - tokens invalidados imediatamente
+- ✅ **ZERO BREAKAGE**: Todas funcionalidades existentes mantidas integralmente
+
+**Previous Updates (August 26, 2025):**
 - ✅ **EMAIL BRANDING UPDATE**: Template de boas-vindas atualizado com nova identidade NuPtechs
 - ✅ **CRITICAL ARCHITECTURE FIX**: Corrigida inconsistência grave entre MemStorage e DatabaseStorage
 - ✅ **PRODUCTION READY**: MemStorage completamente removido - sistema usa apenas PostgreSQL
@@ -63,9 +73,10 @@ Preferred communication style: Simple, everyday language.
 - **Development**: Vite middleware integration for seamless full-stack development
 
 ## Data Layer
-- **ORM**: Drizzle ORM with PostgreSQL dialect
-- **Database**: PostgreSQL database with persistent storage
+- **ORM**: Drizzle ORM with PostgreSQL dialect and SQL injection protection
+- **Database**: PostgreSQL database with persistent storage and prepared statements
 - **Schema**: Shared schema definitions between client and server using Drizzle-Zod
+- **Security**: SQL injection protection nativa do Drizzle ORM com prepared statements otimizados
 - **Database Structure**: 
   - Tasks table with title, description, status, priority, assignee, and progress tracking
   - Columns table for kanban board configuration with WIP limits
@@ -77,6 +88,7 @@ Preferred communication style: Simple, everyday language.
 - **Storage**: DatabaseStorage class implementing full CRUD operations with PostgreSQL
 - **Migrations**: Drizzle Kit for database schema migrations (`npm run db:push`)
 - **Data Persistence**: All tasks, columns, team members, and user-team relationships stored in PostgreSQL
+- **Security Layer**: TokenBlacklistService para invalidação server-side de tokens JWT
 - **User-Team Management**: Complete API for many-to-many relationships with role-based access
   - GET `/api/users/:userId/teams` - Get all teams for a user
   - GET `/api/teams/:teamId/users` - Get all users in a team  

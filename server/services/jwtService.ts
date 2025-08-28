@@ -56,8 +56,15 @@ export class JWTService {
   /**
    * Verificar e decodificar token de acesso
    */
-  static verifyAccessToken(token: string): JWTPayload | null {
+  static async verifyAccessToken(token: string): Promise<JWTPayload | null> {
     try {
+      // Verificar se token está na blacklist primeiro
+      const isBlacklisted = await this.isTokenBlacklisted(token);
+      if (isBlacklisted) {
+        console.log('🚫 [JWT] Token está na blacklist');
+        return null;
+      }
+
       const decoded = jwt.verify(token, JWT_SECRET, {
         issuer: 'nupkan-api',
         audience: 'nupkan-client'
@@ -79,8 +86,15 @@ export class JWTService {
   /**
    * Verificar token de refresh
    */
-  static verifyRefreshToken(token: string): { userId: string } | null {
+  static async verifyRefreshToken(token: string): Promise<{ userId: string } | null> {
     try {
+      // Verificar se token está na blacklist primeiro
+      const isBlacklisted = await this.isTokenBlacklisted(token);
+      if (isBlacklisted) {
+        console.log('🚫 [JWT] Refresh token está na blacklist');
+        return null;
+      }
+
       const decoded = jwt.verify(token, JWT_SECRET, {
         issuer: 'nupkan-api',
         audience: 'nupkan-refresh'
@@ -115,7 +129,7 @@ export class JWTService {
    * Gerar novo access token usando refresh token
    */
   static async refreshAccessToken(refreshToken: string, getUserData: (userId: string) => Promise<any>): Promise<TokenPair | null> {
-    const refreshPayload = this.verifyRefreshToken(refreshToken);
+    const refreshPayload = await this.verifyRefreshToken(refreshToken);
     
     if (!refreshPayload) {
       return null;
@@ -128,6 +142,9 @@ export class JWTService {
       if (!userData) {
         return null;
       }
+
+      // Invalidar refresh token antigo
+      await this.blacklistToken(refreshToken);
 
       // Gerar novo par de tokens
       return this.generateTokenPair({
@@ -143,11 +160,22 @@ export class JWTService {
   }
 
   /**
-   * Validar se token não está na blacklist (para implementação futura)
+   * Validar se token não está na blacklist
    */
-  static isTokenBlacklisted(token: string): boolean {
-    // TODO: Implementar blacklist de tokens para logout
-    return false;
+  static async isTokenBlacklisted(token: string): Promise<boolean> {
+    const { TokenBlacklistService } = await import('./tokenBlacklistService');
+    return await TokenBlacklistService.isTokenBlacklisted(token);
+  }
+
+  /**
+   * Adicionar token à blacklist (logout)
+   */
+  static async blacklistToken(token: string): Promise<void> {
+    const decoded = this.decodeToken(token);
+    if (decoded && decoded.exp) {
+      const { TokenBlacklistService } = await import('./tokenBlacklistService');
+      await TokenBlacklistService.blacklistToken(token, decoded.exp);
+    }
   }
 
   /**

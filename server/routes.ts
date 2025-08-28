@@ -2179,22 +2179,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/logout", async (req, res) => {
     try {
-      // 🚀 JWT LOGOUT - Token será invalidado no frontend
+      // 🚀 JWT LOGOUT - Invalidação server-side com blacklist
       const { JWTService } = await import('./services/jwtService');
       const token = JWTService.extractTokenFromRequest(req);
       
       if (token) {
+        // Adicionar token à blacklist para invalidação server-side
+        await JWTService.blacklistToken(token);
+        
         const payload = JWTService.decodeToken(token);
-        console.log('✅ [LOGOUT-JWT] Logout bem-sucedido:', {
+        console.log('✅ [LOGOUT-JWT] Logout bem-sucedido com blacklist:', {
           userId: payload?.userId,
-          userName: payload?.name
+          userName: payload?.name,
+          tokenBlacklisted: true
         });
       }
       
-      // TODO: Implementar blacklist de tokens se necessário
+      // Destroy session (compatibilidade)
+      if (req.session) {
+        req.session.destroy((err) => {
+          if (err) {
+            console.warn('⚠️ [LOGOUT] Erro ao destruir sessão (não crítico):', err);
+          }
+        });
+      }
+      
       res.json({ 
         message: "Logout realizado com sucesso",
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        tokenInvalidated: !!token
       });
       
     } catch (error) {

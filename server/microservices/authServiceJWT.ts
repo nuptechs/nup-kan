@@ -52,7 +52,7 @@ export class AuthServiceJWT {
       }
 
       // Verificar e decodificar token
-      const tokenPayload = JWTService.verifyAccessToken(token);
+      const tokenPayload = await JWTService.verifyAccessToken(token);
       
       if (!tokenPayload) {
         return null;
