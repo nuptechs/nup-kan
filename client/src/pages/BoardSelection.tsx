@@ -210,23 +210,19 @@ export default function BoardSelection() {
   // Toggle board status mutation
   const toggleBoardStatusMutation = useMutation({
     mutationFn: async (boardId: string) => {
-      console.log(`🔄 [FRONTEND] Iniciando toggle para board: ${boardId}`);
       const response = await apiRequest("PATCH", `/api/boards/${boardId}/toggle-status`);
-      const result = await response.json();
-      console.log(`📦 [FRONTEND] Resposta do backend:`, result);
-      return result;
+      return response.json();
     },
     onSuccess: async (updatedBoard) => {
-      console.log(`✅ [FRONTEND] Toggle bem-sucedido. Board atualizado:`, updatedBoard);
-      
       // 🔄 INVALIDAÇÃO COMPLETA DE CACHE - Lista e board individual
       await queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/boards", updatedBoard.id] });
       await queryClient.refetchQueries({ queryKey: ["/api/boards"] });
       await queryClient.refetchQueries({ queryKey: ["/api/boards", updatedBoard.id] });
       
-      const statusText = updatedBoard.isActive === "true" ? "ativado" : "inativado";
-      console.log(`🎯 [FRONTEND] Status determinado: ${statusText} (isActive: ${updatedBoard.isActive})`);
+      // Converter para string e comparar (resolve problema de conversão automática)
+      const isActive = String(updatedBoard.isActive) === "true";
+      const statusText = isActive ? "ativado" : "inativado";
       
       toast({
         title: `Board ${statusText}`,
@@ -432,7 +428,7 @@ export default function BoardSelection() {
                         }}
                         className={`
                           flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-all duration-200 
-                          ${board.isActive === "true"
+                          ${String(board.isActive) === "true"
                             ? "bg-green-500 text-white hover:bg-green-600" 
                             : "bg-red-500 text-white hover:bg-red-600"
                           }
@@ -444,11 +440,11 @@ export default function BoardSelection() {
                         `}
                         data-testid={`status-toggle-${board.id}`}
                         title={canEdit("Boards") 
-                          ? `Clique para ${board.isActive === "true" ? "inativar" : "ativar"} o board`
+                          ? `Clique para ${String(board.isActive) === "true" ? "inativar" : "ativar"} o board`
                           : "Você não tem permissão para alterar o status"
                         }
                       >
-                        {board.isActive === "true" ? (
+                        {String(board.isActive) === "true" ? (
                           <>
                             <Power className="w-3 h-3" />
                             <span>Ativo</span>

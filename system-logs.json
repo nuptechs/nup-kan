@@ -1,47 +1,15 @@
 [
   {
-    "id": "log_1756403698688_b5q5ujzgq",
-    "timestamp": "2025-08-28T17:54:58.688Z",
-    "level": "error",
-    "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Usuários' necessária para listar usuários",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756403698686_ma78g5bif",
-    "timestamp": "2025-08-28T17:54:58.686Z",
-    "level": "error",
-    "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Usuários' necessária para listar usuários",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756403687756_zdnxp8jnr",
-    "timestamp": "2025-08-28T17:54:47.756Z",
-    "level": "error",
-    "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Usuários' necessária para listar usuários",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756403687742_cx44d5c77",
-    "timestamp": "2025-08-28T17:54:47.742Z",
-    "level": "error",
-    "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Usuários' necessária para listar usuários",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756403674538_q47deutuo",
-    "timestamp": "2025-08-28T17:54:34.538Z",
+    "id": "log_1756404013278_0l4eyb14m",
+    "timestamp": "2025-08-28T18:00:13.278Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756403672455_0rw0wbpa1",
-    "timestamp": "2025-08-28T17:54:32.455Z",
+    "id": "log_1756404010173_famvqkz3y",
+    "timestamp": "2025-08-28T18:00:10.173Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",
