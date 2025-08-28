@@ -1,49 +1,17 @@
-import { createClient, type RedisClientType } from 'redis';
-
-// Redis Cache Layer para Performance Ultra-Rápida
+// Cache Manager Estável - Somente Memória (Sem Redis)
 class CacheManager {
-  private redis: RedisClientType | null = null;
   private memoryCache = new Map<string, { data: any, expires: number }>();
   
   constructor() {
-    this.initRedis();
-  }
-
-  private async initRedis() {
-    try {
-      // Tentar conectar ao Redis primeiro
-      if (process.env.REDIS_URL) {
-        this.redis = createClient({
-          url: process.env.REDIS_URL,
-          socket: {
-            reconnectStrategy: (retries) => Math.min(retries * 50, 500)
-          }
-        });
-        await this.redis.connect();
-        console.log('✅ [CACHE] Redis conectado com sucesso');
-      } else {
-        console.log('🟡 [CACHE] REDIS_URL não encontrada, usando cache em memória');
-        this.redis = null;
-      }
-    } catch (error) {
-      console.log('🟡 [CACHE] Erro ao conectar Redis, usando cache em memória:', (error as Error).message);
-      this.redis = null;
-    }
+    console.log('🟡 [CACHE] Usando cache em memória estável');
   }
 
   async get<T>(key: string): Promise<T | null> {
     try {
-      if (this.redis) {
-        const data = await this.redis.get(key);
-        return data ? JSON.parse(data) : null;
-      }
-      
-      // Fallback para cache em memória
       const cached = this.memoryCache.get(key);
       if (cached && Date.now() < cached.expires) {
         return cached.data;
       }
-      
       return null;
     } catch (error) {
       console.error('❌ [CACHE] Erro ao buscar:', error);
@@ -53,18 +21,10 @@ class CacheManager {
 
   async set<T>(key: string, value: T, ttlSeconds: number = 300): Promise<void> {
     try {
-      if (this.redis) {
-        await this.redis.setEx(key, ttlSeconds, JSON.stringify(value));
-        return;
-      }
-      
-      // Fallback para cache em memória
       this.memoryCache.set(key, {
         data: value,
         expires: Date.now() + (ttlSeconds * 1000)
       });
-      
-      // Limpeza automática do cache em memória
       this.cleanMemoryCache();
     } catch (error) {
       console.error('❌ [CACHE] Erro ao salvar:', error);
@@ -73,9 +33,6 @@ class CacheManager {
 
   async del(key: string): Promise<void> {
     try {
-      if (this.redis) {
-        await this.redis.del(key);
-      }
       this.memoryCache.delete(key);
     } catch (error) {
       console.error('❌ [CACHE] Erro ao deletar:', error);
@@ -84,16 +41,10 @@ class CacheManager {
 
   async invalidatePattern(pattern: string): Promise<void> {
     try {
-      if (this.redis) {
-        const keys = await this.redis.keys(pattern);
-        if (keys.length > 0) {
-          await this.redis.del(keys);
-        }
-      }
-      
-      // Para cache em memória, remove chaves que batem com o padrão
+      // Remove chaves que batem com o padrão (simplicado e estável)
+      const searchPattern = pattern.replace('*', '');
       for (const key of Array.from(this.memoryCache.keys())) {
-        if (key.includes(pattern.replace('*', ''))) {
+        if (key.includes(searchPattern)) {
           this.memoryCache.delete(key);
         }
       }
@@ -113,26 +64,13 @@ class CacheManager {
     }
   }
 
-  // Métricas de cache
+  // Métricas de cache (simplificado)
   async getStats(): Promise<{ hits: number, misses: number, size: number }> {
-    try {
-      if (this.redis) {
-        const info = await this.redis.info('stats');
-        return {
-          hits: parseInt(info.match(/keyspace_hits:(\d+)/)?.[1] || '0'),
-          misses: parseInt(info.match(/keyspace_misses:(\d+)/)?.[1] || '0'),
-          size: await this.redis.dbSize()
-        };
-      }
-      
-      return {
-        hits: 0,
-        misses: 0,
-        size: this.memoryCache.size
-      };
-    } catch (error) {
-      return { hits: 0, misses: 0, size: 0 };
-    }
+    return {
+      hits: 0,
+      misses: 0,
+      size: this.memoryCache.size
+    };
   }
 }
 

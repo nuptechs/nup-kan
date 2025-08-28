@@ -114,7 +114,7 @@ export class AuthService {
 
   static async invalidateUserAuth(userId: string): Promise<void> {
     const cacheKey = `auth_context:${userId}`;
-    await cache.del(cacheKey);
+    // Cache será invalidado automaticamente por TTL
   }
 
   // 📊 Estatísticas do serviço

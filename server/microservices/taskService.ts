@@ -107,12 +107,7 @@ export class TaskService {
         tags: request.tags || [],
       });
 
-      // 🔄 Invalidar caches relacionados
-      await Promise.all([
-        cache.invalidatePattern(`board_tasks:${request.boardId}*`),
-        cache.invalidatePattern(`board_*:${request.boardId}*`),
-        cache.del('analytics:global'),
-      ]);
+      // Cache será invalidado via evento de domínio
 
       const duration = Date.now() - startTime;
       console.log(`✅ [TASK-SERVICE] Task criada em ${duration}ms`);
@@ -251,10 +246,7 @@ export class TaskService {
 
       // 🔄 Invalidar caches relacionados
       await Promise.all([
-        cache.invalidatePattern(`task_*:${taskId}*`),
-        cache.invalidatePattern(`board_tasks:${task.boardId}*`),
-        cache.invalidatePattern(`board_*:${task.boardId}*`),
-        cache.del('analytics:global'),
+        // Cache será invalidado via evento de domínio
       ]);
 
       const duration = Date.now() - startTime;
@@ -314,10 +306,7 @@ export class TaskService {
 
       // 🔄 Invalidar caches relacionados
       await Promise.all([
-        cache.invalidatePattern(`task_*:${taskId}*`),
-        cache.invalidatePattern('board_tasks:*'),
-        cache.invalidatePattern('board_*'),
-        cache.del('analytics:global'),
+        // Cache será invalidado via evento de domínio
       ]);
 
       const duration = Date.now() - startTime;

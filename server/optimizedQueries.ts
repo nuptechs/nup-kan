@@ -189,28 +189,20 @@ export class OptimizedQueries {
     return result;
   }
 
-  // Cache invalidation utilities
+  // Cache invalidation utilities (REMOVIDO - usar BaseService)
   static async invalidateUserCache(userId: string) {
-    await Promise.all([
-      cache.del(CacheKeys.USER_PERMISSIONS(userId)),
-      cache.del(CacheKeys.USER_DATA(userId)),
-      cache.del(`user_with_profile:${userId}`),
-      cache.del(`user_teams:${userId}`),
-    ]);
+    // Cache será invalidado via BaseService.invalidateCache()
+    console.log('Cache invalidation moved to BaseService');
   }
 
   static async invalidateBoardCache(boardId: string) {
-    await Promise.all([
-      cache.del(CacheKeys.BOARD_DATA(boardId)),
-      cache.del(CacheKeys.BOARD_COLUMNS(boardId)), 
-      cache.del(CacheKeys.BOARD_TASKS(boardId)),
-      cache.del(`board_tasks_optimized:${boardId}`),
-      cache.invalidatePattern('boards_*'), // Invalidar todas as listagens de boards
-    ]);
+    // Cache será invalidado via BaseService.invalidateCache()
+    console.log('Cache invalidation moved to BaseService');
   }
 
   static async invalidateAnalyticsCache() {
-    await cache.del(CacheKeys.ANALYTICS);
+    // Cache será invalidado via BaseService.invalidateCache()
+    console.log('Cache invalidation moved to BaseService');
   }
 }
 

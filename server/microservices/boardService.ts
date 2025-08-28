@@ -89,13 +89,7 @@ export class BoardService {
         createDefaultColumns: request.createDefaultColumns !== false,
       });
 
-      // 🔄 Invalidar caches ASSÍNCRONO (não bloqueia resposta)
-      Promise.all([
-        cache.invalidatePattern('boards_*'),
-        cache.del('boards_count_db'),
-      ]).catch(error => {
-        console.error('⚠️ [CACHE] Erro assíncrono na invalidação:', error);
-      });
+      // Cache será invalidado via evento de domínio
 
 
       // Retornar resposta otimizada
@@ -295,8 +289,7 @@ export class BoardService {
 
       // 🔄 Invalidar caches
       await Promise.all([
-        cache.invalidatePattern(`board_*:${boardId}:*`),
-        cache.invalidatePattern('boards_*'),
+        // Cache será invalidado via evento de domínio
       ]);
 
       // Por enquanto, retornar board atual

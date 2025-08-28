@@ -539,7 +539,7 @@ export class BoardService extends BaseService {
       isActive: newStatus
     });
 
-    // Invalidar caches relevantes - CORRIGIDO!
+    // Invalidar caches via BaseService (SISTEMÁTICO)
     await this.invalidateCache([
       `boards:user:${authContext.userId}:*`,
       `board:${boardId}:*`,

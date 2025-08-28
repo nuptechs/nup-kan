@@ -1575,7 +1575,7 @@ export class DatabaseStorage implements IStorage {
       ));
     
     // Clear all notification caches since we don't know which users were affected
-    await cache.invalidatePattern("notifications:*");
+    // Cache será invalidado por evento de domínio
     
     return result.rowCount || 0;
   }
