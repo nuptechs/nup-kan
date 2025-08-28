@@ -2735,7 +2735,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/users/:userId/permissions", async (req, res) => {
     try {
       const { permissionId } = req.body;
-      const result = await permissionService.addPermissionToUser(req.authContext, req.params.userId, permissionId);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await permissionService.addPermissionToUser(authContext, req.params.userId, permissionId);
       res.status(201).json(result);
     } catch (error) {
       res.status(400).json({ message: "Failed to add permission to user" });
@@ -2744,7 +2745,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/users/:userId/permissions/:permissionId", async (req, res) => {
     try {
-      await permissionService.removePermissionFromUser(req.authContext, req.params.userId, req.params.permissionId);
+      const authContext = createAuthContextFromRequest(req);
+      await permissionService.removePermissionFromUser(authContext, req.params.userId, req.params.permissionId);
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to remove permission from user" });
@@ -2754,7 +2756,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Team Permission Management routes
   app.get("/api/teams/:teamId/permissions", async (req, res) => {
     try {
-      const permissions = await permissionService.getTeamPermissions(req.authContext, req.params.teamId);
+      const authContext = createAuthContextFromRequest(req);
+      const permissions = await permissionService.getTeamPermissions(authContext, req.params.teamId);
       res.json(permissions);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch team permissions" });
@@ -2765,7 +2768,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { permissionId } = req.body;
       console.log("Adding permission to team:", req.params.teamId, permissionId);
-      const result = await permissionService.addPermissionToTeam(req.authContext, req.params.teamId, permissionId);
+      const authContext = createAuthContextFromRequest(req);
+      const result = await permissionService.addPermissionToTeam(authContext, req.params.teamId, permissionId);
       res.status(201).json(result);
     } catch (error) {
       console.error("Error adding permission to team:", error);
@@ -2775,7 +2779,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/teams/:teamId/permissions/:permissionId", async (req, res) => {
     try {
-      await permissionService.removePermissionFromTeam(req.authContext, req.params.teamId, req.params.permissionId);
+      const authContext = createAuthContextFromRequest(req);
+      await permissionService.removePermissionFromTeam(authContext, req.params.teamId, req.params.permissionId);
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to remove permission from team" });
@@ -2964,18 +2969,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Task Status routes
-  app.get("/api/task-statuses", async (req, res) => {
+  app.get("/api/task-statuses", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
-      const statuses = await taskStatusService.getTaskStatuses(req.authContext);
+      const authContext = createAuthContextFromRequest(req);
+      const statuses = await taskStatusService.getTaskStatuses(authContext);
       res.json(statuses);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch task statuses" });
     }
   });
 
-  app.get("/api/task-statuses/:id", async (req, res) => {
+  app.get("/api/task-statuses/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
-      const status = await taskStatusService.getTaskStatus(req.authContext, req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      const status = await taskStatusService.getTaskStatus(authContext, req.params.id);
       if (!status) {
         return res.status(404).json({ message: "Task status not found" });
       }
@@ -2985,10 +2992,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/task-statuses", async (req, res) => {
+  app.post("/api/task-statuses", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const statusData = insertTaskStatusSchema.parse(req.body);
-      const status = await taskStatusService.createTaskStatus(req.authContext, statusData);
+      const authContext = createAuthContextFromRequest(req);
+      const status = await taskStatusService.createTaskStatus(authContext, statusData);
       res.status(201).json(status);
     } catch (error) {
       console.error("Error creating task status:", error);
@@ -3003,10 +3011,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/task-statuses/:id", async (req, res) => {
+  app.patch("/api/task-statuses/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const statusData = updateTaskStatusSchema.parse(req.body);
-      const status = await taskStatusService.updateTaskStatus(req.authContext, req.params.id, statusData);
+      const authContext = createAuthContextFromRequest(req);
+      const status = await taskStatusService.updateTaskStatus(authContext, req.params.id, statusData);
       res.json(status);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -3016,9 +3025,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/task-statuses/:id", async (req, res) => {
+  app.delete("/api/task-statuses/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
-      await taskStatusService.deleteTaskStatus(req.authContext, req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      await taskStatusService.deleteTaskStatus(authContext, req.params.id);
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -3029,18 +3039,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Task Priority routes
-  app.get("/api/task-priorities", async (req, res) => {
+  app.get("/api/task-priorities", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
-      const priorities = await taskStatusService.getTaskPriorities(req.authContext);
+      const authContext = createAuthContextFromRequest(req);
+      const priorities = await taskStatusService.getTaskPriorities(authContext);
       res.json(priorities);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch task priorities" });
     }
   });
 
-  app.get("/api/task-priorities/:id", async (req, res) => {
+  app.get("/api/task-priorities/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
-      const priority = await taskStatusService.getTaskPriority(req.authContext, req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      const priority = await taskStatusService.getTaskPriority(authContext, req.params.id);
       if (!priority) {
         return res.status(404).json({ message: "Task priority not found" });
       }
@@ -3050,10 +3062,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/task-priorities", async (req, res) => {
+  app.post("/api/task-priorities", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const priorityData = insertTaskPrioritySchema.parse(req.body);
-      const priority = await taskStatusService.createTaskPriority(req.authContext, priorityData);
+      const authContext = createAuthContextFromRequest(req);
+      const priority = await taskStatusService.createTaskPriority(authContext, priorityData);
       res.status(201).json(priority);
     } catch (error) {
       console.error("Error creating task priority:", error);
@@ -3068,10 +3081,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/task-priorities/:id", async (req, res) => {
+  app.patch("/api/task-priorities/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
       const priorityData = updateTaskPrioritySchema.parse(req.body);
-      const priority = await taskStatusService.updateTaskPriority(req.authContext, req.params.id, priorityData);
+      const authContext = createAuthContextFromRequest(req);
+      const priority = await taskStatusService.updateTaskPriority(authContext, req.params.id, priorityData);
       res.json(priority);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -3081,9 +3095,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/task-priorities/:id", async (req, res) => {
+  app.delete("/api/task-priorities/:id", AuthMiddlewareJWT.requireAuth, async (req, res) => {
     try {
-      await taskStatusService.deleteTaskPriority(req.authContext, req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      await taskStatusService.deleteTaskPriority(authContext, req.params.id);
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
