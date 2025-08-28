@@ -1,11 +1,8 @@
 // Event-driven system for CQRS synchronization
 
-import { Queue, Worker, Job } from 'bullmq';
-import Redis from 'ioredis';
 import { mongoStore } from '../mongodb';
 
-// Local event system (Redis disabled)
-const redis = null;
+// Sistema de eventos local (sem cache externo)
 
 // Event Types
 export interface DomainEvent {
@@ -41,11 +38,11 @@ export interface TaskDeletedEvent extends DomainEvent {
 }
 
 class EventBus {
-  private eventQueue: Queue | null = null;
-  private worker: Worker | null = null;
+  private eventQueue: any = null;
+  private worker: any = null;
 
   constructor() {
-    // Sistema de eventos local (sem Redis)
+    // Sistema de eventos local
     this.eventQueue = null;
 
     this.startEventWorker();
@@ -71,7 +68,7 @@ class EventBus {
   // 🎯 Worker desabilitado (modo local)
   private startEventWorker(): void {
     this.worker = null;
-    console.log('🎪 [EVENT-WORKER] Sistema funcionando em modo local (sem Redis)');
+    console.log('🎪 [EVENT-WORKER] Sistema funcionando em modo local');
   }
 
   // 🎪 Router de eventos para handlers
