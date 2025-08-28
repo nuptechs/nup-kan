@@ -1,71 +1,15 @@
 [
   {
-    "id": "log_1756349219538_e9h6fuqri",
-    "timestamp": "2025-08-28T02:46:59.538Z",
-    "level": "error",
-    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349218052_qoxqh2zvu",
-    "timestamp": "2025-08-28T02:46:58.052Z",
-    "level": "error",
-    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349217657_q1mgiyas7",
-    "timestamp": "2025-08-28T02:46:57.657Z",
-    "level": "error",
-    "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349217656_8u6lk8519",
-    "timestamp": "2025-08-28T02:46:57.656Z",
-    "level": "error",
-    "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349217652_elwj5fesf",
-    "timestamp": "2025-08-28T02:46:57.652Z",
-    "level": "error",
-    "message": "Error fetching teams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar times",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349217650_1m3zw7as5",
-    "timestamp": "2025-08-28T02:46:57.650Z",
-    "level": "error",
-    "message": "❌ [TEAM-SERVICE] Erro em getTeams: Error: Permissão insuficiente: 'Listar Teams' necessária para listar times",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349217309_frpr3p1vm",
-    "timestamp": "2025-08-28T02:46:57.309Z",
-    "level": "error",
-    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
-    "context": "ERROR",
-    "actionType": "system"
-  },
-  {
-    "id": "log_1756349203976_dgttwdess",
-    "timestamp": "2025-08-28T02:46:43.976Z",
+    "id": "log_1756349408067_6h6ylb707",
+    "timestamp": "2025-08-28T02:50:08.067Z",
     "level": "warn",
     "message": "Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme",
     "context": "WARNING",
     "actionType": "system"
   },
   {
-    "id": "log_1756349202109_sppkxja98",
-    "timestamp": "2025-08-28T02:46:42.109Z",
+    "id": "log_1756349406404_vy32ib15m",
+    "timestamp": "2025-08-28T02:50:06.404Z",
     "level": "info",
     "message": "Sistema de logs iniciado",
     "context": "SYSTEM",

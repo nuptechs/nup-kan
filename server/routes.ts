@@ -978,7 +978,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/users/:id", async (req, res) => {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+      
       const userData = updateUserSchema.parse(req.body);
       const user = await userService.updateUser(authContext, req.params.id, userData);
       res.json(user);
@@ -986,21 +994,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.status(400).json({ message: "Invalid user data" });
+      console.error('Error in PUT /api/users/:id:', error);
+      const message = error instanceof Error ? error.message : "Invalid user data";
+      res.status(400).json({ message });
     }
   });
 
   app.patch("/api/users/:id", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.user?.id || 'unknown';
-    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
-      const userData = req.body;
-      const authContext = createAuthContextFromRequest(req);
-      const user = await userService.updateUser(authContext, req.params.id, userData);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
       
-      // Cache individual será invalidado automaticamente pelo TanStack Query
+      const userId = authContext.userId;
+      const userName = authContext.userName || 'Usuário desconhecido';
+      const userData = req.body;
+      const user = await userService.updateUser(authContext, req.params.id, userData);
       
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Atualizar usuário "${user.name}" (${user.email})`, 'success', null, duration);
@@ -1010,26 +1026,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const duration = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
       
+      // Tentar obter informações do usuário para o log, mesmo com erro
+      let userId = 'unknown';
+      let userName = 'Usuário desconhecido';
+      try {
+        const authContext = await AuthServiceJWT.verifyAuth(req);
+        if (authContext) {
+          userId = authContext.userId;
+          userName = authContext.userName || 'Usuário desconhecido';
+        }
+      } catch (authError) {
+        // Ignore auth error for logging
+      }
+      
       if (error instanceof Error && error.message.includes("not found")) {
         addUserActionLog(userId, userName, `Atualizar usuário (ID: ${req.params.id})`, 'error', { error: 'Usuário não encontrado' }, duration);
         return res.status(404).json({ message: "User not found" });
       }
       
       addUserActionLog(userId, userName, `Atualizar usuário (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
-      res.status(400).json({ message: "Invalid user data" });
+      console.error('Error in PATCH /api/users/:id:', error);
+      const message = error instanceof Error ? error.message : "Invalid user data";
+      res.status(400).json({ message });
     }
   });
 
   app.delete("/api/users/:id", async (req, res) => {
     const startTime = Date.now();
-    const userId = req.session?.user?.id || 'unknown';
-    const userName = req.session?.user?.name || 'Usuário desconhecido';
     
     try {
-      const authContext = createAuthContextFromRequest(req);
-      await userService.deleteUser(authContext, req.params.id);
+      // Verificar JWT
+      const authContext = await AuthServiceJWT.verifyAuth(req);
+      if (!authContext) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
       
-      // Cache individual será invalidado automaticamente pelo TanStack Query
+      const userId = authContext.userId;
+      const userName = authContext.userName || 'Usuário desconhecido';
+      
+      await userService.deleteUser(authContext, req.params.id);
       
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Deletar usuário (ID: ${req.params.id})`, 'success', null, duration);
@@ -1039,12 +1077,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const duration = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
       
+      // Tentar obter informações do usuário para o log, mesmo com erro
+      let userId = 'unknown';
+      let userName = 'Usuário desconhecido';
+      try {
+        const authContext = await AuthServiceJWT.verifyAuth(req);
+        if (authContext) {
+          userId = authContext.userId;
+          userName = authContext.userName || 'Usuário desconhecido';
+        }
+      } catch (authError) {
+        // Ignore auth error for logging
+      }
+      
       if (error instanceof Error && error.message.includes("not found")) {
         addUserActionLog(userId, userName, `Deletar usuário (ID: ${req.params.id})`, 'error', { error: 'Usuário não encontrado' }, duration);
         return res.status(404).json({ message: "User not found" });
       }
       
       addUserActionLog(userId, userName, `Deletar usuário (ID: ${req.params.id})`, 'error', { error: errorMessage, details: error }, duration);
+      console.error('Error in DELETE /api/users/:id:', error);
       res.status(500).json({ message: "Failed to delete user" });
     }
   });
