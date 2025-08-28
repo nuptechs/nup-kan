@@ -1,5 +1,37 @@
 [
   {
+    "id": "log_1756349841243_nrkvm3bmr",
+    "timestamp": "2025-08-28T02:57:21.243Z",
+    "level": "error",
+    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349840075_tyiy3gbls",
+    "timestamp": "2025-08-28T02:57:20.075Z",
+    "level": "error",
+    "message": "Error fetching current user: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349840072_jsw4njpid",
+    "timestamp": "2025-08-28T02:57:20.072Z",
+    "level": "error",
+    "message": "❌ [USER-SERVICE] Erro em getUsers: Error: Permissão insuficiente: 'Listar Users' necessária para listar usuários",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
+    "id": "log_1756349840056_p8605tgaq",
+    "timestamp": "2025-08-28T02:57:20.056Z",
+    "level": "error",
+    "message": "❌ [TAG-SERVICE] Erro em getTags: Error: Permissão insuficiente: 'Listar Tags' necessária para listar tags",
+    "context": "ERROR",
+    "actionType": "system"
+  },
+  {
     "id": "log_1756349824436_9c85nec97",
     "timestamp": "2025-08-28T02:57:04.436Z",
     "level": "warn",
