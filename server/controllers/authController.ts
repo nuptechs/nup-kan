@@ -199,12 +199,42 @@ export class AuthController {
 
   static async currentUser(req: Request, res: Response) {
     try {
-      const { AuthServiceJWT } = await import('../microservices/authServiceJWT');
-      const authContext = await AuthServiceJWT.getCurrentUserContext(req);
+      const { getUserWithPermissions } = await import('../auth/simpleAuth');
       
-      if (!authContext?.isAuthenticated || !authContext.userId) {
+      // Extrair userId da request (JWT ou session)
+      let userId: string | null = null;
+      const { JWTService } = await import('../services/jwtService');
+      const token = JWTService.extractTokenFromRequest(req);
+      if (token) {
+        const tokenPayload = await JWTService.verifyAccessToken(token);
+        if (tokenPayload) {
+          userId = tokenPayload.userId;
+        }
+      }
+      
+      if (!userId) {
+        userId = req.session?.user?.id || req.session?.userId || null;
+      }
+      
+      if (!userId) {
         return res.status(401).json({ message: "Não autenticado" });
       }
+      
+      const user = await getUserWithPermissions(userId);
+      if (!user) {
+        return res.status(401).json({ message: "Usuário não encontrado" });
+      }
+      
+      const authContext = {
+        userId: user.id,
+        userName: user.name,
+        userEmail: user.email,
+        profileId: user.profileId,
+        profileName: 'User',
+        permissions: user.permissions,
+        teams: [],
+        isAuthenticated: true
+      };
 
       console.log('✅ [CURRENT-USER-JWT] Usuário autenticado via JWT:', authContext.userId);
       

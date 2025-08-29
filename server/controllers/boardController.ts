@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { boardService, boardShareService } from "../services";
-import { AuthServiceJWT } from "../microservices/authServiceJWT";
+import { AuthRequest } from "../auth/simpleAuth";
 
 // Helper para criar AuthContext a partir da request
 function createAuthContextFromRequest(req: any): any {
@@ -45,7 +45,7 @@ export class BoardController {
   static async getBoards(req: Request, res: Response) {
     try {
       // Verificar JWT
-      const authContext = await AuthServiceJWT.verifyAuth(req);
+      const authContext = createAuthContextFromRequest(req);
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',
@@ -81,7 +81,7 @@ export class BoardController {
   static async getBoard(req: Request, res: Response) {
     try {
       // Verificar JWT
-      const authContext = await AuthServiceJWT.verifyAuth(req);
+      const authContext = createAuthContextFromRequest(req);
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',

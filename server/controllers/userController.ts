@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { userService, hierarchyService } from "../services";
-import { AuthServiceJWT } from "../microservices/authServiceJWT";
+import { AuthRequest } from "../auth/simpleAuth";
 
 // Helper para criar AuthContext a partir da request
 function createAuthContextFromRequest(req: any): any {
@@ -104,7 +104,7 @@ export class UserController {
     
     try {
       // Verificar JWT
-      const authContext = await AuthServiceJWT.verifyAuth(req);
+      const authContext = createAuthContextFromRequest(req);
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',
@@ -158,7 +158,7 @@ export class UserController {
   static async updateUser(req: Request, res: Response) {
     try {
       // Verificar JWT
-      const authContext = await AuthServiceJWT.verifyAuth(req);
+      const authContext = createAuthContextFromRequest(req);
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',
@@ -185,7 +185,7 @@ export class UserController {
   static async patchUser(req: Request, res: Response) {
     try {
       // Verificar JWT
-      const authContext = await AuthServiceJWT.verifyAuth(req);
+      const authContext = createAuthContextFromRequest(req);
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',
@@ -242,7 +242,7 @@ export class UserController {
   static async deleteUser(req: Request, res: Response) {
     try {
       // Verificar JWT
-      const authContext = await AuthServiceJWT.verifyAuth(req);
+      const authContext = createAuthContextFromRequest(req);
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',
@@ -308,7 +308,7 @@ export class UserController {
   static async changePassword(req: Request, res: Response) {
     try {
       // Verificar JWT
-      const authContext = await AuthServiceJWT.verifyAuth(req);
+      const authContext = createAuthContextFromRequest(req);
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',
@@ -338,7 +338,7 @@ export class UserController {
   static async getUserHierarchy(req: Request, res: Response) {
     try {
       // Verificar autenticação JWT manualmente
-      const authContext = await AuthServiceJWT.verifyAuth(req);
+      const authContext = createAuthContextFromRequest(req);
       if (!authContext) {
         return res.status(401).json({ error: 'Authentication required' });
       }

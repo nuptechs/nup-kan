@@ -16,8 +16,8 @@ import { OptimizedQueries, PerformanceStats } from "../optimizedQueries";
 import { cache } from "../cache";
 
 // 🚀 MICROSERVIÇOS IMPORTADOS
+import { requireAuth, requirePermission } from '../auth/simpleAuth';
 import { AuthMiddleware, AuthService } from '../microservices/authService';
-import { AuthServiceJWT, AuthMiddlewareJWT } from '../microservices/authServiceJWT';
 import { mongoStore } from '../mongodb';
 
 // Helper para criar AuthContext a partir da request
@@ -78,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🚨 ROTAS TEMPORÁRIAS QUE AINDA PRECISAM SER REFATORADAS
 
   // 💾 System logs management (ainda não refatorado)
-  app.get("/api/system/logs", AuthMiddlewareJWT.requireAuth, async (req, res) => {
+  app.get("/api/system/logs", requireAuth, async (req, res) => {
     try {
       const path = join(process.cwd(), 'logs');
       
@@ -122,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/system/logs", AuthMiddlewareJWT.requireAuth, async (req, res) => {
+  app.delete("/api/system/logs", requireAuth, async (req, res) => {
     try {
       const path = join(process.cwd(), 'logs');
       
@@ -224,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===========================
 
   // Teams related routes (ainda precisam ser refatoradas)
-  app.get("/api/user-teams", AuthMiddlewareJWT.requireAuth, async (req, res) => {
+  app.get("/api/user-teams", requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const userTeams = await userTeamService.getUserTeams(authContext, authContext.userId);
@@ -234,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/:userId/teams", AuthMiddlewareJWT.requireAuth, async (req, res) => {
+  app.get("/api/users/:userId/teams", requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const teams = await userTeamService.getUserTeams(authContext, req.params.userId);
@@ -244,7 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/teams/:teamId/users", AuthMiddlewareJWT.requireAuth, async (req, res) => {
+  app.get("/api/teams/:teamId/users", requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const users = await userTeamService.getTeamUsers(authContext, req.params.teamId);
@@ -362,7 +362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Notification routes
-  app.get("/api/notifications", AuthMiddlewareJWT.requireAuth, async (req, res) => {
+  app.get("/api/notifications", requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const notifications = await notificationService.getNotifications(authContext);
@@ -372,7 +372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/notifications/unread-count", AuthMiddlewareJWT.requireAuth, async (req, res) => {
+  app.get("/api/notifications/unread-count", requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const count = await notificationService.getUnreadCount(authContext);
@@ -427,7 +427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/permissions/sync", AuthMiddlewareJWT.requireAuth, async (req, res) => {
+  app.post("/api/permissions/sync", requireAuth, async (req, res) => {
     try {
       const permissionSyncService = PermissionSyncService.getInstance();
       const result = await permissionSyncService.syncPermissions(app);
@@ -441,8 +441,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Password change route
   app.patch("/api/users/:id/password", async (req, res) => {
     try {
-      // Verificar JWT
-      const authContext = await AuthServiceJWT.verifyAuth(req);
+      // Verificar autenticação
+      const authContext = createAuthContextFromRequest(req);
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',

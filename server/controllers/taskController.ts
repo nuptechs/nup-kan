@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { taskService, assigneeService } from "../services";
-import { AuthServiceJWT } from "../microservices/authServiceJWT";
+import { AuthRequest } from "../auth/simpleAuth";
 import { insertTaskAssigneeSchema } from "@shared/schema";
 
 // Helper para criar AuthContext a partir da request
