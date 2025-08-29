@@ -250,74 +250,7 @@ export class TeamService extends BaseService {
     }
   }
 
-  // 🗑️ REMOVIDO: addUserToTeam duplicado - Use userTeamService.addUserToTeam() em vez disso
-  /**
-   * [DEPRECATED] Método movido para userTeamService
-   */
-  async addUserToTeam(authContext: AuthContext, userId: string, teamId: string, role: string = 'member'): Promise<UserTeam> {
-    throw new Error('DEPRECATED: Use userTeamService.addUserToTeam() em vez disso. Este método foi consolidado para evitar duplicação.');
-  }
 
-  /**
-   * Remover usuário do time
-   */
-  async removeUserFromTeam(authContext: AuthContext, userId: string, teamId: string): Promise<void> {
-    this.log('team-service', 'removeUserFromTeam', { requestingUser: authContext.userId, userId, teamId });
-    
-    try {
-      this.requirePermission(authContext, 'Atribuir Membros', 'remover membro do time');
-
-      // Verificar se o usuário tem permissão para gerenciar este time
-      const hasTeamAccess = await this.hasTeamAdminAccess(authContext.userId, teamId);
-      if (!hasTeamAccess && !this.hasPermission(authContext, 'Gerenciar Times')) {
-        throw new Error('Acesso negado para remover membros neste time');
-      }
-
-      await this.storage.removeUserFromTeam(userId, teamId);
-      const user = await this.storage.getUser(userId);
-      if (!user) {
-        throw new Error('Usuário não encontrado');
-      }
-
-      // Verificar se o time existe
-      const team = await this.storage.getTeam(teamId);
-      if (!team) {
-        throw new Error('Time não encontrado');
-      }
-
-      // Verificar se o usuário já está no time
-      const existingUserTeams = await this.storage.getUserTeams(userId);
-      const alreadyInTeam = existingUserTeams.some(ut => ut.teamId === teamId);
-      if (alreadyInTeam) {
-        throw new Error('Usuário já está neste time');
-      }
-
-      const userTeam = await this.storage.addUserToTeam({
-        userId,
-        teamId,
-        role
-      });
-
-      // Invalidar caches relacionados
-      await this.invalidateCache([
-        `team:${teamId}:*`,
-        `user:${userId}:teams`
-      ]);
-
-      // Emitir evento
-      this.emitEvent('team.member_added', {
-        teamId,
-        userId,
-        role,
-        addedBy: authContext.userId
-      });
-
-      return userTeam;
-    } catch (error) {
-      this.logError('team-service', 'addUserToTeam', error);
-      throw error;
-    }
-  }
 
   /**
    * Remover usuário do time

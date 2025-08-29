@@ -18,21 +18,7 @@ export function NotificationSystem() {
   const { user, isAuthenticated } = useAuth();
   const { createNotification, notifications } = useNotifications();
 
-  // TEMPORARIAMENTE DESABILITADO - Evitar loop de notificações
-  // TODO: Reativar depois que o sistema estiver estável
-  /*
-  useEffect(() => {
-    if (!isAuthenticated || !user?.id) return;
-    
-    // Evitar loop - usar flag no localStorage
-    const demoNotificationsCreated = localStorage.getItem(`demo-notifications-${user.id}`);
-    if (demoNotificationsCreated) return;
-
-    console.log('🔔 [NOTIFICATION-SYSTEM] Criando notificações demo para:', user.id);
-    localStorage.setItem(`demo-notifications-${user.id}`, 'true');
-    
-  }, [isAuthenticated, user?.id]);
-  */
+  // Sistema de notificações estável - demo notifications removidas
 
   // Run Apollo cleanup on component mount
   useEffect(() => {

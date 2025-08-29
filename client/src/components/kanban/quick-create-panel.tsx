@@ -357,7 +357,7 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
       name: profile.name,
       description: profile.description || "",
       color: profile.color,
-      selectedPermissions: [], // TODO: carregar permissões do perfil
+      selectedPermissions: [] // Carregar permissões via API separadamente
     });
     setActiveTab("profile");
     setViewMode("create");
