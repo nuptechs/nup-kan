@@ -136,9 +136,7 @@ export async function requireAdmin(req: AuthenticatedRequest, res: Response, nex
     // Verificar se o usuário tem perfil de administrador
     const profile = user.profileId ? await storage.getProfile(user.profileId) : null;
     const isAdmin = profile?.name.toLowerCase().includes('admin') || 
-                   profile?.name.toLowerCase().includes('administrador') ||
-                   user.role?.toLowerCase().includes('admin') ||
-                   user.role?.toLowerCase().includes('dono');
+                   profile?.name.toLowerCase().includes('administrador');
 
     if (!isAdmin) {
       console.warn(`🚫 [SECURITY] Tentativa de acesso admin negado para usuário ${user.name} (${user.id}) na rota ${req.method} ${req.path}`);
