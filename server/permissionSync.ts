@@ -412,18 +412,18 @@ export class PermissionSyncService {
             category: permission.category
           };
           
-          // Criar a permissão
-          await storage.createPermission(insertPermission);
+          // Criar a permissão e pegar o ID real gerado
+          const createdPermission = await storage.createPermission(insertPermission);
           createdCount++;
           console.log(`✅ [PERMISSION SYNC] Criada permissão: ${permission.name}`);
           
-          // Atribuir automaticamente ao perfil administrador
+          // Atribuir automaticamente ao perfil administrador usando o ID real
           try {
-            await storage.addPermissionToProfile(adminProfile.id, permission.id);
+            await storage.addPermissionToProfile(adminProfile.id, createdPermission.id);
             assignedCount++;
             console.log(`🔗 [PERMISSION SYNC] Permissão "${permission.name}" atribuída ao perfil "${adminProfile.name}"`);
           } catch (assignError) {
-            console.error(`❌ [PERMISSION SYNC] Erro ao atribuir permissão ${permission.id} ao perfil administrador:`, assignError);
+            console.error(`❌ [PERMISSION SYNC] Erro ao atribuir permissão ${createdPermission.id} ao perfil administrador:`, assignError);
           }
           
         } catch (error) {
