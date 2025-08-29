@@ -198,9 +198,9 @@ export class AuthController {
         userName: user.name,
         userEmail: user.email,
         profileId: user.profileId,
-        profileName: 'User',
+        profileName: user.profileName || 'Usuário',
         permissions: user.permissions,
-        teams: [],
+        teams: user.teams || [],
         isAuthenticated: true
       };
 
