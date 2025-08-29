@@ -249,8 +249,25 @@ export default function BoardSelection() {
       console.log("🚀 [DEBUG] onSuccess chamado com:", updatedBoard);
       console.log("🚀 [DEBUG] updatedBoard.isActive:", updatedBoard.isActive, typeof updatedBoard.isActive);
       
-      // Invalidate and refetch boards to sync with server
-      queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
+      // Update cache directly with server response instead of invalidating
+      queryClient.setQueryData(["/api/boards"], (old: any) => {
+        if (!old?.data) return old;
+        
+        return {
+          ...old,
+          data: old.data.map((board: any) => {
+            if (board.id === updatedBoard.id) {
+              return {
+                ...board,
+                ...updatedBoard,
+                // Ensure isActive is properly set from server response
+                isActive: updatedBoard.isActive
+              };
+            }
+            return board;
+          })
+        };
+      });
       
       // Converter para string e comparar (resolve problema de conversão automática)
       const isActive = updatedBoard.isActive === true || updatedBoard.isActive === "true";
