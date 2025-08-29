@@ -34,7 +34,7 @@ function createAuthContextFromRequest(req: any): any {
     permissions: permissions.map((p: any) => p.name),
     permissionCategories: Array.from(new Set(permissions.map((p: any) => p.category))),
     profileId: user?.profileId || '',
-    profileName: 'User',
+    profileName: null,
     teams: [],
     sessionId: req.session?.id || 'no-session',
     isAuthenticated: !!userId,

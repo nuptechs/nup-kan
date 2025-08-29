@@ -66,7 +66,7 @@ export class AuthService {
         permissions: userData.permissions || [],
         permissionCategories: userData.permissionCategories || [],
         profileId: userData.profileId,
-        profileName: userData.profileName || 'Usuário',
+        profileName: userData.profileName,
         teams: userData.teams || [],
         sessionId: (req as any).sessionID || 'no-session',
         isAuthenticated: true,

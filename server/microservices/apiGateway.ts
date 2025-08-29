@@ -297,7 +297,7 @@ export class RouteHandlers {
           id: authContext.userId,
           name: authContext.userName,
           email: authContext.userEmail,
-          role: authContext.profileName || 'Usuário',
+          role: authContext.profileName,
           avatar: '', // Adicionar se disponível no futuro
           profileId: authContext.profileId,
           permissions: authContext.permissions || []

@@ -81,7 +81,7 @@ export class AuthServiceJWT {
         permissions: userData.permissions || [],
         permissionCategories: userData.permissionCategories || [],
         profileId: userData.profileId || '',
-        profileName: userData.profileName || 'Usuário',
+        profileName: userData.profileName,
         teams: userData.teams || [],
         sessionId: `jwt-${tokenPayload.userId}-${tokenPayload.iat}`,
         isAuthenticated: true,
