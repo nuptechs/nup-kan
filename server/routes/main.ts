@@ -74,7 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🔥 ROUTES LEGACY - Manter compatibilidade temporária para algumas funcionalidades não refatoradas
   // ===========================
 
-  // 🚨 ROTAS TEMPORÁRIAS QUE AINDA PRECISAM SER REFATORADAS
+  // 💾 System logs and admin routes
 
   // 💾 System logs management (ainda não refatorado)
   app.get("/api/system/logs", requireAuth, async (req, res) => {
@@ -270,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/users/:userId/teams/:teamId", async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
-      await userTeamService.removeUserFromTeam(authContext, req.params.userId, req.params.teamId);
+      await teamService.removeUserFromTeam(authContext, req.params.userId, req.params.teamId);
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to remove user from team" });
@@ -280,7 +280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/users/:userId/teams/:teamId", async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
-      const result = await userTeamService.updateUserTeamRole(authContext, req.params.userId, req.params.teamId, req.body.role);
+      const result = await teamService.updateUserTeamRole(authContext, req.params.userId, req.params.teamId, req.body.role);
       res.json(result);
     } catch (error) {
       res.status(400).json({ message: "Failed to update user team role" });
@@ -450,7 +450,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const result = await userService.changePassword(authContext, req.params.id, req.body);
+      // Implementar changePassword diretamente aqui temporariamente
+      const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
+      await storage.updateUser(req.params.id, { password: hashedPassword });
+      const result = { success: true, message: 'Password updated successfully' };
       res.json(result);
     } catch (error) {
       console.error("Error changing password:", error);
