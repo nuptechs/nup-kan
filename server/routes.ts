@@ -16,12 +16,9 @@ import { OptimizedQueries, PerformanceStats } from "./optimizedQueries";
 import { cache } from "./cache";
 
 // 🚀 MICROSERVIÇOS IMPORTADOS
-import { APIGateway } from './microservices/apiGateway';
 import { AuthMiddleware, AuthService } from './microservices/authService';
 import { AuthServiceJWT, AuthMiddlewareJWT } from './microservices/authServiceJWT';
-import { BoardService } from './microservices/boardService';
 import { mongoStore } from './mongodb';
-import { QueryHandlers } from './cqrs/queries';
 
 // Helper para criar AuthContext a partir da request
 function createAuthContextFromRequest(req: any): any {
@@ -223,7 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ===========================
-  // 🔥 ROTAS AINDA NÃO REFATORADAS - TODO: Mover para módulos apropriados
+  // 🔥 ROTAS LEGACY NÃO REFATORADAS
   // ===========================
 
   // Teams related routes (ainda precisam ser refatoradas)
