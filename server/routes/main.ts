@@ -16,8 +16,7 @@ import { OptimizedQueries, PerformanceStats } from "../optimizedQueries";
 import { cache } from "../cache";
 
 // 🚀 MICROSERVIÇOS IMPORTADOS
-import { requireAuth, requirePermission } from '../auth/simpleAuth';
-import { AuthMiddleware, AuthService } from '../microservices/authService';
+import { UnifiedAuthService, auth, requireAuth, requirePermission, AuthRequest } from '../auth/unifiedAuth';
 import { mongoStore } from '../mongodb';
 
 // Helper para criar AuthContext a partir da request
@@ -442,7 +441,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/users/:id/password", async (req, res) => {
     try {
       // Verificar autenticação
-      const authContext = createAuthContextFromRequest(req);
+      const token = req.headers.authorization?.replace('Bearer ', '') || '';
+      const authContext = await UnifiedAuthService.validateToken(token);
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',

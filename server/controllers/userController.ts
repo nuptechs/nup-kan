@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { userService, hierarchyService } from "../services";
-import { AuthRequest } from "../auth/simpleAuth";
+import { UnifiedAuthService, AuthRequest } from "../auth/unifiedAuth";
 
 // Helper para criar AuthContext a partir da request
 function createAuthContextFromRequest(req: any): any {
@@ -44,7 +44,7 @@ function createAuthContextFromRequest(req: any): any {
 export class UserController {
   static async getUsers(req: Request, res: Response) {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       const users = await userService.getUsers(authContext);
       res.json(users);
     } catch (error) {
@@ -56,7 +56,7 @@ export class UserController {
 
   static async getUser(req: Request, res: Response) {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       const user = await userService.getUser(authContext, req.params.id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -104,7 +104,7 @@ export class UserController {
     
     try {
       // Verificar JWT
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',
@@ -158,7 +158,7 @@ export class UserController {
   static async updateUser(req: Request, res: Response) {
     try {
       // Verificar JWT
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',
@@ -185,7 +185,7 @@ export class UserController {
   static async patchUser(req: Request, res: Response) {
     try {
       // Verificar JWT
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',
@@ -242,7 +242,7 @@ export class UserController {
   static async deleteUser(req: Request, res: Response) {
     try {
       // Verificar JWT
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',
@@ -308,7 +308,7 @@ export class UserController {
   static async changePassword(req: Request, res: Response) {
     try {
       // Verificar JWT
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       if (!authContext) {
         return res.status(401).json({ 
           error: 'Authentication required',
@@ -338,7 +338,7 @@ export class UserController {
   static async getUserHierarchy(req: Request, res: Response) {
     try {
       // Verificar autenticação JWT manualmente
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       if (!authContext) {
         return res.status(401).json({ error: 'Authentication required' });
       }

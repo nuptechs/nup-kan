@@ -1,78 +1,46 @@
 import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { userService } from "../services";
+import { UnifiedAuthService, LoginCredentials } from "../auth/unifiedAuth";
 
 export class AuthController {
   static async login(req: Request, res: Response) {
     try {
-      const { email, password } = req.body;
-      
-      if (!email || !password) {
+      const credentials: LoginCredentials = {
+        email: req.body.email,
+        password: req.body.password
+      };
+
+      if (!credentials.email || !credentials.password) {
         return res.status(400).json({ message: "Email e senha são obrigatórios" });
       }
 
-      // Find user by email através do UserService
-      const authContextTemp = { userId: 'system', permissions: ['Listar Usuários'] } as any;
-      const users = await userService.getUsers(authContextTemp);
-      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-      
-      console.log(`🔍 [LOGIN-DEBUG] Tentativa de login para: ${email}`);
-      console.log(`🔍 [LOGIN-DEBUG] Usuário encontrado:`, user ? 'SIM' : 'NÃO');
-      
-      if (!user) {
-        return res.status(401).json({ message: "Email ou senha incorretos" });
+      // 🚀 USAR UNIFIED AUTH SERVICE
+      const authResult = await UnifiedAuthService.authenticate(credentials);
+
+      if (!authResult.success) {
+        return res.status(401).json({ message: authResult.message });
       }
 
-      console.log(`🔍 [LOGIN-DEBUG] Dados do usuário:`, {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        hasPassword: !!user.password,
-        firstLogin: user.firstLogin
+      console.log('✅ [UNIFIED-LOGIN] Login bem-sucedido:', {
+        userId: authResult.user?.id,
+        userName: authResult.user?.name
       });
 
-      // Check password
-      if (user.password) {
-        console.log(`🔍 [LOGIN-DEBUG] Comparando senhas...`);
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        console.log(`🔍 [LOGIN-DEBUG] Senha válida:`, isPasswordValid);
-        
-        if (!isPasswordValid) {
-          return res.status(401).json({ message: "Email ou senha incorretos" });
-        }
-      } else {
-        console.log(`🔍 [LOGIN-DEBUG] Usuário sem senha cadastrada`);
-      }
-      
-      // 🚀 GERAR TOKENS JWT
-      const { JWTService } = await import('../services/jwtService');
-      const tokens = JWTService.generateTokenPair({
-        userId: user.id,
-        email: user.email,
-        name: user.name,
-        profileId: user.profileId ?? undefined
-      });
-
-      console.log('✅ [LOGIN-JWT] Login bem-sucedido:', {
-        userId: user.id,
-        userName: user.name,
-        tokenGenerated: true
-      });
-
-      // Retornar tokens e dados do usuário
+      // Retornar resultado unificado
       res.json({
         user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          avatar: user.avatar,
-          profileId: user.profileId,
-          firstLogin: user.firstLogin
+          id: authResult.user?.id,
+          name: authResult.user?.name,
+          email: authResult.user?.email,
+          avatar: authResult.user?.avatar,
+          profileId: authResult.user?.profileId,
+          permissions: authResult.user?.permissions,
+          teams: authResult.user?.teams
         },
         tokens: {
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
+          accessToken: authResult.tokens?.accessToken,
+          refreshToken: authResult.tokens?.refreshToken,
           expiresIn: tokens.expiresIn
         },
         isAuthenticated: true,

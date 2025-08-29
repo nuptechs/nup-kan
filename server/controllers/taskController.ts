@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { taskService, assigneeService } from "../services";
-import { AuthRequest } from "../auth/simpleAuth";
+import { UnifiedAuthService, AuthRequest } from "../auth/unifiedAuth";
 import { insertTaskAssigneeSchema } from "@shared/schema";
 
 // Helper para criar AuthContext a partir da request
@@ -55,7 +55,7 @@ export class TaskController {
         const offset = (validPage - 1) * validLimit;
         
         // Buscar tasks paginadas através do TaskService
-        const authContext = createAuthContextFromRequest(req);
+        const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
         const tasks = await taskService.getTasks(authContext, {
           page: validPage,
           limit: validLimit,
@@ -72,7 +72,7 @@ export class TaskController {
         });
       } else {
         // Buscar todas as tasks sem paginação
-        const authContext = createAuthContextFromRequest(req);
+        const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
         const tasks = await taskService.getTasks(authContext);
         res.json(tasks);
       }
@@ -84,7 +84,7 @@ export class TaskController {
 
   static async getTask(req: Request, res: Response) {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       const task = await taskService.getTask(authContext, req.params.id);
       if (!task) {
         return res.status(404).json({ message: "Task not found" });
@@ -98,7 +98,7 @@ export class TaskController {
 
   static async createTask(req: Request, res: Response) {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       const task = await taskService.createTask(authContext, req.body);
       
       res.status(201).json(task);
@@ -110,7 +110,7 @@ export class TaskController {
 
   static async updateTask(req: Request, res: Response) {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       const updatedTask = await taskService.updateTask(authContext, req.params.id, req.body);
       
       res.json(updatedTask);
@@ -124,7 +124,7 @@ export class TaskController {
 
   static async deleteTask(req: Request, res: Response) {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       await taskService.deleteTask(authContext, req.params.id);
       
       res.status(204).send();
@@ -141,7 +141,7 @@ export class TaskController {
     console.log("🔍 [REORDER] Method:", req.method);
     
     try {
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       const result = await taskService.reorderTasks(authContext, req.body);
       
       res.json(result);
@@ -153,7 +153,7 @@ export class TaskController {
 
   static async getBoardTasks(req: Request, res: Response) {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       const tasks = await taskService.getBoardTasks(authContext, req.params.boardId);
       res.json(tasks);
     } catch (error) {
@@ -165,7 +165,7 @@ export class TaskController {
   // Assignee methods
   static async getTaskAssignees(req: Request, res: Response) {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       const assignees = await assigneeService.getTaskAssignees(authContext, req.params.taskId);
       res.json(assignees);
     } catch (error) {
@@ -179,7 +179,7 @@ export class TaskController {
         taskId: req.params.taskId,
         userId: req.body.userId,
       });
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       const assignee = await taskService.addTaskAssignee(authContext, req.params.taskId, req.body.userId);
       res.status(201).json(assignee);
     } catch (error) {
@@ -189,7 +189,7 @@ export class TaskController {
 
   static async removeTaskAssignee(req: Request, res: Response) {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       await taskService.removeTaskAssignee(authContext, req.params.taskId, req.params.userId);
       res.status(204).send();
     } catch (error) {
@@ -206,7 +206,7 @@ export class TaskController {
       if (!Array.isArray(userIds)) {
         return res.status(400).json({ message: "userIds must be an array" });
       }
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       await taskService.setTaskAssignees(authContext, req.params.taskId, userIds);
       res.status(204).send();
     } catch (error) {
@@ -223,7 +223,7 @@ export class TaskController {
       }
 
       // Buscar assignees para todas as tasks em paralelo
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       const assigneesPromises = taskIds.map(async (taskId: string) => {
         try {
           const assignees = await taskService.getTaskAssignees(authContext, taskId);
@@ -252,7 +252,7 @@ export class TaskController {
   // Custom values methods
   static async getTaskCustomValues(req: Request, res: Response) {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       const customValues = await taskService.getTaskCustomValues(authContext, req.params.taskId);
       res.json(customValues);
     } catch (error) {
@@ -262,7 +262,7 @@ export class TaskController {
 
   static async createTaskCustomValue(req: Request, res: Response) {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       const customValue = await taskService.createTaskCustomValue(authContext, {
         taskId: req.params.taskId,
         ...req.body
@@ -275,7 +275,7 @@ export class TaskController {
 
   static async updateTaskCustomValue(req: Request, res: Response) {
     try {
-      const authContext = createAuthContextFromRequest(req);
+      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
       const updatedValue = await taskService.updateTaskCustomValue(authContext, req.params.valueId, req.body);
       res.json(updatedValue);
     } catch (error) {
