@@ -790,7 +790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bodyData = { ...req.body };
       if (bodyData.wipLimit === null) bodyData.wipLimit = undefined;
       
-      const columnData = insertColumnSchema.parse(bodyData);
+      const columnData = insertColumnSchema.parse(bodyData) as any;
       const authContext = createAuthContextFromRequest(req);
       const column = await columnService.createColumn(authContext, columnData);
       
@@ -813,7 +813,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bodyData = { ...req.body };
       if (bodyData.wipLimit === null) bodyData.wipLimit = undefined;
       
-      const columnData = updateColumnSchema.parse(bodyData);
+      const columnData = updateColumnSchema.parse(bodyData) as any;
       const authContext = createAuthContextFromRequest(req);
       const column = await columnService.updateColumn(authContext, req.params.id, columnData);
       res.json(column);
@@ -834,7 +834,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bodyData = { ...req.body };
       if (bodyData.wipLimit === null) bodyData.wipLimit = undefined;
       
-      const columnData = updateColumnSchema.parse(bodyData);
+      const columnData = updateColumnSchema.parse(bodyData) as any;
       const authContext = createAuthContextFromRequest(req);
       const column = await columnService.updateColumn(authContext, req.params.id, columnData);
       res.json(column);
@@ -1130,7 +1130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (bodyData.password === null) bodyData.password = undefined;
       if (bodyData.profileId === null) bodyData.profileId = undefined;
       
-      const userData = updateUserSchema.parse(bodyData);
+      const userData = updateUserSchema.parse(bodyData) as any;
       const user = await userService.updateUser(authContext, req.params.id, userData);
       res.json(user);
     } catch (error) {
@@ -2218,7 +2218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (bodyData.description === null) bodyData.description = undefined;
       if (bodyData.isDefault === null) bodyData.isDefault = undefined;
       
-      const profileData = insertProfileSchema.parse(bodyData);
+      const profileData = insertProfileSchema.parse(bodyData) as any;
       const profile = await profileService.createProfile(authContext, profileData);
       
       const duration = Date.now() - startTime;
@@ -2273,7 +2273,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (bodyData.description === null) bodyData.description = undefined;
       if (bodyData.isDefault === null) bodyData.isDefault = undefined;
       
-      const profileData = updateProfileSchema.parse(bodyData);
+      const profileData = updateProfileSchema.parse(bodyData) as any;
       const profile = await profileService.updateProfile(authContext, req.params.id, profileData);
       
       // Cache individual será invalidado automaticamente pelo TanStack Query
@@ -2367,7 +2367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bodyData = { ...req.body };
       if (bodyData.description === null) bodyData.description = undefined;
       
-      const permissionData = insertPermissionSchema.parse(bodyData);
+      const permissionData = insertPermissionSchema.parse(bodyData) as any;
       const authContext = createAuthContextFromRequest(req);
       const permission = await permissionService.createPermission(authContext, permissionData);
       // Cache invalidation handled automatically
@@ -3113,7 +3113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (bodyData.isDefault === null) bodyData.isDefault = undefined;
       if (bodyData.level === undefined || bodyData.level === null) bodyData.level = 1; // Valor padrão
       
-      const priorityData = insertTaskPrioritySchema.parse(bodyData);
+      const priorityData = insertTaskPrioritySchema.parse(bodyData) as any;
       const authContext = createAuthContextFromRequest(req);
       const priority = await taskStatusService.createTaskPriority(authContext, priorityData);
       res.status(201).json(priority);
@@ -3431,9 +3431,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const result = await notificationService.getNotifications(authContext);
+      const notifications = Array.isArray(result) ? result : [];
       res.json({
-        notifications: result.data || [],
-        count: result.data?.length || 0
+        notifications: notifications,
+        count: notifications.length
       });
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -3452,7 +3453,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const result = await notificationService.getUnreadCount(authContext);
-      res.json({ count: result.data || 0 });
+      const count = typeof result === 'number' ? result : 0;
+      res.json({ count });
     } catch (error) {
       console.error("Error fetching unread count:", error);
       res.status(500).json({ error: "Failed to get unread count" });
@@ -3468,12 +3470,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const authContext = createAuthContextFromRequest(req);
       const result = await notificationService.getNotification(authContext, id);
       
-      if (!result.success) {
-        const status = result.error === 'Notification not found' ? 404 : 500;
-        return res.status(status).json({ error: result.error });
+      if (!result) {
+        return res.status(404).json({ error: 'Notification not found' });
       }
 
-      res.json(result.data);
+      res.json(result);
     } catch (error) {
       console.error("Error fetching notification:", error);
       res.status(500).json({ error: "Failed to get notification" });
@@ -3488,13 +3489,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const authContext = createAuthContextFromRequest(req);
       const result = await notificationService.createNotification(authContext, req.body);
       
-      if (!result.success) {
-        return res.status(400).json({ error: result.error });
-      }
-      
       res.status(201).json({
         success: true,
-        notification: result.data
+        notification: result
       });
     } catch (error) {
       console.error("Error creating notification:", error);
