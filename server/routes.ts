@@ -2495,7 +2495,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Criar contexto de sistema para registro
-      const systemContext = { userId: 'system', userName: 'System', userEmail: '', permissions: [], permissionCategories: [], profileId: null, profileName: 'System', teams: [], isAuthenticated: true, lastActivity: new Date(), sessionId: 'system-register' };
+      const systemContext = { userId: 'system', userName: 'System', userEmail: '', permissions: [], permissionCategories: [], profileId: 'system', profileName: 'System', teams: [], isAuthenticated: true, lastActivity: new Date(), sessionId: 'system-register' };
       const newUser = await userService.createUser(systemContext, userData);
       
       // Send welcome email if configured
@@ -2570,7 +2570,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Função auxiliar para buscar dados do usuário para refresh (sem validação de permissões)
       const getUserData = async (userId: string) => {
-        const systemContext = { userId: 'system', permissions: ['*'], profileId: 'system' };
+        const systemContext = { 
+          userId: 'system', 
+          userName: 'System',
+          userEmail: '',
+          permissions: ['*'], 
+          permissionCategories: [],
+          profileId: 'system',
+          profileName: 'System',
+          teams: [],
+          isAuthenticated: true,
+          lastActivity: new Date(),
+          sessionId: 'system-refresh'
+        };
         return await userService.getUser(systemContext, userId);
       };
 
@@ -2838,7 +2850,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const exportData = req.body;
-      const newExport = await exportService.createExportHistory(req.authContext, exportData);
+      const authContext = createAuthContextFromRequest(req);
+      const newExport = await exportService.createExportHistory(authContext, exportData);
       
       const duration = Date.now() - startTime;
       addUserActionLog(userId, userName, `Iniciar exportação (${exportData.exportType || 'tipo não especificado'})`, 'success', null, duration);
@@ -2868,7 +2881,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updates.completedAt = new Date(updates.completedAt);
       }
       
-      const updatedExport = await exportService.updateExportHistory(req.authContext, id, updates);
+      const authContext = createAuthContextFromRequest(req);
+      const updatedExport = await exportService.updateExportHistory(authContext, id, updates);
       
       const duration = Date.now() - startTime;
       const action = updates.status === 'completed' ? 'Concluir exportação' : 
@@ -2966,7 +2980,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/board-shares", async (req, res) => {
     try {
       const shareData = insertBoardShareSchema.parse(req.body);
-      const share = await boardShareService.createBoardShare(req.authContext, shareData);
+      const authContext = createAuthContextFromRequest(req);
+      const share = await boardShareService.createBoardShare(authContext, shareData);
       res.status(201).json(share);
     } catch (error) {
       console.error("Error creating board share:", error);
@@ -2981,7 +2996,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/board-shares/:id", async (req, res) => {
     try {
       const shareData = updateBoardShareSchema.parse(req.body);
-      const share = await boardShareService.updateBoardShare(req.authContext, req.params.id, shareData);
+      const authContext = createAuthContextFromRequest(req);
+      const share = await boardShareService.updateBoardShare(authContext, req.params.id, shareData);
       res.json(share);
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -2993,7 +3009,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/board-shares/:id", async (req, res) => {
     try {
-      await boardShareService.deleteBoardShare(req.authContext, req.params.id);
+      const authContext = createAuthContextFromRequest(req);
+      await boardShareService.deleteBoardShare(authContext, req.params.id);
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes("not found")) {
@@ -3005,7 +3022,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/users/:userId/boards/:boardId/permission", async (req, res) => {
     try {
-      const permission = await boardShareService.getUserBoardPermission(req.authContext, req.params.userId, req.params.boardId);
+      const authContext = createAuthContextFromRequest(req);
+      const permission = await boardShareService.getUserBoardPermission(authContext, req.params.userId, req.params.boardId);
       res.json({ permission });
     } catch (error) {
       res.status(500).json({ message: "Failed to check user board permission" });
@@ -3658,7 +3676,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Buscar permissões do usuário atual
       const authContext = createAuthContextFromRequest(req);
-      const userPermissions = await userService.getUserPermissions(authContext, userId);
+      const user = await userService.getUser(authContext, userId);
+      const userPermissions = user?.permissions || authContext.permissions || [];
       
       res.json({
         permissions: userPermissions,
@@ -3683,9 +3702,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Buscar assignees para todas as tasks em paralelo
+      const authContext = createAuthContextFromRequest(req);
       const assigneesPromises = taskIds.map(async (taskId: string) => {
         try {
-          const assignees = await taskService.getTaskAssignees(req.authContext, taskId);
+          const assignees = await taskService.getTaskAssignees(authContext, taskId);
           return { taskId, assignees };
         } catch (error) {
           console.error(`Error fetching assignees for task ${taskId}:`, error);
