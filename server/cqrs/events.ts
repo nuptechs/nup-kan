@@ -1,6 +1,6 @@
 // Event-driven system for CQRS synchronization
 
-import { mongoStore } from '../mongodb';
+// Sistema de eventos com PostgreSQL apenas
 
 // Sistema de eventos local (sem cache externo)
 
@@ -148,179 +148,44 @@ class EventBus {
 }
 
 /**
- * 🎭 EVENT HANDLERS - Sincronização PostgreSQL → MongoDB
+ * 🎭 EVENT HANDLERS - Sistema de Eventos PostgreSQL
  */
 class EventHandlers {
   
   // 📝 Handler: Board Criado
   static async handleBoardCreated(event: BoardCreatedEvent): Promise<void> {
-    if (!mongoStore.collections) {
-      console.log('🟡 [EVENT-HANDLER] MongoDB não disponível, pulando sincronização');
-      return;
-    }
+    // Sistema funcionando com PostgreSQL apenas
+    console.log('📊 [EVENT-HANDLER] Processando evento de criação de board');
 
     const { board } = event.data;
 
-    // Criar board otimizado no MongoDB (Read Model)
-    const boardReadModel = {
-      _id: board.id,
-      name: board.name,
-      description: board.description || '',
-      color: board.color || '#3B82F6',
-      createdAt: board.createdAt,
-      createdById: board.createdById,
-      
-      // Dados pré-calculados (iniciais)
-      taskCount: 0,
-      completedTasks: 0,
-      inProgressTasks: 0,
-      pendingTasks: 0,
-      
-      columns: [], // Será preenchido quando colunas forem criadas
-      activeMembers: [], // Será preenchido quando membros entrarem
-      
-      metrics: {
-        avgTaskCompletion: 0,
-        cycleTime: 0,
-        throughput: 0,
-        lastActivity: board.createdAt,
-      },
-    };
-
-    await mongoStore.collections.boardsWithStats.replaceOne(
-      { _id: board.id },
-      boardReadModel,
-      { upsert: true }
-    );
-
-    console.log(`📊 [SYNC] Board ${board.name} sincronizado para MongoDB`);
+    // Board criado no PostgreSQL - evento processado
+    console.log(`📊 [SYNC] Board ${board.name} processado com sucesso`);
   }
 
   // 📝 Handler: Task Criada
   static async handleTaskCreated(event: TaskCreatedEvent): Promise<void> {
-    if (!mongoStore.collections) return;
-
     const { task } = event.data;
-
-    // Criar task otimizada no MongoDB (Read Model)
-    const taskReadModel = {
-      _id: task.id,
-      boardId: task.boardId,
-      columnId: task.status, // Status = columnId para compatibilidade
-      title: task.title,
-      description: task.description || '',
-      status: task.status,
-      priority: task.priority,
-      progress: task.progress || 0,
-      assigneeId: task.assigneeId,
-      assigneeName: '', // Será preenchido em paralelo
-      assigneeAvatar: '',
-      tags: task.tags || [],
-      createdAt: task.createdAt,
-      updatedAt: task.updatedAt,
-      
-      // Dados desnormalizados (será preenchido)
-      boardName: '',
-      columnTitle: task.status,
-      
-      recentActivity: [{
-        action: 'created',
-        timestamp: task.createdAt,
-        userId: task.assigneeId || 'system',
-        userName: 'Sistema',
-      }],
-    };
-
-    // Operações em paralelo para performance máxima
-    await Promise.all([
-      // Inserir task otimizada
-      mongoStore.collections.tasksOptimized.replaceOne(
-        { _id: task.id },
-        taskReadModel,
-        { upsert: true }
-      ),
-      
-      // Atualizar contadores do board
-      mongoStore.collections.boardsWithStats.updateOne(
-        { _id: task.boardId },
-        { 
-          $inc: { 
-            taskCount: 1,
-            pendingTasks: 1 
-          },
-          $set: { 
-            'metrics.lastActivity': new Date() 
-          }
-        }
-      ),
-    ]);
-
-    console.log(`📊 [SYNC] Task ${task.title} sincronizada para MongoDB`);
+    
+    // Task criada no PostgreSQL - evento processado
+    console.log(`📊 [SYNC] Task ${task.title} processada com sucesso`);
   }
 
   // 📝 Handler: Task Atualizada
   static async handleTaskUpdated(event: TaskUpdatedEvent): Promise<void> {
-    if (!mongoStore.collections) return;
-
     const { task, changes } = event.data;
-
-    // Atualizar task no MongoDB
-    const updateData: any = {
-      title: task.title,
-      description: task.description || '',
-      status: task.status,
-      priority: task.priority,
-      progress: task.progress || 0,
-      updatedAt: task.updatedAt,
-      
-      $push: {
-        recentActivity: {
-          action: 'updated',
-          timestamp: task.updatedAt,
-          userId: 'system',
-          userName: 'Sistema',
-        }
-      }
-    };
-
-    await mongoStore.collections.tasksOptimized.updateOne(
-      { _id: task.id },
-      { $set: updateData }
-    );
-
-    console.log(`📊 [SYNC] Task ${task.title} atualizada no MongoDB`);
+    
+    // Task atualizada no PostgreSQL - evento processado
+    console.log(`📊 [SYNC] Task ${task.title} atualizada com sucesso`);
   }
 
   // 📝 Handler: Task Deletada
   static async handleTaskDeleted(event: TaskDeletedEvent): Promise<void> {
-    if (!mongoStore.collections) return;
 
     const { taskId, task } = event.data;
 
-    // Operações em paralelo
-    await Promise.all([
-      // Remover task do MongoDB
-      mongoStore.collections.tasksOptimized.deleteOne({ _id: taskId }),
-      
-      // Atualizar contadores do board
-      mongoStore.collections.boardsWithStats.updateOne(
-        { _id: task.boardId },
-        { 
-          $inc: { 
-            taskCount: -1,
-            // Decrementar contador específico baseado no status
-            ...(task.status === 'done' && { completedTasks: -1 }),
-            ...(task.status === 'in_progress' && { inProgressTasks: -1 }),
-            ...(task.status !== 'done' && task.status !== 'in_progress' && { pendingTasks: -1 }),
-          },
-          $set: { 
-            'metrics.lastActivity': new Date() 
-          }
-        }
-      ),
-    ]);
-
-    console.log(`📊 [SYNC] Task ${task.title} removida do MongoDB`);
+    // Task removida do PostgreSQL - evento processado
+    console.log(`📊 [SYNC] Task ${task.title} removida com sucesso`);
   }
 }
 

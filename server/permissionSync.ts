@@ -373,8 +373,7 @@ export class PermissionSyncService {
    */
   async syncPermissions(app: Express): Promise<void> {
     try {
-      console.log('⏸️  [PERMISSION SYNC] Sistema de sincronização desabilitado temporariamente');
-      return; // Temporariamente desabilitado para evitar duplicações
+      // Sistema de sincronização de permissões ativo
       
       console.log('🔄 [PERMISSION SYNC] Iniciando sincronização de permissões...');
       

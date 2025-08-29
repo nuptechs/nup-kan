@@ -2,13 +2,12 @@
  * 🔍 CQRS QUERY SIDE - Leituras Ultra-Rápidas
  * 
  * RESPONSABILIDADES:
- * - Queries otimizadas no MongoDB (Read Model)
- * - Fallback para PostgreSQL se MongoDB não disponível
- * - Cache inteligente em múltiplas camadas
- * - Performance 10-50x superior ao PostgreSQL para reads
+ * - Queries otimizadas no PostgreSQL
+ * - Cache inteligente para performance
+ * - Performance otimizada com cache inteligente
  */
 
-import { mongoStore } from '../mongodb';
+// Sistema de queries com PostgreSQL apenas
 import { cache, CacheKeys, TTL } from '../cache';
 import { OptimizedQueries } from '../optimizedQueries';
 
@@ -17,158 +16,58 @@ import { OptimizedQueries } from '../optimizedQueries';
  */
 export class QueryHandlers {
   
-  // 📊 QUERY: Buscar Boards com Estatísticas (MongoDB First)
+  // 📊 QUERY: Buscar Boards com Estatísticas (PostgreSQL)
   static async getBoardsWithStats(limit: number = 20, offset: number = 0) {
     try {
-      if (mongoStore.collections?.boardsWithStats) {
-        const boardsData = await mongoStore.collections.boardsWithStats
-          .find({})
-          .sort({ createdAt: -1 })
-          .skip(offset)
-          .limit(limit)
-          .toArray();
-
-        if (boardsData.length > 0) {
-          return boardsData.map(board => ({
-            id: board._id,
-            name: board.name,
-            description: board.description,
-            color: board.color,
-            isActive: (board as any).isActive || 'true',
-            createdAt: board.createdAt,
-            createdById: board.createdById,
-            taskCount: board.taskCount,
-            completedTasks: board.completedTasks,
-            inProgressTasks: board.inProgressTasks,
-            pendingTasks: board.pendingTasks,
-            columns: board.columns,
-            activeMembers: board.activeMembers,
-            metrics: board.metrics,
-          }));
-        }
-      }
-
       return await OptimizedQueries.getBoardsWithStatsOptimized(limit, offset) as any[];
-
     } catch (error) {
       console.error('QUERY: Erro em getBoardsWithStats:', error);
       throw error;
     }
   }
 
-  // 📋 QUERY: Buscar Tasks de um Board (MongoDB First)
+  // 📋 QUERY: Buscar Tasks de um Board (PostgreSQL)
   static async getBoardTasks(boardId: string, limit: number = 100, offset: number = 0) {
     const startTime = Date.now();
     
     try {
-      if (mongoStore.collections?.tasksOptimized) {
-        const tasksData = await mongoStore.collections.tasksOptimized
-          .find({ boardId })
-          .sort({ createdAt: -1 })
-          .skip(offset)
-          .limit(limit)
-          .toArray();
-
-        if (tasksData.length > 0) {
-          return tasksData.map(task => ({
-            id: task._id,
-            boardId: task.boardId,
-            title: task.title,
-            description: task.description,
-            status: task.status,
-            priority: task.priority,
-            progress: task.progress,
-            assigneeId: task.assigneeId,
-            assigneeName: task.assigneeName,
-            assigneeAvatar: task.assigneeAvatar,
-            tags: task.tags,
-            createdAt: task.createdAt,
-            updatedAt: task.updatedAt,
-            boardName: task.boardName,
-            columnTitle: task.columnTitle,
-            recentActivity: task.recentActivity,
-          }));
-        }
-      }
-
-      const tasks = await OptimizedQueries.getBoardTasksOptimized(boardId) as any[];
-      
-      const duration = Date.now() - startTime;
-      console.log(`🔄 [QUERY-PG] ${tasks.length} tasks em ${duration}ms (PostgreSQL)`);
-      return tasks;
-
+      return await OptimizedQueries.getBoardTasksOptimized(boardId, limit, offset) as any[];
     } catch (error) {
-      const duration = Date.now() - startTime;
-      console.error(`❌ [QUERY] Erro em getBoardTasks após ${duration}ms:`, error);
+      console.error('QUERY: Erro em getBoardTasks:', error);
       throw error;
     }
   }
 
-  // 👤 QUERY: Buscar Usuário com Permissões (MongoDB First)
+  // 👤 QUERY: Buscar Usuário com Permissões (PostgreSQL)
   static async getUserWithPermissions(userId: string) {
-    console.log('🔍 [QUERY] Buscando usuário com permissões:', userId);
     const startTime = Date.now();
-
+    
     try {
-      // 🥇 CACHE REDIS PRIMEIRO
-      const cached = await cache.get(`user_with_permissions_v2:${userId}`);
+      // 🥇 PRIMEIRA TENTATIVA: Cache (Ultra-rápido)
+      const cached = await cache.get(CacheKeys.userWithPermissions(userId));
       if (cached) {
-        console.log(`🚀 [QUERY-CACHE] Usuário em 0ms (Cache Hit)`);
+        const duration = Date.now() - startTime;
+        console.log(`⚡ [QUERY-CACHE] Usuário em ${duration}ms (Cache)`);
         return cached;
       }
-
-      // 🥇 SEGUNDA TENTATIVA: MongoDB (Read Model)
-      if (mongoStore.collections?.usersWithPermissions) {
-        const userData = await mongoStore.collections.usersWithPermissions.findOne({ _id: userId });
-
-        if (userData) {
-          // Cachear resultado
-          await cache.set(`user_with_permissions_v2:${userId}`, userData, TTL.MEDIUM);
-          
-          const duration = Date.now() - startTime;
-          console.log(`🚀 [QUERY-MONGO] Usuário em ${duration}ms (MongoDB)`);
-          return {
-            id: userData._id,
-            name: userData.name,
-            email: userData.email,
-            avatar: userData.avatar,
-            profileId: userData.profileId,
-            profileName: userData.profileName,
-            permissions: userData.permissions,
-            permissionCategories: userData.permissionCategories,
-            teams: userData.teams,
-            stats: userData.stats,
-          };
-        }
+      
+      // 🔄 SEGUNDA TENTATIVA: PostgreSQL (Source of Truth)
+      const result = await OptimizedQueries.getUserWithPermissionsOptimized(userId);
+      
+      // Cache por 30 minutos se obtido com sucesso
+      if (result) {
+        await cache.set(
+          CacheKeys.userWithPermissions(userId), 
+          result, 
+          TTL.MEDIUM
+        );
       }
-
-      // 🥈 FALLBACK: PostgreSQL
-      console.log('🟡 [QUERY] MongoDB vazio, usando PostgreSQL');
-      const [user, permissions] = await Promise.all([
-        OptimizedQueries.getUserWithProfileOptimized(userId),
-        OptimizedQueries.getUserPermissionsOptimized(userId),
-      ]) as [any, any[]];
-
-      const result = {
-        ...user,
-        permissions: permissions.map(p => p.name),
-        permissionCategories: Array.from(new Set(permissions.map((p: any) => p.category))),
-        teams: [], // Será preenchido se necessário
-        stats: {
-          activeTasks: 0,
-          completedTasks: 0,
-          boardsAccess: 0,
-          lastActivity: new Date(),
-        },
-      };
-
-      // Cachear resultado
-      await cache.set(`user_with_permissions_v2:${userId}`, result, TTL.MEDIUM);
       
       const duration = Date.now() - startTime;
       console.log(`🔄 [QUERY-PG] Usuário em ${duration}ms (PostgreSQL)`);
+      
       return result;
-
+      
     } catch (error) {
       const duration = Date.now() - startTime;
       console.error(`❌ [QUERY] Erro em getUserWithPermissions após ${duration}ms:`, error);
@@ -176,37 +75,32 @@ export class QueryHandlers {
     }
   }
 
-  // 📊 QUERY: Analytics Ultra-Rápidos (MongoDB First)
-  static async getAnalytics(type: 'global' | 'board' = 'global', targetId: string = 'global') {
-    console.log('🔍 [QUERY] Buscando analytics:', type, targetId);
+  // 📊 QUERY: Analytics Ultra-Rápidos (PostgreSQL)
+  static async getAnalytics() {
     const startTime = Date.now();
-
+    
     try {
-      // 🥇 PRIMEIRA TENTATIVA: MongoDB (Read Model)
-      if (mongoStore.collections?.analytics) {
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-        
-        const analyticsData = await mongoStore.collections.analytics.findOne({
-          type,
-          targetId,
-          date: today,
-        });
-
-        if (analyticsData) {
-          const duration = Date.now() - startTime;
-          console.log(`🚀 [QUERY-MONGO] Analytics em ${duration}ms (MongoDB)`);
-          return analyticsData.data;
-        }
+      // 🥇 PRIMEIRA TENTATIVA: Cache (Ultra-rápido)
+      const cached = await cache.get(CacheKeys.analytics());
+      if (cached) {
+        const duration = Date.now() - startTime;
+        console.log(`⚡ [QUERY-CACHE] Analytics em ${duration}ms (Cache)`);
+        return cached;
       }
 
-      // 🥈 FALLBACK: Calcular em tempo real do PostgreSQL
-      console.log('🟡 [QUERY] MongoDB vazio, calculando analytics em tempo real');
-      const analytics = await OptimizedQueries.getAnalyticsOptimized();
+      // 🔄 SEGUNDA TENTATIVA: PostgreSQL com cache
+      const result = await OptimizedQueries.getAnalyticsOptimized();
+      
+      // Cache por 5 minutos
+      if (result) {
+        await cache.set(CacheKeys.analytics(), result, TTL.SHORT);
+      }
       
       const duration = Date.now() - startTime;
       console.log(`🔄 [QUERY-PG] Analytics em ${duration}ms (PostgreSQL)`);
-      return analytics;
-
+      
+      return result;
+      
     } catch (error) {
       const duration = Date.now() - startTime;
       console.error(`❌ [QUERY] Erro em getAnalytics após ${duration}ms:`, error);
@@ -214,39 +108,80 @@ export class QueryHandlers {
     }
   }
 
-  // 📈 QUERY: Métricas do Sistema
-  static async getSystemMetrics() {
+  // 🔍 QUERY: Buscar Tasks por Filtros (PostgreSQL)
+  static async getTasksByFilters(filters: any, limit: number = 50, offset: number = 0) {
     const startTime = Date.now();
-
+    
     try {
-      const [cacheStats, mongoHealth] = await Promise.all([
-        cache.getStats(),
-        mongoStore.health(),
-      ]);
-
-      const duration = Date.now() - startTime;
+      const cacheKey = `tasks:filtered:${JSON.stringify(filters)}:${limit}:${offset}`;
       
-      return {
-        performance: {
-          queryResponseTime: duration,
-          cacheHitRate: cacheStats.hits / (cacheStats.hits + cacheStats.misses) * 100 || 0,
-          cacheSize: cacheStats.size,
-        },
-        health: {
-          mongodb: mongoHealth ? 'healthy' : 'unavailable',
-          cache: cacheStats.size >= 0 ? 'healthy' : 'unhealthy',
-        },
-        features: {
-          cqrsEnabled: mongoHealth,
-          cacheEnabled: true,
-          eventDriven: true,
-        },
-        timestamp: new Date(),
-      };
+      // Cache por 2 minutos para queries filtradas
+      const cached = await cache.get(cacheKey);
+      if (cached) {
+        const duration = Date.now() - startTime;
+        console.log(`⚡ [QUERY-CACHE] Tasks filtradas em ${duration}ms (Cache)`);
+        return cached;
+      }
+
+      const result = await OptimizedQueries.getTasksByFiltersOptimized(filters, limit, offset);
+      
+      if (result) {
+        await cache.set(cacheKey, result, 120); // 2 minutos
+      }
+      
+      const duration = Date.now() - startTime;
+      console.log(`🔄 [QUERY-PG] Tasks filtradas em ${duration}ms (PostgreSQL)`);
+      
+      return result;
+      
     } catch (error) {
       const duration = Date.now() - startTime;
-      console.error(`❌ [QUERY] Erro em getSystemMetrics após ${duration}ms:`, error);
+      console.error(`❌ [QUERY] Erro em getTasksByFilters após ${duration}ms:`, error);
+      throw error;
+    }
+  }
+
+  // 🏃‍♂️ QUERY: Performance Metrics (PostgreSQL)
+  static async getPerformanceMetrics() {
+    const startTime = Date.now();
+    
+    try {
+      const cached = await cache.get(CacheKeys.performanceMetrics());
+      if (cached) {
+        const duration = Date.now() - startTime;
+        console.log(`⚡ [QUERY-CACHE] Performance em ${duration}ms (Cache)`);
+        return cached;
+      }
+
+      const result = await OptimizedQueries.getPerformanceMetricsOptimized();
+      
+      if (result) {
+        await cache.set(CacheKeys.performanceMetrics(), result, TTL.SHORT);
+      }
+      
+      const duration = Date.now() - startTime;
+      console.log(`🔄 [QUERY-PG] Performance em ${duration}ms (PostgreSQL)`);
+      
+      return result;
+      
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      console.error(`❌ [QUERY] Erro em getPerformanceMetrics após ${duration}ms:`, error);
       throw error;
     }
   }
 }
+
+/**
+ * 🎯 CACHE KEYS - Chaves padronizadas para cache
+ */
+export const QueryCacheKeys = {
+  boardsWithStats: (limit: number, offset: number) => `boards:stats:${limit}:${offset}`,
+  boardTasks: (boardId: string, limit: number, offset: number) => `board:${boardId}:tasks:${limit}:${offset}`,
+  userPermissions: (userId: string) => `user:${userId}:permissions`,
+  analytics: () => 'analytics:global',
+  performanceMetrics: () => 'performance:metrics',
+  tasksByFilters: (filters: any, limit: number, offset: number) => `tasks:filtered:${JSON.stringify(filters)}:${limit}:${offset}`,
+};
+
+export default QueryHandlers;
