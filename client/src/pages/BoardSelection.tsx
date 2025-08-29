@@ -485,7 +485,7 @@ export default function BoardSelection() {
                         }}
                         className={`
                           flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-all duration-200 
-                          ${(String(board.isActive) === "true")
+                          ${board.isActive
                             ? "bg-green-500 text-white hover:bg-green-600" 
                             : "bg-red-500 text-white hover:bg-red-600"
                           }
@@ -497,11 +497,11 @@ export default function BoardSelection() {
                         `}
                         data-testid={`status-toggle-${board.id}`}
                         title={canEdit("Boards") 
-                          ? `Clique para ${String(board.isActive) === "true" ? "inativar" : "ativar"} o board`
+                          ? `Clique para ${board.isActive ? "inativar" : "ativar"} o board`
                           : "Você não tem permissão para alterar o status"
                         }
                       >
-                        {String(board.isActive) === "true" ? (
+                        {board.isActive ? (
                           <>
                             <Power className="w-3 h-3" />
                             <span>Ativo</span>

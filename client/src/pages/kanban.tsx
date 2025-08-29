@@ -71,7 +71,7 @@ export default function KanbanPage() {
   }
 
   // Check if board is inactive
-  const isBoardInactive = board.isActive === "false";
+  const isBoardInactive = !board.isActive;
 
   // Show inactive board warning
   if (isBoardInactive) {
