@@ -1,8 +1,9 @@
 // Cache Manager Otimizado - Redis + Memória como fallback
+import { createClient } from 'redis';
 import Redis from 'ioredis';
 
 class CacheManager {
-  private redis: Redis | null = null;
+  private redis: any | null = null;
   private memoryCache = new Map<string, { data: any, expires: number }>();
   private isRedisEnabled = false;
   
@@ -12,19 +13,20 @@ class CacheManager {
 
   private async initializeRedis() {
     try {
-      // Tentar conectar com Redis se disponível
-      const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-      this.redis = new Redis(redisUrl, {
-        maxRetriesPerRequest: 3,
-        lazyConnect: true
+      this.redis = createClient({
+        url: process.env.REDIS_URL || 'redis://localhost:6379',
+        socket: {
+          keepAlive: true,
+          reconnectDelay: 100,
+        },
       });
-      
-      await this.redis.ping();
+      await this.redis.connect();
       this.isRedisEnabled = true;
-      console.log('🔴 [CACHE] Redis habilitado e conectado');
+      console.log('🟢 [CACHE] Redis conectado com sucesso');
     } catch (error) {
+      console.error('🔴 [CACHE] Erro conectando Redis, usando cache em memória:', error);
+      this.redis = null;
       this.isRedisEnabled = false;
-      console.log('🟡 [CACHE] Redis não disponível, usando cache em memória');
     }
   }
 
