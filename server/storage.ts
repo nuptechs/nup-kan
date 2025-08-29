@@ -125,19 +125,16 @@ export interface IStorage {
   createExportHistory(exportData: InsertExportHistory): Promise<ExportHistory>;
   updateExportHistory(id: string, updates: Partial<ExportHistory>): Promise<ExportHistory>;
 
-  // Task Statuses
-  getTaskStatuses(): Promise<TaskStatus[]>;
-  getTaskStatus(id: string): Promise<TaskStatus | undefined>;
-  createTaskStatus(status: InsertTaskStatus): Promise<TaskStatus>;
-  updateTaskStatus(id: string, status: UpdateTaskStatus): Promise<TaskStatus>;
-  deleteTaskStatus(id: string): Promise<void>;
+  // Configuration Values (replaces TaskStatuses and TaskPriorities)
+  getConfigValues(category: string): Promise<ConfigValue[]>;
+  getConfigValue(id: string): Promise<ConfigValue | undefined>;
+  createConfigValue(config: InsertConfigValue): Promise<ConfigValue>;
+  updateConfigValue(id: string, config: UpdateConfigValue): Promise<ConfigValue>;
+  deleteConfigValue(id: string): Promise<void>;
 
-  // Task Priorities
-  getTaskPriorities(): Promise<TaskPriority[]>;
-  getTaskPriority(id: string): Promise<TaskPriority | undefined>;
-  createTaskPriority(priority: InsertTaskPriority): Promise<TaskPriority>;
-  updateTaskPriority(id: string, priority: UpdateTaskPriority): Promise<TaskPriority>;
-  deleteTaskPriority(id: string): Promise<void>;
+  // Helper methods for backward compatibility
+  getTaskStatuses(): Promise<ConfigValue[]>;
+  getTaskPriorities(): Promise<ConfigValue[]>;
 
   // Notifications
   getNotifications(userId: string): Promise<Notification[]>;
@@ -398,11 +395,6 @@ export class DatabaseStorage implements IStorage {
         .insert(tasks)
         .values({
           ...insertTask,
-          description: insertTask.description || "",
-          assigneeId: insertTask.assigneeId || "",
-          assigneeName: insertTask.assigneeName || "",
-          assigneeAvatar: insertTask.assigneeAvatar || "",
-          tags: insertTask.tags || [],
         })
         .returning();
       
@@ -413,8 +405,6 @@ export class DatabaseStorage implements IStorage {
           taskId: task.id,
           eventType: "created",
           description: "Task criada",
-          userName: "Sistema",
-          userAvatar: "S",
           metadata: ""
         });
       } catch (eventError) {
@@ -461,8 +451,6 @@ export class DatabaseStorage implements IStorage {
           taskId: task.id,
           eventType: "moved",
           description: `Task movida para ${statusNames[task.status] || task.status}`,
-          userName: "Sistema",
-          userAvatar: "S",
           metadata: `De ${statusNames[oldTask.status] || oldTask.status} para ${statusNames[task.status] || task.status}`
         });
       }
@@ -472,8 +460,6 @@ export class DatabaseStorage implements IStorage {
           taskId: task.id,
           eventType: "updated",
           description: "Título alterado",
-          userName: "Sistema",
-          userAvatar: "S",
           metadata: `De "${oldTask.title}" para "${task.title}"`
         });
       }
@@ -489,8 +475,6 @@ export class DatabaseStorage implements IStorage {
           taskId: task.id,
           eventType: "updated",
           description: "Prioridade alterada",
-          userName: "Sistema",
-          userAvatar: "S",
           metadata: `De ${priorityNames[oldTask.priority] || oldTask.priority} para ${priorityNames[task.priority] || task.priority}`
         });
       }
@@ -500,8 +484,6 @@ export class DatabaseStorage implements IStorage {
           taskId: task.id,
           eventType: "updated",
           description: "Progresso atualizado",
-          userName: "Sistema",
-          userAvatar: "S",
           metadata: `${oldTask.progress || 0}% → ${task.progress || 0}%`
         });
       }
@@ -1181,10 +1163,10 @@ export class DatabaseStorage implements IStorage {
         name: users.name,
         email: users.email,
         password: users.password,
-        role: users.role,
         avatar: users.avatar,
         status: users.status,
         profileId: users.profileId,
+        firstLogin: users.firstLogin,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
       })
@@ -1332,92 +1314,57 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  // Task Status methods
-  async getTaskStatuses(): Promise<TaskStatus[]> {
-    return await db.select().from(taskStatuses).orderBy(taskStatuses.position);
+  // Configuration Values methods (replaces TaskStatuses and TaskPriorities)
+  async getConfigValues(category: string): Promise<ConfigValue[]> {
+    return await db.select().from(configValues)
+      .where(and(eq(configValues.category, category), eq(configValues.isActive, true)))
+      .orderBy(configValues.level);
   }
 
-  async getTaskStatus(id: string): Promise<TaskStatus | undefined> {
-    const [status] = await db.select().from(taskStatuses).where(eq(taskStatuses.id, id));
-    return status || undefined;
+  async getConfigValue(id: string): Promise<ConfigValue | undefined> {
+    const [config] = await db.select().from(configValues).where(eq(configValues.id, id));
+    return config || undefined;
   }
 
-  async createTaskStatus(insertStatus: InsertTaskStatus): Promise<TaskStatus> {
-    const [status] = await db
-      .insert(taskStatuses)
-      .values({
-        ...insertStatus,
-      })
+  async createConfigValue(insertConfig: InsertConfigValue): Promise<ConfigValue> {
+    const [config] = await db
+      .insert(configValues)
+      .values(insertConfig)
       .returning();
-    return status;
+    return config;
   }
 
-  async updateTaskStatus(id: string, updateData: UpdateTaskStatus): Promise<TaskStatus> {
-    const [status] = await db
-      .update(taskStatuses)
+  async updateConfigValue(id: string, updateData: UpdateConfigValue): Promise<ConfigValue> {
+    const [config] = await db
+      .update(configValues)
       .set({
         ...updateData,
         updatedAt: new Date(),
       })
-      .where(eq(taskStatuses.id, id))
+      .where(eq(configValues.id, id))
       .returning();
     
-    if (!status) {
-      throw new Error(`TaskStatus with id ${id} not found`);
+    if (!config) {
+      throw new Error(`ConfigValue with id ${id} not found`);
     }
     
-    return status;
+    return config;
   }
 
-  async deleteTaskStatus(id: string): Promise<void> {
-    const result = await db.delete(taskStatuses).where(eq(taskStatuses.id, id));
+  async deleteConfigValue(id: string): Promise<void> {
+    const result = await db.delete(configValues).where(eq(configValues.id, id));
     if (result.rowCount === 0) {
-      throw new Error(`TaskStatus with id ${id} not found`);
+      throw new Error(`ConfigValue with id ${id} not found`);
     }
   }
 
-  // Task Priority methods
-  async getTaskPriorities(): Promise<TaskPriority[]> {
-    return await db.select().from(taskPriorities).orderBy(taskPriorities.level);
+  // Helper methods for backward compatibility
+  async getTaskStatuses(): Promise<ConfigValue[]> {
+    return await this.getConfigValues('task_status');
   }
 
-  async getTaskPriority(id: string): Promise<TaskPriority | undefined> {
-    const [priority] = await db.select().from(taskPriorities).where(eq(taskPriorities.id, id));
-    return priority || undefined;
-  }
-
-  async createTaskPriority(insertPriority: InsertTaskPriority): Promise<TaskPriority> {
-    const [priority] = await db
-      .insert(taskPriorities)
-      .values({
-        ...insertPriority,
-      })
-      .returning();
-    return priority;
-  }
-
-  async updateTaskPriority(id: string, updateData: UpdateTaskPriority): Promise<TaskPriority> {
-    const [priority] = await db
-      .update(taskPriorities)
-      .set({
-        ...updateData,
-        updatedAt: new Date(),
-      })
-      .where(eq(taskPriorities.id, id))
-      .returning();
-    
-    if (!priority) {
-      throw new Error(`TaskPriority with id ${id} not found`);
-    }
-    
-    return priority;
-  }
-
-  async deleteTaskPriority(id: string): Promise<void> {
-    const result = await db.delete(taskPriorities).where(eq(taskPriorities.id, id));
-    if (result.rowCount === 0) {
-      throw new Error(`TaskPriority with id ${id} not found`);
-    }
+  async getTaskPriorities(): Promise<ConfigValue[]> {
+    return await this.getConfigValues('task_priority');
   }
 
   // Notifications Implementation
@@ -1511,7 +1458,7 @@ export class DatabaseStorage implements IStorage {
     const [notification] = await db
       .update(notifications)
       .set({
-        isRead: "true",
+        isRead: true,
         readAt: new Date(),
       })
       .where(eq(notifications.id, id))
@@ -1533,12 +1480,12 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .update(notifications)
       .set({
-        isRead: "true",
+        isRead: true,
         readAt: new Date(),
       })
       .where(and(
         eq(notifications.userId, userId),
-        eq(notifications.isRead, "false")
+        eq(notifications.isRead, false)
       ));
 
     // Invalidate caches
@@ -1558,7 +1505,7 @@ export class DatabaseStorage implements IStorage {
       .from(notifications)
       .where(and(
         eq(notifications.userId, userId),
-        eq(notifications.isRead, "false")
+        eq(notifications.isRead, false)
       ));
     
     const count = result[0]?.count || 0;
