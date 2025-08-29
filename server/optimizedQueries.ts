@@ -52,7 +52,7 @@ export class OptimizedQueries {
       const result = {
         ...user,
         permissions: userPermissions.map(p => p.name),
-        permissionCategories: [...new Set(userPermissions.map(p => p.category))],
+        permissionCategories: Array.from(new Set(userPermissions.map(p => p.category))),
       };
 
       // Cache por 2 horas para reduzir hits no banco

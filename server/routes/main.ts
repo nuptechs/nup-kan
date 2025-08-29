@@ -12,7 +12,7 @@ import { boardService, taskService, userService, teamService, notificationServic
 import { eq, sql, and } from "drizzle-orm";
 import { sendWelcomeEmail, sendNotificationEmail } from "../emailService";
 import { PermissionSyncService } from "../permissionSync";
-import { OptimizedQueries, PerformanceStats } from "../optimizedQueries";
+import { OptimizedQueries } from "../optimizedQueries";
 import { cache } from "../cache";
 
 // 🚀 MICROSERVIÇOS IMPORTADOS
