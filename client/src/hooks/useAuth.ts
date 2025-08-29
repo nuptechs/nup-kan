@@ -110,16 +110,16 @@ export function useAuth() {
         id: authResponse.userId || authResponse.id,
         name: authResponse.userName || authResponse.name,
         email: authResponse.userEmail || authResponse.email,
-        role: authResponse.profileName || authResponse.role,
-        avatar: authResponse.avatar,
-        profileId: authResponse.profileId,
+        avatar: authResponse.avatar || null,
+        profileId: authResponse.profileId || null,
         password: null,
         status: null,
+        firstLogin: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-        // ✅ INCLUIR PERMISSÕES NO OBJETO USER
+        // ✅ INCLUIR PERMISSÕES NO OBJETO USER (como propriedade extra)
         permissions: authResponse.permissions
-      };
+      } as User & { permissions?: string[] };
     }
 
     // Fallback: dados do localStorage
@@ -129,11 +129,11 @@ export function useAuth() {
         id: localUserData.id,
         name: localUserData.name,
         email: localUserData.email,
-        role: localUserData.role,
-        avatar: localUserData.avatar,
-        profileId: localUserData.profileId,
+        avatar: localUserData.avatar || null,
+        profileId: localUserData.profileId || null,
         password: null,
         status: null,
+        firstLogin: false,
         createdAt: new Date(),
         updatedAt: new Date()
       };

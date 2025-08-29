@@ -85,11 +85,14 @@ export function usePermissions() {
 
   // Nova função para verificar se usuário é administrador
   const isAdmin = (): boolean => {
-    if (!currentUser || !currentUser.role) return false;
-    const role = currentUser.role.toLowerCase();
-    return role.includes('admin') || 
-           role.includes('administrador') ||
-           role.includes('dono');
+    if (!currentUser) return false;
+    // Verificar se tem permissões de administrador
+    return hasAnyPermission([
+      "Gerenciar Permissões",
+      "Criar Usuários", 
+      "Excluir Usuários",
+      "Gerenciar Times"
+    ]);
   };
 
   // Nova função para logs de segurança
