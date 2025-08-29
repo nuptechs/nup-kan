@@ -12,14 +12,6 @@ export function usePermissions() {
   // ✅ AGORA AS PERMISSÕES ESTÃO NO currentUser
   const userPermissionsData = (currentUser as any)?.permissions ? { permissions: (currentUser as any).permissions } : null;
   
-  // DEBUG TEMPORÁRIO - verificar se permissions estão chegando
-  console.log('🔍 [PERM-DATA] Dados das permissões:', {
-    hasCurrentUser: !!currentUser,
-    hasPermissions: !!(currentUser as any)?.permissions,
-    permissionsCount: (currentUser as any)?.permissions?.length,
-    samplePermissions: (currentUser as any)?.permissions?.slice(0, 3),
-    userRole: currentUser?.role
-  });
   const permissionsLoading = false;
   const permissionsError = null;
 
@@ -27,6 +19,7 @@ export function usePermissions() {
   const userPermissions: Permission[] = useMemo(() => {
     // Usar diretamente currentUser.permissions
     const permissionsArray = (currentUser as any)?.permissions;
+    
     if (!permissionsArray || !Array.isArray(permissionsArray)) return [];
     
     return permissionsArray.map((permissionName: string) => ({
@@ -44,7 +37,7 @@ export function usePermissions() {
       description: `Permissão para ${permissionName}`,
       createdAt: new Date(),
     }));
-  }, [userPermissionsData]);
+  }, [currentUser]);
 
   // Log de segurança - detectar tentativas de acesso sem permissão
   useEffect(() => {
@@ -72,27 +65,12 @@ export function usePermissions() {
   const hasPermission = (permissionName: string): boolean => {
     if (!currentUser || !permissionName) return false;
     
-    // DEBUG TEMPORÁRIO - investigar problema de permissões
-    const directCheck = (currentUser as any)?.permissions?.includes(permissionName);
-    const mapCheck = permissionMap.has(permissionName);
-    const mapCheckPt = permissionMap.has(permissionName.replace("Tarefas", "Tasks"));
-    const mapCheckEn = permissionMap.has(permissionName.replace("Tasks", "Tarefas"));
+    // Verificar ambas as versões (português e inglês) para compatibilidade
+    const hasPermissionResult = permissionMap.has(permissionName) || 
+           permissionMap.has(permissionName.replace("Tarefas", "Tasks")) ||
+           permissionMap.has(permissionName.replace("Tasks", "Tarefas"));
     
-    const result = mapCheck || mapCheckPt || mapCheckEn;
-    
-    console.log(`🔍 [PERM] "${permissionName}":`, {
-      directCheck,
-      mapCheck,
-      mapCheckPt,
-      mapCheckEn,
-      result,
-      userPermissionsCount: (currentUser as any)?.permissions?.length,
-      mapSize: permissionMap.size,
-      samplePermissions: (currentUser as any)?.permissions?.slice(0, 3),
-      currentUserRole: currentUser?.role
-    });
-    
-    return result;
+    return hasPermissionResult;
   };
 
   const hasAnyPermission = (permissionNames: string[]): boolean => {

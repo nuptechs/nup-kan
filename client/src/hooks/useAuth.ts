@@ -118,7 +118,7 @@ export function useAuth() {
         createdAt: new Date(),
         updatedAt: new Date(),
         // ✅ INCLUIR PERMISSÕES NO OBJETO USER
-        ...(authResponse.permissions && { permissions: authResponse.permissions })
+        permissions: authResponse.permissions
       };
     }
 
