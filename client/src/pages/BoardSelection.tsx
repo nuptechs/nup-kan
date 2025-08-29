@@ -216,31 +216,60 @@ export default function BoardSelection() {
       console.log("🚀 [DEBUG] Resposta recebida:", data);
       return data;
     },
+    onMutate: async (boardId: string) => {
+      // Cancel outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ["/api/boards"] });
+
+      // Snapshot the previous value
+      const previousBoards = queryClient.getQueryData(["/api/boards"]);
+
+      // Optimistically update the cache
+      queryClient.setQueryData(["/api/boards"], (old: any) => {
+        if (!old?.data) return old;
+        
+        return {
+          ...old,
+          data: old.data.map((board: any) => {
+            if (board.id === boardId) {
+              const currentActive = board.isActive === true || board.isActive === "true";
+              return {
+                ...board,
+                isActive: !currentActive ? "true" : "false"
+              };
+            }
+            return board;
+          })
+        };
+      });
+
+      // Return a context object with the snapshotted value
+      return { previousBoards };
+    },
     onSuccess: async (updatedBoard) => {
       console.log("🚀 [DEBUG] onSuccess chamado com:", updatedBoard);
       console.log("🚀 [DEBUG] updatedBoard.isActive:", updatedBoard.isActive, typeof updatedBoard.isActive);
-      console.log("🚀 [DEBUG] updatedBoard.name:", updatedBoard.name);
       
-      // 🔄 INVALIDAÇÃO COMPLETA DE CACHE - Lista e board individual
-      await queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/boards", updatedBoard.id] });
-      await queryClient.refetchQueries({ queryKey: ["/api/boards"] });
-      await queryClient.refetchQueries({ queryKey: ["/api/boards", updatedBoard.id] });
+      // Invalidate and refetch boards to sync with server
+      queryClient.invalidateQueries({ queryKey: ["/api/boards"] });
       
       // Converter para string e comparar (resolve problema de conversão automática)
-      const isActive = String(updatedBoard.isActive) === "true";
+      const isActive = updatedBoard.isActive === true || updatedBoard.isActive === "true";
       const statusText = isActive ? "ativado" : "inativado";
       console.log("🚀 [DEBUG] isActive final:", isActive, "statusText:", statusText);
       
-      console.log("🚀 [DEBUG] Chamando toast...");
       toast({
         title: `Board ${statusText}`,
         description: `O board "${updatedBoard.name}" foi ${statusText} com sucesso!`,
       });
-      console.log("🚀 [DEBUG] Toast chamado com sucesso!");
     },
-    onError: (error) => {
+    onError: (error, boardId, context) => {
       console.log("❌ [DEBUG] Erro na mutation:", error);
+      
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousBoards) {
+        queryClient.setQueryData(["/api/boards"], context.previousBoards);
+      }
+      
       toast({
         title: "Erro",
         description: "Erro ao alterar status do board. Tente novamente.",
@@ -439,7 +468,7 @@ export default function BoardSelection() {
                         }}
                         className={`
                           flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-all duration-200 
-                          ${(board.isActive === true || board.isActive === "true")
+                          ${(String(board.isActive) === "true")
                             ? "bg-green-500 text-white hover:bg-green-600" 
                             : "bg-red-500 text-white hover:bg-red-600"
                           }
@@ -451,11 +480,11 @@ export default function BoardSelection() {
                         `}
                         data-testid={`status-toggle-${board.id}`}
                         title={canEdit("Boards") 
-                          ? `Clique para ${(board.isActive === true || board.isActive === "true") ? "inativar" : "ativar"} o board`
+                          ? `Clique para ${String(board.isActive) === "true" ? "inativar" : "ativar"} o board`
                           : "Você não tem permissão para alterar o status"
                         }
                       >
-                        {(board.isActive === true || board.isActive === "true") ? (
+                        {String(board.isActive) === "true" ? (
                           <>
                             <Power className="w-3 h-3" />
                             <span>Ativo</span>
