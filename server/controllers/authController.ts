@@ -41,10 +41,10 @@ export class AuthController {
         tokens: {
           accessToken: authResult.tokens?.accessToken,
           refreshToken: authResult.tokens?.refreshToken,
-          expiresIn: tokens.expiresIn
+          expiresIn: authResult.tokens?.expiresIn
         },
         isAuthenticated: true,
-        requiresPasswordChange: user.firstLogin || false
+        requiresPasswordChange: false
       });
       
     } catch (error) {
@@ -153,10 +153,10 @@ export class AuthController {
         tokens: {
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
-          expiresIn: tokens.expiresIn
+          expiresIn: authResult.tokens?.expiresIn
         },
         isAuthenticated: true,
-        requiresPasswordChange: user.firstLogin || false
+        requiresPasswordChange: false
       });
       
     } catch (error) {

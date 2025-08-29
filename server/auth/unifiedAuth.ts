@@ -56,6 +56,7 @@ export interface AuthContext {
   userName: string;
   userEmail: string;
   permissions: string[];
+  permissionCategories?: string[]; // Para compatibilidade
   profileId?: string;
   profileName?: string;
   teams: Array<{
@@ -63,6 +64,7 @@ export interface AuthContext {
     name: string;
     role: string;
   }>;
+  sessionId?: string; // Para compatibilidade  
   isAuthenticated: boolean;
   lastActivity: Date;
 }
@@ -110,6 +112,13 @@ export class UnifiedAuthService {
       const foundUser = user[0];
 
       // 2. Verificar senha
+      if (!foundUser.password) {
+        return {
+          success: false,
+          message: 'Email ou senha incorretos'
+        };
+      }
+      
       const isPasswordValid = await bcrypt.compare(credentials.password, foundUser.password);
       if (!isPasswordValid) {
         return {
@@ -186,9 +195,11 @@ export class UnifiedAuthService {
         userName: user.name,
         userEmail: user.email,
         permissions: user.permissions || [],
+        permissionCategories: [], // Para compatibilidade
         profileId: user.profileId,
         profileName: user.profileName,
         teams: user.teams || [],
+        sessionId: `unified-${user.id}-${tokenPayload.iat}`, // Para compatibilidade
         isAuthenticated: true,
         lastActivity: new Date()
       };
