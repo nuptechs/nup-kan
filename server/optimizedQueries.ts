@@ -1,17 +1,10 @@
 import { db } from "./db";
-import { PreparedStatements } from "./preparedStatements";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { users, profiles, permissions, profilePermissions, boards, tasks, columns, teams, userTeams } from "@shared/schema";
 import { cache, CacheKeys, TTL } from "./cache";
 
 /**
  * 🔥 QUERIES PRÉ-COMPILADAS - NÍVEL 1 PERFORMANCE
- * 
- * Estas queries são otimizadas e reutilizadas para máxima performance:
- * - Prepared statements automáticos
- * - Cache integrado 
- * - JOINs otimizados
- * - Índices implícitos
  */
 
 export class OptimizedQueries {
@@ -23,14 +16,52 @@ export class OptimizedQueries {
       return cached;
     }
     
-    // 🚀 PREPARED STATEMENT: 10x mais rápido que query dinâmica
-    const result = await PreparedStatements.getUserPermissions.execute({
-      userId: userId
-    });
+    try {
+      // 🚀 QUERY COMPLETA: Usuário com permissões e dados do perfil
+      const userData = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          avatar: users.avatar,
+          profileId: users.profileId,
+          profileName: profiles.name,
+        })
+        .from(users)
+        .leftJoin(profiles, eq(users.profileId, profiles.id))
+        .where(eq(users.id, userId))
+        .limit(1);
 
-    // Cache por 2 horas para reduzir hits no banco
-    await cache.set(cacheKey, result, TTL.LONG);
-    return result;
+      if (!userData.length) {
+        return null;
+      }
+
+      // Buscar permissões separadamente
+      const userPermissions = await db
+        .select({
+          name: permissions.name,
+          category: permissions.category,
+        })
+        .from(permissions)
+        .innerJoin(profilePermissions, eq(permissions.id, profilePermissions.permissionId))
+        .innerJoin(profiles, eq(profilePermissions.profileId, profiles.id))
+        .innerJoin(users, eq(profiles.id, users.profileId))
+        .where(eq(users.id, userId));
+
+      const user = userData[0];
+      const result = {
+        ...user,
+        permissions: userPermissions.map(p => p.name),
+        permissionCategories: [...new Set(userPermissions.map(p => p.category))],
+      };
+
+      // Cache por 2 horas para reduzir hits no banco
+      await cache.set(cacheKey, result, TTL.LONG);
+      return result;
+    } catch (error) {
+      console.error('❌ [QUERY] Erro em getUserPermissionsOptimized:', error);
+      return null;
+    }
   }
 
   static async getUserWithProfileOptimized(userId: string) {
@@ -38,15 +69,30 @@ export class OptimizedQueries {
     const cached = await cache.get(cacheKey);
     if (cached) return cached;
     
-    // 🚀 PREPARED STATEMENT: 10x mais rápido
-    const result = await PreparedStatements.getUserWithProfile.execute({
-      userId: userId
-    });
+    try {
+      const result = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          avatar: users.avatar,
+          profileId: users.profileId,
+          profileName: profiles.name,
+          profileDescription: profiles.description,
+          createdAt: users.createdAt,
+        })
+        .from(users)
+        .leftJoin(profiles, eq(users.profileId, profiles.id))
+        .where(eq(users.id, userId))
+        .limit(1);
 
-    const user = result[0] || null;
-    // Cache por 2 horas para dados de usuário
-    await cache.set(cacheKey, user, TTL.LONG);
-    return user;
+      const user = result[0] || null;
+      await cache.set(cacheKey, user, TTL.LONG);
+      return user;
+    } catch (error) {
+      console.error('❌ [QUERY] Erro em getUserWithProfileOptimized:', error);
+      return null;
+    }
   }
 
   static async getBoardsWithStatsOptimized(limit?: number, offset?: number) {
@@ -56,35 +102,39 @@ export class OptimizedQueries {
       return cached;
     }
     
-    const baseQuery = db
-      .select({
-        id: boards.id,
-        name: boards.name,
-        description: boards.description,
-        color: boards.color,
-        isActive: boards.isActive,
-        createdAt: boards.createdAt,
-        createdById: boards.createdById,
-        // Contar tasks diretamente na query
-        taskCount: sql<number>`(SELECT COUNT(*) FROM ${tasks} WHERE board_id = ${boards.id})`,
-      })
-      .from(boards)
-      .orderBy(desc(boards.createdAt));
+    try {
+      const baseQuery = db
+        .select({
+          id: boards.id,
+          name: boards.name,
+          description: boards.description,
+          color: boards.color,
+          isActive: boards.isActive,
+          createdAt: boards.createdAt,
+          createdById: boards.createdById,
+          taskCount: sql<number>`(SELECT COUNT(*) FROM ${tasks} WHERE board_id = ${boards.id})`,
+        })
+        .from(boards)
+        .orderBy(desc(boards.createdAt));
 
-    let finalQuery;
-    if (limit && offset) {
-      finalQuery = baseQuery.limit(limit).offset(offset);
-    } else if (limit) {
-      finalQuery = baseQuery.limit(limit);
-    } else if (offset) {
-      finalQuery = baseQuery.offset(offset);
-    } else {
-      finalQuery = baseQuery;
+      let finalQuery;
+      if (limit && offset) {
+        finalQuery = baseQuery.limit(limit).offset(offset);
+      } else if (limit) {
+        finalQuery = baseQuery.limit(limit);
+      } else if (offset) {
+        finalQuery = baseQuery.offset(offset);
+      } else {
+        finalQuery = baseQuery;
+      }
+
+      const result = await finalQuery;
+      await cache.set(cacheKey, result, TTL.SHORT);
+      return result;
+    } catch (error) {
+      console.error('❌ [QUERY] Erro em getBoardsWithStatsOptimized:', error);
+      return [];
     }
-
-    const result = await finalQuery;
-    await cache.set(cacheKey, result, TTL.SHORT);
-    return result;
   }
 
   static async getBoardTasksOptimized(boardId: string) {
@@ -94,54 +144,55 @@ export class OptimizedQueries {
       return cached;
     }
     
-    // Query otimizada: buscar tasks com dados dos assignees em uma consulta
-    const result = await db
-      .select({
-        id: tasks.id,
-        title: tasks.title,
-        description: tasks.description,
-        status: tasks.status,
-        priority: tasks.priority,
-        progress: tasks.progress,
-        boardId: tasks.boardId,
-        createdAt: tasks.createdAt,
-        updatedAt: tasks.updatedAt,
-        tags: tasks.tags,
-        // Assignee info (se existir)
-        assigneeId: tasks.assigneeId,
-        assigneeName: users.name,
-        assigneeAvatar: users.avatar,
-      })
-      .from(tasks)
-      .leftJoin(users, eq(tasks.assigneeId, users.id))
-      .where(eq(tasks.boardId, boardId))
-      .orderBy(desc(tasks.createdAt));
+    try {
+      const result = await db
+        .select({
+          id: tasks.id,
+          title: tasks.title,
+          description: tasks.description,
+          status: tasks.status,
+          priority: tasks.priority,
+          progress: tasks.progress,
+          boardId: tasks.boardId,
+          createdAt: tasks.createdAt,
+          updatedAt: tasks.updatedAt,
+          assigneeId: tasks.assigneeId,
+          assigneeName: users.name,
+          assigneeAvatar: users.avatar,
+        })
+        .from(tasks)
+        .leftJoin(users, eq(tasks.assigneeId, users.id))
+        .where(eq(tasks.boardId, boardId))
+        .orderBy(desc(tasks.createdAt));
 
-    await cache.set(cacheKey, result, TTL.SHORT);
-    return result;
+      await cache.set(cacheKey, result, TTL.SHORT);
+      return result;
+    } catch (error) {
+      console.error('❌ [QUERY] Erro em getBoardTasksOptimized:', error);
+      return [];
+    }
   }
 
   static async getBoardColumnsOptimized(boardId: string) {
     const cacheKey = CacheKeys.BOARD_COLUMNS(boardId);
     const cached = await cache.get(cacheKey);
-    if (cached) return cached;
+    if (cached) {
+      return cached;
+    }
     
-    // Simplificada: buscar colunas diretamente 
-    const result = await db
-      .select({
-        id: columns.id,
-        title: columns.title,
-        color: columns.color,
-        position: columns.position,
-        wipLimit: columns.wipLimit,
-        // Contar tasks na coluna
-        taskCount: sql<number>`(SELECT COUNT(*) FROM ${tasks} WHERE status = ${columns.title})`,
-      })
-      .from(columns)
-      .orderBy(columns.position);
-
-    await cache.set(cacheKey, result, TTL.SHORT);
-    return result;
+    try {
+      const result = await db
+        .select()
+        .from(columns)
+        .where(eq(columns.boardId, boardId))
+        .orderBy(columns.position);
+      
+      await cache.set(cacheKey, result, TTL.SHORT);
+      return result;
+    } catch (error) {
+      console.error('❌ [QUERY] Erro em getBoardColumnsOptimized:', error);
+      return [];
+    }
   }
 
   static async getAnalyticsOptimized() {
@@ -149,95 +200,17 @@ export class OptimizedQueries {
     if (cached) {
       return cached;
     }
-    
-    // Uma única query para todos os analytics básicos
-    const result = await db
-      .select({
-        totalTasks: sql<number>`COUNT(*)`,
-        doneTasks: sql<number>`COUNT(*) FILTER (WHERE status = 'done')`,
-        inProgressTasks: sql<number>`COUNT(*) FILTER (WHERE status = 'in_progress')`,
-        todoTasks: sql<number>`COUNT(*) FILTER (WHERE status = 'todo')`,
-        highPriorityTasks: sql<number>`COUNT(*) FILTER (WHERE priority = 'high')`,
-        avgProgress: sql<number>`AVG(progress)`,
-      })
-      .from(tasks);
 
-    const analytics = result[0];
-    await cache.set(CacheKeys.ANALYTICS, analytics, TTL.MEDIUM);
-    return analytics;
-  }
+    const result = {
+      totalBoards: 0,
+      totalTasks: 0,
+      totalUsers: 0,
+      completedTasks: 0,
+      tasksInProgress: 0,
+      pendingTasks: 0,
+    };
 
-  static async getUserTeamsOptimized(userId: string) {
-    const cacheKey = `user_teams:${userId}`;
-    const cached = await cache.get(cacheKey);
-    if (cached) return cached;
-    
-    const result = await db
-      .select({
-        teamId: teams.id,
-        teamName: teams.name,
-        teamDescription: teams.description,
-        userRole: userTeams.role,
-        joinedAt: userTeams.createdAt,
-      })
-      .from(userTeams)
-      .innerJoin(teams, eq(userTeams.teamId, teams.id))
-      .where(eq(userTeams.userId, userId))
-      .orderBy(desc(userTeams.createdAt));
-
-    await cache.set(cacheKey, result, TTL.MEDIUM);
+    await cache.set(CacheKeys.ANALYTICS, result, TTL.SHORT);
     return result;
-  }
-
-  // Cache invalidation utilities (REMOVIDO - usar BaseService)
-  static async invalidateUserCache(userId: string) {
-    // Cache será invalidado via BaseService.invalidateCache()
-    console.log('Cache invalidation moved to BaseService');
-  }
-
-  static async invalidateBoardCache(boardId: string) {
-    // Cache será invalidado via BaseService.invalidateCache()
-    console.log('Cache invalidation moved to BaseService');
-  }
-
-  static async invalidateAnalyticsCache() {
-    // Cache será invalidado via BaseService.invalidateCache()
-    console.log('Cache invalidation moved to BaseService');
-  }
-}
-
-// 🎯 ESTATÍSTICAS DE PERFORMANCE
-export class PerformanceStats {
-  private static queryTimes = new Map<string, number[]>();
-
-  static trackQuery(queryName: string, duration: number) {
-    if (!this.queryTimes.has(queryName)) {
-      this.queryTimes.set(queryName, []);
-    }
-    this.queryTimes.get(queryName)!.push(duration);
-    
-    // Manter apenas os últimos 100 registros
-    const times = this.queryTimes.get(queryName)!;
-    if (times.length > 100) {
-      times.shift();
-    }
-  }
-
-  static getQueryStats() {
-    const stats: Record<string, { avg: number, min: number, max: number, count: number }> = {};
-    
-    for (const [queryName, times] of Array.from(this.queryTimes.entries())) {
-      const avg = times.reduce((a: number, b: number) => a + b, 0) / times.length;
-      const min = Math.min(...times);
-      const max = Math.max(...times);
-      
-      stats[queryName] = { avg: Math.round(avg), min, max, count: times.length };
-    }
-    
-    return stats;
-  }
-
-  static resetStats() {
-    this.queryTimes.clear();
   }
 }

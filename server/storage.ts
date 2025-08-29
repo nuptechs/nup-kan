@@ -5,7 +5,7 @@ import { eq, desc, and, inArray, sql, or } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 import { cache, CacheKeys, TTL } from "./cache";
-import { OptimizedQueries, PerformanceStats } from "./optimizedQueries";
+import { OptimizedQueries } from "./optimizedQueries";
 
 export interface IStorage {
   // Boards
@@ -1054,12 +1054,12 @@ export class DatabaseStorage implements IStorage {
       }
 
       const duration = Date.now() - startTime;
-      PerformanceStats.trackQuery('getUserPermissions_DB', duration);
+      // Performance tracking removido temporariamente
       console.log(`🚀 [DB-PERF] ${permissions.length} permissões em ${duration}ms (OTIMIZADO)`);
       return permissions;
     } catch (error) {
       const duration = Date.now() - startTime;
-      PerformanceStats.trackQuery('getUserPermissions_DB_error', duration);
+      // Performance tracking removido temporariamente
       console.error("❌ [SECURITY] Erro em getUserPermissions:", error);
       return [];
     }
