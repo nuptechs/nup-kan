@@ -1,0 +1,53 @@
+Responder
+🚀 INSTRUÇÕES COMPLETAS PARA REFATORAÇÃO DO NUP-KAN
+Com base na análise completa do seu código, aqui estão as instruções claras para o Replit refatorar e otimizar seu sistema:
+
+📋 FASE 1: SIMPLIFICAÇÃO DO SISTEMA DE AUTENTICAÇÃO
+Instrução 1: Criar Novo Sistema de Autenticação Simplificado
+Crie um novo arquivo `server/auth/simpleAuth.ts` com as seguintes funcionalidades:
+
+1. Interface User simplificada:
+```typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  permissions: string[];
+  profileId?: string;
+}
+
+interface AuthRequest extends Request {
+  user?: User;
+}
+Função para buscar usuário com permissões (UMA ÚNICA QUERY): ```typescript async function getUserWithPermissions(userId: string): Promise<User | null> { const result = await db .select({ id: usuários.id, nome: usuários.nome, e-mail: usuários.email, avatar: usuários.avatar, profileId: usuários.profileId, permissões: sql<string[]>  COALESCE(    ARRAY_AGG(DISTINCT p.name) FILTER (WHERE p.name IS NOT NULL),    ARRAY[]::text[]  )    }) .from(usuários) .leftJoin(perfis, eq(usuários.profileId, perfis.id)) .leftJoin(permissões de perfil, eq(perfis.id, perfis.permissões.profileId)) .leftJoin(permissões, eq(permissões de perfil.permissãoId, permissões.id)) .where(eq(usuários.id, usuárioId)) .groupBy(usuários.id, usuários.nome, usuários.email, usuários.avatar, usuários.profileId);
+retornar resultado[0] || nulo; }
+
+
+3. Middleware unificado que substitui AuthMiddleware.requireAuth + AuthMiddleware.requirePermissions:
+```typescript
+export const auth = (requiredPermissions?: string | string[]) => {
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    // Implementar lógica completa aqui
+  };
+};
+IMPORTANTE: Mantenha TODAS as 26 funções existentes funcionando exatamente iguais.
+
+
+### **Instrução 2: Otimizar Redis Cache**
+Habilite o Redis no arquivo server/cache.ts:
+
+Remova a linha que desabilita o Redis
+Configurar conexão adequada com Redis
+Implementar cache hierárquico com diferentes TTLs
+Crie cache específico para auth: ```typescript class AuthCache { // Cache de usuário: 1 hora async cacheUser(userId: string, userData: User): Promise
+
+// Busca otimizada com pipeline async getUser(userId: string): Promise<User | nulo>
+
+// Invalidação inteligente async invalidateUser(userId: string): Promise }
+
+
+3. Configure TTLs otimizados:
+   - Dados básicos do usuário: 3600s (1 hora)
+   - Permissões: 1800s (30 minutos)  
+   - Sessão ativa: 300s (5 minutos)

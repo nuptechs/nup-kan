@@ -1,13 +1,45 @@
-// Cache Manager Estável - Somente Memória (Sem Redis)
+// Cache Manager Otimizado - Redis + Memória como fallback
+import Redis from 'ioredis';
+
 class CacheManager {
+  private redis: Redis | null = null;
   private memoryCache = new Map<string, { data: any, expires: number }>();
+  private isRedisEnabled = false;
   
   constructor() {
-    console.log('🟡 [CACHE] Usando cache em memória estável');
+    this.initializeRedis();
+  }
+
+  private async initializeRedis() {
+    try {
+      // Tentar conectar com Redis se disponível
+      const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+      this.redis = new Redis(redisUrl, {
+        maxRetriesPerRequest: 3,
+        lazyConnect: true
+      });
+      
+      await this.redis.ping();
+      this.isRedisEnabled = true;
+      console.log('🔴 [CACHE] Redis habilitado e conectado');
+    } catch (error) {
+      this.isRedisEnabled = false;
+      console.log('🟡 [CACHE] Redis não disponível, usando cache em memória');
+    }
   }
 
   async get<T>(key: string): Promise<T | null> {
     try {
+      // Tentar Redis primeiro se disponível
+      if (this.isRedisEnabled && this.redis) {
+        const result = await this.redis.get(key);
+        if (result) {
+          return JSON.parse(result);
+        }
+        return null;
+      }
+      
+      // Fallback para memória
       const cached = this.memoryCache.get(key);
       if (cached && Date.now() < cached.expires) {
         return cached.data;
@@ -21,11 +53,19 @@ class CacheManager {
 
   async set<T>(key: string, value: T, ttlSeconds: number = 300): Promise<void> {
     try {
+      // Tentar Redis primeiro se disponível
+      if (this.isRedisEnabled && this.redis) {
+        await this.redis.setex(key, ttlSeconds, JSON.stringify(value));
+        console.log(`💾 [CACHE-REDIS] Salvando chave: '${key}' (TTL: ${ttlSeconds}s)`);
+        return;
+      }
+      
+      // Fallback para memória
       this.memoryCache.set(key, {
         data: value,
         expires: Date.now() + (ttlSeconds * 1000)
       });
-      console.log(`💾 [CACHE] Salvando chave: '${key}' (TTL: ${ttlSeconds}s)`);
+      console.log(`💾 [CACHE-MEMORY] Salvando chave: '${key}' (TTL: ${ttlSeconds}s)`);
       this.cleanMemoryCache();
     } catch (error) {
       console.error('❌ [CACHE] Erro ao salvar:', error);
@@ -34,6 +74,12 @@ class CacheManager {
 
   async del(key: string): Promise<void> {
     try {
+      // Deletar do Redis se disponível
+      if (this.isRedisEnabled && this.redis) {
+        await this.redis.del(key);
+      }
+      
+      // Deletar da memória também
       this.memoryCache.delete(key);
     } catch (error) {
       console.error('❌ [CACHE] Erro ao deletar:', error);
@@ -42,7 +88,19 @@ class CacheManager {
 
   async invalidatePattern(pattern: string): Promise<void> {
     try {
-      // Remove chaves que batem com o padrão (simplicado e estável)
+      let totalDeleted = 0;
+      
+      // Invalidar no Redis se disponível
+      if (this.isRedisEnabled && this.redis) {
+        const keys = await this.redis.keys(pattern);
+        if (keys.length > 0) {
+          await this.redis.del(...keys);
+          totalDeleted += keys.length;
+          console.log(`🧹 [CACHE-REDIS] Invalidou ${keys.length} chaves para padrão '${pattern}'`);
+        }
+      }
+      
+      // Invalidar na memória
       const searchPattern = pattern.replace('*', '');
       const keysToDelete: string[] = [];
       
@@ -53,7 +111,8 @@ class CacheManager {
         }
       }
       
-      console.log(`🧹 [CACHE] Invalidando padrão '${pattern}' -> removeu ${keysToDelete.length} chaves:`, keysToDelete);
+      totalDeleted += keysToDelete.length;
+      console.log(`🧹 [CACHE] Invalidou total de ${totalDeleted} chaves para padrão '${pattern}'`);
     } catch (error) {
       console.error('❌ [CACHE] Erro ao invalidar padrão:', error);
     }
