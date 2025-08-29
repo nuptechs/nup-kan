@@ -10,7 +10,7 @@ export const boards = pgTable("boards", {
   description: text("description").default(""),
   color: text("color").notNull().default("#3b82f6"),
   createdById: varchar("created_by_id").notNull(),
-  isActive: text("is_active").notNull().default("true"),
+  isActive: boolean("is_active").notNull().default(true), // ✅ OTIMIZADO: boolean real
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -22,12 +22,10 @@ export const tasks = pgTable("tasks", {
   description: text("description").default(""),
   status: text("status").notNull().default("backlog"),
   priority: text("priority").notNull().default("medium"),
-  assigneeId: varchar("assignee_id").default(""),
-  assigneeName: text("assignee_name").default(""),
-  assigneeAvatar: text("assignee_avatar").default(""),
+  assigneeId: varchar("assignee_id").default(""), // ⚠️ LEGACY: manter para compatibilidade
+  // ❌ REMOVIDOS: assigneeName, assigneeAvatar, tags (otimizados)
   progress: integer("progress").notNull().default(0),
   position: integer("position").notNull().default(0),
-  tags: text("tags").array().default([]),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -65,7 +63,7 @@ export const users = pgTable("users", {
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   password: text("password"), // Optional for backward compatibility
-  role: text("role").default(""),
+  // ❌ REMOVIDO: role (redundante com sistema de profiles)
   avatar: text("avatar").default(""),
   status: text("status").default("offline"),
   profileId: varchar("profile_id").references(() => profiles.id),
@@ -87,7 +85,7 @@ export const profiles = pgTable("profiles", {
   name: text("name").notNull().unique(),
   description: text("description").default(""),
   color: text("color").notNull().default("#3b82f6"),
-  isDefault: text("is_default").default("false"),
+  isDefault: boolean("is_default").default(false), // ✅ OTIMIZADO: boolean real
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -113,34 +111,37 @@ export const taskEvents = pgTable("task_events", {
   eventType: text("event_type").notNull(), // created, updated, moved, assigned, completed, comment
   description: text("description").notNull(),
   userId: varchar("user_id").references(() => users.id),
-  userName: text("user_name").default(""),
-  userAvatar: text("user_avatar").default(""),
+  // ❌ REMOVIDOS: userName, userAvatar (usar JOIN com users)
   metadata: text("metadata").default(""), // JSON string for additional data
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Task auxiliary data tables
-export const taskStatuses = pgTable("task_statuses", {
+// ✅ NOVA TABELA: Relacionamento N:N para tags (substituindo tasks.tags array)
+export const taskTags = pgTable("task_tags", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull().unique(),
+  taskId: varchar("task_id").notNull().references(() => tasks.id, { onDelete: "cascade" }),
+  tagId: varchar("tag_id").notNull().references(() => tags.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ✅ CONSOLIDADO: Tabela unificada para configurações (substitui taskStatuses e taskPriorities)
+export const configValues = pgTable("config_values", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  category: text("category").notNull(), // 'task_status', 'task_priority', etc.
+  key: text("key").notNull(),
   displayName: text("display_name").notNull(),
-  color: text("color").notNull().default("#3b82f6"),
-  isDefault: text("is_default").default("false"),
-  position: integer("position").notNull().default(0),
+  value: text("value"),
+  color: text("color").default("#3b82f6"),
+  level: integer("level").default(0),
+  isDefault: boolean("is_default").default(false), // ✅ OTIMIZADO: boolean real
+  isActive: boolean("is_active").default(true), // ✅ OTIMIZADO: boolean real
+  metadata: text("metadata").default("{}"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const taskPriorities = pgTable("task_priorities", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull().unique(),
-  displayName: text("display_name").notNull(),
-  color: text("color").notNull().default("#3b82f6"),
-  isDefault: text("is_default").default("false"),
-  level: integer("level").notNull().default(0), // 0=lowest, higher numbers = higher priority
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+// 📝 NOTA: taskStatuses e taskPriorities foram MIGRADAS para configValues
+// Use configValues com category='task_status' ou 'task_priority'
 
 // Task assignees many-to-many table
 export const taskAssignees = pgTable("task_assignees", {
@@ -174,13 +175,13 @@ export const customFields = pgTable("custom_fields", {
   name: text("name").notNull(),
   label: text("label").notNull(),
   type: text("type").notNull(), // text, number, date, select, boolean, url, email
-  required: text("required").default("false"),
+  required: boolean("required").default(false), // ✅ OTIMIZADO: boolean real
   options: text("options").array().default([]), // for select type
   boardIds: text("board_ids").array().default([]), // boards where this field applies
   placeholder: text("placeholder").default(""),
   validation: text("validation").default(""), // regex or validation rules
   position: integer("position").notNull().default(0),
-  isActive: text("is_active").default("true"),
+  isActive: boolean("is_active").default(true), // ✅ OTIMIZADO: boolean real
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -353,28 +354,7 @@ export const insertTaskEventSchema = createInsertSchema(taskEvents).omit({
   createdAt: true,
 });
 
-// Task auxiliary data schemas
-export const insertTaskStatusSchema = createInsertSchema(taskStatuses).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-}).extend({
-  name: z.string().min(1, "Nome obrigatório").trim(),
-  displayName: z.string().min(1, "Nome de exibição obrigatório").trim(),
-});
-
-export const updateTaskStatusSchema = insertTaskStatusSchema.partial();
-
-export const insertTaskPrioritySchema = createInsertSchema(taskPriorities).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-}).extend({
-  name: z.string().min(1, "Nome obrigatório").trim(),
-  displayName: z.string().min(1, "Nome de exibição obrigatório").trim(),
-});
-
-export const updateTaskPrioritySchema = insertTaskPrioritySchema.partial();
+// 📝 NOTA: Schemas taskStatus e taskPriority foram substituídos por configValue schemas
 
 // Custom Fields schemas
 export const insertCustomFieldSchema = createInsertSchema(customFields).omit({
@@ -390,9 +370,9 @@ export const insertCustomFieldSchema = createInsertSchema(customFields).omit({
     .refine((val) => val.length <= 50, { message: "Nome muito longo (máximo 50 caracteres)" }),
   label: z.string().min(1, "Rótulo obrigatório").trim(),
   type: z.enum(["text", "number", "date", "select", "boolean", "url", "email"], { message: "Tipo de campo inválido" }),
-  required: z.enum(["true", "false"]).default("false"),
+  required: z.boolean().default(false), // ✅ OTIMIZADO: boolean real
   boardIds: z.array(z.string()).min(1, "Selecione pelo menos um board").default([]),
-  isActive: z.enum(["true", "false"]).default("true"),
+  isActive: z.boolean().default(true), // ✅ OTIMIZADO: boolean real
 });
 
 export const updateCustomFieldSchema = insertCustomFieldSchema.partial();
@@ -405,13 +385,7 @@ export const insertTaskCustomValueSchema = createInsertSchema(taskCustomValues).
 
 export const updateTaskCustomValueSchema = insertTaskCustomValueSchema.partial();
 
-// Task auxiliary data types
-export type TaskStatus = typeof taskStatuses.$inferSelect;
-export type InsertTaskStatus = z.infer<typeof insertTaskStatusSchema>;
-export type UpdateTaskStatus = z.infer<typeof updateTaskStatusSchema>;
-export type TaskPriority = typeof taskPriorities.$inferSelect;
-export type InsertTaskPriority = z.infer<typeof insertTaskPrioritySchema>;
-export type UpdateTaskPriority = z.infer<typeof updateTaskPrioritySchema>;
+// 📝 NOTA: Types TaskStatus e TaskPriority foram substituídos por ConfigValue types
 
 // Custom Fields types
 export type CustomField = typeof customFields.$inferSelect;
@@ -428,7 +402,7 @@ export const notifications = pgTable("notifications", {
   title: text("title").notNull(),
   message: text("message").notNull(),
   type: text("type").notNull().default("info"), // info, success, warning, error
-  isRead: text("is_read").notNull().default("false"),
+  isRead: boolean("is_read").notNull().default(false), // ✅ OTIMIZADO: boolean real
   priority: text("priority").notNull().default("normal"), // low, normal, high, urgent
   category: text("category").default("general"), // general, system, task, board, team
   metadata: text("metadata").default("{}"), // JSON string for additional data
@@ -438,18 +412,47 @@ export const notifications = pgTable("notifications", {
   readAt: timestamp("read_at"),
 });
 
+// Schemas para novas tabelas otimizadas
+export const insertTaskTagSchema = createInsertSchema(taskTags).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertConfigValueSchema = createInsertSchema(configValues).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateConfigValueSchema = insertConfigValueSchema.partial();
+
 // Notification schemas
 export const insertNotificationSchema = createInsertSchema(notifications, {
   title: z.string().min(1, "Título é obrigatório"),
   message: z.string().min(1, "Mensagem é obrigatória"),
   type: z.enum(["info", "success", "warning", "error"]).default("info"),
   priority: z.enum(["low", "normal", "high", "urgent"]).default("normal"),
-  isRead: z.enum(["true", "false"]).default("false"),
+}).omit({
+  id: true,
+  createdAt: true,
+  readAt: true,
 });
 
 export const updateNotificationSchema = insertNotificationSchema.partial();
+
+// Tipos para novas tabelas otimizadas
+export type TaskTag = typeof taskTags.$inferSelect;
+export type InsertTaskTag = z.infer<typeof insertTaskTagSchema>;
+
+export type ConfigValue = typeof configValues.$inferSelect;
+export type InsertConfigValue = z.infer<typeof insertConfigValueSchema>;
+export type UpdateConfigValue = z.infer<typeof updateConfigValueSchema>;
 
 // Notification types
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type UpdateNotification = z.infer<typeof updateNotificationSchema>;
+
+// ✅ COMPATIBILIDADE: Aliases para facilitar migração
+// Nota: taskStatuses e taskPriorities ainda existem como tabelas legacy
+// Novas queries devem usar configValues com category='task_status'|'task_priority'

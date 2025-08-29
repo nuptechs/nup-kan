@@ -11,7 +11,7 @@
 import { BaseService, createSuccessResponse, createErrorResponse, PaginatedResponse, PaginationOptions } from "./baseService";
 import type { AuthContext } from "../microservices/authService";
 import type { TaskStatus, InsertTaskStatus, UpdateTaskStatus, TaskPriority, InsertTaskPriority, UpdateTaskPriority } from "@shared/schema";
-import { insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema } from "@shared/schema";
+import { insertConfigValueSchema, updateConfigValueSchema } from "@shared/schema";
 import { TTL } from "../cache";
 
 export interface TaskStatusCreateRequest {
