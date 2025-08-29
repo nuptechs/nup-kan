@@ -15,7 +15,7 @@
 import { storage } from "../storage";
 import { eventBus } from "../cqrs/events";
 import { cache } from "../cache";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 
 export abstract class BaseService {
   protected readonly storage = storage;

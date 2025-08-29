@@ -145,7 +145,6 @@ export class AuthController {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role,
           avatar: user.avatar,
           profileId: user.profileId,
           firstLogin: user.firstLogin
@@ -153,7 +152,7 @@ export class AuthController {
         tokens: {
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
-          expiresIn: authResult.tokens?.expiresIn
+          expiresIn: tokens.expiresIn
         },
         isAuthenticated: true,
         requiresPasswordChange: false
@@ -167,7 +166,7 @@ export class AuthController {
 
   static async currentUser(req: Request, res: Response) {
     try {
-      const { getUserWithPermissions } = await import('../auth/simpleAuth');
+      const { UnifiedAuthService } = await import('../auth/unifiedAuth');
       
       // Extrair userId da request (JWT ou session)
       let userId: string | null = null;
@@ -188,7 +187,7 @@ export class AuthController {
         return res.status(401).json({ message: "Não autenticado" });
       }
       
-      const user = await getUserWithPermissions(userId);
+      const user = await UnifiedAuthService.getUserWithPermissions(userId);
       if (!user) {
         return res.status(401).json({ message: "Usuário não encontrado" });
       }
@@ -198,9 +197,9 @@ export class AuthController {
         userName: user.name,
         userEmail: user.email,
         profileId: user.profileId,
-        profileName: user.profileName,
+        profileName: undefined, // Remover propriedade inexistente
         permissions: user.permissions,
-        teams: user.teams || [],
+        teams: [], // Remover propriedade inexistente
         isAuthenticated: true
       };
 
@@ -214,7 +213,7 @@ export class AuthController {
         profileName: authContext.profileName,
         avatar: authContext.userEmail, // Usando email como avatar temporário
         permissions: authContext.permissions,
-        teams: authContext.teams || []
+        teams: authContext.teams
       });
       
     } catch (error) {
@@ -258,7 +257,10 @@ export class AuthController {
       }
 
       const { JWTService } = await import('../services/jwtService');
-      const newTokens = await JWTService.refreshTokens(refreshToken);
+      // Precisa de uma função de getUserData para o refreshAccessToken
+      // Por enquanto, usar UnifiedAuthService que tem método próprio
+      const { UnifiedAuthService } = await import('../auth/unifiedAuth');
+      const newTokens = await UnifiedAuthService.refreshToken(refreshToken);
       
       console.log('✅ [REFRESH-TOKEN-JWT] Tokens renovados com sucesso');
       

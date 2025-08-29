@@ -1,6 +1,6 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { AuthMiddlewareJWT } from "../microservices/authServiceJWT";
+import { requireAuth } from "../auth/unifiedAuth";
 import { 
   boardService, 
   taskService, 
@@ -65,7 +65,7 @@ router.get("/system/health", async (req: Request, res: Response) => {
   });
 });
 
-router.get("/system/metrics", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.get("/system/metrics", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     
@@ -86,7 +86,7 @@ router.get("/system/metrics", AuthMiddlewareJWT.requireAuth, async (req: Request
 });
 
 // Performance stats route
-router.get("/performance-stats", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.get("/performance-stats", requireAuth, async (req: Request, res: Response) => {
   try {
     const { OptimizedQueries } = await import("../optimizedQueries");
     const stats = { queries: 0, cached: 0, performance: 'good' }; // Mock stats
@@ -97,7 +97,7 @@ router.get("/performance-stats", AuthMiddlewareJWT.requireAuth, async (req: Requ
 });
 
 // Analytics route
-router.get("/analytics", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.get("/analytics", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     
@@ -138,7 +138,7 @@ router.get("/boards/:boardId/columns", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/columns", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.get("/columns", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const columns = await columnService.getColumns(authContext);
@@ -148,7 +148,7 @@ router.get("/columns", AuthMiddlewareJWT.requireAuth, async (req: Request, res: 
   }
 });
 
-router.get("/columns/:id", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.get("/columns/:id", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const column = await columnService.getColumn(authContext, req.params.id);
@@ -161,7 +161,7 @@ router.get("/columns/:id", AuthMiddlewareJWT.requireAuth, async (req: Request, r
   }
 });
 
-router.post("/columns", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.post("/columns", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const column = await columnService.createColumn(authContext, req.body);
@@ -171,7 +171,7 @@ router.post("/columns", AuthMiddlewareJWT.requireAuth, async (req: Request, res:
   }
 });
 
-router.patch("/columns/:id", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.patch("/columns/:id", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const updatedColumn = await columnService.updateColumn(authContext, req.params.id, req.body);
@@ -184,7 +184,7 @@ router.patch("/columns/:id", AuthMiddlewareJWT.requireAuth, async (req: Request,
   }
 });
 
-router.delete("/columns/:id", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.delete("/columns/:id", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     await columnService.deleteColumn(authContext, req.params.id);
@@ -197,7 +197,7 @@ router.delete("/columns/:id", AuthMiddlewareJWT.requireAuth, async (req: Request
   }
 });
 
-router.post("/columns/reorder", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.post("/columns/reorder", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const result = await columnService.reorderColumns(authContext, req.body);
@@ -208,7 +208,7 @@ router.post("/columns/reorder", AuthMiddlewareJWT.requireAuth, async (req: Reque
 });
 
 // Tags routes
-router.get("/tags", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.get("/tags", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const tags = await tagService.getTags(authContext);
@@ -218,7 +218,7 @@ router.get("/tags", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Res
   }
 });
 
-router.get("/tags/:id", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.get("/tags/:id", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const tag = await tagService.getTag(authContext, req.params.id);
@@ -231,7 +231,7 @@ router.get("/tags/:id", AuthMiddlewareJWT.requireAuth, async (req: Request, res:
   }
 });
 
-router.post("/tags", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.post("/tags", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const tag = await tagService.createTag(authContext, req.body);
@@ -241,7 +241,7 @@ router.post("/tags", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Re
   }
 });
 
-router.put("/tags/:id", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.put("/tags/:id", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const updatedTag = await tagService.updateTag(authContext, req.params.id, req.body);
@@ -254,7 +254,7 @@ router.put("/tags/:id", AuthMiddlewareJWT.requireAuth, async (req: Request, res:
   }
 });
 
-router.delete("/tags/:id", AuthMiddlewareJWT.requireAuth, async (req: Request, res: Response) => {
+router.delete("/tags/:id", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     await tagService.deleteTag(authContext, req.params.id);

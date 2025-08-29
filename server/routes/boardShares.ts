@@ -1,17 +1,17 @@
 import { Router } from "express";
 import { BoardController } from "../controllers/boardController";
-import { AuthMiddlewareJWT } from "../microservices/authServiceJWT";
+import { requireAuth, requirePermission } from "../auth/unifiedAuth";
 
 const router = Router();
 
 // Middleware de autenticação aplicado a todas as rotas
-router.use(AuthMiddlewareJWT.requireAuth);
+router.use(requireAuth);
 
 // Board sharing routes
 router.get("/", BoardController.getAllBoardShares);
-router.post("/", AuthMiddlewareJWT.requirePermissions("Gerenciar Times"), BoardController.createBoardShare);
-router.patch("/:id", AuthMiddlewareJWT.requirePermissions("Gerenciar Times"), BoardController.updateBoardShare);
-router.delete("/:id", AuthMiddlewareJWT.requirePermissions("Gerenciar Times"), BoardController.deleteBoardShare);
+router.post("/", requirePermission("Gerenciar Times"), BoardController.createBoardShare);
+router.patch("/:id", requirePermission("Gerenciar Times"), BoardController.updateBoardShare);
+router.delete("/:id", requirePermission("Gerenciar Times"), BoardController.deleteBoardShare);
 
 // User and team board shares
 router.get("/users/:userId/shared-boards", BoardController.getUserSharedBoards);

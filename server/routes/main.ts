@@ -16,7 +16,7 @@ import { OptimizedQueries } from "../optimizedQueries";
 import { cache } from "../cache";
 
 // 🚀 MICROSERVIÇOS IMPORTADOS
-import { UnifiedAuthService, auth, requireAuth, requirePermission, AuthRequest } from '../auth/unifiedAuth';
+import { UnifiedAuthService, requireAuth, requirePermission, AuthRequest } from '../auth/unifiedAuth';
 // MongoDB removido - usando apenas PostgreSQL
 
 // Helper para criar AuthContext a partir da request
@@ -361,7 +361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Notification routes
-  app.get("/api/notifications", auth, requireAuth, async (req, res) => {
+  app.get("/api/notifications", requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const notifications = await notificationService.getNotifications(authContext);
@@ -371,7 +371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/notifications/unread-count", auth, requireAuth, async (req, res) => {
+  app.get("/api/notifications/unread-count", requireAuth, async (req, res) => {
     try {
       const authContext = createAuthContextFromRequest(req);
       const count = await notificationService.getUnreadCount(authContext);

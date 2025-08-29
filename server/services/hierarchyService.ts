@@ -15,7 +15,7 @@
  */
 
 import { BaseService } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { Permission, Profile, Team, User } from "@shared/schema";
 import { TTL } from "../cache";
 
@@ -118,7 +118,7 @@ export class HierarchyService extends BaseService {
         teams: validTeamsWithProfiles,
         allPermissions: permissionResolution.combinedPermissions,
         effectiveRoles: [
-          user.role || 'user',
+          'user', // Removido user.role pois não existe no schema
           ...validTeamsWithProfiles.map(t => `${t.team.name}:${t.role}`)
         ]
       };
