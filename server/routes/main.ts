@@ -3,22 +3,22 @@ import { createServer, type Server } from "http";
 import bcrypt from "bcryptjs";
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import { storage } from "./storage";
-import { db } from "./db";
+import { storage } from "../storage";
+import { db } from "../db";
 import { insertBoardSchema, updateBoardSchema, insertTaskSchema, updateTaskSchema, insertColumnSchema, updateColumnSchema, insertTagSchema, insertTeamSchema, updateTeamSchema, insertUserSchema, updateUserSchema, insertProfileSchema, updateProfileSchema, insertPermissionSchema, insertProfilePermissionSchema, insertTeamProfileSchema, insertBoardShareSchema, updateBoardShareSchema, insertTaskStatusSchema, updateTaskStatusSchema, insertTaskPrioritySchema, updateTaskPrioritySchema, insertTaskAssigneeSchema, insertCustomFieldSchema, updateCustomFieldSchema, insertTaskCustomValueSchema, updateTaskCustomValueSchema, customFields, taskCustomValues, insertNotificationSchema, updateNotificationSchema } from "@shared/schema";
 
 // 🏗️ SERVICES - Camada única oficial de persistência
-import { boardService, taskService, userService, teamService, notificationService, columnService, tagService, profileService, permissionService, boardShareService, taskStatusService, userTeamService, taskEventService, exportService, teamProfileService, assigneeService, hierarchyService } from "./services";
+import { boardService, taskService, userService, teamService, notificationService, columnService, tagService, profileService, permissionService, boardShareService, taskStatusService, userTeamService, taskEventService, exportService, teamProfileService, assigneeService, hierarchyService } from "../services";
 import { eq, sql, and } from "drizzle-orm";
-import { sendWelcomeEmail, sendNotificationEmail } from "./emailService";
-import { PermissionSyncService } from "./permissionSync";
-import { OptimizedQueries, PerformanceStats } from "./optimizedQueries";
-import { cache } from "./cache";
+import { sendWelcomeEmail, sendNotificationEmail } from "../emailService";
+import { PermissionSyncService } from "../permissionSync";
+import { OptimizedQueries, PerformanceStats } from "../optimizedQueries";
+import { cache } from "../cache";
 
 // 🚀 MICROSERVIÇOS IMPORTADOS
-import { AuthMiddleware, AuthService } from './microservices/authService';
-import { AuthServiceJWT, AuthMiddlewareJWT } from './microservices/authServiceJWT';
-import { mongoStore } from './mongodb';
+import { AuthMiddleware, AuthService } from '../microservices/authService';
+import { AuthServiceJWT, AuthMiddlewareJWT } from '../microservices/authServiceJWT';
+import { mongoStore } from '../mongodb';
 
 // Helper para criar AuthContext a partir da request
 function createAuthContextFromRequest(req: any): any {
@@ -64,8 +64,8 @@ function createAuthContextFromRequest(req: any): any {
 export async function registerRoutes(app: Express): Promise<Server> {
   // 🏗️ NOVA ARQUITETURA DE ROTAS MODULAR
   // Importar rotas separadas por domínio
-  const apiRoutes = (await import('./routes/index')).default;
-  const remainingRoutes = (await import('./routes/remaining')).default;
+  const apiRoutes = (await import('./api')).default;
+  const remainingRoutes = (await import('./remaining')).default;
 
   // Registrar todas as rotas sob /api
   app.use('/api', apiRoutes);
