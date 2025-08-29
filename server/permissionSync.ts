@@ -395,10 +395,10 @@ export class PermissionSyncService {
       
       // 4. Obter permissões existentes
       const existingPermissions = await storage.getPermissions();
-      const existingPermissionIds = new Set(existingPermissions.map(p => p.id));
+      const existingPermissionNames = new Set(existingPermissions.map(p => p.name));
       
-      // 5. Identificar permissões a serem criadas
-      const permissionsToCreate = newPermissions.filter(p => !existingPermissionIds.has(p.id));
+      // 5. Identificar permissões a serem criadas (comparar por nome, não por ID)
+      const permissionsToCreate = newPermissions.filter(p => !existingPermissionNames.has(p.name));
       
       // 6. Criar novas permissões e atribuir ao perfil administrador
       let createdCount = 0;
@@ -436,9 +436,30 @@ export class PermissionSyncService {
       
       // 8. Identificar permissões órfãs (que não correspondem a funcionalidades ativas)
       const orphanPermissions = existingPermissions.filter(p => 
-        !newPermissions.some(np => np.id === p.id) && 
+        !newPermissions.some(np => np.name === p.name) && 
         activeCategories.has(p.category)
       );
+      
+      // 9. CRÍTICO: Atribuir permissões existentes que não estão no perfil administrador
+      const adminPermissions = await storage.getProfilePermissions(adminProfile.id);
+      const adminPermissionIds = new Set(adminPermissions.map(pp => pp.permissionId));
+      
+      const existingPermissionsToAssign = existingPermissions.filter(p => 
+        newPermissions.some(np => np.name === p.name) && 
+        !adminPermissionIds.has(p.id)
+      );
+      
+      console.log(`🔧 [PERMISSION SYNC] ${existingPermissionsToAssign.length} permissões existentes precisam ser atribuídas ao administrador`);
+      
+      for (const permission of existingPermissionsToAssign) {
+        try {
+          await storage.addPermissionToProfile(adminProfile.id, permission.id);
+          assignedCount++;
+          console.log(`🔗 [PERMISSION SYNC] Permissão existente "${permission.name}" atribuída ao perfil "${adminProfile.name}"`);
+        } catch (assignError) {
+          console.error(`❌ [PERMISSION SYNC] Erro ao atribuir permissão existente ${permission.id} ao perfil administrador:`, assignError);
+        }
+      }
       
       if (orphanPermissions.length > 0) {
         console.log(`⚠️ [PERMISSION SYNC] ${orphanPermissions.length} permissões órfãs detectadas:`, 
