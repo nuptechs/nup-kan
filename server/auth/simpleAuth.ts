@@ -74,7 +74,7 @@ export async function getUserWithPermissions(userId: string): Promise<User | nul
         profileId: users.profileId,
         permissions: sql<string[]>`
           COALESCE(
-            ARRAY_AGG(DISTINCT p.name) FILTER (WHERE p.name IS NOT NULL),
+            ARRAY_AGG(DISTINCT permissions.name) FILTER (WHERE permissions.name IS NOT NULL),
             ARRAY[]::text[]
           )
         `
