@@ -15,14 +15,14 @@ export function usePermissions() {
       const errorInstance = userError instanceof Error ? userError : new Error(String(userError));
       const permissionError = PermissionErrors.authContextCorrupted(
         errorInstance, 
-        currentUser?.id
+        currentUser?.id || 'unknown'
       );
       console.error('🚨 [PERMISSION-INTEGRITY] Erro crítico detectado:', permissionError.toJSON());
     }
   }, [userError, userLoading, currentUser?.id]);
 
-  // ✅ CORREÇÃO: Usar permissões estruturadas do servidor
-  const userPermissions: Permission[] = useMemo(() => {
+  // ✅ CORREÇÃO: Usar permissões do servidor (formato string array)
+  const userPermissions: string[] = useMemo(() => {
     // 1. Estados explícitos durante carregamento
     if (userLoading) {
       return [];
@@ -33,13 +33,16 @@ export function usePermissions() {
       return [];
     }
 
-    const permissionObjects = (currentUser as any)?.permissionObjects;
+    // ✅ CORREÇÃO: A API retorna permissions como array de strings, não permissionObjects
+    const permissionStrings = (currentUser as any)?.permissions || [];
+    const permissionObjects = permissionStrings;
 
     // 3. Validação de integridade
     if (!Array.isArray(permissionObjects)) {
       console.error('🚨 [PERMISSION-INTEGRITY] Dados de permissões corrompidos:', {
         userId: currentUser?.id,
         permissionObjects: typeof permissionObjects,
+        permissionStrings: typeof permissionStrings,
         currentUser: !!currentUser
       });
       return [];
@@ -48,7 +51,7 @@ export function usePermissions() {
     // 4. Log para auditoria
     console.log(`🔐 [PERMISSIONS] Usuário ${currentUser.id} tem ${permissionObjects.length} permissões`);
 
-    return permissionObjects;
+    return permissionObjects; // Agora é array de strings
   }, [currentUser, userLoading, userError]);
 
   // Estados explícitos
@@ -56,13 +59,12 @@ export function usePermissions() {
   const error = userError;
 
   const permissionMap = useMemo(() => {
-    const map = new Map<string, Permission>();
+    const map = new Map<string, boolean>();
     // Garantir que userPermissions é um array antes de fazer forEach
     if (Array.isArray(userPermissions)) {
-      userPermissions.forEach(permission => {
-        map.set(permission.name, permission);
-        // Também indexar por categoria:nome para facilitar verificações
-        map.set(`${permission.category}:${permission.name}`, permission);
+      userPermissions.forEach(permissionName => {
+        // Como agora são strings, mapear diretamente
+        map.set(permissionName, true);
       });
     }
     return map;
@@ -72,11 +74,11 @@ export function usePermissions() {
     if (!currentUser || !permissionName) return false;
     
     // Verificar ambas as versões (português e inglês) para compatibilidade
-    const hasPermissionResult = permissionMap.has(permissionName) || 
-           permissionMap.has(permissionName.replace("Tarefas", "Tasks")) ||
-           permissionMap.has(permissionName.replace("Tasks", "Tarefas"));
+    const hasPermissionResult = permissionMap.get(permissionName) || 
+           permissionMap.get(permissionName.replace("Tarefas", "Tasks")) ||
+           permissionMap.get(permissionName.replace("Tasks", "Tarefas"));
     
-    return hasPermissionResult;
+    return !!hasPermissionResult;
   };
 
   const hasAnyPermission = (permissionNames: string[]): boolean => {
@@ -115,11 +117,13 @@ export function usePermissions() {
   };
 
   const hasPermissionInCategory = (category: string): boolean => {
-    return Array.isArray(userPermissions) ? userPermissions.some(permission => permission.category === category) : false;
+    // Para strings, verificar se alguma permissão contém a categoria
+    return Array.isArray(userPermissions) ? userPermissions.some(permission => permission.includes(category)) : false;
   };
 
-  const getPermissionsInCategory = (category: string): Permission[] => {
-    return Array.isArray(userPermissions) ? userPermissions.filter(permission => permission.category === category) : [];
+  const getPermissionsInCategory = (category: string): string[] => {
+    // Para strings, filtrar permissões que contêm a categoria
+    return Array.isArray(userPermissions) ? userPermissions.filter(permission => permission.includes(category)) : [];
   };
 
   // Memoizar verificações de permissão para melhor performance
@@ -157,22 +161,26 @@ export function usePermissions() {
 
   // ✅ THROW ERROR PARA ESTADOS CRÍTICOS
   const throwCriticalError = (errorType: keyof typeof PermissionErrors) => {
-    const error = PermissionErrors[errorType](currentUser?.id);
+    const error = PermissionErrors[errorType](currentUser?.id || 'unknown');
     throw error;
   };
 
   // ✅ VALIDAÇÃO ROBUSTA DE ESTADO
   const validateSystemState = () => {
     if (error && !isLoading) {
-      throwCriticalError('authContextCorrupted');
+      const errorInstance = error instanceof Error ? error : new Error(String(error));
+      const permissionError = PermissionErrors.authContextCorrupted(errorInstance, currentUser?.id || 'unknown');
+      throw permissionError;
     }
     
     if (!isLoading && !currentUser) {
-      throwCriticalError('userDataMissing');
+      const permissionError = PermissionErrors.userDataMissing(currentUser?.id || 'unknown');
+      throw permissionError;
     }
     
     if (!isLoading && !Array.isArray(userPermissions)) {
-      throwCriticalError('permissionDataCorrupted');
+      const permissionError = PermissionErrors.permissionDataCorrupted(currentUser?.id || 'unknown');
+      throw permissionError;
     }
   };
 
