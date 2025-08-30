@@ -17,5 +17,4 @@ router.delete("/:id", requirePermission("Excluir Boards"), BoardController.delet
 // Board status management
 router.patch("/:id/toggle-status", requirePermission("Editar Boards"), BoardController.toggleBoardStatus);
 
-
 export default router;

@@ -8,10 +8,10 @@ const router = Router();
 router.use(requireAuth);
 
 // Board share CRUD operations
-router.get("/", BoardController.getAllBoardShares);
-router.post("/", requirePermission("Gerenciar Times"), BoardController.createBoardShare);
-router.patch("/:id", requirePermission("Gerenciar Times"), BoardController.updateBoardShare);
-router.delete("/:id", requirePermission("Gerenciar Times"), BoardController.deleteBoardShare);
+router.get("/", requirePermission("Listar Boards"), BoardController.getAllBoardShares);
+router.post("/", requirePermission("Editar Boards"), BoardController.createBoardShare);
+router.patch("/:id", requirePermission("Editar Boards"), BoardController.updateBoardShare);
+router.delete("/:id", requirePermission("Editar Boards"), BoardController.deleteBoardShare);
 
 // Board-specific sharing information
 router.get("/boards/:boardId/shares", BoardController.getBoardShares);
