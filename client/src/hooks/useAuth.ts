@@ -127,7 +127,8 @@ export function useAuth() {
         createdAt: new Date(),
         updatedAt: new Date(),
         // ✅ INCLUIR PERMISSÕES NO OBJETO USER (como propriedade extra)
-        permissions: authResponse.permissions || []
+        permissions: authResponse.permissions || [],
+        permissionObjects: authResponse.permissionObjects || [] // ✅ Adicionar permissionObjects
       };
       
       
@@ -172,5 +173,6 @@ export function useAuth() {
     isLoading,
     error,
     isAuthenticated,
+    authResponse, // ✅ Expor authResponse para usePermissions
   };
 }

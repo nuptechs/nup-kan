@@ -15,29 +15,9 @@ export function usePermissions() {
   const permissionsLoading = false;
   const permissionsError = null;
 
-  // Converter array de strings para array de objetos Permission
+  // ✅ CORREÇÃO: Usar permissões estruturadas do servidor
   const userPermissions: Permission[] = useMemo(() => {
-    // Usar diretamente currentUser.permissions
-    const permissionsArray = (currentUser as any)?.permissions;
-    
-    if (!permissionsArray || !Array.isArray(permissionsArray)) {
-      return [];
-    }
-    return permissionsArray.map((permissionName: string) => ({
-      id: permissionName.toLowerCase().replace(/\s+/g, '-'),
-      name: permissionName,
-      category: permissionName.includes('Board') ? 'boards' : 
-                permissionName.includes('Task') || permissionName.includes('Tarefa') ? 'tasks' :
-                permissionName.includes('User') || permissionName.includes('Usuário') ? 'users' :
-                permissionName.includes('Team') || permissionName.includes('Time') ? 'teams' :
-                permissionName.includes('Profile') || permissionName.includes('Perfil') ? 'profiles' :
-                permissionName.includes('Permission') || permissionName.includes('Permissão') ? 'permissions' :
-                permissionName.includes('Analytics') ? 'analytics' :
-                permissionName.includes('Column') || permissionName.includes('Coluna') ? 'columns' :
-                'general',
-      description: `Permissão para ${permissionName}`,
-      createdAt: new Date(),
-    }));
+    return (currentUser as any)?.permissionObjects || [];
   }, [currentUser]);
 
   // Log de segurança - detectar tentativas de acesso sem permissão
