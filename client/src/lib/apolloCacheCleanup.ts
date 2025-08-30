@@ -21,7 +21,13 @@ export class ApolloCacheCleanup {
     '__APOLLO_CLIENT__',
     'apollo-link-state-cache',
     'apollo-cache-inmemory',
-    'APOLLO_CACHE_PERSIST'
+    'APOLLO_CACHE_PERSIST',
+    'apollo-state-cache',
+    'apollo-client-state',
+    'apollo-graphql-cache',
+    'graphql-cache',
+    'notification-alert-cache',
+    'apollo-notification'
   ];
 
   private static readonly APOLLO_STORAGE_PATTERNS = [
@@ -29,7 +35,11 @@ export class ApolloCacheCleanup {
     /^__apollo/i,
     /^graphql/i,
     /cache.*apollo/i,
-    /apollo.*cache/i
+    /apollo.*cache/i,
+    /notification.*alert/i,
+    /apollo.*notification/i,
+    /^_app-.*\.js$/,
+    /^gql/i
   ];
 
   /**
@@ -233,13 +243,42 @@ export class ApolloCacheCleanup {
    * Initialize cleanup on app start - run automatically
    */
   static async initCleanup(): Promise<void> {
-    // Only run cleanup once per session
-    const cleanupKey = 'apollo-cleanup-v1';
-    const hasRun = sessionStorage.getItem(cleanupKey);
+    // Force cleanup on every page load to ensure no Apollo artifacts remain
+    // This is more aggressive but necessary to prevent the error
+    await this.cleanup();
     
-    if (!hasRun) {
-      await this.cleanup();
-      sessionStorage.setItem(cleanupKey, 'true');
+    // Also perform a deep clean of all storage
+    await this.deepClean();
+  }
+  
+  /**
+   * Perform a deep clean of all storage mechanisms
+   */
+  private static async deepClean(): Promise<void> {
+    try {
+      // Clear ALL localStorage items that might contain Apollo data
+      const localStorageKeys = Object.keys(localStorage);
+      localStorageKeys.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value && (value.includes('apollo') || value.includes('graphql') || value.includes('notification') || value.includes('alert'))) {
+          localStorage.removeItem(key);
+          console.log(`🗑️ [APOLLO-CLEANUP] Deep clean removed localStorage key: ${key}`);
+        }
+      });
+      
+      // Clear ALL sessionStorage items that might contain Apollo data
+      const sessionStorageKeys = Object.keys(sessionStorage);
+      sessionStorageKeys.forEach(key => {
+        const value = sessionStorage.getItem(key);
+        if (value && (value.includes('apollo') || value.includes('graphql') || value.includes('notification') || value.includes('alert'))) {
+          sessionStorage.removeItem(key);
+          console.log(`🗑️ [APOLLO-CLEANUP] Deep clean removed sessionStorage key: ${key}`);
+        }
+      });
+      
+      console.log('✅ [APOLLO-CLEANUP] Deep clean completed');
+    } catch (error) {
+      console.error('❌ [APOLLO-CLEANUP] Error during deep clean:', error);
     }
   }
 
@@ -259,12 +298,50 @@ export class ApolloCacheCleanup {
   }
 }
 
-// Auto-initialize cleanup when module loads
+// Auto-initialize cleanup when module loads - run immediately to prevent errors
 if (typeof window !== 'undefined') {
-  // Run cleanup after a short delay to avoid blocking initial render
-  setTimeout(() => {
-    ApolloCacheCleanup.initCleanup();
-  }, 100);
+  // Run cleanup immediately to prevent Apollo errors
+  ApolloCacheCleanup.initCleanup().catch(error => {
+    console.error('Failed to run initial Apollo cleanup:', error);
+  });
+  
+  // Also clear any global Apollo references
+  try {
+    // Remove any global Apollo client references
+    if ('__APOLLO_CLIENT__' in window) {
+      delete (window as any).__APOLLO_CLIENT__;
+    }
+    if ('__APOLLO_DEVTOOLS_GLOBAL_HOOK__' in window) {
+      delete (window as any).__APOLLO_DEVTOOLS_GLOBAL_HOOK__;
+    }
+    if ('__APOLLO_STATE__' in window) {
+      delete (window as any).__APOLLO_STATE__;
+    }
+    
+    // Clear any Apollo-related properties from window
+    Object.keys(window).forEach(key => {
+      if (key.toLowerCase().includes('apollo') || key.toLowerCase().includes('graphql')) {
+        try {
+          delete (window as any)[key];
+        } catch (e) {
+          // Some properties might be non-configurable
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Failed to clear global Apollo references:', error);
+  }
 }
 
+// Export both the class and a convenience function for manual cleanup
 export { ApolloCacheCleanup as apolloCleanup };
+
+// Add global function for manual cleanup from browser console
+if (typeof window !== 'undefined') {
+  (window as any).clearApolloCache = async () => {
+    console.log('🚀 Running manual Apollo cache cleanup...');
+    await ApolloCacheCleanup.forceCleanup();
+  };
+  
+  console.log('%c💡 Tip: If you see Apollo errors, run clearApolloCache() in the console', 'color: #3b82f6; font-weight: bold');
+}
