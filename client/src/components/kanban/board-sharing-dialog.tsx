@@ -59,7 +59,7 @@ export function BoardSharingDialog({ board, open, onOpenChange }: BoardSharingDi
 
   // Queries
   const { data: shares = [] } = useQuery<BoardShare[]>({
-    queryKey: [`/api/boards/${board.id}/shares`],
+    queryKey: [`/api/board-shares/boards/${board.id}/shares`],
     enabled: open,
   });
 
@@ -88,9 +88,9 @@ export function BoardSharingDialog({ board, open, onOpenChange }: BoardSharingDi
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/shares`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/member-count`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/members`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/board-shares/boards/${board.id}/shares`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/board-shares/boards/${board.id}/member-count`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/board-shares/boards/${board.id}/members`] });
       form.reset();
       onOpenChange(false); // Fecha o modal automaticamente
       toast({
@@ -112,9 +112,9 @@ export function BoardSharingDialog({ board, open, onOpenChange }: BoardSharingDi
       await apiRequest("DELETE", `/api/board-shares/${shareId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/shares`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/member-count`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/members`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/board-shares/boards/${board.id}/shares`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/board-shares/boards/${board.id}/member-count`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/board-shares/boards/${board.id}/members`] });
       toast({
         title: "Compartilhamento removido",
         description: "O acesso ao board foi removido.",
