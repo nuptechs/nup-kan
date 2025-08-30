@@ -36,11 +36,13 @@ export class OptimizedQueries {
         return null;
       }
 
-      // Buscar permissões separadamente
+      // ✅ CORREÇÃO: Retornar objetos Permission completos
       const userPermissions = await db
         .select({
+          id: permissions.id,
           name: permissions.name,
           category: permissions.category,
+          description: permissions.description,
         })
         .from(permissions)
         .innerJoin(profilePermissions, eq(permissions.id, profilePermissions.permissionId))
@@ -51,7 +53,8 @@ export class OptimizedQueries {
       const user = userData[0];
       const result = {
         ...user,
-        permissions: userPermissions.map(p => p.name),
+        permissions: userPermissions.map(p => p.name), // Array de strings para compatibilidade
+        permissionObjects: userPermissions, // Objetos Permission completos
         permissionCategories: Array.from(new Set(userPermissions.map(p => p.category))),
       };
 
