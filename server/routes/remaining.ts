@@ -1,60 +1,16 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { requireAuth } from "../auth/unifiedAuth";
+import { requireAuth, requirePermission } from "../auth/unifiedAuth";
 import { 
   boardService, 
-  taskService, 
   userService, 
-  teamService, 
-  notificationService, 
   columnService, 
-  tagService, 
-  profileService, 
-  permissionService,
-  taskStatusService,
-  hierarchyService,
-  exportService
+  tagService
 } from "../services";
+import { createAuthContextFromRequest } from "../utils/authUtils";
 
 const router = Router();
 
-// Helper para criar AuthContext a partir da request
-function createAuthContextFromRequest(req: any): any {
-  const authContextJWT = req.authContext;
-  if (authContextJWT) {
-    return {
-      userId: authContextJWT.userId,
-      userName: authContextJWT.userName,
-      userEmail: authContextJWT.userEmail,
-      permissions: authContextJWT.permissions,
-      permissionCategories: authContextJWT.permissionCategories,
-      profileId: authContextJWT.profileId || '',
-      profileName: authContextJWT.profileName,
-      teams: authContextJWT.teams,
-      sessionId: `jwt-${authContextJWT.userId}-${Date.now()}`,
-      isAuthenticated: authContextJWT.isAuthenticated,
-      lastActivity: authContextJWT.lastActivity
-    };
-  }
-  
-  const userId = req.session?.user?.id || req.session?.userId;
-  const user = req.user;
-  const permissions = req.userPermissions || [];
-  
-  return {
-    userId: userId,
-    userName: user?.name || 'Unknown',
-    userEmail: user?.email || '',
-    permissions: permissions.map((p: any) => p.name),
-    permissionCategories: Array.from(new Set(permissions.map((p: any) => p.category))),
-    profileId: user?.profileId || '',
-    profileName: null,
-    teams: [],
-    sessionId: req.session?.id || 'no-session',
-    isAuthenticated: !!userId,
-    lastActivity: new Date()
-  };
-}
 
 // System routes
 router.get("/system/health", async (req: Request, res: Response) => {
@@ -88,8 +44,13 @@ router.get("/system/metrics", requireAuth, async (req: Request, res: Response) =
 // Performance stats route
 router.get("/performance-stats", requireAuth, async (req: Request, res: Response) => {
   try {
-    const { OptimizedQueries } = await import("../optimizedQueries");
-    const stats = { queries: 0, cached: 0, performance: 'good' }; // Mock stats
+    // Simples resposta de performance - pode ser expandida no futuro
+    const stats = { 
+      queries: 0, 
+      cached: 0, 
+      performance: 'good',
+      timestamp: new Date().toISOString()
+    };
     res.json(stats);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch performance stats" });
@@ -127,7 +88,7 @@ router.get("/analytics", requireAuth, async (req: Request, res: Response) => {
 });
 
 // Columns routes
-router.get("/boards/:boardId/columns", async (req: Request, res: Response) => {
+router.get("/boards/:boardId/columns", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const columns = await columnService.getColumns(authContext);
@@ -161,7 +122,7 @@ router.get("/columns/:id", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.post("/columns", requireAuth, async (req: Request, res: Response) => {
+router.post("/columns", requireAuth, requirePermission("Criar Colunas"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const column = await columnService.createColumn(authContext, req.body);
@@ -171,7 +132,7 @@ router.post("/columns", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.patch("/columns/:id", requireAuth, async (req: Request, res: Response) => {
+router.patch("/columns/:id", requireAuth, requirePermission("Editar Colunas"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const updatedColumn = await columnService.updateColumn(authContext, req.params.id, req.body);
@@ -184,7 +145,7 @@ router.patch("/columns/:id", requireAuth, async (req: Request, res: Response) =>
   }
 });
 
-router.delete("/columns/:id", requireAuth, async (req: Request, res: Response) => {
+router.delete("/columns/:id", requireAuth, requirePermission("Excluir Colunas"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     await columnService.deleteColumn(authContext, req.params.id);
@@ -197,7 +158,7 @@ router.delete("/columns/:id", requireAuth, async (req: Request, res: Response) =
   }
 });
 
-router.post("/columns/reorder", requireAuth, async (req: Request, res: Response) => {
+router.post("/columns/reorder", requireAuth, requirePermission("Editar Colunas"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const result = await columnService.reorderColumns(authContext, req.body);
@@ -231,7 +192,7 @@ router.get("/tags/:id", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.post("/tags", requireAuth, async (req: Request, res: Response) => {
+router.post("/tags", requireAuth, requirePermission("Criar Tags"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const tag = await tagService.createTag(authContext, req.body);
@@ -241,7 +202,7 @@ router.post("/tags", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.put("/tags/:id", requireAuth, async (req: Request, res: Response) => {
+router.put("/tags/:id", requireAuth, requirePermission("Editar Tags"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const updatedTag = await tagService.updateTag(authContext, req.params.id, req.body);
@@ -254,7 +215,7 @@ router.put("/tags/:id", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/tags/:id", requireAuth, async (req: Request, res: Response) => {
+router.delete("/tags/:id", requireAuth, requirePermission("Excluir Tags"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     await tagService.deleteTag(authContext, req.params.id);
