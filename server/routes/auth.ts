@@ -12,7 +12,5 @@ router.get("/current-user", AuthController.currentUser);
 router.post("/logout", AuthController.logout);
 router.post("/refresh-token", AuthController.refreshToken);
 
-// Novas rotas unificadas (migradas do unifiedAuth.ts)
-router.post("/refresh", AuthController.refreshToken); // Alias para compatibilidade
 
 export default router;

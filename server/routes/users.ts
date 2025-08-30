@@ -4,11 +4,11 @@ import { requireAuth, requirePermission } from "../auth/unifiedAuth";
 
 const router = Router();
 
-// Routes that don't require authentication
-router.get("/me", UserController.getCurrentUser);
-
-// Apply authentication middleware to remaining routes  
+// Apply authentication middleware to all routes
 router.use(requireAuth);
+
+// Current user route (requires authentication)
+router.get("/me", UserController.getCurrentUser);
 
 // User CRUD routes
 router.get("/", requirePermission("Listar Usuários"), UserController.getUsers);
