@@ -14,26 +14,29 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// 🔥 CONNECTION POOL DE ALTA PERFORMANCE - SISTEMA DE PONTA
+// 🔥 CONNECTION POOL ESTÁVEL - OTIMIZADO PARA DESENVOLVIMENTO
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
   
-  // 🚀 POOL OTIMIZADO PARA LATÊNCIA MÍNIMA
-  max: 50,              // 50 conexões para alta concorrência
-  min: 10,              // 10 conexões sempre ativas
-  idleTimeoutMillis: 30000,     // 30s idle (mais tempo)
-  connectionTimeoutMillis: 10000, // 10s timeout (mais robusto)
+  // 🚀 POOL EQUILIBRADO PARA ESTABILIDADE
+  max: 20,              // 20 conexões máximas (reduzido)
+  min: 2,               // 2 conexões mínimas (mais eficiente)
+  idleTimeoutMillis: 60000,     // 60s idle (mais tempo para dev)
+  connectionTimeoutMillis: 20000, // 20s timeout (mais tolerante)
   
-  // 🔧 OTIMIZAÇÕES NEON DE PONTA
+  // 🔧 OTIMIZAÇÕES NEON ESTÁVEIS
   allowExitOnIdle: false,
   
-  // 🎯 CONFIGURAÇÕES DE PERFORMANCE
-  statement_timeout: 5000,      // 5s para statements
-  idle_in_transaction_session_timeout: 10000, // 10s para transações idle
+  // 🎯 CONFIGURAÇÕES BALANCEADAS
+  statement_timeout: 30000,      // 30s para statements (mais tempo)
+  idle_in_transaction_session_timeout: 30000, // 30s para transações idle
   
-  // ⚡ KEEP-ALIVE OTIMIZADO
+  // ⚡ KEEP-ALIVE BALANCEADO
   keepAlive: true,
-  keepAliveInitialDelayMillis: 10000,
+  keepAliveInitialDelayMillis: 5000, // 5s inicial (reduzido)
+  
+  // 🛡️ CONFIGURAÇÕES DE SEGURANÇA
+  maxUses: Infinity,
 });
 
 export const db = drizzle({ client: pool, schema });
