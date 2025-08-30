@@ -17,7 +17,6 @@ class CacheManager {
         url: process.env.REDIS_URL || 'redis://localhost:6379',
         socket: {
           keepAlive: true,
-          reconnectDelay: 100,
         },
       });
       await this.redis.connect();

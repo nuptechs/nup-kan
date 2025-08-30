@@ -82,8 +82,10 @@ export class ProfileService extends BaseService {
       const validData = insertProfileSchema.parse(request);
       const profile = await this.storage.createProfile(validData);
 
-      // Invalidar cache
+      // ✅ INVALIDAÇÃO COORDENADA: Perfis + contexto de usuário
       await this.invalidateCache(['profiles:all']);
+      const { UnifiedAuthService } = await import('../auth/unifiedAuth');
+      await UnifiedAuthService.invalidateAllUserCaches();
 
       this.emitEvent('profile.created', {
         profileId: profile.id,
@@ -115,8 +117,10 @@ export class ProfileService extends BaseService {
       const validData = updateProfileSchema.parse(request);
       const updatedProfile = await this.storage.updateProfile(profileId, validData);
 
-      // Invalidar cache
+      // ✅ INVALIDAÇÃO COORDENADA: Perfis + contexto de usuário
       await this.invalidateCache(['profiles:all']);
+      const { UnifiedAuthService } = await import('../auth/unifiedAuth');
+      await UnifiedAuthService.invalidateAllUserCaches();
 
       this.emitEvent('profile.updated', {
         profileId,
@@ -147,8 +151,10 @@ export class ProfileService extends BaseService {
 
       await this.storage.deleteProfile(profileId);
 
-      // Invalidar cache
+      // ✅ INVALIDAÇÃO COORDENADA: Perfis + contexto de usuário
       await this.invalidateCache(['profiles:all']);
+      const { UnifiedAuthService } = await import('../auth/unifiedAuth');
+      await UnifiedAuthService.invalidateAllUserCaches();
 
       this.emitEvent('profile.deleted', {
         profileId,
@@ -182,7 +188,14 @@ export class ProfileService extends BaseService {
     
     try {
       this.requirePermission(authContext, 'Gerenciar Permissões', 'adicionar permissão ao perfil');
-      return await this.storage.addPermissionToProfile(profileId, permissionId);
+      const result = await this.storage.addPermissionToProfile(profileId, permissionId);
+
+      // ✅ INVALIDAÇÃO COORDENADA: Perfis + contexto de usuário
+      await this.invalidateCache(['profiles:all']);
+      const { UnifiedAuthService } = await import('../auth/unifiedAuth');
+      await UnifiedAuthService.invalidateAllUserCaches();
+
+      return result;
     } catch (error) {
       this.logError('profile-service', 'addPermissionToProfile', error);
       throw error;
@@ -194,7 +207,12 @@ export class ProfileService extends BaseService {
     
     try {
       this.requirePermission(authContext, 'Gerenciar Permissões', 'remover permissão do perfil');
-      return await this.storage.removePermissionFromProfile(profileId, permissionId);
+      await this.storage.removePermissionFromProfile(profileId, permissionId);
+
+      // ✅ INVALIDAÇÃO COORDENADA: Perfis + contexto de usuário
+      await this.invalidateCache(['profiles:all']);
+      const { UnifiedAuthService } = await import('../auth/unifiedAuth');
+      await UnifiedAuthService.invalidateAllUserCaches();
     } catch (error) {
       this.logError('profile-service', 'removePermissionFromProfile', error);
       throw error;

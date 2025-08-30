@@ -204,7 +204,7 @@ export class UnifiedAuthService {
         lastActivity: new Date()
       };
 
-      // 5. Cache por 5 minutos
+      // ✅ PADRONIZAÇÃO TTL: Contexto de usuário com TTL.SHORT (5 minutos)
       await cache.set(cacheKey, authContext, TTL.SHORT);
       console.log('✅ [UNIFIED-AUTH] Token validado para:', user.email);
 
@@ -388,6 +388,40 @@ export class UnifiedAuthService {
     } catch (error) {
       console.error('❌ [UNIFIED-AUTH] Erro ao verificar permissão:', error);
       return false;
+    }
+  }
+
+  /**
+   * 🧹 INVALIDATE USER CACHE - Cache invalidation coordenado
+   * ✅ Invalidar cache quando permissões mudam
+   */
+  static async invalidateUserCache(userId: string): Promise<void> {
+    try {
+      // ✅ Invalidar cache quando permissões mudam
+      await cache.invalidatePattern(`user_permissions:${userId}*`);
+      await cache.invalidatePattern(`unified_auth:${userId}*`);
+      await cache.invalidatePattern(`user_with_permissions:${userId}*`);
+      await cache.invalidatePattern(`user_with_profile:${userId}*`);
+      
+      console.log('🧹 [UNIFIED-AUTH] Cache invalidado para usuário:', userId);
+    } catch (error) {
+      console.error('❌ [UNIFIED-AUTH] Erro ao invalidar cache:', error);
+    }
+  }
+
+  /**
+   * 🧹 INVALIDATE ALL USER CACHES - Invalidação global de usuários
+   */
+  static async invalidateAllUserCaches(): Promise<void> {
+    try {
+      await cache.invalidatePattern('user_permissions:*');
+      await cache.invalidatePattern('unified_auth:*');
+      await cache.invalidatePattern('user_with_permissions:*');
+      await cache.invalidatePattern('user_with_profile:*');
+      
+      console.log('🧹 [UNIFIED-AUTH] Cache invalidado para todos os usuários');
+    } catch (error) {
+      console.error('❌ [UNIFIED-AUTH] Erro ao invalidar cache global:', error);
     }
   }
 }

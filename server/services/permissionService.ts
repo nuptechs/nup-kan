@@ -84,8 +84,10 @@ export class PermissionService extends BaseService {
       const validData = insertPermissionSchema.parse(request);
       const permission = await this.storage.createPermission(validData);
 
-      // Invalidar cache
+      // ✅ INVALIDAÇÃO COORDENADA: Permissões + contexto de usuário
       await this.invalidateCache(['permissions:all']);
+      const { UnifiedAuthService } = await import('../auth/unifiedAuth');
+      await UnifiedAuthService.invalidateAllUserCaches();
 
       this.emitEvent('permission.created', {
         permissionId: permission.id,
@@ -116,8 +118,10 @@ export class PermissionService extends BaseService {
 
       const updatedPermission = await this.storage.updatePermission(permissionId, request);
 
-      // Invalidar cache
+      // ✅ INVALIDAÇÃO COORDENADA: Permissões + contexto de usuário
       await this.invalidateCache(['permissions:all']);
+      const { UnifiedAuthService } = await import('../auth/unifiedAuth');
+      await UnifiedAuthService.invalidateAllUserCaches();
 
       this.emitEvent('permission.updated', {
         permissionId,
@@ -148,8 +152,10 @@ export class PermissionService extends BaseService {
 
       await this.storage.deletePermission(permissionId);
 
-      // Invalidar cache
+      // ✅ INVALIDAÇÃO COORDENADA: Permissões + contexto de usuário
       await this.invalidateCache(['permissions:all']);
+      const { UnifiedAuthService } = await import('../auth/unifiedAuth');
+      await UnifiedAuthService.invalidateAllUserCaches();
 
       this.emitEvent('permission.deleted', {
         permissionId,

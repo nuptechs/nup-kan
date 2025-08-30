@@ -11,7 +11,7 @@
  */
 
 import { BaseService, createSuccessResponse, createErrorResponse, PaginatedResponse, PaginationOptions } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { User, InsertUser, UpdateUser } from "@shared/schema";
 import { insertUserSchema, updateUserSchema } from "@shared/schema";
 import { TTL } from "../cache";
@@ -229,11 +229,16 @@ export class UserService extends BaseService {
 
       const user = await this.storage.updateUser(userId, validatedData);
 
-      // Invalidar caches relacionados
+      // ✅ INVALIDAÇÃO COORDENADA: Usuários + contexto de usuário (especialmente se profileId mudou)
       await this.invalidateCache([
         'users:all',
         `user:${userId}:*`
       ]);
+      // Se profileId mudou, invalidar cache de contexto de usuário
+      if (validatedData.profileId && validatedData.profileId !== existingUser.profileId) {
+        const { UnifiedAuthService } = await import('../auth/unifiedAuth');
+        await UnifiedAuthService.invalidateUserCache(userId);
+      }
 
       // Emitir evento
       this.emitEvent('user.updated', {

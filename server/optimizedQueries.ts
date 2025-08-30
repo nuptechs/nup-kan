@@ -58,8 +58,8 @@ export class OptimizedQueries {
         permissionCategories: Array.from(new Set(userPermissions.map(p => p.category))),
       };
 
-      // Cache por 2 horas para reduzir hits no banco
-      await cache.set(cacheKey, result, TTL.LONG);
+      // ✅ PADRONIZAÇÃO TTL: Permissões com TTL.MEDIUM (30 minutos)
+      await cache.set(cacheKey, result, TTL.MEDIUM);
       return result;
     } catch (error) {
       console.error('❌ [QUERY] Erro em getUserPermissionsOptimized:', error);
@@ -90,7 +90,7 @@ export class OptimizedQueries {
         .limit(1);
 
       const user = result[0] || null;
-      await cache.set(cacheKey, user, TTL.LONG);
+      await cache.set(cacheKey, user, TTL.MEDIUM);
       return user;
     } catch (error) {
       console.error('❌ [QUERY] Erro em getUserWithProfileOptimized:', error);
