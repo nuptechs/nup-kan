@@ -30,6 +30,9 @@ export function TagSelector({ selectedTags, onTagsChange }: TagSelectorProps) {
     queryKey: ["/api/tags"],
   });
 
+  // ✅ PROTEÇÃO CONTRA NULL
+  const safeTags = Array.isArray(tags) ? tags : [];
+
   const createTagMutation = useMutation({
     mutationFn: async (data: { name: string; color: string }) => {
       const response = await apiRequest("POST", "/api/tags", data);
@@ -76,7 +79,7 @@ export function TagSelector({ selectedTags, onTagsChange }: TagSelectorProps) {
     }
   };
 
-  const selectedTagsData = tags.filter(tag => selectedTags.includes(tag.name));
+  const selectedTagsData = safeTags.filter(tag => selectedTags.includes(tag.name));
 
   return (
     <div className="space-y-2">
@@ -187,7 +190,7 @@ export function TagSelector({ selectedTags, onTagsChange }: TagSelectorProps) {
               )}
             </CommandEmpty>
             <CommandGroup>
-              {tags.map((tag) => (
+              {safeTags.map((tag) => (
                 <CommandItem
                   key={tag.id}
                   onSelect={() => handleToggleTag(tag.name)}

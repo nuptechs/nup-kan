@@ -11,7 +11,7 @@
  */
 
 import { cache } from '../cache';
-import { User } from './simpleAuth';
+import { UnifiedUser } from './unifiedAuth';
 
 /**
  * TTLs otimizados por tipo de dados
@@ -32,7 +32,7 @@ export class AuthCache {
   /**
    * Cache de usuário com TTL de 1 hora
    */
-  static async cacheUser(userId: string, userData: User): Promise<void> {
+  static async cacheUser(userId: string, userData: UnifiedUser): Promise<void> {
     const key = `auth:user:${userId}`;
     await cache.set(key, userData, AUTH_TTL.USER_DATA);
     console.log(`💾 [AUTH-CACHE] User cached: ${userId} (${AUTH_TTL.USER_DATA}s)`);
@@ -41,9 +41,9 @@ export class AuthCache {
   /**
    * Busca otimizada de usuário com pipeline
    */
-  static async getUser(userId: string): Promise<User | null> {
+  static async getUser(userId: string): Promise<UnifiedUser | null> {
     const key = `auth:user:${userId}`;
-    const userData = await cache.get<User>(key);
+    const userData = await cache.get<UnifiedUser>(key);
     
     if (userData) {
       console.log(`⚡ [AUTH-CACHE] Hit: ${userId}`);

@@ -45,9 +45,15 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
     queryKey: ["/api/columns"],
   });
 
+  // ✅ PROTEÇÃO CONTRA NULL
+  const safeColumns = Array.isArray(columns) ? columns : [];
+
   const { data: teams = [] } = useQuery<Team[]>({
     queryKey: ["/api/teams"],
   });
+
+  // ✅ PROTEÇÃO CONTRA NULL
+  const safeTeams = Array.isArray(teams) ? teams : [];
 
   const { data: analytics } = useQuery({
     queryKey: ["/api/analytics", boardId],
@@ -297,7 +303,7 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
           <div className="space-y-4">
             <h3 className="font-medium text-gray-900" data-testid="wip-limits-heading">Limites WIP</h3>
             <div className="space-y-3">
-              {columns
+              {safeColumns
                 .filter(column => column.wipLimit !== null)
                 .map((column) => (
                   <div key={column.id} className="flex items-center justify-between">
@@ -325,12 +331,12 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
           <div className="space-y-4">
             <h3 className="font-medium text-gray-900" data-testid="teams-heading">Times</h3>
             <div className="space-y-3">
-              {teams.length === 0 ? (
+              {safeTeams.length === 0 ? (
                 <div className="text-center py-4 text-gray-500 text-sm">
                   Nenhum time cadastrado
                 </div>
               ) : (
-                teams.map((team) => (
+                safeTeams.map((team) => (
                   <div key={team.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                     <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
                       <span className="text-white text-sm font-medium" data-testid={`team-icon-${team.id}`}>

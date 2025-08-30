@@ -29,7 +29,11 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
 
   const { data: tags = [], isLoading } = useQuery<Tag[]>({
     queryKey: ["/api/tags"],
+    enabled: isOpen, // Só busca quando o dialog está aberto
   });
+
+  // ✅ PROTEÇÃO CONTRA NULL
+  const safeTags = Array.isArray(tags) ? tags : [];
 
   // SINGLE FORM: Um único formulário para criar e editar
   const form = useForm<FormData>({
@@ -238,13 +242,13 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
               <div className="text-center py-4 text-gray-500">
                 Carregando tags...
               </div>
-            ) : tags.length === 0 ? (
+            ) : safeTags.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <p className="text-sm">Nenhuma tag criada.</p>
               </div>
             ) : (
               <div className="space-y-2">
-                {tags.map((tag) => (
+                {safeTags.map((tag) => (
                   <div
                     key={tag.id}
                     className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"

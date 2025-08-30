@@ -168,57 +168,55 @@ export class AuthController {
     try {
       const { UnifiedAuthService } = await import('../auth/unifiedAuth');
       
-      // Extrair userId da request (JWT ou session)
-      let userId: string | null = null;
+      // ✅ USAR APENAS JWT - REMOVER FALLBACK PARA SESSÃO
       const { JWTService } = await import('../services/jwtService');
       const token = JWTService.extractTokenFromRequest(req);
-      if (token) {
-        const tokenPayload = await JWTService.verifyAccessToken(token);
-        if (tokenPayload) {
-          userId = tokenPayload.userId;
-        }
+      
+      if (!token) {
+        return res.status(401).json({ 
+          error: 'Authentication required',
+          message: 'Valid JWT token required to access this resource'
+        });
+      }
+
+      const tokenPayload = await JWTService.verifyAccessToken(token);
+      if (!tokenPayload) {
+        return res.status(401).json({ 
+          error: 'Invalid token',
+          message: 'Token is invalid, expired, or blacklisted'
+        });
       }
       
-      if (!userId) {
-        userId = req.session?.user?.id || req.session?.userId || null;
-      }
-      
-      if (!userId) {
-        return res.status(401).json({ message: "Não autenticado" });
-      }
-      
-      const user = await UnifiedAuthService.getUserWithPermissions(userId);
+      const user = await UnifiedAuthService.getUserWithPermissions(tokenPayload.userId);
       if (!user) {
-        return res.status(401).json({ message: "Usuário não encontrado" });
+        return res.status(401).json({ 
+          error: 'User not found',
+          message: 'User account no longer exists'
+        });
       }
+
+      console.log('✅ [CURRENT-USER-JWT] Usuário autenticado via JWT:', user.id);
       
-      const authContext = {
+      // ✅ RETORNAR PERMISSÕES ESTRUTURADAS
+      res.json({
         userId: user.id,
         userName: user.name,
         userEmail: user.email,
         profileId: user.profileId,
-        profileName: undefined, // Remover propriedade inexistente
-        permissions: user.permissions,
-        teams: [], // Remover propriedade inexistente
+        profileName: user.profileName,
+        avatar: user.avatar || user.email, // Avatar ou email como fallback
+        permissions: user.permissions || [], // Array de strings das permissões
+        permissionObjects: [], // Para compatibilidade, mas não necessário
+        teams: user.teams || [],
         isAuthenticated: true
-      };
-
-      console.log('✅ [CURRENT-USER-JWT] Usuário autenticado via JWT:', authContext.userId);
-      
-      res.json({
-        userId: authContext.userId,
-        userName: authContext.userName,
-        userEmail: authContext.userEmail,
-        profileId: authContext.profileId,
-        profileName: authContext.profileName,
-        avatar: authContext.userEmail, // Usando email como avatar temporário
-        permissions: authContext.permissions,
-        teams: authContext.teams
       });
       
     } catch (error) {
       console.error('❌ [CURRENT-USER-JWT] Erro:', error);
-      res.status(401).json({ message: "Token inválido ou expirado" });
+      res.status(401).json({ 
+        error: 'Authentication failed',
+        message: 'Token validation failed'
+      });
     }
   }
 
