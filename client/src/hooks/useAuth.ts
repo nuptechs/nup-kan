@@ -57,7 +57,15 @@ export function useAuth() {
     const data = await response.json();
     console.log('🔍 [useAuth-JWT] Dados recebidos:', data);
     
-    return data;
+    // ✅ GARANTIR QUE AS PERMISSÕES SEJAM PASSADAS
+    const result = {
+      ...data,
+      isAuthenticated: true,
+      permissions: data.permissions || []
+    };
+    
+    
+    return result;
   }, []);
 
   const { data: authResponse, isLoading, error } = useQuery<any>({
@@ -106,7 +114,8 @@ export function useAuth() {
 
     // Se tem dados do servidor, usar eles
     if (authResponse && authResponse.isAuthenticated) {
-      return {
+      
+      const userWithPermissions = {
         id: authResponse.userId || authResponse.id,
         name: authResponse.userName || authResponse.name,
         email: authResponse.userEmail || authResponse.email,
@@ -118,8 +127,11 @@ export function useAuth() {
         createdAt: new Date(),
         updatedAt: new Date(),
         // ✅ INCLUIR PERMISSÕES NO OBJETO USER (como propriedade extra)
-        permissions: authResponse.permissions
-      } as User & { permissions?: string[] };
+        permissions: authResponse.permissions || []
+      };
+      
+      
+      return userWithPermissions as any;
     }
 
     // Fallback: dados do localStorage

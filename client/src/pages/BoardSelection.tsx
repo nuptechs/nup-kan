@@ -37,7 +37,7 @@ export default function BoardSelection() {
   const { hasPermission, userPermissions, isLoading: permissionsLoading } = usePermissions();
   const { mode, isReadOnly, canCreate, canEdit, canDelete } = useProfileMode();
 
-  // DEBUG REMOVIDO - problema de sessão resolvido
+
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);

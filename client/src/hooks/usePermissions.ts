@@ -20,8 +20,9 @@ export function usePermissions() {
     // Usar diretamente currentUser.permissions
     const permissionsArray = (currentUser as any)?.permissions;
     
-    if (!permissionsArray || !Array.isArray(permissionsArray)) return [];
-    
+    if (!permissionsArray || !Array.isArray(permissionsArray)) {
+      return [];
+    }
     return permissionsArray.map((permissionName: string) => ({
       id: permissionName.toLowerCase().replace(/\s+/g, '-'),
       name: permissionName,
