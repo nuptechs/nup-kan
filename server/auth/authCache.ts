@@ -3,9 +3,9 @@
  * 
  * RESPONSABILIDADES:
  * - Cache hierárquico com TTLs otimizados
- * - Pipeline Redis para operações em batch
+ * - Operações em batch otimizadas
  * - Invalidação inteligente de cache
- * - Fallback para memória se Redis não disponível
+ * - Sistema de cache em memória eficiente
  * 
  * PERFORMANCE TARGET: < 2ms para operações de cache
  */
@@ -130,7 +130,7 @@ export class AuthCache {
   /**
    * 🚀 OPERAÇÕES EM PIPELINE (Para múltiplos usuários)
    */
-  static async bulkCacheUsers(users: Array<{ id: string, data: User }>): Promise<void> {
+  static async bulkCacheUsers(users: Array<{ id: string, data: UnifiedUser }>): Promise<void> {
     console.log(`📦 [AUTH-CACHE] Bulk caching ${users.length} users`);
     
     // Cache cada usuário em paralelo para performance
@@ -151,13 +151,13 @@ export class AuthCache {
     userCacheSize: number;
     permissionCacheSize: number;
   }> {
-    // Esta implementação seria específica para Redis
-    // Por enquanto retornamos dados mock
+    // Implementação baseada no cache em memória
+    const stats = await cache.getStats();
     return {
-      hitRate: 85.5,
-      totalKeys: 1500,
-      userCacheSize: 800,
-      permissionCacheSize: 350
+      hitRate: stats.hits / (stats.hits + stats.misses) * 100 || 0,
+      totalKeys: stats.size,
+      userCacheSize: Math.floor(stats.size * 0.6), // Estimativa
+      permissionCacheSize: Math.floor(stats.size * 0.3) // Estimativa
     };
   }
   

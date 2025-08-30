@@ -5,7 +5,7 @@
  * - Remove sistema de sessões (mantém apenas JWT)
  * - Une AuthService + AuthServiceJWT + simpleAuth em um só
  * - Interface limpa e performance otimizada
- * - Cache inteligente com Redis/memória
+ * - Cache inteligente com memória
  * - Blacklist para logout seguro
  * 
  * PERFORMANCE TARGET: < 8ms para todas operações

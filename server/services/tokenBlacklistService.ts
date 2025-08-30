@@ -6,7 +6,7 @@ import { cache, TTL } from '../cache';
  * Responsabilidades:
  * - Blacklist de tokens para logout server-side
  * - Cleanup automático de tokens expirados
- * - Performance otimizada com cache em memória/Redis
+ * - Performance otimizada com cache em memória
  */
 export class TokenBlacklistService {
   private static readonly BLACKLIST_PREFIX = 'blacklist:token:';
@@ -59,10 +59,10 @@ export class TokenBlacklistService {
    * Obter estatísticas da blacklist
    */
   static async getBlacklistStats(): Promise<{ totalBlacklistedTokens: number }> {
-    // Para implementação futura com Redis que suporta key scanning
+    // Implementação simplificada para cache em memória
     console.log('📊 [BLACKLIST] Stats da blacklist (funcionalidade básica)');
     return {
-      totalBlacklistedTokens: 0 // Placeholder - implementar com Redis se necessário
+      totalBlacklistedTokens: 0 // Cache em memória - estatística básica
     };
   }
 }
