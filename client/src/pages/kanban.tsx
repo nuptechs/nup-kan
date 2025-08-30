@@ -35,7 +35,7 @@ export default function KanbanPage() {
   });
 
   const { data: boardMemberCount } = useQuery<{ count: number }>({
-    queryKey: [`/api/boards/${boardId}/member-count`],
+    queryKey: [`/api/board-shares/boards/${boardId}/member-count`],
     enabled: !!boardId,
   });
 

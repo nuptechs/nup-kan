@@ -134,9 +134,9 @@ export function BoardSharingDialog({ board, open, onOpenChange }: BoardSharingDi
       await apiRequest("PATCH", `/api/board-shares/${shareId}`, { permission });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/shares`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/member-count`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/boards/${board.id}/members`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/board-shares/boards/${board.id}/shares`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/board-shares/boards/${board.id}/member-count`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/board-shares/boards/${board.id}/members`] });
       toast({
         title: "Permissão atualizada",
         description: "A permissão foi alterada com sucesso.",

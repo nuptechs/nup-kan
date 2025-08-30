@@ -104,8 +104,8 @@ export default function BoardSelection() {
       await queryClient.refetchQueries({ queryKey: ["/api/boards"] });
       
       // Invalidate member count for the new board since creator is auto-added
-      queryClient.invalidateQueries({ queryKey: [`/api/boards/${newBoard.id}/member-count`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/boards/${newBoard.id}/members`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/board-shares/boards/${newBoard.id}/member-count`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/board-shares/boards/${newBoard.id}/members`] });
       
       setIsCreateOpen(false);
       createForm.reset();
