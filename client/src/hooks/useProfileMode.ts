@@ -1,12 +1,11 @@
 import { usePermissions } from "./usePermissions";
+import { PermissionSystemError } from "../errors/PermissionSystemError";
 
-export type ProfileMode = "read-only" | "full-access" | "admin";
+export type ProfileMode = "read-only" | "full-access" | "admin" | "loading";
 
 /**
- * Hook para determinar o modo de acesso baseado nas permissões do usuário
- * - read-only: Pode visualizar mas não modificar
- * - full-access: Pode modificar dentro do seu escopo
- * - admin: Acesso completo ao sistema
+ * ✅ HOOK ROBUSTO para determinar o modo de perfil do usuário
+ * Implementa validação de integridade e tratamento de erros
  */
 export function useProfileMode(): {
   mode: ProfileMode;
@@ -17,28 +16,75 @@ export function useProfileMode(): {
   canDelete: (resource: string) => boolean;
   canView: (resource: string) => boolean;
 } {
-  const { hasPermission, isAdmin: checkIsAdmin } = usePermissions();
+  const { 
+    hasPermission, 
+    isAdmin: checkIsAdmin, 
+    isLoading, 
+    error, 
+    permissions, 
+    validateSystemState 
+  } = usePermissions();
 
-  // Determinar o modo baseado nas permissões
+  // ✅ CORREÇÃO ROBUSTA - Implementa lógica sem fallbacks silenciosos
   const determineMode = (): ProfileMode => {
-    if (checkIsAdmin()) return "admin";
+    // 1. Estados explícitos durante carregamento
+    if (isLoading) return "loading";
     
-    // Se tem permissões de criação, é full-access
-    if (hasPermission("Criar Boards") || hasPermission("Criar Tarefas")) {
-      return "full-access";
+    try {
+      // 2. Validação de integridade do sistema
+      validateSystemState();
+      
+      // 3. Validação de dados
+      if (!Array.isArray(permissions)) {
+        throw new PermissionSystemError("Dados de permissões corrompidos");
+      }
+      
+      // 4. Log para auditoria
+      console.log(`🔐 [PROFILE-MODE] Usuário tem ${permissions.length} permissões`);
+      
+      // 5. Lógica de negócio (agora confiável)
+      if (checkIsAdmin()) {
+        console.log(`🔐 [PROFILE-MODE] Modo determinado: admin`);
+        return "admin";
+      }
+      
+      // Verificar se tem permissões de criação
+      const hasCreatePermissions = hasPermission("Criar Boards") || 
+                                  hasPermission("Criar Tarefas") ||
+                                  hasPermission("Criar Colunas");
+      
+      if (hasCreatePermissions) {
+        console.log(`🔐 [PROFILE-MODE] Modo determinado: full-access`);
+        return "full-access";
+      }
+      
+      // 6. Read-only é agora um estado válido, não fallback
+      console.log(`🔐 [PROFILE-MODE] Modo determinado: read-only`);
+      return "read-only";
+      
+    } catch (error) {
+      // Erro crítico - propagar para error boundary
+      console.error('🚨 [PROFILE-MODE] Erro crítico ao determinar modo:', error);
+      throw error;
     }
-    
-    // Se só tem permissões de visualização, é read-only
-    return "read-only";
   };
 
   const mode = determineMode();
   const isReadOnly = mode === "read-only";
   const isAdmin = mode === "admin";
 
-  // Funções de verificação por ação
+  // ✅ FUNÇÕES ROBUSTAS DE VERIFICAÇÃO POR AÇÃO
   const canCreate = (resource: string) => {
+    // Estados de carregamento são explícitos
+    if (mode === "loading") return false;
     if (isReadOnly) return false;
+    
+    // Validar entrada
+    if (!resource || typeof resource !== 'string') {
+      console.warn('🚨 [PROFILE-MODE] Parâmetro resource inválido para canCreate:', resource);
+      return false;
+    }
+    
     // Verificar múltiplas variações de permissão para garantir compatibilidade
     return hasPermission(`Criar ${resource}`) || 
            hasPermission(`Create ${resource}`) ||
@@ -47,16 +93,37 @@ export function useProfileMode(): {
   };
 
   const canEdit = (resource: string) => {
+    if (mode === "loading") return false;
     if (isReadOnly) return false;
+    
+    if (!resource || typeof resource !== 'string') {
+      console.warn('🚨 [PROFILE-MODE] Parâmetro resource inválido para canEdit:', resource);
+      return false;
+    }
+    
     return hasPermission(`Editar ${resource}`);
   };
 
   const canDelete = (resource: string) => {
+    if (mode === "loading") return false;
     if (isReadOnly) return false;
+    
+    if (!resource || typeof resource !== 'string') {
+      console.warn('🚨 [PROFILE-MODE] Parâmetro resource inválido para canDelete:', resource);
+      return false;
+    }
+    
     return hasPermission(`Excluir ${resource}`);
   };
 
   const canView = (resource: string) => {
+    if (mode === "loading") return false;
+    
+    if (!resource || typeof resource !== 'string') {
+      console.warn('🚨 [PROFILE-MODE] Parâmetro resource inválido para canView:', resource);
+      return false;
+    }
+    
     return hasPermission(`Visualizar ${resource}`) || hasPermission(`Listar ${resource}`);
   };
 

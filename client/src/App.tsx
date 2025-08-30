@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProtectedRoute } from "@/components/auth/protected-route";
+import { PermissionErrorBoundary } from "@/components/PermissionErrorBoundary";
 import { NotificationSystem } from "@/components/NotificationSystem";
 import LoginPage from "@/pages/login";
 import ChangePasswordPage from "@/pages/change-password";
@@ -114,7 +115,9 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <NotificationSystem />
-        <Router />
+        <PermissionErrorBoundary>
+          <Router />
+        </PermissionErrorBoundary>
       </TooltipProvider>
     </QueryClientProvider>
   );

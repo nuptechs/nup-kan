@@ -2,33 +2,58 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useEffect } from "react";
 import type { User, Permission } from "@shared/schema";
 import { useAuth } from "./useAuth"; // ✅ Usar hook centralizado
+import { PermissionSystemError, PermissionErrors } from "../errors/PermissionSystemError";
 
 export function usePermissions() {
   // ✅ USAR DADOS CENTRALIZADOS - Evita request duplicado
   const authData = useAuth();
   const { user: currentUser, isLoading: userLoading, error: userError } = authData;
 
-
-  // ✅ AGORA AS PERMISSÕES ESTÃO NO currentUser
-  const userPermissionsData = (currentUser as any)?.permissions ? { permissions: (currentUser as any).permissions } : null;
-  
-  const permissionsLoading = false;
-  const permissionsError = null;
+  // ✅ VALIDAÇÃO DE INTEGRIDADE - Falha rápida se erro crítico
+  useEffect(() => {
+    if (userError && !userLoading) {
+      const errorInstance = userError instanceof Error ? userError : new Error(String(userError));
+      const permissionError = PermissionErrors.authContextCorrupted(
+        errorInstance, 
+        currentUser?.id
+      );
+      console.error('🚨 [PERMISSION-INTEGRITY] Erro crítico detectado:', permissionError.toJSON());
+    }
+  }, [userError, userLoading, currentUser?.id]);
 
   // ✅ CORREÇÃO: Usar permissões estruturadas do servidor
   const userPermissions: Permission[] = useMemo(() => {
-    return (currentUser as any)?.permissionObjects || [];
-  }, [currentUser]);
-
-  // Log de segurança - detectar tentativas de acesso sem permissão
-  useEffect(() => {
-    if (userError) {
-      console.warn("🔐 [SECURITY] Falha ao carregar permissões do usuário:", {
-        userError: userError?.message,
-        userId: currentUser?.id
-      });
+    // 1. Estados explícitos durante carregamento
+    if (userLoading) {
+      return [];
     }
-  }, [userError, currentUser?.id]);
+
+    // 2. Falha rápida se erro crítico
+    if (userError || !currentUser) {
+      return [];
+    }
+
+    const permissionObjects = (currentUser as any)?.permissionObjects;
+
+    // 3. Validação de integridade
+    if (!Array.isArray(permissionObjects)) {
+      console.error('🚨 [PERMISSION-INTEGRITY] Dados de permissões corrompidos:', {
+        userId: currentUser?.id,
+        permissionObjects: typeof permissionObjects,
+        currentUser: !!currentUser
+      });
+      return [];
+    }
+
+    // 4. Log para auditoria
+    console.log(`🔐 [PERMISSIONS] Usuário ${currentUser.id} tem ${permissionObjects.length} permissões`);
+
+    return permissionObjects;
+  }, [currentUser, userLoading, userError]);
+
+  // Estados explícitos
+  const isLoading = userLoading;
+  const error = userError;
 
   const permissionMap = useMemo(() => {
     const map = new Map<string, Permission>();
@@ -80,8 +105,8 @@ export function usePermissions() {
   const logSecurityAttempt = (action: string, resource: string, success: boolean) => {
     if (!success) {
       console.warn(`🚫 [SECURITY] Tentativa de acesso negada:`, {
-        user: currentUser?.name,
-        userId: currentUser?.id,
+        user: currentUser?.name || 'Unknown',
+        userId: currentUser?.id || 'Unknown',
         action,
         resource,
         timestamp: new Date().toISOString()
@@ -130,16 +155,47 @@ export function usePermissions() {
     return result;
   }, [permissionMap, currentUser]);
 
+  // ✅ THROW ERROR PARA ESTADOS CRÍTICOS
+  const throwCriticalError = (errorType: keyof typeof PermissionErrors) => {
+    const error = PermissionErrors[errorType](currentUser?.id);
+    throw error;
+  };
+
+  // ✅ VALIDAÇÃO ROBUSTA DE ESTADO
+  const validateSystemState = () => {
+    if (error && !isLoading) {
+      throwCriticalError('authContextCorrupted');
+    }
+    
+    if (!isLoading && !currentUser) {
+      throwCriticalError('userDataMissing');
+    }
+    
+    if (!isLoading && !Array.isArray(userPermissions)) {
+      throwCriticalError('permissionDataCorrupted');
+    }
+  };
+
   return {
-    currentUser,
-    userPermissions,
-    isLoading: userLoading || permissionsLoading,
+    // Estados explícitos
+    isLoading,
+    error,
+    permissions: userPermissions,
+    permissionMap,
+    
+    // Validação de estado
+    validateSystemState,
+    throwCriticalError,
+    
+    // Funções de verificação
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,
     hasPermissionInCategory,
     getPermissionsInCategory,
     isAdmin,
+    
+    // Auditoria
     logSecurityAttempt,
     ...permissionChecks,
     // Nova funcionalidade - verificar permissões com logs
