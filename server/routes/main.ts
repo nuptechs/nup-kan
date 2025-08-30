@@ -10,20 +10,14 @@ import { createAuthContextFromRequest } from "../utils/authUtils";
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // 🏗️ NOVA ARQUITETURA DE ROTAS MODULAR
-  // Importar rotas separadas por domínio
+  // Importar e registrar rotas modulares
   const apiRoutes = (await import('./api')).default;
   const remainingRoutes = (await import('./remaining')).default;
-
-  // Registrar todas as rotas sob /api
+  
   app.use('/api', apiRoutes);
   app.use('/api', remainingRoutes);
 
-  // ===========================
-  // 🔥 ROUTES LEGACY - System logs (ainda não refatorado)
-  // ===========================
-
-  // 💾 System logs management (ainda não refatorado)
+  // System logs management
   app.get("/api/system/logs", requireAuth, async (req, res) => {
     try {
       const path = join(process.cwd(), 'logs');
@@ -89,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ✅ Log viewer HTML page  
+  // Log viewer HTML page
   app.get("/logs-viewer", (req, res) => {
     res.send(`
     <!DOCTYPE html>
@@ -165,12 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     `);
   });
 
-  // ===========================
-  // 🔥 ROTAS LEGACY NÃO REFATORADAS (REMOVIDAS - Movidas para arquivos específicos)
-  // Teams, Notifications, Profiles, Permissions rotas foram movidas para arquivos separados
-  // ===========================
-
-  // Permissões sync (manter aqui pois é funcionalidade de sistema)
+  // Permission sync endpoint
   app.post("/api/permissions/sync", requireAuth, async (req, res) => {
     try {
       const permissionSyncService = PermissionSyncService.getInstance();
@@ -195,7 +184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Implementar changePassword diretamente aqui temporariamente
+      // Change password implementation
       const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
       await storage.updateUser(req.params.id, { password: hashedPassword });
       const result = { success: true, message: 'Password updated successfully' };
