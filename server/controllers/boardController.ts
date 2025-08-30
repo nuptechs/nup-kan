@@ -1,57 +1,13 @@
 import type { Request, Response } from "express";
 import { boardService, boardShareService } from "../services";
-import { UnifiedAuthService, AuthRequest } from "../auth/unifiedAuth";
-
-// Helper para criar AuthContext a partir da request
-function createAuthContextFromRequest(req: any): any {
-  const authContextJWT = req.authContext;
-  if (authContextJWT) {
-    return {
-      userId: authContextJWT.userId,
-      userName: authContextJWT.userName,
-      userEmail: authContextJWT.userEmail,
-      permissions: authContextJWT.permissions,
-      permissionCategories: authContextJWT.permissionCategories,
-      profileId: authContextJWT.profileId || '',
-      profileName: authContextJWT.profileName,
-      teams: authContextJWT.teams,
-      sessionId: `jwt-${authContextJWT.userId}-${Date.now()}`,
-      isAuthenticated: authContextJWT.isAuthenticated,
-      lastActivity: authContextJWT.lastActivity
-    };
-  }
-  
-  // Fallback para session auth
-  const userId = req.session?.user?.id || req.session?.userId;
-  const user = req.user;
-  const permissions = req.userPermissions || [];
-  
-  return {
-    userId: userId,
-    userName: user?.name || 'Unknown',
-    userEmail: user?.email || '',
-    permissions: permissions.map((p: any) => p.name),
-    permissionCategories: Array.from(new Set(permissions.map((p: any) => p.category))),
-    profileId: user?.profileId || '',
-    profileName: null,
-    teams: [],
-    sessionId: req.session?.id || 'no-session',
-    isAuthenticated: !!userId,
-    lastActivity: new Date()
-  };
-}
+import { AuthRequest } from "../auth/unifiedAuth";
+import { createAuthContextFromRequest } from "../utils/authUtils";
 
 export class BoardController {
-  static async getBoards(req: Request, res: Response) {
+  static async getBoards(req: AuthRequest, res: Response) {
     try {
-      // Verificar JWT
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
-      if (!authContext) {
-        return res.status(401).json({ 
-          error: 'Authentication required',
-          message: 'Valid JWT token required to access this resource'
-        });
-      }
+      // Use authContext from middleware
+      const authContext = createAuthContextFromRequest(req);
       
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
@@ -78,16 +34,10 @@ export class BoardController {
     }
   }
 
-  static async getBoard(req: Request, res: Response) {
+  static async getBoard(req: AuthRequest, res: Response) {
     try {
-      // Verificar JWT
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
-      if (!authContext) {
-        return res.status(401).json({ 
-          error: 'Authentication required',
-          message: 'Valid JWT token required to access this resource'
-        });
-      }
+      // Use authContext from middleware
+      const authContext = createAuthContextFromRequest(req);
       
       const board = await boardService.getBoard(authContext, req.params.id);
       if (!board) {
@@ -100,9 +50,9 @@ export class BoardController {
     }
   }
 
-  static async createBoard(req: Request, res: Response) {
+  static async createBoard(req: AuthRequest, res: Response) {
     try {
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       const board = await boardService.createBoard(authContext, req.body);
       res.status(201).json(board);
     } catch (error) {
@@ -111,9 +61,9 @@ export class BoardController {
     }
   }
 
-  static async updateBoard(req: Request, res: Response) {
+  static async updateBoard(req: AuthRequest, res: Response) {
     try {
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       const updatedBoard = await boardService.updateBoard(authContext, req.params.id, req.body);
       
       res.json(updatedBoard);
@@ -125,9 +75,9 @@ export class BoardController {
     }
   }
 
-  static async deleteBoard(req: Request, res: Response) {
+  static async deleteBoard(req: AuthRequest, res: Response) {
     try {
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       await boardService.deleteBoard(authContext, req.params.id);
       
       res.status(204).send();
@@ -139,11 +89,11 @@ export class BoardController {
     }
   }
 
-  static async toggleBoardStatus(req: Request, res: Response) {
+  static async toggleBoardStatus(req: AuthRequest, res: Response) {
     try {
       const boardId = req.params.id;
       
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       const updatedBoard = await boardService.toggleBoardStatus(authContext, boardId);
       
       res.json(updatedBoard);
@@ -153,9 +103,9 @@ export class BoardController {
     }
   }
 
-  static async getBoardShares(req: Request, res: Response) {
+  static async getBoardShares(req: AuthRequest, res: Response) {
     try {
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       const shares = await boardShareService.getBoardShares(authContext, req.params.boardId);
       res.json(shares);
     } catch (error) {
@@ -163,9 +113,9 @@ export class BoardController {
     }
   }
 
-  static async getBoardMembers(req: Request, res: Response) {
+  static async getBoardMembers(req: AuthRequest, res: Response) {
     try {
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       const members = await boardShareService.getBoardMembers(authContext, req.params.boardId);
       res.json(members);
     } catch (error) {
@@ -174,9 +124,9 @@ export class BoardController {
     }
   }
 
-  static async getBoardMemberCount(req: Request, res: Response) {
+  static async getBoardMemberCount(req: AuthRequest, res: Response) {
     try {
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       const count = await boardShareService.getBoardMemberCount(authContext, req.params.boardId);
       res.json({ count });
     } catch (error) {
@@ -185,9 +135,9 @@ export class BoardController {
     }
   }
 
-  static async getAllBoardShares(req: Request, res: Response) {
+  static async getAllBoardShares(req: AuthRequest, res: Response) {
     try {
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       const shares = await boardShareService.getAllBoardShares(authContext);
       res.json(shares);
     } catch (error) {
@@ -195,9 +145,9 @@ export class BoardController {
     }
   }
 
-  static async getUserSharedBoards(req: Request, res: Response) {
+  static async getUserSharedBoards(req: AuthRequest, res: Response) {
     try {
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       const shares = await boardShareService.getUserSharedBoards(authContext, req.params.userId);
       res.json(shares);
     } catch (error) {
@@ -205,9 +155,9 @@ export class BoardController {
     }
   }
 
-  static async getTeamSharedBoards(req: Request, res: Response) {
+  static async getTeamSharedBoards(req: AuthRequest, res: Response) {
     try {
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       const shares = await boardShareService.getTeamSharedBoards(authContext, req.params.teamId);
       res.json(shares);
     } catch (error) {
@@ -215,9 +165,9 @@ export class BoardController {
     }
   }
 
-  static async createBoardShare(req: Request, res: Response) {
+  static async createBoardShare(req: AuthRequest, res: Response) {
     try {
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       const share = await boardShareService.createBoardShare(authContext, req.body);
       res.status(201).json(share);
     } catch (error) {
@@ -225,9 +175,9 @@ export class BoardController {
     }
   }
 
-  static async updateBoardShare(req: Request, res: Response) {
+  static async updateBoardShare(req: AuthRequest, res: Response) {
     try {
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       const updatedShare = await boardShareService.updateBoardShare(authContext, req.params.id, req.body);
       res.json(updatedShare);
     } catch (error) {
@@ -238,9 +188,9 @@ export class BoardController {
     }
   }
 
-  static async deleteBoardShare(req: Request, res: Response) {
+  static async deleteBoardShare(req: AuthRequest, res: Response) {
     try {
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       await boardShareService.deleteBoardShare(authContext, req.params.id);
       res.status(204).send();
     } catch (error) {
@@ -251,9 +201,9 @@ export class BoardController {
     }
   }
 
-  static async getUserBoardPermission(req: Request, res: Response) {
+  static async getUserBoardPermission(req: AuthRequest, res: Response) {
     try {
-      const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      const authContext = createAuthContextFromRequest(req);
       const permission = await boardShareService.getUserBoardPermission(authContext, req.params.userId, req.params.boardId);
       res.json({ permission });
     } catch (error) {

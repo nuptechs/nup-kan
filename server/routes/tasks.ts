@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { TaskController } from "../controllers/taskController";
-import { requireAuth, requirePermission } from "../auth/unifiedAuth";
+import { auth, requireAuth, requirePermission } from "../auth/unifiedAuth";
 
 const router = Router();
 
 // Middleware de autenticação aplicado a todas as rotas
-router.use(requireAuth);
+router.use(auth); // Popula authContext com dados do JWT
+router.use(requireAuth); // Valida se está autenticado
 
 // Task reordering (must come before /:id routes)
 router.patch("/reorder", requirePermission("Editar Tarefas"), TaskController.reorderTasks);

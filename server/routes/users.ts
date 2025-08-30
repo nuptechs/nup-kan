@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { UserController } from "../controllers/userController";
-import { requireAuth, requirePermission } from "../auth/unifiedAuth";
+import { auth, requireAuth, requirePermission } from "../auth/unifiedAuth";
 
 const router = Router();
 
 // Apply authentication middleware to all routes
-router.use(requireAuth);
+router.use(auth); // Popula authContext com dados do JWT
+router.use(requireAuth); // Valida se está autenticado
 
 // Current user route (requires authentication)
 router.get("/me", UserController.getCurrentUser);

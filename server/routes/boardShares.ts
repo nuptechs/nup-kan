@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { BoardController } from "../controllers/boardController";
-import { requireAuth, requirePermission } from "../auth/unifiedAuth";
+import { auth, requireAuth, requirePermission } from "../auth/unifiedAuth";
 
 const router = Router();
 
 // Middleware de autenticação aplicado a todas as rotas
-router.use(requireAuth);
+router.use(auth); // Popula authContext com dados do JWT
+router.use(requireAuth); // Valida se está autenticado
 
 // Board share CRUD operations
 router.get("/", requirePermission("Listar Boards"), BoardController.getAllBoardShares);
