@@ -133,7 +133,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
       form.clearErrors();
       // We don't need to reset the resolver as the form will handle it
     }
-  }, [customFields, form]);
+  }, [customFields]);
 
   // Reset form when dialog opens or when columns/custom fields change
   useEffect(() => {
@@ -151,7 +151,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
         customFields: {},
       });
     }
-  }, [columns, form, boardId, isOpen, defaultColumnId, customFields]);
+  }, [columns, boardId, isOpen, defaultColumnId, customFields]);
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: FormData) => {

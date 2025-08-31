@@ -2,7 +2,13 @@
 
 This is a Kanban board application called **"NuP-Kan"** built with React and Express, featuring a modern task management interface with drag-and-drop functionality. The application allows users to organize tasks across different columns (Backlog, To Do, In Progress, Review, Done), manage team members, and track project analytics. It includes WIP (Work In Progress) limits, task assignments, progress tracking, and real-time updates. **The system uses PostgreSQL for persistent data storage with a many-to-many relationship between users and teams.**
 
-**Recent Updates (August 28, 2025):**
+**Recent Updates (August 31, 2025):**
+- ✅ **CRITICAL FORM FIX**: Corrigido erro "useFormContext() null" que impedia criação de tarefas
+- ✅ **INFINITE LOOP FIX**: Removido `form` das dependências useEffect para evitar re-renders infinitos
+- ✅ **ERROR MESSAGES CONSISTENCY**: Centralizadas todas mensagens de erro em errorMessages.ts
+- ✅ **UI IMPROVEMENTS**: Campo de título do formulário agora editável com estilo funcional
+
+**Previous Updates (August 28, 2025):**
 - ✅ **ETAPA 4 - SECURITY & PREPARED STATEMENTS**: Sistema de segurança avançado 100% implementado
 - ✅ **JWT BLACKLIST SYSTEM**: TokenBlacklistService para logout server-side robusto  
 - ✅ **ASYNC JWT VERIFICATION**: JWTService atualizado para verificação assíncrona com blacklist
