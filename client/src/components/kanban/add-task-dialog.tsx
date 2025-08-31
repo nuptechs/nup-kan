@@ -1,3 +1,4 @@
+import { CACHE_LOGS } from "@/constants/logMessages";
 import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -183,7 +184,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
       // 🚀 FORÇAR REFETCH IMEDIATO das tasks
       await queryClient.refetchQueries({ queryKey: [tasksEndpoint] });
       
-      console.log("🔄 [CACHE] Cache invalidado para:", { tasksEndpoint, columnsEndpoint });
+      console.log(CACHE_LOGS.INVALIDATED({ tasksEndpoint, columnsEndpoint }));
       
       toast({
         title: SUCCESS_MESSAGES.GENERIC.SUCCESS,

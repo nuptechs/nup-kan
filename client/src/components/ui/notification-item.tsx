@@ -1,3 +1,4 @@
+import { NOTIFICATIONS_LOGS } from "@/constants/logMessages";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,7 +73,7 @@ export function NotificationItem({
   try {
     metadata = JSON.parse(notification.metadata || "{}");
   } catch (error) {
-    console.warn("Failed to parse notification metadata:", error);
+    console.warn(NOTIFICATIONS_LOGS.PARSE_METADATA_ERROR(error));
   }
 
   const handleMarkAsRead = () => {

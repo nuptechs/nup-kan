@@ -1,3 +1,4 @@
+import { LOGIN_LOGS } from "@/constants/logMessages";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -179,14 +180,14 @@ export default function LoginPage() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      console.log('🔐 [LOGIN-JWT] Iniciando login:', { email: data.email });
+      console.log(LOGIN_LOGS.STARTING_LOGIN(data.email));
       const response = await apiRequest("POST", "/api/auth/login", data);
       const result = await response.json();
-      console.log('🔐 [LOGIN-JWT] Login bem-sucedido:', result);
+      console.log(LOGIN_LOGS.LOGIN_SUCCESS(result));
       return result;
     },
     onSuccess: async (data) => {
-      console.log('🔐 [LOGIN-JWT] Processando resposta do login...');
+      console.log(LOGIN_LOGS.PROCESSING_RESPONSE());
       
       // 🚀 SALVAR TOKENS JWT E DADOS DO USUÁRIO
       const { AuthService } = await import('@/services/authService');
@@ -198,7 +199,7 @@ export default function LoginPage() {
           tokens: data.tokens,
           isAuthenticated: true
         });
-        console.log('✅ [LOGIN-JWT] Tokens salvos no localStorage');
+        console.log(LOGIN_LOGS.TOKENS_SAVED());
         
         toast({
           title: "Login realizado!",
@@ -210,7 +211,7 @@ export default function LoginPage() {
         
         // ✅ VERIFICAR SE PRECISA TROCAR SENHA (PRIMEIRO LOGIN)
         if (data.requiresPasswordChange || data.user.firstLogin) {
-          console.log('🔄 [LOGIN-JWT] Primeiro login detectado - redirecionando para troca de senha');
+          console.log(LOGIN_LOGS.FIRST_LOGIN_REDIRECT());
           setTimeout(() => {
             window.location.href = "/change-password";
           }, 500);
@@ -222,7 +223,7 @@ export default function LoginPage() {
         }
       } else {
         // Fallback para estrutura antiga (sessão) 
-        console.warn('⚠️ [LOGIN-JWT] Resposta não contém tokens JWT, usando fallback');
+        console.warn(LOGIN_LOGS.NO_JWT_FALLBACK());
         queryClient.setQueryData(["/api/auth/current-user"], data);
         toast({
           title: "Login realizado!",
@@ -232,7 +233,7 @@ export default function LoginPage() {
       }
     },
     onError: (error: any) => {
-      console.error('❌ [LOGIN-JWT] Erro:', error);
+      console.error(LOGIN_LOGS.LOGIN_ERROR(error));
       toast({
         title: "Erro no login",
         description: error.message || "Email ou senha incorretos",

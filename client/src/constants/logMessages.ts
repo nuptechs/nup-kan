@@ -73,7 +73,18 @@ export const APOLLO_CLEANUP_LOGS = {
   CLEARED_SERVICE_WORKERS: (count: number) => `🧹 [APOLLO-CLEANUP] Cleared ${count} service workers`,
   CLEARED_CACHES: (count: number) => `🧹 [APOLLO-CLEANUP] Cleared ${count} Apollo caches`,
   COMPLETED_SUCCESS: () => `%c%c✅ [APOLLO-CLEANUP] Apollo cache cleanup completed successfully`,
+  ERROR_DURING_CLEANUP: (error: any) => `❌ [APOLLO-CLEANUP] Error during cleanup: ${error}`,
+  ERROR_CLEARING_LOCALSTORAGE: (error: any) => `❌ [APOLLO-CLEANUP] Error clearing localStorage: ${error}`,
+  ERROR_CLEARING_SESSIONSTORAGE: (error: any) => `❌ [APOLLO-CLEANUP] Error clearing sessionStorage: ${error}`,
+  ERROR_CLEARING_BROWSER_CACHE: (error: any) => `❌ [APOLLO-CLEANUP] Error clearing browser cache: ${error}`,
+  INDEXEDDB_NOT_AVAILABLE: () => `🟡 [APOLLO-CLEANUP] IndexedDB not available`,
+  DEEP_CLEAN_REMOVED_LOCAL: (key: string) => `🗑️ [APOLLO-CLEANUP] Deep clean removed localStorage key: ${key}`,
+  DEEP_CLEAN_REMOVED_SESSION: (key: string) => `🗑️ [APOLLO-CLEANUP] Deep clean removed sessionStorage key: ${key}`,
   DEEP_CLEAN_COMPLETED: () => `%c%c✅ [APOLLO-CLEANUP] Deep clean completed`,
+  DEEP_CLEAN_ERROR: (error: any) => `❌ [APOLLO-CLEANUP] Error during deep clean: ${error}`,
+  INITIAL_CLEANUP_ERROR: (error: any) => `❌ [APOLLO-CLEANUP] Failed to run initial Apollo cleanup: ${error}`,
+  GLOBAL_REFS_ERROR: (error: any) => `❌ [APOLLO-CLEANUP] Failed to clear global Apollo references: ${error}`,
+  MANUAL_CLEANUP: () => `🚀 [APOLLO-CLEANUP] Running manual Apollo cache cleanup...`,
   SUCCESS_STYLE: () => `color: #10b981; font-weight: bold;`,
 } as const;
 
@@ -138,10 +149,64 @@ export const CACHE_LOGS = {
 export const FRONTEND_LOGS = {
   UPDATING_TASK: (taskId: string, updates: any) => `🔄 [FRONTEND] Updating task: ${taskId} ${JSON.stringify(updates)}`,
   TASK_UPDATED: () => `✅ [FRONTEND] Task updated successfully`,
+  TASK_UPDATE_FAILED: (error: any) => `❌ [FRONTEND] Task update failed: ${error}`,
   REORDERING_TASKS: (taskUpdates: any) => `🔄 [FRONTEND] Reordering tasks: ${JSON.stringify(taskUpdates)}`,
   TASKS_REORDERED: () => `✅ [FRONTEND] Tasks reordered successfully`,
+  TASK_REORDER_FAILED: (error: any) => `❌ [FRONTEND] Task reorder failed: ${error}`,
   UPDATING_COLUMNS: (columnUpdates: any) => `🔄 [FRONTEND] Updating column positions: ${JSON.stringify(columnUpdates)}`,
   COLUMNS_UPDATED: () => `✅ [FRONTEND] Columns updated successfully`,
+  COLUMN_UPDATE_FAILED: (error: any) => `❌ [FRONTEND] Column update failed: ${error}`,
+  FAILED_FETCH_ASSIGNEES: (taskId: string, error: any) => `❌ [FRONTEND] Failed to fetch assignees for task ${taskId}: ${error}`,
+} as const;
+
+// 🔔 NOTIFICAÇÕES
+export const NOTIFICATIONS_LOGS = {
+  CREATE_ERROR: (error: any) => `❌ [NOTIFICATIONS] Error creating notification: ${error}`,
+  MARK_READ_ERROR: (error: any) => `❌ [NOTIFICATIONS] Error marking notification as read: ${error}`,
+  MARK_ALL_READ_ERROR: (error: any) => `❌ [NOTIFICATIONS] Error marking all notifications as read: ${error}`,
+  DELETE_ERROR: (error: any) => `❌ [NOTIFICATIONS] Error deleting notification: ${error}`,
+  PARSE_METADATA_ERROR: (error: any) => `⚠️ [NOTIFICATIONS] Failed to parse notification metadata: ${error}`,
+} as const;
+
+// 🔐 LOGIN E AUTENTICAÇÃO
+export const LOGIN_LOGS = {
+  STARTING_LOGIN: (email: string) => `🔐 [LOGIN-JWT] Iniciando login: ${JSON.stringify({ email })}`,
+  LOGIN_SUCCESS: (result: any) => `🔐 [LOGIN-JWT] Login bem-sucedido: ${JSON.stringify(result)}`,
+  PROCESSING_RESPONSE: () => `🔐 [LOGIN-JWT] Processando resposta do login...`,
+  TOKENS_SAVED: () => `✅ [LOGIN-JWT] Tokens salvos no localStorage`,
+  FIRST_LOGIN_REDIRECT: () => `🔄 [LOGIN-JWT] Primeiro login detectado - redirecionando para troca de senha`,
+  NO_JWT_FALLBACK: () => `⚠️ [LOGIN-JWT] Resposta não contém tokens JWT, usando fallback`,
+  LOGIN_ERROR: (error: any) => `❌ [LOGIN-JWT] Erro: ${error}`,
+} as const;
+
+// 🔑 TROCA DE SENHA
+export const CHANGE_PASSWORD_LOGS = {
+  STARTING: () => `🔐 [CHANGE-PASSWORD] Iniciando troca de senha...`,
+  SUCCESS: () => `✅ [CHANGE-PASSWORD] Senha alterada com sucesso`,
+  ERROR: (error: any) => `❌ [CHANGE-PASSWORD] Erro: ${error}`,
+} as const;
+
+// 📊 SELEÇÃO DE BOARDS
+export const BOARD_SELECTION_LOGS = {
+  API_ERROR: (error: any) => `❌ [BOARD-SELECTION] Original API error: ${error}`,
+  CREATE_ERROR: (error: any) => `❌ [BOARD-SELECTION] Erro ao criar board: ${error}`,
+  CACHE_INVALIDATED: () => `🔄 [CACHE] Cache de boards invalidado e refeito`,
+  DEBUG_REQUEST: () => `🚀 [DEBUG] Fazendo request para toggle-status...`,
+  DEBUG_RESPONSE: (data: any) => `🚀 [DEBUG] Resposta recebida: ${JSON.stringify(data)}`,
+  DEBUG_SUCCESS: (updatedBoard: any) => `🚀 [DEBUG] onSuccess chamado com: ${JSON.stringify(updatedBoard)}`,
+  DEBUG_ACTIVE_STATUS: (isActive: any, statusText: string) => `🚀 [DEBUG] isActive final: ${isActive} statusText: ${statusText}`,
+  DEBUG_MUTATION_ERROR: (error: any) => `❌ [DEBUG] Erro na mutation: ${error}`,
+} as const;
+
+// 🔒 SERVIÇO DE AUTENTICAÇÃO
+export const AUTH_SERVICE_LOGS = {
+  TOKEN_REFRESH_ERROR: (error: any) => `❌ [AUTH-SERVICE] Erro ao renovar token: ${error}`,
+} as const;
+
+// 💻 SISTEMA (main.tsx)
+export const SYSTEM_LOGS = {
+  WARNING_SUPPRESSED: (count: number) => `🔇 [SYSTEM] ${count} warnings suprimidos`,
+  CONSOLE_CLEAR: () => `🧹 [SYSTEM] Console cleared`,
 } as const;
 
 // 🎨 ESTILOS REUTILIZÁVEIS
@@ -152,4 +217,5 @@ export const LOG_STYLES = {
   INFO: 'color: #3b82f6; font-weight: bold;',
   MUTED: 'color: #6b7280; font-style: italic;',
   PROTECTION: 'color: #3b82f6; font-weight: bold; font-size: 14px; background: #eff6ff; padding: 3px 8px; border-radius: 5px;',
+  SUPPRESSED_STYLE: 'color: #ef4444; font-weight: bold; background: #fef2f2; padding: 2px 6px; border-radius: 4px;',
 } as const;

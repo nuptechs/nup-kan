@@ -65,7 +65,7 @@ export function useProfileMode(): {
       
     } catch (error) {
       // Erro crítico - propagar para error boundary
-      console.error('🚨 [PROFILE-MODE] Erro crítico ao determinar modo:', error);
+      console.error(PROFILE_MODE_LOGS.CRITICAL_ERROR(error));
       throw error;
     }
   };
@@ -82,7 +82,7 @@ export function useProfileMode(): {
     
     // Validar entrada
     if (!resource || typeof resource !== 'string') {
-      console.warn('🚨 [PROFILE-MODE] Parâmetro resource inválido para canCreate:', resource);
+      console.warn(PROFILE_MODE_LOGS.INVALID_RESOURCE_CREATE(resource));
       return false;
     }
     
@@ -97,7 +97,7 @@ export function useProfileMode(): {
     if (isReadOnly) return false;
     
     if (!resource || typeof resource !== 'string') {
-      console.warn('🚨 [PROFILE-MODE] Parâmetro resource inválido para canEdit:', resource);
+      console.warn(PROFILE_MODE_LOGS.INVALID_RESOURCE_EDIT(resource));
       return false;
     }
     
@@ -109,7 +109,7 @@ export function useProfileMode(): {
     if (isReadOnly) return false;
     
     if (!resource || typeof resource !== 'string') {
-      console.warn('🚨 [PROFILE-MODE] Parâmetro resource inválido para canDelete:', resource);
+      console.warn(PROFILE_MODE_LOGS.INVALID_RESOURCE_DELETE(resource));
       return false;
     }
     
@@ -120,7 +120,7 @@ export function useProfileMode(): {
     if (mode === "loading") return false;
     
     if (!resource || typeof resource !== 'string') {
-      console.warn('🚨 [PROFILE-MODE] Parâmetro resource inválido para canView:', resource);
+      console.warn(PROFILE_MODE_LOGS.INVALID_RESOURCE_VIEW(resource));
       return false;
     }
     

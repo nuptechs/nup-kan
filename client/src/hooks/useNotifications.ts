@@ -5,6 +5,7 @@ import { useAuth } from "./useAuth";
 import { useToast } from "./use-toast";
 import { SUCCESS_MESSAGES } from "@/constants/successMessages";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import { NOTIFICATIONS_LOGS } from "@/constants/logMessages";
 
 export interface Notification {
   id: string;
@@ -122,7 +123,7 @@ export function useNotifications() {
       });
     },
     onError: (error) => {
-      console.error("Error creating notification:", error);
+      console.error(NOTIFICATIONS_LOGS.CREATE_ERROR(error));
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
         description: ERROR_MESSAGES.NOTIFICATIONS.CREATE_FAILED,
@@ -142,7 +143,7 @@ export function useNotifications() {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
     },
     onError: (error) => {
-      console.error("Error marking notification as read:", error);
+      console.error(NOTIFICATIONS_LOGS.MARK_READ_ERROR(error));
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
         description: ERROR_MESSAGES.NOTIFICATIONS.MARK_READ_FAILED,
@@ -171,7 +172,7 @@ export function useNotifications() {
       }
     },
     onError: (error) => {
-      console.error("Error marking all notifications as read:", error);
+      console.error(NOTIFICATIONS_LOGS.MARK_ALL_READ_ERROR(error));
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
         description: ERROR_MESSAGES.NOTIFICATIONS.MARK_READ_FAILED,
@@ -195,7 +196,7 @@ export function useNotifications() {
       });
     },
     onError: (error) => {
-      console.error("Error deleting notification:", error);
+      console.error(NOTIFICATIONS_LOGS.DELETE_ERROR(error));
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
         description: ERROR_MESSAGES.NOTIFICATIONS.DELETE_FAILED,

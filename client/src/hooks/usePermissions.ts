@@ -107,13 +107,13 @@ export function usePermissions() {
   // Nova função para logs de segurança
   const logSecurityAttempt = (action: string, resource: string, success: boolean) => {
     if (!success) {
-      console.warn(`🚫 [SECURITY] Tentativa de acesso negada:`, {
+      console.warn(PERMISSION_LOGS.ACCESS_DENIED({
         user: currentUser?.name || 'Unknown',
         userId: currentUser?.id || 'Unknown',
         action,
         resource,
         timestamp: new Date().toISOString()
-      });
+      }));
     }
   };
 

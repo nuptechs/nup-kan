@@ -1,3 +1,4 @@
+import { FRONTEND_LOGS } from "@/constants/logMessages";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { KanbanColumn } from "./kanban-column";
@@ -89,15 +90,15 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
   const updateTaskMutation = useMutation({
     mutationFn: async ({ taskId, updates }: { taskId: string; updates: Partial<Task> }) => {
-      console.log("🔄 [FRONTEND] Updating task:", taskId, updates);
+      console.log(FRONTEND_LOGS.UPDATING_TASK(taskId, updates));
       return await apiRequest("PATCH", `/api/tasks/${taskId}`, updates);
     },
     onSuccess: () => {
-      console.log("✅ [FRONTEND] Task updated successfully");
+      console.log(FRONTEND_LOGS.TASK_UPDATED());
       queryClient.invalidateQueries({ queryKey: [tasksEndpoint] });
     },
     onError: (error) => {
-      console.error("❌ [FRONTEND] Task update failed:", error);
+      console.error(FRONTEND_LOGS.TASK_UPDATE_FAILED(error));
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao atualizar tarefa. Tente novamente.",
@@ -108,15 +109,15 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
   const reorderTasksMutation = useMutation({
     mutationFn: async (taskUpdates: { id: string; position: number }[]) => {
-      console.log("🔄 [FRONTEND] Reordering tasks:", taskUpdates);
+      console.log(FRONTEND_LOGS.REORDERING_TASKS(taskUpdates));
       return await apiRequest("PATCH", "/api/tasks/reorder", { tasks: taskUpdates });
     },
     onSuccess: () => {
-      console.log("✅ [FRONTEND] Tasks reordered successfully");
+      console.log(FRONTEND_LOGS.TASKS_REORDERED());
       queryClient.invalidateQueries({ queryKey: [tasksEndpoint] });
     },
     onError: (error) => {
-      console.error("❌ [FRONTEND] Task reorder failed:", error);
+      console.error(FRONTEND_LOGS.TASK_REORDER_FAILED(error));
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao reordenar tarefas. Tente novamente.",
