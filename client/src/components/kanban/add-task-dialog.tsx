@@ -135,7 +135,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
     }
   }, [customFields]);
 
-  // Reset form when dialog opens or when columns/custom fields change
+  // Reset form when dialog opens
   useEffect(() => {
     if (isOpen) {
       form.reset({
@@ -151,7 +151,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
         customFields: {},
       });
     }
-  }, [columns, boardId, isOpen, defaultColumnId, customFields]);
+  }, [isOpen]);
 
   const createTaskMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -251,8 +251,8 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                         <FormLabel className="text-sm font-medium text-slate-700">Título</FormLabel>
                         <FormControl>
                           <Input
-                            {...field}
                             placeholder="Digite o título da tarefa"
+                            {...field}
                             className="text-xl font-semibold"
                             data-testid="input-header-title"
                           />
