@@ -11,7 +11,7 @@ import { BaseService } from "./baseService";
 import type { AuthContext } from "../auth/unifiedAuth";
 import type { TeamProfile, InsertTeamProfile } from "@shared/schema";
 import { insertTeamProfileSchema } from "@shared/schema";
-import { TTL } from "../cache";
+import { TTL } from "../../cache";
 import { PERMISSIONS } from "../config/permissions";
 
 export interface TeamProfileRequest {

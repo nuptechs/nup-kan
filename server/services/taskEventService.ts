@@ -12,7 +12,7 @@ import { BaseService } from "./baseService";
 import type { AuthContext } from "../auth/unifiedAuth";
 import type { TaskEvent, InsertTaskEvent } from "@shared/schema";
 import { insertTaskEventSchema } from "@shared/schema";
-import { TTL } from "../cache";
+import { TTL } from "../../cache";
 import { PERMISSIONS } from "../config/permissions";
 
 export interface TaskEventCreateRequest {

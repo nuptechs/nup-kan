@@ -12,7 +12,7 @@ import { BaseService, createSuccessResponse, createErrorResponse, PaginatedRespo
 import type { AuthContext } from "../auth/unifiedAuth";
 import type { BoardShare, InsertBoardShare, UpdateBoardShare, User } from "@shared/schema";
 import { insertBoardShareSchema, updateBoardShareSchema } from "@shared/schema";
-import { TTL } from "../cache";
+import { TTL } from "../../cache";
 import { PERMISSIONS } from "../config/permissions";
 
 export interface BoardShareCreateRequest {

@@ -14,7 +14,7 @@ import { BaseService, createSuccessResponse, createErrorResponse, PaginatedRespo
 import type { AuthContext } from "../auth/unifiedAuth";
 import type { Column, InsertColumn, UpdateColumn } from "@shared/schema";
 import { insertColumnSchema, updateColumnSchema } from "@shared/schema";
-import { TTL } from "../cache";
+import { TTL } from "../../cache";
 import { PERMISSIONS } from "../config/permissions";
 
 export interface ColumnCreateRequest {

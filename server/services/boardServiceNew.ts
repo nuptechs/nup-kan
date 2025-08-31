@@ -14,7 +14,7 @@ import { BaseService, createSuccessResponse, createErrorResponse, PaginatedRespo
 import type { AuthContext } from "../auth/unifiedAuth";
 import type { Board, InsertBoard, UpdateBoard } from "@shared/schema";
 import { insertBoardSchema, updateBoardSchema } from "@shared/schema";
-import { TTL } from "../cache";
+import { TTL } from "../../cache";
 import { PERMISSIONS } from "../config/permissions";
 import { Logger } from '../utils/logMessages';
 

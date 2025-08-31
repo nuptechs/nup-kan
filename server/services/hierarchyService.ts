@@ -17,7 +17,7 @@
 import { BaseService } from "./baseService";
 import type { AuthContext } from "../auth/unifiedAuth";
 import type { Permission, Profile, Team, User } from "@shared/schema";
-import { TTL } from "../cache";
+import { TTL } from "../../cache";
 
 export interface UserHierarchy {
   user: User;

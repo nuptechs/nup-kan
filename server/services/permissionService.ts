@@ -14,7 +14,7 @@ import { BaseService, createSuccessResponse, createErrorResponse, PaginatedRespo
 import type { AuthContext } from "../auth/unifiedAuth";
 import type { Permission, InsertPermission } from "@shared/schema";
 import { insertPermissionSchema } from "@shared/schema";
-import { TTL } from "../cache";
+import { TTL } from "../../cache";
 import { PERMISSIONS } from "../config/permissions";
 
 export interface PermissionCreateRequest {

@@ -14,7 +14,7 @@ import { BaseService, createSuccessResponse, createErrorResponse, PaginatedRespo
 import type { AuthContext } from "../auth/unifiedAuth";
 import type { User, InsertUser, UpdateUser } from "@shared/schema";
 import { insertUserSchema, updateUserSchema } from "@shared/schema";
-import { TTL } from "../cache";
+import { TTL } from "../../cache";
 import { PERMISSIONS } from "../config/permissions";
 import bcrypt from "bcryptjs";
 

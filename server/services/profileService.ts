@@ -14,7 +14,7 @@ import { BaseService, createSuccessResponse, createErrorResponse, PaginatedRespo
 import type { AuthContext } from "../auth/unifiedAuth";
 import type { Profile, InsertProfile, UpdateProfile } from "@shared/schema";
 import { insertProfileSchema, updateProfileSchema } from "@shared/schema";
-import { TTL } from "../cache";
+import { TTL } from "../../cache";
 import { PERMISSIONS } from "../config/permissions";
 
 export interface ProfileCreateRequest {

@@ -11,7 +11,7 @@
 import { BaseService } from "./baseService";
 import type { AuthContext } from "../auth/unifiedAuth";
 import type { ExportHistory, InsertExportHistory } from "@shared/schema";
-import { TTL } from "../cache";
+import { TTL } from "../../cache";
 import { PERMISSIONS } from "../config/permissions";
 
 export interface ExportCreateRequest {

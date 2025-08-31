@@ -5,7 +5,7 @@ import { Logger } from './utils/logMessages';
 import { eq, desc, and, inArray, sql, or } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
-import { cache, CacheKeys, TTL } from "./cache";
+import { cache, CacheKeys, TTL } from "../cache";
 import { OptimizedQueries } from "./optimizedQueries";
 
 export interface IStorage {

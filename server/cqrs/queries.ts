@@ -9,7 +9,7 @@
 
 // Sistema de queries com PostgreSQL apenas
 import { cache } from '../../cache';
-import { CacheKeys, TTL } from '../cache';
+import { CacheKeys, TTL } from "../../cache";
 import { OptimizedQueries } from '../optimizedQueries';
 
 /**

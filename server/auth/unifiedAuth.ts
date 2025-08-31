@@ -17,7 +17,7 @@ import { db } from '../db';
 import { users, profiles, permissions, profilePermissions, userTeams, teams } from '@shared/schema';
 import { eq, sql, and } from 'drizzle-orm';
 import { cache } from '../../cache';
-import { TTL } from '../cache';
+import { TTL } from '../../cache';
 import { JWTService, JWTPayload, TokenPair } from '../services/jwtService';
 import { TokenBlacklistService } from '../services/tokenBlacklistService';
 

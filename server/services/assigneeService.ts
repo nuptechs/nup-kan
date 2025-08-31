@@ -17,7 +17,7 @@ import { BaseService } from "./baseService";
 import type { AuthContext } from "../auth/unifiedAuth";
 import type { TaskAssignee, InsertTaskAssignee, User } from "@shared/schema";
 import { insertTaskAssigneeSchema } from "@shared/schema";
-import { TTL } from "../cache";
+import { TTL } from "../../cache";
 import { PERMISSIONS } from "../config/permissions";
 import { hierarchyService } from "./hierarchyService";
 
