@@ -1,0 +1,61 @@
+Por que isso está acontecendo (o loop infinito)?
+A mensagem já te dá a pista principal: está relacionado a um useEffect que está chamando uma função setState (uma função que atualiza o estado do componente), e essa atualização de estado, por sua vez, causa uma nova renderização que aciona o useEffect novamente, criando um ciclo vicioso.
+
+Existem duas causas principais para esse ciclo:
+
+useEffect sem array de dependências (ou array vazio [] ausente):
+
+typescript
+Copiar
+
+useEffect(() => {
+  // Alguma lógica que chama um set algumEstado (ex: setOpen(true), setAlgumDado(valor))
+  setAlgumEstado(novoValor); // <-- O problema está aqui
+}); // FALTA o segundo argumento (o array de dependências)
+O que acontece: Quando um useEffect não tem o segundo argumento (o array de dependências), ele é executado após cada renderização do componente.
+Se a lógica dentro dele chama setAlgumEstado, isso causa uma nova renderização. Essa nova renderização faz o useEffect ser executado de novo, chamando setAlgumEstado de novo, e assim por diante, infinitamente.
+useEffect com uma dependência instável no array de dependências:
+
+typescript
+Copiar
+
+const algumaFuncaoOuObjeto = () => {}; // Esta função/objeto é criada NOVA a CADA renderização
+
+useEffect(() => {
+  setAlgumEstado(novoValor);
+}, [algumaFuncaoOuObjeto]); // <-- A dependência muda em cada renderização
+O que acontece: Mesmo que você tenha um array de dependências, se um valor dentro desse array for um objeto, um array ou uma função que é recriado em cada renderização, o React interpreta isso como uma "mudança" na dependência.
+Consequentemente, o useEffect é executado novamente, chamando setAlgumEstado, causando uma nova renderização, recriando a dependência, e reiniciando o ciclo.
+Isso geralmente é resolvido usando useCallback para funções e useMemo para objetos/arrays, para garantir que eles sejam estáveis entre as renderizações.
+Onde procurar no seu código (AddTaskDialog.tsx na linha 54:33)?
+A pilha de chamadas (stack trace) aponta diretamente para o componente AddTaskDialog. Você precisa:
+
+Localizar o arquivo src/components/kanban/add-task-dialog.tsx (que foi o componente BoardSharingDialog na nossa última conversa, mas o erro aponta para um AddTaskDialog): O aviso é muito específico quanto à linha 54:33.
+Encontrar todos os hooks useEffect nesse componente.
+Para cada useEffect:
+Verifique se ele tem um array de dependências (o segundo argumento, [] ou [dependencias]). Se não tiver, adicione um, provavelmente [] se ele deveria rodar apenas uma vez na montagem do componente.
+Se ele tem um array de dependências, inspecione as variáveis listadas lá. Alguma delas é uma função ou um objeto que está sendo definida dentro do próprio corpo do componente (e não fora ou memoizada com useCallback/useMemo)?
+Identifique qual setState (ex: setOpen, setAlgumFormState, etc.) está sendo chamado dentro desse useEffect problemático. É essa chamada que está desencadeando a renderização infinita.
+Exemplo comum em um Dialog:
+Um cenário comum para isso acontecer em um dialog como o seu AddTaskDialog é a tentativa de resetar o formulário ou algum estado quando o dialog abre:
+
+typescript
+Copiar
+
+// Exemplo de código que PODE causar o erro
+function AddTaskDialog({ open, onClose }) {
+  const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+    if (open) {
+      // Se 'open' for true, ele reseta. O reset causa uma re-renderização.
+      // Se 'open' continuar true na próxima renderização, o useEffect roda de novo... loop!
+      setFormData({});
+    }
+  }, [open]); // O problema aqui pode ser o 'open' ou a forma como 'setFormData' é usado
+
+  // ... restante do componente
+}
+Nesse caso, a solução seria garantir que setFormData({}) só seja chamado uma vez quando o dialog realmente abre ou que o estado que ele tenta setar não provoque um novo ciclo. Ou, se o estado for o próprio open (que não é o caso aqui), a lógica de fechar o dialog deve estar bem definida.
+
+Em resumo: Vá para src/components/kanban/add-task-dialog.tsx na linha 54 e inspecione o useEffect ali. Quase 100% de certeza que o problema está na forma como o array de dependências está configurado ou na estabilidade de uma de suas dependências.
