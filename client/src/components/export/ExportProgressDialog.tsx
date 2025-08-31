@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, XCircle, Download, FileText, Clock, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface ExportProgressDialogProps {
   open: boolean;
@@ -126,7 +127,7 @@ export function ExportProgressDialog({ open, onOpenChange, onExportComplete }: E
       setCurrentStep('Erro na exportação');
       toast({
         title: "Erro na exportação",
-        description: "Ocorreu um erro ao exportar os dados. Tente novamente.",
+        description: ERROR_MESSAGES.GENERIC.OPERATION_FAILED,
         variant: "destructive",
       });
     }

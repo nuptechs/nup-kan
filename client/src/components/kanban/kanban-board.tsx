@@ -110,7 +110,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
       console.error(FRONTEND_LOGS.TASK_UPDATE_FAILED(error));
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao atualizar tarefa. Tente novamente.",
+        description: ERROR_MESSAGES.TASKS.UPDATE_FAILED,
         variant: "destructive",
       });
     },
@@ -129,7 +129,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
       console.error(FRONTEND_LOGS.TASK_REORDER_FAILED(error));
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao reordenar tarefas. Tente novamente.",
+        description: ERROR_MESSAGES.TASKS.REORDER_FAILED,
         variant: "destructive",
       });
     },
@@ -148,7 +148,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
       console.error("❌ [FRONTEND] Column reorder failed:", error);
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao reordenar colunas. Tente novamente.",
+        description: ERROR_MESSAGES.COLUMNS.REORDER_FAILED,
         variant: "destructive",
       });
     },
@@ -165,7 +165,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao excluir coluna. Tente novamente.",
+        description: ERROR_MESSAGES.COLUMNS.DELETE_FAILED,
         variant: "destructive",
       });
     },

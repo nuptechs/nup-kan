@@ -83,7 +83,7 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao criar usuário. Tente novamente.",
+        description: ERROR_MESSAGES.AUTH.USER_CREATE_FAILED,
         variant: "destructive",
       });
     },
@@ -105,7 +105,7 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao criar time. Tente novamente.",
+        description: ERROR_MESSAGES.TEAMS.CREATE_FAILED,
         variant: "destructive",
       });
     },
@@ -143,7 +143,7 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao criar perfil. Tente novamente.",
+        description: ERROR_MESSAGES.PROFILES.CREATE_FAILED,
         variant: "destructive",
       });
     },

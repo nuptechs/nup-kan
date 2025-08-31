@@ -97,7 +97,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
     onError: (error: any) => {
       console.error(USER_LOGS.CREATE_ERROR(error));
       
-      let errorMessage = "Falha ao criar usuário. Tente novamente.";
+      let errorMessage = ERROR_MESSAGES.AUTH.USER_CREATE_FAILED;
       
       if (error?.message?.includes("já está em uso") || 
           error?.message?.includes("already exists") ||
@@ -168,7 +168,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao atualizar usuário. Tente novamente.",
+        description: ERROR_MESSAGES.AUTH.USER_UPDATE_FAILED,
         variant: "destructive",
       });
     },

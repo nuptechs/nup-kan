@@ -120,23 +120,9 @@ export default function BoardSelection() {
     onError: (error: any) => {
       console.error("Erro ao criar board:", error);
       
-      // Parse API error response for better user feedback
-      let errorMessage = "Erro ao criar board. Tente novamente.";
-      
-      if (error?.message) {
-        // Check if it's a validation error from the backend
-        if (error.message.includes("O nome do board deve conter pelo menos 3 caracteres")) {
-          errorMessage = "O nome do board deve conter pelo menos 3 caracteres.";
-        } else if (error.message.includes("Invalid board data")) {
-          errorMessage = "Dados do board inválidos. Verifique se todos os campos estão preenchidos corretamente.";
-        } else {
-          errorMessage = error.message;
-        }
-      }
-      
       toast({
-        title: "Erro ao criar board",
-        description: errorMessage,
+        title: ERROR_MESSAGES.GENERIC.ERROR,
+        description: ERROR_MESSAGES.BOARDS.CREATE_FAILED,
         variant: "destructive",
       });
     },

@@ -54,7 +54,7 @@ export function TagSelector({ selectedTags, onTagsChange }: TagSelectorProps) {
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao criar tag. Tente novamente.",
+        description: ERROR_MESSAGES.TAGS.CREATE_FAILED,
         variant: "destructive",
       });
     },

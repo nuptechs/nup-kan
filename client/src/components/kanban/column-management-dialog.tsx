@@ -101,7 +101,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao criar coluna. Tente novamente.",
+        description: ERROR_MESSAGES.COLUMNS.CREATE_FAILED,
         variant: "destructive",
         duration: 3000,
       });
@@ -127,7 +127,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao atualizar coluna. Tente novamente.",
+        description: ERROR_MESSAGES.COLUMNS.UPDATE_FAILED,
         variant: "destructive",
       });
     },
@@ -155,7 +155,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
     },
     onError: (error: any) => {
       console.error("Error deleting column:", error);
-      let errorMessage = "Falha ao excluir coluna. Tente novamente.";
+      let errorMessage = ERROR_MESSAGES.COLUMNS.DELETE_FAILED;
       
       if (error?.response?.status === 404) {
         errorMessage = "Esta coluna já foi excluída ou não existe.";
@@ -180,7 +180,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao reordenar colunas. Tente novamente.",
+        description: ERROR_MESSAGES.COLUMNS.REORDER_FAILED,
         variant: "destructive",
       });
     },

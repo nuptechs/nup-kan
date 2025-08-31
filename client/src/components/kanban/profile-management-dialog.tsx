@@ -99,7 +99,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Erro ao criar perfil. Tente novamente.",
+        description: ERROR_MESSAGES.PROFILES.CREATE_FAILED,
         variant: "destructive",
       });
     },
@@ -127,7 +127,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Erro ao atualizar perfil. Tente novamente.",
+        description: ERROR_MESSAGES.PROFILES.UPDATE_FAILED,
         variant: "destructive",
       });
     },
@@ -149,7 +149,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Erro ao excluir perfil. Tente novamente.",
+        description: ERROR_MESSAGES.PROFILES.DELETE_FAILED,
         variant: "destructive",
       });
     },
@@ -170,7 +170,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Erro ao adicionar permissão. Tente novamente.",
+        description: ERROR_MESSAGES.PROFILES.PERMISSIONS_ADD_FAILED,
         variant: "destructive",
       });
     },
@@ -191,7 +191,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Erro ao remover permissão. Tente novamente.",
+        description: ERROR_MESSAGES.PROFILES.PERMISSION_REMOVE_FAILED,
         variant: "destructive",
       });
     },

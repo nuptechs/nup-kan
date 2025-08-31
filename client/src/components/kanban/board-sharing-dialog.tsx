@@ -103,7 +103,7 @@ export function BoardSharingDialog({ board, open, onOpenChange }: BoardSharingDi
     onError: (error: any) => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Erro ao compartilhar board. Tente novamente.",
+        description: ERROR_MESSAGES.SHARING.SHARE_FAILED,
         variant: "destructive",
       });
     },

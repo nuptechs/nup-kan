@@ -46,7 +46,7 @@ export default function UserSettingsPage() {
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao atualizar informações. Tente novamente.",
+        description: ERROR_MESSAGES.AUTH.USER_UPDATE_FAILED,
         variant: "destructive",
       });
     },

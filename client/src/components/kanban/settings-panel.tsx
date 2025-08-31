@@ -83,7 +83,7 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao atualizar limite WIP. Tente novamente.",
+        description: ERROR_MESSAGES.SETTINGS.UPDATE_FAILED,
         variant: "destructive",
       });
     },

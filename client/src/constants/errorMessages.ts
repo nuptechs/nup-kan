@@ -18,7 +18,7 @@ export const ERROR_MESSAGES = {
 
   // Boards
   BOARDS: {
-    CREATE_FAILED: "Erro ao criar board viu. Tente novamente.",
+    CREATE_FAILED: "Erro ao criar board. Tente novamente.",
     UPDATE_FAILED: "Erro ao atualizar board. Tente novamente.",
     DELETE_FAILED: "Erro ao excluir board. Tente novamente.",
     STATUS_CHANGE_FAILED: "Erro ao alterar status do board. Tente novamente.",

@@ -105,7 +105,7 @@ export function FluidPermissionsInterface({ targetType, targetId, targetName }: 
       console.error("Permission toggle error:", error);
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao atualizar permissão. Tente novamente.",
+        description: ERROR_MESSAGES.GENERIC.OPERATION_FAILED,
         variant: "destructive",
       });
     },

@@ -76,7 +76,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao criar tag. Tente novamente.",
+        description: ERROR_MESSAGES.TAGS.CREATE_FAILED,
         variant: "destructive",
       });
     },
@@ -101,7 +101,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao atualizar tag. Tente novamente.",
+        description: ERROR_MESSAGES.TAGS.UPDATE_FAILED,
         variant: "destructive",
       });
     },
@@ -122,7 +122,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao excluir tag. Tente novamente.",
+        description: ERROR_MESSAGES.TAGS.DELETE_FAILED,
         variant: "destructive",
       });
     },

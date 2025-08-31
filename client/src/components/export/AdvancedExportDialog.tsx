@@ -30,6 +30,7 @@ import jsPDF from 'jspdf';
 // @ts-ignore
 import 'jspdf-autotable';
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface AdvancedExportDialogProps {
   open: boolean;
@@ -678,7 +679,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
       
       toast({
         title: "Erro na exportação",
-        description: "Ocorreu um erro ao exportar os dados. Tente novamente.",
+        description: ERROR_MESSAGES.GENERIC.OPERATION_FAILED,
         variant: "destructive",
       });
     }

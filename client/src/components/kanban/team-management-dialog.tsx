@@ -155,7 +155,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao criar time. Tente novamente.",
+        description: ERROR_MESSAGES.TEAMS.CREATE_FAILED,
         variant: "destructive",
       });
     },
@@ -185,7 +185,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao atualizar time. Tente novamente.",
+        description: ERROR_MESSAGES.TEAMS.UPDATE_FAILED,
         variant: "destructive",
       });
     },
@@ -205,7 +205,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao excluir time. Tente novamente.",
+        description: ERROR_MESSAGES.TEAMS.DELETE_FAILED,
         variant: "destructive",
       });
     },
