@@ -12,12 +12,12 @@ router.use(requireAuth); // Valida se está autenticado
 router.get("/me", UserController.getCurrentUser);
 
 // User CRUD routes
-router.get("/", requirePermission("Listar Usuários"), UserController.getUsers);
-router.get("/:id", requirePermission("Visualizar Usuários"), UserController.getUser);
-router.post("/", requirePermission("Criar Usuários"), UserController.createUser);
-router.put("/:id", requirePermission("Editar Usuários"), UserController.updateUser);
+router.get("/", requirePermission("List Users"), UserController.getUsers);
+router.get("/:id", requirePermission("Edit Users"), UserController.getUser);
+router.post("/", requirePermission("Create Users"), UserController.createUser);
+router.put("/:id", requirePermission("Edit Users"), UserController.updateUser);
 router.patch("/:id", UserController.patchUser); // Allow self-editing with conditional permission check
-router.delete("/:id", requirePermission("Excluir Usuários"), UserController.deleteUser);
+router.delete("/:id", requirePermission("Delete Users"), UserController.deleteUser);
 
 // User permissions
 router.get("/:userId/permissions", UserController.getUserPermissions);

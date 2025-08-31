@@ -11,7 +11,7 @@
  */
 
 import { BaseService, createSuccessResponse, createErrorResponse, PaginatedResponse, PaginationOptions } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { Column, InsertColumn, UpdateColumn } from "@shared/schema";
 import { insertColumnSchema, updateColumnSchema } from "@shared/schema";
 import { TTL } from "../cache";
@@ -40,7 +40,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'getColumns', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Colunas', 'listar colunas');
+      this.requirePermission(authContext, 'List Columns', 'listar colunas');
 
       const cacheKey = 'columns:all';
       const cached = await this.cache.get<Column[]>(cacheKey);
@@ -65,7 +65,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'getBoardColumns', { userId: authContext.userId, boardId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Colunas', 'visualizar colunas');
+      this.requirePermission(authContext, 'Edit Columns', 'visualizar colunas');
 
       const cacheKey = `board_columns:${boardId}`;
       const cached = await this.cache.get<Column[]>(cacheKey);
