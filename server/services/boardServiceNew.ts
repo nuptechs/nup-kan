@@ -11,7 +11,7 @@
  */
 
 import { BaseService, createSuccessResponse, createErrorResponse, PaginatedResponse, PaginationOptions } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { Board, InsertBoard, UpdateBoard } from "@shared/schema";
 import { insertBoardSchema, updateBoardSchema } from "@shared/schema";
 import { TTL } from "../cache";
@@ -72,7 +72,7 @@ export class BoardService extends BaseService {
     
     try {
       // Verificar permissão básica - ajustando para permitir acesso aos próprios boards
-      if (!this.hasPermission(authContext, 'Listar Boards') && !this.hasPermission(authContext, 'Visualizar Boards')) {
+      if (!this.hasPermission(authContext, 'List Boards') && !this.hasPermission(authContext, 'View Boards')) {
         // Se não tem permissão geral, só pode ver os próprios boards - isso será filtrado mais tarde
         console.log('⚠️ [BOARD-SERVICE] Usuário sem permissão geral, filtrando apenas próprios boards');
       }
@@ -188,7 +188,11 @@ export class BoardService extends BaseService {
     this.log('board-service', 'getBoard', { userId: authContext.userId, boardId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Boards', 'visualizar board');
+      // Verificar se usuário tem acesso a este board (sem requerer permissão geral)
+      const hasAccess = await this.checkBoardAccess(authContext.userId, boardId);
+      if (!hasAccess) {
+        throw new Error('Acesso negado ao board solicitado');
+      }
 
       // Tentar cache primeiro
       const cacheKey = `board:${boardId}:full`;
@@ -201,12 +205,6 @@ export class BoardService extends BaseService {
       const board = await this.storage.getBoard(boardId);
       if (!board) {
         return null;
-      }
-
-      // Verificar se usuário tem acesso a este board
-      const hasAccess = await this.checkBoardAccess(authContext.userId, boardId);
-      if (!hasAccess) {
-        throw new Error('Acesso negado ao board solicitado');
       }
 
       // Enriquecer com dados completos
@@ -456,9 +454,9 @@ export class BoardService extends BaseService {
     // Lógica para calcular permissões específicas do board
     // Por enquanto, retorna baseado nas permissões gerais do usuário
     return {
-      canEdit: this.hasPermission(authContext, 'Editar Boards'),
-      canDelete: this.hasPermission(authContext, 'Excluir Boards'),
-      canManageMembers: this.hasPermission(authContext, 'Gerenciar Times'),
+      canEdit: this.hasPermission(authContext, 'Edit Boards'),
+      canDelete: this.hasPermission(authContext, 'Delete Boards'),
+      canManageMembers: this.hasPermission(authContext, 'Edit Teams'),
     };
   }
 
@@ -525,14 +523,14 @@ export class BoardService extends BaseService {
 
     // Verificar se o usuário pode editar este board
     const canEdit = currentBoard.createdById === authContext.userId || 
-                   this.hasPermission(authContext, 'Editar Boards');
+                   this.hasPermission(authContext, 'Edit Boards');
     
     if (!canEdit) {
       throw new Error("Permission denied");
     }
 
     // Toggle do status
-    const newStatus = currentBoard.isActive === "true" ? "false" : "true";
+    const newStatus = !currentBoard.isActive;
     
     // Atualizar no banco
     const updatedBoard = await this.storage.updateBoard(boardId, {
