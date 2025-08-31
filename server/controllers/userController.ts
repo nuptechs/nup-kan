@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { userService, hierarchyService } from "../services";
 import { UnifiedAuthService, AuthRequest } from "../auth/unifiedAuth";
+import { Logger } from '../utils/logMessages';
 
 // Helper para criar AuthContext a partir da request
 function createAuthContextFromRequest(req: any): any {
@@ -51,7 +52,7 @@ export class UserController {
       const users = await userService.getUsers(authContext);
       res.json(users);
     } catch (error) {
-      console.error('Error in GET /api/users:', error);
+      Logger.error.generic('GET /api/users', error);
       const message = error instanceof Error ? error.message : "Failed to fetch users";
       res.status(500).json({ message });
     }
@@ -69,7 +70,7 @@ export class UserController {
       }
       res.json(user);
     } catch (error) {
-      console.error('Error in GET /api/users/:id:', error);
+      Logger.error.generic('GET /api/users/:id', error);
       const message = error instanceof Error ? error.message : "Failed to fetch user";
       res.status(500).json({ message });
     }

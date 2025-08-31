@@ -1,6 +1,7 @@
 import { type Board, type InsertBoard, type UpdateBoard, type Task, type InsertTask, type UpdateTask, type Column, type InsertColumn, type UpdateColumn, type Tag, type InsertTag, type Team, type InsertTeam, type UpdateTeam, type User, type InsertUser, type UpdateUser, type Profile, type InsertProfile, type UpdateProfile, type Permission, type InsertPermission, type ProfilePermission, type InsertProfilePermission, type TeamProfile, type InsertTeamProfile, type UserTeam, type InsertUserTeam, type BoardShare, type InsertBoardShare, type UpdateBoardShare, type TaskEvent, type InsertTaskEvent, type ExportHistory, type InsertExportHistory, type ConfigValue, type InsertConfigValue, type UpdateConfigValue, type TaskTag, type InsertTaskTag, type TaskAssignee, type InsertTaskAssignee, type Notification, type InsertNotification, type UpdateNotification } from "@shared/schema";
 import { db } from "./db";
 import { boards, tasks, columns, tags, teams, users, profiles, permissions, profilePermissions, teamProfiles, userTeams, boardShares, taskEvents, exportHistory, taskAssignees, notifications, configValues, taskTags } from "@shared/schema";
+import { Logger } from './utils/logMessages';
 import { eq, desc, and, inArray, sql, or } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
@@ -189,11 +190,11 @@ export class DatabaseStorage implements IStorage {
     const cacheKey = `boards_paginated:${limit}:${offset}`;
     const cached = await cache.get<Board[]>(cacheKey);
     if (cached) {
-      console.log("🚀 [CACHE HIT] Boards paginados servidos do cache");
+      Logger.cache.hit(`boards:paginated:${page}:${limit}`);
       return cached;
     }
 
-    console.log("🔍 [CACHE MISS] Buscando boards paginados no banco");
+    Logger.cache.miss(`boards:paginated:${page}:${limit}`);
     const result = await db
       .select()
       .from(boards)
@@ -226,11 +227,11 @@ export class DatabaseStorage implements IStorage {
     const cacheKey = `boards_creator:${creatorId}:${limit}:${offset}`;
     const cached = await cache.get<Board[]>(cacheKey);
     if (cached) {
-      console.log("🚀 [CACHE HIT] Boards por criador servidos do cache");
+      Logger.cache.hit(`boards:creator:${creatorId}`);
       return cached;
     }
 
-    console.log("🔍 [CACHE MISS] Buscando boards do criador no banco:", creatorId);
+    Logger.cache.miss(`boards:creator:${creatorId}`);
     const result = await db
       .select()
       .from(boards)
@@ -249,11 +250,11 @@ export class DatabaseStorage implements IStorage {
     const cacheKey = `boards_user_access:${userId}:${limit}:${offset}`;
     const cached = await cache.get<Board[]>(cacheKey);
     if (cached) {
-      console.log("🚀 [CACHE HIT] Boards do usuário servidos do cache");
+      Logger.cache.hit(`boards_user_access:${userId}:${limit}:${offset}`);
       return cached;
     }
 
-    console.log("🔍 [CACHE MISS] Buscando boards acessíveis do usuário:", userId);
+    Logger.cache.miss(`boards_user_access:${userId}:${limit}:${offset}`);
     
     // Buscar IDs de boards compartilhados com o usuário
     const sharedBoardIds = await db
@@ -282,7 +283,7 @@ export class DatabaseStorage implements IStorage {
     
     // Cache por 30 segundos
     await cache.set(cacheKey, result, TTL.SHORT / 2);
-    console.log(`🔒 [SECURITY] Usuário ${userId} pode acessar ${result.length} boards`);
+    Logger.security.userBoardAccess(userId, result.length);
     return result;
   }
 
@@ -347,18 +348,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async initializeBoardWithDefaults(boardId: string): Promise<void> {
-    console.log(`🔄 [TRANSACTION] Initializing board ${boardId} with default data`);
+    Logger.transaction.initializing(boardId);
     
     // Check if board already has columns
     const existingColumns = await this.getBoardColumns(boardId);
     if (existingColumns.length > 0) {
-      console.log(`⚠️ [TRANSACTION] Board ${boardId} already has columns, skipping initialization`);
+      Logger.transaction.alreadyHasColumns(boardId);
       return; // Already initialized
     }
     
     // 🔒 TRANSAÇÃO: Garantir que todas as colunas sejam criadas ou nenhuma
     await db.transaction(async (tx) => {
-      console.log(`🔒 [TRANSACTION] Iniciando transação para board ${boardId}`);
+      Logger.transaction.starting(boardId);
       
       const defaultColumns = [
         { boardId, title: "Backlog", position: 0, wipLimit: null, color: "gray" },
@@ -371,10 +372,10 @@ export class DatabaseStorage implements IStorage {
       // Insert todas as colunas em uma única transação
       for (const column of defaultColumns) {
         await tx.insert(columns).values(column);
-        console.log(`✅ [TRANSACTION] Coluna "${column.title}" inserida para board ${boardId}`);
+        Logger.transaction.columnInserted(column.title, boardId);
       }
       
-      console.log(`✅ [TRANSACTION] Board ${boardId} inicializado com ${defaultColumns.length} colunas (transação concluída)`);
+      Logger.transaction.boardInitialized(boardId, defaultColumns.length);
     });
   }
 
@@ -408,13 +409,13 @@ export class DatabaseStorage implements IStorage {
           metadata: ""
         });
       } catch (eventError) {
-        console.error("⚠️  DatabaseStorage: Event creation failed, but task was created:", eventError);
+        Logger.error.eventCreationFailed(eventError);
         // Continue without failing - task is already created
       }
       
       return task;
     } catch (error) {
-      console.error("❌ DatabaseStorage: Task creation failed:", error);
+      Logger.error.taskCreationFailed(error);
       throw error;
     }
   }
@@ -617,11 +618,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async reorderColumns(reorderedColumns: { id: string; position: number }[]): Promise<void> {
-    console.log("🔄 [TRANSACTION] Reordenando columns:", reorderedColumns.map(c => ({ id: c.id, position: c.position })));
+    Logger.transaction.reorderingColumns(reorderedColumns);
     
     // 🔒 TRANSAÇÃO: Garantir que todas as posições sejam atualizadas ou nenhuma
     await db.transaction(async (tx) => {
-      console.log(`🔒 [TRANSACTION] Iniciando transação para reordenar ${reorderedColumns.length} columns`);
+      Logger.transaction.startingReorder(reorderedColumns.length);
       
       for (const { id, position } of reorderedColumns) {
         const result = await tx
@@ -629,37 +630,37 @@ export class DatabaseStorage implements IStorage {
           .set({ position })
           .where(eq(columns.id, id));
         
-        console.log(`✅ [TRANSACTION] Column ${id} -> position ${position}, rowCount: ${result.rowCount}`);
+        Logger.transaction.columnUpdated(id, position, result.rowCount);
         
         if (result.rowCount === 0) {
-          console.log(`❌ [TRANSACTION] Column ${id} não foi atualizada`);
+          Logger.transaction.columnNotUpdated(id);
           throw new Error(`Column with id ${id} not found during transaction`);
         }
       }
       
-      console.log("✅ [TRANSACTION] Todas as columns reordenadas com sucesso (transação concluída)");
+      Logger.transaction.reorderSuccess();
     });
   }
 
   async reorderTasks(reorderedTasks: { id: string; position: number }[]): Promise<void> {
-    console.log("🔄 [TRANSACTION] Reordenando tasks:", reorderedTasks.map(t => ({ id: t.id, position: t.position })));
+    Logger.transaction.reorderingTasks(reorderedTasks);
     
     // Validar se todas as tasks existem antes da transação
     const taskIds = reorderedTasks.map(t => t.id);
     const existingTasks = await db.select({ id: tasks.id, title: tasks.title }).from(tasks).where(inArray(tasks.id, taskIds));
-    console.log("🔍 [TRANSACTION] Tasks existentes no DB:", existingTasks);
+    Logger.transaction.reorderingTasks(existingTasks);
     
     const foundTaskIds = existingTasks.map(t => t.id);
     const missingTaskIds = taskIds.filter(id => !foundTaskIds.includes(id));
     
     if (missingTaskIds.length > 0) {
-      console.log("❌ [TRANSACTION] Tasks não encontradas:", missingTaskIds);
+      Logger.error.generic('TRANSACTION', `Tasks não encontradas: ${missingTaskIds.join(', ')}`);
       throw new Error(`Tasks not found: ${missingTaskIds.join(', ')}`);
     }
     
     // 🔒 TRANSAÇÃO: Garantir que todas as posições sejam atualizadas ou nenhuma
     await db.transaction(async (tx) => {
-      console.log(`🔒 [TRANSACTION] Iniciando transação para reordenar ${reorderedTasks.length} tasks`);
+      Logger.transaction.startingReorder(reorderedTasks.length);
       
       for (const { id, position } of reorderedTasks) {
         const result = await tx
@@ -667,15 +668,15 @@ export class DatabaseStorage implements IStorage {
           .set({ position })
           .where(eq(tasks.id, id));
         
-        console.log(`✅ [TRANSACTION] Task ${id} -> position ${position}, rowCount: ${result.rowCount}`);
+        Logger.transaction.columnUpdated(id, position, result.rowCount);
         
         if (result.rowCount === 0) {
-          console.log(`❌ [TRANSACTION] Task ${id} não foi atualizada`);
+          Logger.transaction.columnNotUpdated(id);
           throw new Error(`Task with id ${id} not found during transaction`);
         }
       }
       
-      console.log("✅ [TRANSACTION] Todas as tasks reordenadas com sucesso (transação concluída)");
+      Logger.transaction.reorderSuccess();
     });
   }
 
@@ -1031,18 +1032,18 @@ export class DatabaseStorage implements IStorage {
       const permissions = Array.isArray(result) ? result : [];
       
       if (permissions.length === 0) {
-        console.log("⚠️ [SECURITY] Usuário sem permissões ou não encontrado");
+        Logger.security.accessDenied('unknown', 'permissions not found');
         return [];
       }
 
       const duration = Date.now() - startTime;
       // Performance tracking removido temporariamente
-      console.log(`🚀 [DB-PERF] ${permissions.length} permissões em ${duration}ms (OTIMIZADO)`);
+      Logger.service.operationComplete('user', 'getUserPermissions', { count: permissions.length, duration });
       return permissions;
     } catch (error) {
       const duration = Date.now() - startTime;
       // Performance tracking removido temporariamente
-      console.error("❌ [SECURITY] Erro em getUserPermissions:", error);
+      Logger.error.generic('SECURITY', error);
       return [];
     }
   }
@@ -1088,7 +1089,7 @@ export class DatabaseStorage implements IStorage {
       
       return allPermissions;
     } catch (error) {
-      console.error("Error in getTeamPermissions:", error);
+      Logger.error.generic('TEAM-PERMISSIONS', error);
       return [];
     }
   }
@@ -1113,7 +1114,7 @@ export class DatabaseStorage implements IStorage {
         return await this.addPermissionToProfile(teamProfilesData[0].profileId, permissionId);
       }
     } catch (error) {
-      console.error("Error adding permission to team:", error);
+      Logger.error.generic('TEAM-PERMISSION-ADD', error);
       throw error;
     }
   }
@@ -1129,11 +1130,11 @@ export class DatabaseStorage implements IStorage {
           await this.removePermissionFromProfile(teamProfile.profileId, permissionId);
         } catch (error) {
           // Continuar mesmo se não encontrar a permissão em um perfil
-          console.warn(`Permission ${permissionId} not found in profile ${teamProfile.profileId}`);
+          Logger.security.accessDenied(`profile:${teamProfile.profileId}`, `permission:${permissionId}`);
         }
       }
     } catch (error) {
-      console.error("Error removing permission from team:", error);
+      Logger.error.generic('TEAM-PERMISSION-REMOVE', error);
       throw error;
     }
   }

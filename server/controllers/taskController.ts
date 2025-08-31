@@ -3,6 +3,7 @@ import { taskService, assigneeService } from "../services";
 import { AuthRequest } from "../auth/unifiedAuth";
 import { insertTaskAssigneeSchema } from "@shared/schema";
 import { createAuthContextFromRequest } from "../utils/authUtils";
+import { Logger } from '../utils/logMessages';
 
 export class TaskController {
   static async getTasks(req: AuthRequest, res: Response) {
@@ -37,7 +38,7 @@ export class TaskController {
         res.json(tasks);
       }
     } catch (error) {
-      console.error("Error fetching tasks:", error);
+      Logger.error.generic('FETCH-TASKS', error);
       res.status(500).json({ message: "Failed to fetch tasks" });
     }
   }
@@ -51,7 +52,7 @@ export class TaskController {
       }
       res.json(task);
     } catch (error) {
-      console.error("Error fetching task:", error);
+      Logger.error.generic('FETCH-TASK', error);
       res.status(500).json({ message: "Failed to fetch task" });
     }
   }
@@ -63,7 +64,7 @@ export class TaskController {
       
       res.status(201).json(task);
     } catch (error) {
-      console.error("Error creating task:", error);
+      Logger.error.generic('CREATE-TASK', error);
       res.status(400).json({ message: "Invalid task data" });
     }
   }

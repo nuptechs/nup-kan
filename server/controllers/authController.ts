@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { userService } from "../services";
 import { UnifiedAuthService, LoginCredentials } from "../auth/unifiedAuth";
+import { Logger } from '../utils/logMessages';
 
 export class AuthController {
   static async login(req: Request, res: Response) {
@@ -22,10 +23,7 @@ export class AuthController {
         return res.status(401).json({ message: authResult.message });
       }
 
-      console.log('✅ [UNIFIED-LOGIN] Login bem-sucedido:', {
-        userId: authResult.user?.id,
-        userName: authResult.user?.name
-      });
+      Logger.auth.tokenValidated(authResult.user?.email || 'unknown');
 
       // Retornar resultado unificado
       res.json({
@@ -48,7 +46,7 @@ export class AuthController {
       });
       
     } catch (error) {
-      console.error('❌ [LOGIN-JWT] Erro:', error);
+      Logger.error.generic('LOGIN-JWT', error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   }
@@ -95,7 +93,7 @@ export class AuthController {
         firstLogin: false
       });
 
-      console.log(`🔐 [FIRST-LOGIN] Senha alterada com sucesso para ${user.email}`);
+      Logger.auth.tokenValidated(user.email);
 
       res.json({
         success: true,
@@ -103,14 +101,14 @@ export class AuthController {
       });
       
     } catch (error) {
-      console.error('❌ [FIRST-LOGIN] Erro:', error);
+      Logger.error.generic('FIRST-LOGIN', error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   }
 
   static async devLogin(req: Request, res: Response) {
     try {
-      console.log('🔧 [DEV-LOGIN] Endpoint de desenvolvimento acessado');
+      Logger.auth.permissionSync('DEV-LOGIN endpoint accessed');
       
       // Buscar o primeiro usuário disponível
       const authContextTemp = { userId: 'system', permissions: ['Listar Usuários'] } as any;
@@ -124,7 +122,7 @@ export class AuthController {
       }
 
       const user = users[0]; // Primeiro usuário disponível
-      console.log('🔧 [DEV-LOGIN] Fazendo login automático com:', user.email);
+      Logger.auth.tokenValidated(user.email);
 
       // 🚀 GERAR TOKENS JWT
       const { JWTService } = await import('../services/jwtService');
@@ -135,10 +133,7 @@ export class AuthController {
         profileId: user.profileId ?? undefined
       });
 
-      console.log('✅ [DEV-LOGIN] Login automático bem-sucedido:', {
-        userId: user.id,
-        userName: user.name
-      });
+      Logger.auth.tokenValidated(user.email);
 
       res.json({
         user: {
@@ -159,7 +154,7 @@ export class AuthController {
       });
       
     } catch (error) {
-      console.error('❌ [DEV-LOGIN] Erro:', error);
+      Logger.error.generic('DEV-LOGIN', error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   }
@@ -195,7 +190,7 @@ export class AuthController {
         });
       }
 
-      console.log('✅ [CURRENT-USER-JWT] Usuário autenticado via JWT:', user.id);
+      Logger.auth.userAuthenticated(user.id);
       
       // ✅ RETORNAR PERMISSÕES ESTRUTURADAS
       res.json({
@@ -212,7 +207,7 @@ export class AuthController {
       });
       
     } catch (error) {
-      console.error('❌ [CURRENT-USER-JWT] Erro:', error);
+      Logger.error.generic('CURRENT-USER-JWT', error);
       res.status(401).json({ 
         error: 'Authentication failed',
         message: 'Token validation failed'
@@ -233,7 +228,7 @@ export class AuthController {
       // Invalidar o token
       await JWTService.blacklistToken(token);
       
-      console.log('✅ [LOGOUT-JWT] Token invalidado com sucesso');
+      Logger.auth.permissionSync('Token invalidated successfully');
       
       res.json({
         success: true,
@@ -241,7 +236,7 @@ export class AuthController {
       });
       
     } catch (error) {
-      console.error('❌ [LOGOUT-JWT] Erro:', error);
+      Logger.error.generic('LOGOUT-JWT', error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   }
@@ -260,7 +255,7 @@ export class AuthController {
       const { UnifiedAuthService } = await import('../auth/unifiedAuth');
       const newTokens = await UnifiedAuthService.refreshToken(refreshToken);
       
-      console.log('✅ [REFRESH-TOKEN-JWT] Tokens renovados com sucesso');
+      Logger.auth.permissionSync('Tokens refreshed successfully');
       
       res.json({
         tokens: newTokens,
@@ -268,7 +263,7 @@ export class AuthController {
       });
       
     } catch (error) {
-      console.error('❌ [REFRESH-TOKEN-JWT] Erro:', error);
+      Logger.error.generic('REFRESH-TOKEN-JWT', error);
       res.status(401).json({ message: "Refresh token inválido ou expirado" });
     }
   }
