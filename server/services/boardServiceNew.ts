@@ -16,6 +16,7 @@ import type { Board, InsertBoard, UpdateBoard } from "@shared/schema";
 import { insertBoardSchema, updateBoardSchema } from "@shared/schema";
 import { TTL } from "../cache";
 import { PERMISSIONS } from "../config/permissions";
+import { Logger } from '../utils/logMessages';
 
 export interface BoardCreateRequest {
   name: string;
@@ -75,7 +76,7 @@ export class BoardService extends BaseService {
       // Verificar permissão básica - ajustando para permitir acesso aos próprios boards
       if (!this.hasPermission(authContext, 'List Boards') && !this.hasPermission(authContext, 'View Boards')) {
         // Se não tem permissão geral, só pode ver os próprios boards - isso será filtrado mais tarde
-        console.log('⚠️ [BOARD-SERVICE] Usuário sem permissão geral, filtrando apenas próprios boards');
+        Logger.security.accessDenied(authContext.userId, 'general-board-access');
       }
 
       const { page = 1, limit = 20 } = options;
@@ -441,7 +442,7 @@ export class BoardService extends BaseService {
         pendingTasks,
       };
     } catch (error) {
-      console.error('Erro calculando estatísticas do board:', error);
+      Logger.error.generic('BOARD-SERVICE-STATS', error);
       return {
         taskCount: 0,
         completedTasks: 0,
@@ -474,7 +475,7 @@ export class BoardService extends BaseService {
         role: share.permission || 'member',
       }));
     } catch (error) {
-      console.error('Erro buscando membros do board:', error);
+      Logger.error.generic('BOARD-SERVICE-MEMBERS', error);
       return [];
     }
   }
@@ -492,7 +493,7 @@ export class BoardService extends BaseService {
         taskCount: 0, // Será calculado se necessário
       }));
     } catch (error) {
-      console.error('Erro buscando colunas do board:', error);
+      Logger.error.generic('BOARD-SERVICE-COLUMNS', error);
       return [];
     }
   }

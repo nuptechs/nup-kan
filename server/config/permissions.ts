@@ -6,6 +6,7 @@
  * - Facilita manutenção e auditoria
  * - Elimina inconsistências entre services
  */
+import { Logger } from '../utils/logMessages';
 
 // ============================================
 // TIPOS DE PERMISSÕES
@@ -250,7 +251,7 @@ allPerms.forEach(perm => {
 });
 
 if (validationErrors.length > 0) {
-  console.warn('⚠️ [PERMISSIONS] Permissões com formato incorreto:', validationErrors);
+  Logger.error.generic('PERMISSIONS-VALIDATION', validationErrors);
 }
 
-console.log(`🔐 [PERMISSIONS] ${allPerms.length} permissões carregadas do arquivo central`);
+Logger.auth.permissionSync(`${allPerms.length} permissões carregadas do arquivo central`);

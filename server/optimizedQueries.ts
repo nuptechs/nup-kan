@@ -2,6 +2,7 @@ import { db } from "./db";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { users, profiles, permissions, profilePermissions, boards, tasks, columns, teams, userTeams } from "@shared/schema";
 import { cache, CacheKeys, TTL } from "./cache";
+import { Logger } from './utils/logMessages';
 
 /**
  * 🔥 QUERIES PRÉ-COMPILADAS - NÍVEL 1 PERFORMANCE
@@ -62,7 +63,7 @@ export class OptimizedQueries {
       await cache.set(cacheKey, result, TTL.MEDIUM);
       return result;
     } catch (error) {
-      console.error('❌ [QUERY] Erro em getUserPermissionsOptimized:', error);
+      Logger.error.generic('QUERY-USER-PERMISSIONS', error);
       return null;
     }
   }
@@ -93,7 +94,7 @@ export class OptimizedQueries {
       await cache.set(cacheKey, user, TTL.MEDIUM);
       return user;
     } catch (error) {
-      console.error('❌ [QUERY] Erro em getUserWithProfileOptimized:', error);
+      Logger.error.generic('QUERY-USER-PROFILE', error);
       return null;
     }
   }
@@ -135,7 +136,7 @@ export class OptimizedQueries {
       await cache.set(cacheKey, result, TTL.SHORT);
       return result;
     } catch (error) {
-      console.error('❌ [QUERY] Erro em getBoardsWithStatsOptimized:', error);
+      Logger.error.generic('QUERY-BOARDS-STATS', error);
       return [];
     }
   }
@@ -171,7 +172,7 @@ export class OptimizedQueries {
       await cache.set(cacheKey, result, TTL.SHORT);
       return result;
     } catch (error) {
-      console.error('❌ [QUERY] Erro em getBoardTasksOptimized:', error);
+      Logger.error.generic('QUERY-BOARD-TASKS', error);
       return [];
     }
   }
@@ -193,7 +194,7 @@ export class OptimizedQueries {
       await cache.set(cacheKey, result, TTL.SHORT);
       return result;
     } catch (error) {
-      console.error('❌ [QUERY] Erro em getBoardColumnsOptimized:', error);
+      Logger.error.generic('QUERY-BOARD-COLUMNS', error);
       return [];
     }
   }

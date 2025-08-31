@@ -16,6 +16,7 @@ import type { Task, InsertTask, UpdateTask } from "@shared/schema";
 import { insertTaskSchema, updateTaskSchema } from "@shared/schema";
 import { TTL } from "../cache";
 import { PERMISSIONS } from "../config/permissions";
+import { Logger } from '../utils/logMessages';
 
 export interface TaskCreateRequest {
   boardId: string;
@@ -502,7 +503,7 @@ export class TaskService extends BaseService {
         avatar: user.avatar || '',
       } : null;
     } catch (error) {
-      console.error('Erro buscando info do assignee:', error);
+      Logger.error.generic('TASK-SERVICE-ASSIGNEE', error);
       return null;
     }
   }
@@ -527,7 +528,7 @@ export class TaskService extends BaseService {
       const shares = await this.storage.getBoardShares(boardId);
       return shares.some(share => share.shareWithId === userId);
     } catch (error) {
-      console.error('Erro verificando acesso ao board:', error);
+      Logger.error.generic('TASK-SERVICE-BOARD-ACCESS', error);
       return false;
     }
   }

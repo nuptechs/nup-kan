@@ -87,79 +87,99 @@ export const EXPRESS_LOGS = {
 
 // 🎯 CENTRAL LOGGER CLASS
 export class Logger {
-  private static enabled = true;
+  private static isDevelopment = process.env.NODE_ENV === 'development';
+  private static categories = {
+    cache: true,
+    security: true, 
+    transaction: true,
+    error: true,
+    service: true,
+    auth: true,
+    express: false // Reduzir spam de requests
+  };
   
   static setEnabled(enabled: boolean) {
-    this.enabled = enabled;
+    Object.keys(this.categories).forEach(key => {
+      this.categories[key as keyof typeof this.categories] = enabled;
+    });
+  }
+  
+  static setCategoryEnabled(category: keyof typeof Logger.categories, enabled: boolean) {
+    this.categories[category] = enabled;
+  }
+  
+  private static shouldLog(category: keyof typeof Logger.categories): boolean {
+    return this.isDevelopment && this.categories[category];
   }
   
   static cache = {
-    hit: (key: string) => this.enabled && console.log(CACHE_LOGS.HIT(key)),
-    miss: (key: string) => this.enabled && console.log(CACHE_LOGS.MISS(key)),
-    set: (key: string, ttl?: number) => this.enabled && console.log(CACHE_LOGS.SET(key, ttl)),
-    invalidate: (pattern: string) => this.enabled && console.log(CACHE_LOGS.INVALIDATE(pattern)),
+    hit: (key: string) => this.shouldLog('cache') && console.log(CACHE_LOGS.HIT(key)),
+    miss: (key: string) => this.shouldLog('cache') && console.log(CACHE_LOGS.MISS(key)),
+    set: (key: string, ttl?: number) => this.shouldLog('cache') && console.log(CACHE_LOGS.SET(key, ttl)),
+    invalidate: (pattern: string) => this.shouldLog('cache') && console.log(CACHE_LOGS.INVALIDATE(pattern)),
   };
   
   static security = {
-    userBoardAccess: (userId: string, count: number) => this.enabled && console.log(SECURITY_LOGS.USER_BOARD_ACCESS(userId, count)),
-    accessDenied: (userId: string, resource: string) => this.enabled && console.log(SECURITY_LOGS.ACCESS_DENIED(userId, resource)),
-    permissionCheck: (userId: string, permission: string, result: 'GRANTED' | 'DENIED') => this.enabled && console.log(SECURITY_LOGS.PERMISSION_CHECK(userId, permission, result)),
+    userBoardAccess: (userId: string, count: number) => this.shouldLog('security') && console.log(SECURITY_LOGS.USER_BOARD_ACCESS(userId, count)),
+    accessDenied: (userId: string, resource: string) => this.shouldLog('security') && console.log(SECURITY_LOGS.ACCESS_DENIED(userId, resource)),
+    permissionCheck: (userId: string, permission: string, result: 'GRANTED' | 'DENIED') => this.shouldLog('security') && console.log(SECURITY_LOGS.PERMISSION_CHECK(userId, permission, result)),
   };
   
   static transaction = {
-    initializing: (boardId: string) => this.enabled && console.log(TRANSACTION_LOGS.INITIALIZING(boardId)),
-    alreadyHasColumns: (boardId: string) => this.enabled && console.log(TRANSACTION_LOGS.ALREADY_HAS_COLUMNS(boardId)),
-    starting: (boardId: string) => this.enabled && console.log(TRANSACTION_LOGS.STARTING(boardId)),
-    columnInserted: (title: string, boardId: string) => this.enabled && console.log(TRANSACTION_LOGS.COLUMN_INSERTED(title, boardId)),
-    boardInitialized: (boardId: string, count: number) => this.enabled && console.log(TRANSACTION_LOGS.BOARD_INITIALIZED(boardId, count)),
-    reorderingColumns: (columns: any[]) => this.enabled && console.log(TRANSACTION_LOGS.REORDERING_COLUMNS(columns)),
-    startingReorder: (count: number) => this.enabled && console.log(TRANSACTION_LOGS.STARTING_REORDER(count)),
-    columnUpdated: (id: string, position: number, rowCount: number) => this.enabled && console.log(TRANSACTION_LOGS.COLUMN_UPDATED(id, position, rowCount)),
-    columnNotUpdated: (id: string) => this.enabled && console.log(TRANSACTION_LOGS.COLUMN_NOT_UPDATED(id)),
-    reorderSuccess: () => this.enabled && console.log(TRANSACTION_LOGS.REORDER_SUCCESS()),
-    reorderingTasks: (tasks: any[]) => this.enabled && console.log(TRANSACTION_LOGS.REORDERING_TASKS(tasks)),
+    initializing: (boardId: string) => this.shouldLog('transaction') && console.log(TRANSACTION_LOGS.INITIALIZING(boardId)),
+    alreadyHasColumns: (boardId: string) => this.shouldLog('transaction') && console.log(TRANSACTION_LOGS.ALREADY_HAS_COLUMNS(boardId)),
+    starting: (boardId: string) => this.shouldLog('transaction') && console.log(TRANSACTION_LOGS.STARTING(boardId)),
+    columnInserted: (title: string, boardId: string) => this.shouldLog('transaction') && console.log(TRANSACTION_LOGS.COLUMN_INSERTED(title, boardId)),
+    boardInitialized: (boardId: string, count: number) => this.shouldLog('transaction') && console.log(TRANSACTION_LOGS.BOARD_INITIALIZED(boardId, count)),
+    reorderingColumns: (columns: any[]) => this.shouldLog('transaction') && console.log(TRANSACTION_LOGS.REORDERING_COLUMNS(columns)),
+    startingReorder: (count: number) => this.shouldLog('transaction') && console.log(TRANSACTION_LOGS.STARTING_REORDER(count)),
+    columnUpdated: (id: string, position: number, rowCount: number) => this.shouldLog('transaction') && console.log(TRANSACTION_LOGS.COLUMN_UPDATED(id, position, rowCount)),
+    columnNotUpdated: (id: string) => this.shouldLog('transaction') && console.log(TRANSACTION_LOGS.COLUMN_NOT_UPDATED(id)),
+    reorderSuccess: () => this.shouldLog('transaction') && console.log(TRANSACTION_LOGS.REORDER_SUCCESS()),
+    reorderingTasks: (tasks: any[]) => this.shouldLog('transaction') && console.log(TRANSACTION_LOGS.REORDERING_TASKS(tasks)),
   };
   
   static error = {
-    eventCreationFailed: (error: any) => this.enabled && console.error(ERROR_LOGS.EVENT_CREATION_FAILED(error), error),
-    taskCreationFailed: (error: any) => this.enabled && console.error(ERROR_LOGS.TASK_CREATION_FAILED(error), error),
-    generic: (context: string, error: any) => this.enabled && console.error(ERROR_LOGS.GENERIC_ERROR(context, error), error),
+    eventCreationFailed: (error: any) => this.shouldLog('error') && console.error(ERROR_LOGS.EVENT_CREATION_FAILED(error), error),
+    taskCreationFailed: (error: any) => this.shouldLog('error') && console.error(ERROR_LOGS.TASK_CREATION_FAILED(error), error),
+    generic: (context: string, error: any) => this.shouldLog('error') && console.error(ERROR_LOGS.GENERIC_ERROR(context, error), error),
   };
   
   static service = {
     operation: (service: string, operation: string, params: any) => {
+      if (!this.shouldLog('service')) return;
       switch(service.toLowerCase()) {
         case 'board':
-          return this.enabled && console.log(SERVICE_LOGS.BOARD_SERVICE(operation, params));
+          return console.log(SERVICE_LOGS.BOARD_SERVICE(operation, params));
         case 'user':
-          return this.enabled && console.log(SERVICE_LOGS.USER_SERVICE(operation, params));
+          return console.log(SERVICE_LOGS.USER_SERVICE(operation, params));
         case 'task':
-          return this.enabled && console.log(SERVICE_LOGS.TASK_SERVICE(operation, params));
+          return console.log(SERVICE_LOGS.TASK_SERVICE(operation, params));
         case 'column':
-          return this.enabled && console.log(SERVICE_LOGS.COLUMN_SERVICE(operation, params));
+          return console.log(SERVICE_LOGS.COLUMN_SERVICE(operation, params));
         case 'tag':
-          return this.enabled && console.log(SERVICE_LOGS.TAG_SERVICE(operation, params));
+          return console.log(SERVICE_LOGS.TAG_SERVICE(operation, params));
         case 'team':
-          return this.enabled && console.log(SERVICE_LOGS.TEAM_SERVICE(operation, params));
+          return console.log(SERVICE_LOGS.TEAM_SERVICE(operation, params));
         default:
-          return this.enabled && console.log(SERVICE_LOGS.BOARD_SERVICE(operation, params));
+          return console.log(SERVICE_LOGS.BOARD_SERVICE(operation, params));
       }
     },
-    cacheHit: (service: string, details: any) => this.enabled && console.log(SERVICE_LOGS.CACHE_HIT(service, details)),
-    operationComplete: (service: string, operation: string, details: any) => this.enabled && console.log(SERVICE_LOGS.OPERATION_COMPLETE(service, operation, details)),
+    cacheHit: (service: string, details: any) => this.shouldLog('service') && console.log(SERVICE_LOGS.CACHE_HIT(service, details)),
+    operationComplete: (service: string, operation: string, details: any) => this.shouldLog('service') && console.log(SERVICE_LOGS.OPERATION_COMPLETE(service, operation, details)),
   };
   
   static auth = {
-    tokenValidated: (email: string) => this.enabled && console.log(AUTH_LOGS.TOKEN_VALIDATED(email)),
-    cacheHit: (userId: string) => this.enabled && console.log(AUTH_LOGS.CACHE_HIT_AUTH(userId)),
-    userAuthenticated: (userId: string) => this.enabled && console.log(AUTH_LOGS.USER_AUTHENTICATED(userId)),
-    permissionSync: (message: string) => this.enabled && console.log(AUTH_LOGS.PERMISSION_SYNC(message)),
-    profileAdminIdentified: (name: string, id: string) => this.enabled && console.log(AUTH_LOGS.PROFILE_ADMIN_IDENTIFIED(name, id)),
+    tokenValidated: (email: string) => this.shouldLog('auth') && console.log(AUTH_LOGS.TOKEN_VALIDATED(email)),
+    cacheHit: (userId: string) => this.shouldLog('auth') && console.log(AUTH_LOGS.CACHE_HIT_AUTH(userId)),
+    userAuthenticated: (userId: string) => this.shouldLog('auth') && console.log(AUTH_LOGS.USER_AUTHENTICATED(userId)),
+    permissionSync: (message: string) => this.shouldLog('auth') && console.log(AUTH_LOGS.PERMISSION_SYNC(message)),
+    profileAdminIdentified: (name: string, id: string) => this.shouldLog('auth') && console.log(AUTH_LOGS.PROFILE_ADMIN_IDENTIFIED(name, id)),
   };
   
   static express = {
     request: (method: string, path: string, status: number, duration: number, details?: string) => 
-      this.enabled && console.log(EXPRESS_LOGS.REQUEST(method, path, status, duration, details)),
-    serverStart: (port: number) => this.enabled && console.log(EXPRESS_LOGS.SERVER_START(port)),
+      this.shouldLog('express') && console.log(EXPRESS_LOGS.REQUEST(method, path, status, duration, details)),
+    serverStart: (port: number) => this.shouldLog('express') && console.log(EXPRESS_LOGS.SERVER_START(port)),
   };
 }

@@ -1,4 +1,5 @@
 import { cache, TTL } from '../cache';
+import { Logger } from '../utils/logMessages';
 
 /**
  * 🚀 TOKEN BLACKLIST SERVICE - Segurança avançada para logout
@@ -20,7 +21,7 @@ export class TokenBlacklistService {
     
     if (ttlSeconds > 0) {
       await cache.set(key, 'blacklisted', ttlSeconds);
-      console.log(`🚫 [BLACKLIST] Token adicionado à blacklist por ${ttlSeconds}s`);
+      Logger.auth.permissionSync(`Token adicionado à blacklist por ${ttlSeconds}s`);
     }
   }
 
@@ -58,7 +59,7 @@ export class TokenBlacklistService {
     );
     
     await Promise.all(promises);
-    console.log(`🚫 [BLACKLIST] ${tokens.length} tokens adicionados à blacklist`);
+    Logger.auth.permissionSync(`${tokens.length} tokens adicionados à blacklist`);
   }
 
   /**
@@ -67,7 +68,7 @@ export class TokenBlacklistService {
   static async cleanupExpiredTokens(): Promise<number> {
     // Como usamos TTL, o cache limpa automaticamente
     // Este método existe para compatibilidade e debug
-    console.log('🧹 [BLACKLIST] Cleanup automático via TTL (nenhuma ação necessária)');
+    Logger.auth.permissionSync('Blacklist cleanup automático via TTL');
     return 0;
   }
 
@@ -76,7 +77,7 @@ export class TokenBlacklistService {
    */
   static async getBlacklistStats(): Promise<{ totalBlacklistedTokens: number }> {
     // Implementação simplificada para cache em memória
-    console.log('📊 [BLACKLIST] Stats da blacklist (funcionalidade básica)');
+    Logger.auth.permissionSync('Stats da blacklist executadas');
     return {
       totalBlacklistedTokens: 0 // Cache em memória - estatística básica
     };

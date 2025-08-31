@@ -1,10 +1,11 @@
 // Cache Manager Simplificado - Apenas Memória (Redis removido)
+import { Logger } from './utils/logMessages';
 
 class CacheManager {
   private memoryCache = new Map<string, { data: any, expires: number }>();
   
   constructor() {
-    console.log('💾 [CACHE] Iniciando sistema de cache em memória');
+    Logger.auth.permissionSync('Memory cache system started');
     // Limpeza automática a cada 5 minutos
     setInterval(() => this.cleanMemoryCache(), 5 * 60 * 1000);
   }
@@ -13,7 +14,7 @@ class CacheManager {
     try {
       const cached = this.memoryCache.get(key);
       if (cached && Date.now() < cached.expires) {
-        console.log(`🎯 [CACHE-HIT] '${key}'`);
+        Logger.cache.hit(key);
         return cached.data;
       }
       
@@ -22,10 +23,10 @@ class CacheManager {
         this.memoryCache.delete(key);
       }
       
-      console.log(`❌ [CACHE-MISS] '${key}'`);
+      Logger.cache.miss(key);
       return null;
     } catch (error) {
-      console.error('❌ [CACHE] Erro ao buscar:', error);
+      Logger.error.generic('CACHE-GET', error);
       return null;
     }
   }
@@ -36,14 +37,14 @@ class CacheManager {
         data: value,
         expires: Date.now() + (ttlSeconds * 1000)
       });
-      console.log(`💾 [CACHE-SET] '${key}' (TTL: ${ttlSeconds}s)`);
+      Logger.cache.set(key, ttlSeconds);
       
       // Limpeza preventiva se cache muito grande
       if (this.memoryCache.size > 1000) {
         this.cleanMemoryCache();
       }
     } catch (error) {
-      console.error('❌ [CACHE] Erro ao salvar:', error);
+      Logger.error.generic('CACHE-SET', error);
     }
   }
 
@@ -51,10 +52,10 @@ class CacheManager {
     try {
       const deleted = this.memoryCache.delete(key);
       if (deleted) {
-        console.log(`🗑️ [CACHE-DEL] '${key}'`);
+        Logger.cache.invalidate(key);
       }
     } catch (error) {
-      console.error('❌ [CACHE] Erro ao deletar:', error);
+      Logger.error.generic('CACHE-DEL', error);
     }
   }
 
@@ -70,9 +71,9 @@ class CacheManager {
         }
       }
       
-      console.log(`🧹 [CACHE-INVALIDATE] ${keysToDelete.length} chaves para padrão '${pattern}'`);
+      Logger.cache.invalidate(`${pattern}:${keysToDelete.length}`);
     } catch (error) {
-      console.error('❌ [CACHE] Erro ao invalidar padrão:', error);
+      Logger.error.generic('CACHE-INVALIDATE', error);
     }
   }
 
@@ -88,7 +89,7 @@ class CacheManager {
     }
     
     if (cleaned > 0) {
-      console.log(`🧹 [CACHE-CLEANUP] ${cleaned} chaves expiradas removidas`);
+      Logger.cache.invalidate(`cleanup:${cleaned}`);
     }
   }
 
