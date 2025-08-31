@@ -15,7 +15,7 @@
 import { storage } from "../storage";
 import { eventBus, emit } from "../events";
 import type { EventType, EventData } from "../events/types";
-import { cache } from "../cache";
+import { cache } from "../../cache";
 import type { AuthContext } from "../auth/unifiedAuth";
 import { authorizationService } from "./authorizationService";
 import { Logger } from '../utils/logMessages';
@@ -68,23 +68,10 @@ export abstract class BaseService {
   }
 
   /**
-   * Limpar cache relacionado a uma entidade
+   * Limpar cache relacionado a uma entidade - Interface simplificada
    */
-  protected async invalidateCache(patterns: string[]): Promise<void> {
-    try {
-      Logger.cache.invalidate(patterns.join(', '));
-      await Promise.all(
-        patterns.map(pattern => {
-          if (pattern.includes('*')) {
-            return this.cache.invalidatePattern(pattern);
-          } else {
-            return this.cache.del(pattern);
-          }
-        })
-      );
-    } catch (error) {
-      Logger.error.generic('CACHE-INVALIDATION', error);
-    }
+  protected async invalidateCache(keys: string[]): Promise<void> {
+    await this.cache.invalidate(keys);
   }
 
   /**
