@@ -51,7 +51,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'getTeams', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.TEAMS.LIST, 'listar times');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.LIST, 'list teams');
 
       const cacheKey = 'teams:all';
       const cached = await this.cache.get<Team[]>(cacheKey);
@@ -127,7 +127,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'createTeam', { userId: authContext.userId, teamName: request.name });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.TEAMS.CREATE, 'criar time');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.CREATE, 'create teams');
 
       // Validar dados
       const validatedData = insertTeamSchema.parse({
@@ -172,7 +172,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'updateTeam', { userId: authContext.userId, teamId });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.TEAMS.EDIT, 'editar time');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.EDIT, 'edit teams');
 
       const existingTeam = await this.storage.getTeam(teamId);
       if (!existingTeam) {
@@ -181,7 +181,7 @@ export class TeamService extends BaseService {
 
       // Verificar se o usuário tem permissão para editar este time específico
       const hasTeamAccess = await this.hasTeamAdminAccess(authContext.userId, teamId);
-      if (!hasTeamAccess && !this.hasPermission(authContext, 'Gerenciar Times')) {
+      if (!hasTeamAccess && !this.hasPermission(authContext, 'Manage Teams')) {
         throw new Error('Acesso negado para editar este time');
       }
 
@@ -218,7 +218,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'deleteTeam', { userId: authContext.userId, teamId });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.TEAMS.DELETE, 'excluir time');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.DELETE, 'delete teams');
 
       const team = await this.storage.getTeam(teamId);
       if (!team) {
@@ -227,7 +227,7 @@ export class TeamService extends BaseService {
 
       // Verificar se o usuário tem permissão para excluir este time específico
       const hasTeamAccess = await this.hasTeamAdminAccess(authContext.userId, teamId);
-      if (!hasTeamAccess && !this.hasPermission(authContext, 'Gerenciar Times')) {
+      if (!hasTeamAccess && !this.hasPermission(authContext, 'Manage Teams')) {
         throw new Error('Acesso negado para excluir este time');
       }
 
@@ -265,7 +265,7 @@ export class TeamService extends BaseService {
 
       // Verificar se o usuário tem permissão para gerenciar este time
       const hasTeamAccess = await this.hasTeamAdminAccess(authContext.userId, teamId);
-      if (!hasTeamAccess && !this.hasPermission(authContext, 'Gerenciar Times')) {
+      if (!hasTeamAccess && !this.hasPermission(authContext, 'Manage Teams')) {
         throw new Error('Acesso negado para remover membros neste time');
       }
 
@@ -300,7 +300,7 @@ export class TeamService extends BaseService {
 
       // Verificar se o usuário tem permissão para gerenciar este time
       const hasTeamAccess = await this.hasTeamAdminAccess(authContext.userId, teamId);
-      if (!hasTeamAccess && !this.hasPermission(authContext, 'Gerenciar Times')) {
+      if (!hasTeamAccess && !this.hasPermission(authContext, 'Manage Teams')) {
         throw new Error('Acesso negado para alterar roles neste time');
       }
 
@@ -335,7 +335,7 @@ export class TeamService extends BaseService {
     
     try {
       // Usuários podem ver seus próprios times, admins podem ver de qualquer usuário
-      if (authContext.userId !== userId && !this.hasPermission(authContext, 'Visualizar Users')) {
+      if (authContext.userId !== userId && !this.hasPermission(authContext, 'View Users')) {
         throw new Error('Acesso negado para visualizar times de outro usuário');
       }
 

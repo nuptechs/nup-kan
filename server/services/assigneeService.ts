@@ -64,7 +64,7 @@ export class AssigneeService extends BaseService {
     this.log('assignee-service', 'addTaskAssignee', { userId: authContext.userId, request });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.TASKS.ASSIGN, 'adicionar assignee');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.ASSIGN, 'add assignee');
 
       // Validar dados
       const validData = insertTaskAssigneeSchema.parse(request);
@@ -84,7 +84,7 @@ export class AssigneeService extends BaseService {
       // Usar hierarchyService para verificar se usuário pode ser assignee da task
       const userHierarchy = await hierarchyService.resolveUserHierarchy(authContext, request.userId);
       const canBeAssigned = userHierarchy.allPermissions.some(p => 
-        p.name === 'Visualizar Tarefas' || p.name === 'Editar Tarefas'
+        p.name === 'View Tasks' || p.name === 'Edit Tasks'
       );
       
       if (!canBeAssigned) {

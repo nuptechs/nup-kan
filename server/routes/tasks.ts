@@ -9,27 +9,27 @@ router.use(auth); // Popula authContext com dados do JWT
 router.use(requireAuth); // Valida se está autenticado
 
 // Task reordering (must come before /:id routes)
-router.patch("/reorder", requirePermission("Editar Tarefas"), TaskController.reorderTasks);
+router.patch("/reorder", requirePermission("Edit Tasks"), TaskController.reorderTasks);
 
 // Task CRUD routes
-router.get("/", requirePermission("Listar Tarefas"), TaskController.getTasks);
-router.get("/:id", requirePermission("Visualizar Tarefas"), TaskController.getTask);
-router.post("/", requirePermission("Criar Tarefas"), TaskController.createTask);
-router.patch("/:id", requirePermission("Editar Tarefas"), TaskController.updateTask);
-router.delete("/:id", requirePermission("Excluir Tarefas"), TaskController.deleteTask);
+router.get("/", requirePermission("List Tasks"), TaskController.getTasks);
+router.get("/:id", requirePermission("View Tasks"), TaskController.getTask);
+router.post("/", requirePermission("Create Tasks"), TaskController.createTask);
+router.patch("/:id", requirePermission("Edit Tasks"), TaskController.updateTask);
+router.delete("/:id", requirePermission("Delete Tasks"), TaskController.deleteTask);
 
 // Task assignee routes
-router.get("/:taskId/assignees", requirePermission("Visualizar Tarefas"), TaskController.getTaskAssignees);
-router.post("/:taskId/assignees", requirePermission("Atribuir Membros"), TaskController.addTaskAssignee);
-router.delete("/:taskId/assignees/:userId", requirePermission("Atribuir Membros"), TaskController.removeTaskAssignee);
-router.put("/:taskId/assignees", requirePermission("Atribuir Membros"), TaskController.setTaskAssignees);
+router.get("/:taskId/assignees", requirePermission("View Tasks"), TaskController.getTaskAssignees);
+router.post("/:taskId/assignees", requirePermission("Assign Members"), TaskController.addTaskAssignee);
+router.delete("/:taskId/assignees/:userId", requirePermission("Assign Members"), TaskController.removeTaskAssignee);
+router.put("/:taskId/assignees", requirePermission("Assign Members"), TaskController.setTaskAssignees);
 
 // Bulk operations
-router.post("/assignees/bulk", requirePermission("Visualizar Tarefas"), TaskController.bulkGetAssignees);
+router.post("/assignees/bulk", requirePermission("View Tasks"), TaskController.bulkGetAssignees);
 
 // Custom values routes
-router.get("/:taskId/custom-values", requirePermission("Visualizar Tarefas"), TaskController.getTaskCustomValues);
-router.post("/:taskId/custom-values", requirePermission("Editar Tarefas"), TaskController.createTaskCustomValue);
-router.patch("/:taskId/custom-values/:valueId", requirePermission("Editar Tarefas"), TaskController.updateTaskCustomValue);
+router.get("/:taskId/custom-values", requirePermission("View Tasks"), TaskController.getTaskCustomValues);
+router.post("/:taskId/custom-values", requirePermission("Edit Tasks"), TaskController.createTaskCustomValue);
+router.patch("/:taskId/custom-values/:valueId", requirePermission("Edit Tasks"), TaskController.updateTaskCustomValue);
 
 export default router;

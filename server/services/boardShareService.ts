@@ -85,7 +85,7 @@ export class BoardShareService extends BaseService {
     this.log('board-share-service', 'getUserSharedBoards', { userId: authContext.userId, targetUserId: userId });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.BOARDS.VIEW, 'visualizar boards compartilhados');
+      this.requirePermission(authContext, PERMISSIONS.BOARDS.VIEW, 'view shared boards');
 
       const shares = await this.storage.getUserSharedBoards(userId);
       return shares;
@@ -99,7 +99,7 @@ export class BoardShareService extends BaseService {
     this.log('board-share-service', 'getTeamSharedBoards', { userId: authContext.userId, teamId });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.TEAMS.VIEW, 'visualizar boards da equipe');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.VIEW, 'view team boards');
 
       const shares = await this.storage.getTeamSharedBoards(teamId);
       return shares;

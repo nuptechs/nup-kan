@@ -16,7 +16,8 @@ export type PermissionAction = 'list' | 'create' | 'edit' | 'delete' | 'view' | 
 export type Resource = 
   | 'users' | 'teams' | 'boards' | 'tasks' | 'tags' | 'columns' 
   | 'profiles' | 'permissions' | 'exports' | 'notifications' 
-  | 'analytics' | 'auth' | 'system' | 'custom-fields';
+  | 'analytics' | 'auth' | 'system' | 'custom-fields' 
+  | 'task-statuses' | 'task-priorities';
 
 // ============================================
 // DEFINIÇÃO CENTRAL DE PERMISSÕES
@@ -142,6 +143,24 @@ export const PERMISSIONS = {
   // 🔗 ATRIBUIÇÕES ESPECIAIS
   SPECIAL: {
     ASSIGN_MEMBERS: 'Assign Members'
+  },
+
+  // 📊 STATUS DE TAREFAS
+  TASK_STATUSES: {
+    LIST: 'List Task Statuses',
+    CREATE: 'Create Task Statuses',
+    EDIT: 'Edit Task Statuses',
+    DELETE: 'Delete Task Statuses',
+    VIEW: 'View Task Statuses'
+  },
+
+  // 🎯 PRIORIDADES DE TAREFAS
+  TASK_PRIORITIES: {
+    LIST: 'List Task Priorities',
+    CREATE: 'Create Task Priorities',
+    EDIT: 'Edit Task Priorities',
+    DELETE: 'Delete Task Priorities',
+    VIEW: 'View Task Priorities'
   }
 
 } as const;
@@ -164,7 +183,9 @@ export const RESOURCE_PERMISSIONS = {
   analytics: PERMISSIONS.ANALYTICS,
   auth: PERMISSIONS.AUTH,
   system: PERMISSIONS.SYSTEM,
-  'custom-fields': PERMISSIONS.CUSTOM_FIELDS
+  'custom-fields': PERMISSIONS.CUSTOM_FIELDS,
+  'task-statuses': PERMISSIONS.TASK_STATUSES,
+  'task-priorities': PERMISSIONS.TASK_PRIORITIES
 } as const;
 
 // ============================================
@@ -230,7 +251,9 @@ export function buildPermission(action: PermissionAction, resource: Resource): s
     analytics: 'Analytics', 
     auth: 'Auth',
     system: 'System',
-    'custom-fields': 'Custom-fields'
+    'custom-fields': 'Custom-fields',
+    'task-statuses': 'Task Statuses',
+    'task-priorities': 'Task Priorities'
   };
   
   return `${actionMap[action]} ${resourceMap[resource]}`;

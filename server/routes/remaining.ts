@@ -7,6 +7,7 @@ import {
   columnService, 
   tagService
 } from "../services";
+import { taskStatusService } from "../services/taskStatusService";
 import { createAuthContextFromRequest } from "../utils/authUtils";
 import { Logger } from '../utils/logMessages';
 
@@ -204,7 +205,7 @@ router.post("/tags", requireAuth, requirePermission("Create Tags"), async (req: 
   }
 });
 
-router.put("/tags/:id", requireAuth, requirePermission("Editar Tags"), async (req: Request, res: Response) => {
+router.put("/tags/:id", requireAuth, requirePermission("Edit Tags"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const updatedTag = await tagService.updateTag(authContext, req.params.id, req.body);
@@ -217,7 +218,7 @@ router.put("/tags/:id", requireAuth, requirePermission("Editar Tags"), async (re
   }
 });
 
-router.delete("/tags/:id", requireAuth, requirePermission("Excluir Tags"), async (req: Request, res: Response) => {
+router.delete("/tags/:id", requireAuth, requirePermission("Delete Tags"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     await tagService.deleteTag(authContext, req.params.id);
@@ -227,6 +228,128 @@ router.delete("/tags/:id", requireAuth, requirePermission("Excluir Tags"), async
       return res.status(404).json({ message: "Tag not found" });
     }
     res.status(500).json({ message: "Failed to delete tag" });
+  }
+});
+
+// Task Status routes
+router.get("/task-statuses", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const authContext = createAuthContextFromRequest(req);
+    const statuses = await taskStatusService.getTaskStatuses(authContext);
+    res.json(statuses);
+  } catch (error) {
+    Logger.error.generic('TASK-STATUSES-FETCH', error);
+    res.status(500).json({ message: "Failed to fetch task statuses" });
+  }
+});
+
+router.get("/task-statuses/:id", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const authContext = createAuthContextFromRequest(req);
+    const status = await taskStatusService.getTaskStatus(authContext, req.params.id);
+    if (!status) {
+      return res.status(404).json({ message: "Task status not found" });
+    }
+    res.json(status);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch task status" });
+  }
+});
+
+router.post("/task-statuses", requireAuth, requirePermission("Create Task Statuses"), async (req: Request, res: Response) => {
+  try {
+    const authContext = createAuthContextFromRequest(req);
+    const status = await taskStatusService.createTaskStatus(authContext, req.body);
+    res.status(201).json(status);
+  } catch (error) {
+    res.status(400).json({ message: "Invalid task status data" });
+  }
+});
+
+router.patch("/task-statuses/:id", requireAuth, requirePermission("Edit Task Statuses"), async (req: Request, res: Response) => {
+  try {
+    const authContext = createAuthContextFromRequest(req);
+    const updatedStatus = await taskStatusService.updateTaskStatus(authContext, req.params.id, req.body);
+    res.json(updatedStatus);
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("not found")) {
+      return res.status(404).json({ message: "Task status not found" });
+    }
+    res.status(400).json({ message: "Invalid task status data" });
+  }
+});
+
+router.delete("/task-statuses/:id", requireAuth, requirePermission("Delete Task Statuses"), async (req: Request, res: Response) => {
+  try {
+    const authContext = createAuthContextFromRequest(req);
+    await taskStatusService.deleteTaskStatus(authContext, req.params.id);
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("not found")) {
+      return res.status(404).json({ message: "Task status not found" });
+    }
+    res.status(500).json({ message: "Failed to delete task status" });
+  }
+});
+
+// Task Priority routes
+router.get("/task-priorities", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const authContext = createAuthContextFromRequest(req);
+    const priorities = await taskStatusService.getTaskPriorities(authContext);
+    res.json(priorities);
+  } catch (error) {
+    Logger.error.generic('TASK-PRIORITIES-FETCH', error);
+    res.status(500).json({ message: "Failed to fetch task priorities" });
+  }
+});
+
+router.get("/task-priorities/:id", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const authContext = createAuthContextFromRequest(req);
+    const priority = await taskStatusService.getTaskPriority(authContext, req.params.id);
+    if (!priority) {
+      return res.status(404).json({ message: "Task priority not found" });
+    }
+    res.json(priority);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch task priority" });
+  }
+});
+
+router.post("/task-priorities", requireAuth, requirePermission("Create Task Priorities"), async (req: Request, res: Response) => {
+  try {
+    const authContext = createAuthContextFromRequest(req);
+    const priority = await taskStatusService.createTaskPriority(authContext, req.body);
+    res.status(201).json(priority);
+  } catch (error) {
+    res.status(400).json({ message: "Invalid task priority data" });
+  }
+});
+
+router.patch("/task-priorities/:id", requireAuth, requirePermission("Edit Task Priorities"), async (req: Request, res: Response) => {
+  try {
+    const authContext = createAuthContextFromRequest(req);
+    const updatedPriority = await taskStatusService.updateTaskPriority(authContext, req.params.id, req.body);
+    res.json(updatedPriority);
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("not found")) {
+      return res.status(404).json({ message: "Task priority not found" });
+    }
+    res.status(400).json({ message: "Invalid task priority data" });
+  }
+});
+
+router.delete("/task-priorities/:id", requireAuth, requirePermission("Delete Task Priorities"), async (req: Request, res: Response) => {
+  try {
+    const authContext = createAuthContextFromRequest(req);
+    await taskStatusService.deleteTaskPriority(authContext, req.params.id);
+    res.status(204).send();
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("not found")) {
+      return res.status(404).json({ message: "Task priority not found" });
+    }
+    res.status(500).json({ message: "Failed to delete task priority" });
   }
 });
 
