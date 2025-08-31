@@ -148,6 +148,54 @@ export interface ColumnReorderedEvent extends DomainEvent {
   };
 }
 
+// 🏢 TEAM EVENTS
+export interface TeamCreatedEvent extends DomainEvent {
+  type: 'team.created';
+  data: {
+    teamId: string;
+    teamName: string;
+    userId: string;
+  };
+}
+
+export interface TeamUpdatedEvent extends DomainEvent {
+  type: 'team.updated';
+  data: {
+    teamId: string;
+    teamName: string;
+    changes: any;
+    userId: string;
+  };
+}
+
+export interface TeamDeletedEvent extends DomainEvent {
+  type: 'team.deleted';
+  data: {
+    teamId: string;
+    deletedBy: string;
+    deletedTeam: any;
+  };
+}
+
+export interface TeamMemberRemovedEvent extends DomainEvent {
+  type: 'team.member_removed';
+  data: {
+    teamId: string;
+    userId: string;
+    removedBy: string;
+  };
+}
+
+export interface TeamMemberRoleUpdatedEvent extends DomainEvent {
+  type: 'team.member_role_updated';
+  data: {
+    teamId: string;
+    userId: string;
+    newRole: string;
+    updatedBy: string;
+  };
+}
+
 // 🔐 AUTH EVENTS
 export interface UserLoginEvent extends DomainEvent {
   type: 'user.login';
@@ -183,6 +231,11 @@ export type AllDomainEvents =
   | TagUpdatedEvent
   | ColumnCreatedEvent
   | ColumnReorderedEvent
+  | TeamCreatedEvent
+  | TeamUpdatedEvent
+  | TeamDeletedEvent
+  | TeamMemberRemovedEvent
+  | TeamMemberRoleUpdatedEvent
   | UserLoginEvent
   | UserLogoutEvent;
 
@@ -201,6 +254,11 @@ export type EventRegistry = {
   'tag.updated': TagUpdatedEvent;
   'column.created': ColumnCreatedEvent;
   'column.reordered': ColumnReorderedEvent;
+  'team.created': TeamCreatedEvent;
+  'team.updated': TeamUpdatedEvent;
+  'team.deleted': TeamDeletedEvent;
+  'team.member_removed': TeamMemberRemovedEvent;
+  'team.member_role_updated': TeamMemberRoleUpdatedEvent;
   'user.login': UserLoginEvent;
   'user.logout': UserLogoutEvent;
 };

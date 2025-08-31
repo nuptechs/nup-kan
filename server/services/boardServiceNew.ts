@@ -299,11 +299,11 @@ export class BoardService extends BaseService {
         'boards_count*'
       ]);
 
-      // Emitir evento
-      this.emitEvent('board.created', {
-        boardId: board.id,
+      // Emitir evento tipado
+      await this.emitEvent('board.created', {
+        board,
         userId: authContext.userId,
-        boardName: board.name,
+        createdDefaultColumns: request.createDefaultColumns !== false,
       });
 
       this.log('board-service', 'board created successfully', { boardId: board.id });
@@ -359,11 +359,12 @@ export class BoardService extends BaseService {
         'boards:all'
       ]);
 
-      // Emitir evento
-      this.emitEvent('board.updated', {
+      // Emitir evento tipado
+      await this.emitEvent('board.updated', {
         boardId,
-        userId: authContext.userId,
+        board: updatedBoard,
         changes: validData,
+        userId: authContext.userId,
       });
 
       this.log('board-service', 'board updated successfully', { boardId });

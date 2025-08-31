@@ -378,8 +378,8 @@ export class TaskService extends BaseService {
           
           return {
             ...task,
-            assigneeName: assigneeInfo.name,
-            assigneeAvatar: assigneeInfo.avatar,
+            assigneeName: assigneeInfo?.name || null,
+            assigneeAvatar: assigneeInfo?.avatar || null,
             recentActivity: [], // Pode ser implementado depois
             permissions: {
               canEdit: this.hasPermission(authContext, 'Editar Tarefas'),
@@ -480,7 +480,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'assignTask', { userId: authContext.userId, taskId, assigneeId });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.MEMBERS.ASSIGN, 'atribuir tasks');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.EDIT, 'atribuir tasks');
 
       return this.updateTask(authContext, taskId, { assigneeId });
 

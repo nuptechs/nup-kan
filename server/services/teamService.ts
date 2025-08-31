@@ -151,11 +151,11 @@ export class TeamService extends BaseService {
         `user:${authContext.userId}:teams`
       ]);
 
-      // Emitir evento
-      this.emitEvent('team.created', {
+      // Emitir evento tipado
+      await this.emitEvent('team.created', {
         teamId: team.id,
-        createdBy: authContext.userId,
-        team: team
+        teamName: team.name,
+        userId: authContext.userId,
       });
 
       return team;
@@ -196,11 +196,12 @@ export class TeamService extends BaseService {
         `team:${teamId}:*`
       ]);
 
-      // Emitir evento
-      this.emitEvent('team.updated', {
+      // Emitir evento tipado
+      await this.emitEvent('team.updated', {
         teamId: teamId,
-        updatedBy: authContext.userId,
-        changes: validatedData
+        teamName: team.name,
+        changes: validatedData,
+        userId: authContext.userId,
       });
 
       return team;
@@ -260,7 +261,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'removeUserFromTeam', { requestingUser: authContext.userId, userId, teamId });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.MEMBERS.ASSIGN, 'remover membro do time');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.MANAGE, 'remover membro do time');
 
       // Verificar se o usuário tem permissão para gerenciar este time
       const hasTeamAccess = await this.hasTeamAdminAccess(authContext.userId, teamId);
@@ -295,7 +296,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'updateUserTeamRole', { requestingUser: authContext.userId, userId, teamId, newRole });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.MEMBERS.ASSIGN, 'alterar role do membro');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.MANAGE, 'alterar role do membro');
 
       // Verificar se o usuário tem permissão para gerenciar este time
       const hasTeamAccess = await this.hasTeamAdminAccess(authContext.userId, teamId);

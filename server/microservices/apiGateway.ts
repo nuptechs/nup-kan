@@ -6,7 +6,7 @@ import { UnifiedAuthService } from '../auth/unifiedAuth';
 import { boardService } from '../services/boardServiceNew';
 import { taskService } from '../services/taskServiceNew';
 import { cache, TTL } from '../cache';
-import { eventBus } from '../cqrs/events';
+import { eventBus } from '../events';
 
 export interface ServiceMetrics {
   service: string;

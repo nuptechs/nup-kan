@@ -64,7 +64,7 @@ export class AssigneeService extends BaseService {
     this.log('assignee-service', 'addTaskAssignee', { userId: authContext.userId, request });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.MEMBERS.ASSIGN, 'adicionar assignee');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.ASSIGN, 'adicionar assignee');
 
       // Validar dados
       const validData = insertTaskAssigneeSchema.parse(request);
@@ -107,12 +107,11 @@ export class AssigneeService extends BaseService {
         `user:${request.userId}:assignments`
       ]);
 
-      // Emitir evento
-      this.emitEvent('task.assignee_added', {
+      // Log assignee adicionado
+      this.log('assignee-service', 'assignee-added', {
         taskId: request.taskId,
         userId: request.userId,
-        assignedBy: authContext.userId,
-        assignee: assignee
+        assignedBy: authContext.userId
       });
 
       return assignee;
@@ -129,7 +128,7 @@ export class AssigneeService extends BaseService {
     this.log('assignee-service', 'removeTaskAssignee', { userId: authContext.userId, taskId, targetUserId: userId });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.MEMBERS.ASSIGN, 'remover assignee');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.ASSIGN, 'remover assignee');
 
       // Verificar se assignee existe
       const existingAssignees = await this.storage.getTaskAssignees(taskId);
@@ -147,8 +146,8 @@ export class AssigneeService extends BaseService {
         `user:${userId}:assignments`
       ]);
 
-      // Emitir evento
-      this.emitEvent('task.assignee_removed', {
+      // Log assignee removido
+      this.log('assignee-service', 'assignee-removed', {
         taskId,
         userId,
         removedBy: authContext.userId
@@ -229,8 +228,8 @@ export class AssigneeService extends BaseService {
         }
       }
 
-      // Emitir evento de transferência
-      this.emitEvent('assignments.transferred', {
+      // Log transferência de assignments
+      this.log('assignee-service', 'assignments-transferred', {
         fromUserId,
         toUserId,
         transferredCount,
