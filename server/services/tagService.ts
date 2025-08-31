@@ -11,7 +11,7 @@
  */
 
 import { BaseService, createSuccessResponse, createErrorResponse, PaginatedResponse, PaginationOptions } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { Tag, InsertTag } from "@shared/schema";
 import { insertTagSchema } from "@shared/schema";
 import { TTL } from "../cache";
@@ -37,7 +37,7 @@ export class TagService extends BaseService {
     this.log('tag-service', 'getTags', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Tags', 'listar tags');
+      this.requirePermission(authContext, 'List Tags', 'listar tags');
 
       const cacheKey = 'tags:all';
       const cached = await this.cache.get<Tag[]>(cacheKey);
@@ -62,7 +62,7 @@ export class TagService extends BaseService {
     this.log('tag-service', 'getTag', { userId: authContext.userId, tagId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Tags', 'visualizar tag');
+      this.requirePermission(authContext, 'Edit Tags', 'visualizar tag');
 
       const tag = await this.storage.getTag(tagId);
       return tag || null;

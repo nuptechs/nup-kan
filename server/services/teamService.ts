@@ -11,7 +11,7 @@
  */
 
 import { BaseService, createSuccessResponse, createErrorResponse, PaginatedResponse, PaginationOptions } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { Team, InsertTeam, UpdateTeam, UserTeam, InsertUserTeam } from "@shared/schema";
 import { insertTeamSchema, updateTeamSchema } from "@shared/schema";
 import { TTL } from "../cache";
@@ -50,7 +50,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'getTeams', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Times', 'listar times');
+      this.requirePermission(authContext, 'List Teams', 'listar times');
 
       const cacheKey = 'teams:all';
       const cached = await this.cache.get<Team[]>(cacheKey);
@@ -76,7 +76,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'getTeam', { userId: authContext.userId, teamId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Times', 'visualizar time');
+      this.requirePermission(authContext, 'Edit Teams', 'visualizar time');
 
       const cacheKey = `team:${teamId}:full`;
       const cached = await this.cache.get<TeamWithMembers>(cacheKey);

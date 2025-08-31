@@ -11,7 +11,7 @@
  */
 
 import { BaseService, createSuccessResponse, createErrorResponse, PaginatedResponse, PaginationOptions } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { Profile, InsertProfile, UpdateProfile } from "@shared/schema";
 import { insertProfileSchema, updateProfileSchema } from "@shared/schema";
 import { TTL } from "../cache";
@@ -35,7 +35,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'getProfiles', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Perfis', 'listar perfis');
+      this.requirePermission(authContext, 'List Profiles', 'listar perfis');
 
       const cacheKey = 'profiles:all';
       const cached = await this.cache.get<Profile[]>(cacheKey);
@@ -60,7 +60,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'getProfile', { userId: authContext.userId, profileId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Perfis', 'visualizar perfil');
+      this.requirePermission(authContext, 'Edit Profiles', 'visualizar perfil');
 
       const profile = await this.storage.getProfile(profileId);
       return profile || null;
