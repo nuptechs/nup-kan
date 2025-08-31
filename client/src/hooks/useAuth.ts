@@ -8,7 +8,7 @@ export function useAuth() {
   // 🚀 VERIFICAR AUTENTICAÇÃO LOCAL - REATIVO A MUDANÇAS
   const [authVersion, setAuthVersion] = useState(0);
   
-  // DEBUG: Identificador único para cada instância do hook
+  // DEBUG: Identificador único para cada instância do hook (agora estático)
   const hookId = useMemo(() => Math.random().toString(36).substr(2, 9), []);
   
   // Ouvir mudanças de autenticação

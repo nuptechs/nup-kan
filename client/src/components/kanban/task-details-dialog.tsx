@@ -258,6 +258,10 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden [&>button]:hidden p-0" data-testid="task-details-dialog">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Detalhes da Tarefa</DialogTitle>
+          <DialogDescription>Visualizar e editar informações da tarefa</DialogDescription>
+        </DialogHeader>
         {/* Cabeçalho fixo com título e botões */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 pb-3">
           <div className="flex items-center justify-between">

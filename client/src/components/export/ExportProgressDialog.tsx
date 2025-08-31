@@ -80,10 +80,10 @@ export function ExportProgressDialog({ open, onOpenChange, onExportComplete }: E
 
       // Fetch actual data for export
       const [tasks, columns, teamMembers, analytics] = await Promise.all([
-        fetch('/api/tasks').then(r => r.json()),
-        fetch('/api/columns').then(r => r.json()),
-        fetch('/api/users').then(r => r.json()),
-        fetch('/api/analytics').then(r => r.json())
+        fetch('/api/tasks', { credentials: 'include' }).then(r => r.json()),
+        fetch('/api/columns', { credentials: 'include' }).then(r => r.json()),
+        fetch('/api/users', { credentials: 'include' }).then(r => r.json()),
+        fetch('/api/analytics', { credentials: 'include' }).then(r => r.json())
       ]);
 
       const exportedData = {

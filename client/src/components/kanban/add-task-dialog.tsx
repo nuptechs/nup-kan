@@ -75,7 +75,12 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
     enabled: userTeams.length > 0,
     queryFn: async () => {
       if (userTeams.length === 0) return [];
-      const response = await fetch('/api/users');
+      const response = await fetch('/api/users', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch users');
       const users = await response.json();
       return users.filter((user: any) => 
