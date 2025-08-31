@@ -15,6 +15,7 @@ import type { AuthContext } from "../auth/unifiedAuth";
 import type { Column, InsertColumn, UpdateColumn } from "@shared/schema";
 import { insertColumnSchema, updateColumnSchema } from "@shared/schema";
 import { TTL } from "../cache";
+import { PERMISSIONS } from "../config/permissions";
 
 export interface ColumnCreateRequest {
   boardId: string;
@@ -40,7 +41,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'getColumns', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'List Columns', 'listar colunas');
+      this.requirePermission(authContext, PERMISSIONS.COLUMNS.LIST, 'listar colunas');
 
       const cacheKey = 'columns:all';
       const cached = await this.cache.get<Column[]>(cacheKey);
@@ -65,7 +66,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'getBoardColumns', { userId: authContext.userId, boardId });
     
     try {
-      this.requirePermission(authContext, 'Edit Columns', 'visualizar colunas');
+      this.requirePermission(authContext, PERMISSIONS.COLUMNS.VIEW, 'visualizar colunas');
 
       const cacheKey = `board_columns:${boardId}`;
       const cached = await this.cache.get<Column[]>(cacheKey);

@@ -15,6 +15,7 @@ import type { AuthContext } from "../auth/unifiedAuth";
 import type { Profile, InsertProfile, UpdateProfile } from "@shared/schema";
 import { insertProfileSchema, updateProfileSchema } from "@shared/schema";
 import { TTL } from "../cache";
+import { PERMISSIONS } from "../config/permissions";
 
 export interface ProfileCreateRequest {
   name: string;
@@ -35,7 +36,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'getProfiles', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'List Profiles', 'listar perfis');
+      this.requirePermission(authContext, PERMISSIONS.PROFILES.LIST, 'listar perfis');
 
       const cacheKey = 'profiles:all';
       const cached = await this.cache.get<Profile[]>(cacheKey);
@@ -60,7 +61,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'getProfile', { userId: authContext.userId, profileId });
     
     try {
-      this.requirePermission(authContext, 'Edit Profiles', 'visualizar perfil');
+      this.requirePermission(authContext, PERMISSIONS.PROFILES.VIEW, 'visualizar perfil');
 
       const profile = await this.storage.getProfile(profileId);
       return profile || null;

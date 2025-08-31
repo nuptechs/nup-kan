@@ -15,6 +15,7 @@ import type { AuthContext } from "../auth/unifiedAuth";
 import type { Tag, InsertTag } from "@shared/schema";
 import { insertTagSchema } from "@shared/schema";
 import { TTL } from "../cache";
+import { PERMISSIONS } from "../config/permissions";
 
 export interface TagCreateRequest {
   name: string;
@@ -37,7 +38,7 @@ export class TagService extends BaseService {
     this.log('tag-service', 'getTags', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'List Tags', 'listar tags');
+      this.requirePermission(authContext, PERMISSIONS.TAGS.LIST, 'listar tags');
 
       const cacheKey = 'tags:all';
       const cached = await this.cache.get<Tag[]>(cacheKey);
@@ -62,7 +63,7 @@ export class TagService extends BaseService {
     this.log('tag-service', 'getTag', { userId: authContext.userId, tagId });
     
     try {
-      this.requirePermission(authContext, 'Edit Tags', 'visualizar tag');
+      this.requirePermission(authContext, PERMISSIONS.TAGS.VIEW, 'visualizar tag');
 
       const tag = await this.storage.getTag(tagId);
       return tag || null;

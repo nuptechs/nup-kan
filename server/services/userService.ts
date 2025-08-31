@@ -15,6 +15,7 @@ import type { AuthContext } from "../auth/unifiedAuth";
 import type { User, InsertUser, UpdateUser } from "@shared/schema";
 import { insertUserSchema, updateUserSchema } from "@shared/schema";
 import { TTL } from "../cache";
+import { PERMISSIONS } from "../config/permissions";
 import bcrypt from "bcryptjs";
 
 export interface UserCreateRequest {
@@ -54,7 +55,7 @@ export class UserService extends BaseService {
     this.log('user-service', 'getUsers', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'List Users', 'listar usuários');
+      this.requirePermission(authContext, PERMISSIONS.USERS.LIST, 'listar usuários');
 
       const cacheKey = 'users:all';
       const cached = await this.cache.get<User[]>(cacheKey);
@@ -82,7 +83,7 @@ export class UserService extends BaseService {
     try {
       // Bypass de permissão para usuário 'system' (usado em refresh tokens)
       if (authContext.userId !== 'system') {
-        this.requirePermission(authContext, 'Edit Users', 'visualizar usuário');
+        this.requirePermission(authContext, PERMISSIONS.USERS.VIEW, 'visualizar usuário');
       }
 
       const cacheKey = `user:${userId}:full`;
@@ -153,7 +154,7 @@ export class UserService extends BaseService {
     this.log('user-service', 'createUser', { userId: authContext.userId, email: request.email });
     
     try {
-      this.requirePermission(authContext, 'Create Users', 'criar usuário');
+      this.requirePermission(authContext, PERMISSIONS.USERS.CREATE, 'criar usuário');
 
       // Verificar se email já existe
       const existingUsers = await this.storage.getUsers();
@@ -217,7 +218,7 @@ export class UserService extends BaseService {
     this.log('user-service', 'updateUser', { userId: authContext.userId, targetUserId: userId });
     
     try {
-      this.requirePermission(authContext, 'Edit Users', 'editar usuário');
+      this.requirePermission(authContext, PERMISSIONS.USERS.EDIT, 'editar usuário');
 
       const existingUser = await this.storage.getUser(userId);
       if (!existingUser) {
@@ -261,7 +262,7 @@ export class UserService extends BaseService {
     this.log('user-service', 'deleteUser', { userId: authContext.userId, targetUserId: userId });
     
     try {
-      this.requirePermission(authContext, 'Delete Users', 'excluir usuário');
+      this.requirePermission(authContext, PERMISSIONS.USERS.DELETE, 'excluir usuário');
 
       const user = await this.storage.getUser(userId);
       if (!user) {
@@ -304,7 +305,7 @@ export class UserService extends BaseService {
     try {
       // Permitir que usuários alterem suas próprias senhas ou admins alterem qualquer senha
       if (authContext.userId !== userId) {
-        this.requirePermission(authContext, 'Edit Users', 'alterar senha de outro usuário');
+        this.requirePermission(authContext, PERMISSIONS.USERS.EDIT, 'alterar senha de outro usuário');
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);

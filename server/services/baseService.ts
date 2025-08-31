@@ -16,6 +16,7 @@ import { storage } from "../storage";
 import { eventBus } from "../cqrs/events";
 import { cache } from "../cache";
 import type { AuthContext } from "../auth/unifiedAuth";
+import { authorizationService } from "./authorizationService";
 
 export abstract class BaseService {
   protected readonly storage = storage;
@@ -23,20 +24,45 @@ export abstract class BaseService {
   protected readonly cache = cache;
 
   /**
-   * Verificar se usuário tem permissão específica
+   * Verificar se usuário tem permissão específica (via AuthorizationService centralizado)
    */
   protected hasPermission(authContext: AuthContext, permission: string): boolean {
-    return authContext.permissions?.includes(permission) || false;
+    return authorizationService.hasPermission(authContext, permission);
   }
 
   /**
-   * Validar permissão obrigatória (throw se não tiver)
+   * Validar permissão obrigatória (throw se não tiver) (via AuthorizationService centralizado)
    */
   protected requirePermission(authContext: AuthContext, permission: string, action?: string): void {
-    if (!this.hasPermission(authContext, permission)) {
-      const actionText = action ? ` para ${action}` : '';
-      throw new Error(`Permissão insuficiente: '${permission}' necessária${actionText}`);
-    }
+    authorizationService.requirePermission(authContext, permission, action);
+  }
+
+  /**
+   * Verificar múltiplas permissões (OR - pelo menos uma)
+   */
+  protected hasAnyPermission(authContext: AuthContext, permissions: string[]): boolean {
+    return authorizationService.hasAnyPermission(authContext, permissions);
+  }
+
+  /**
+   * Verificar múltiplas permissões (AND - todas)
+   */
+  protected hasAllPermissions(authContext: AuthContext, permissions: string[]): boolean {
+    return authorizationService.hasAllPermissions(authContext, permissions);
+  }
+
+  /**
+   * Exigir pelo menos uma das permissões
+   */
+  protected requireAnyPermission(authContext: AuthContext, permissions: string[], action?: string): void {
+    authorizationService.requireAnyPermission(authContext, permissions, action);
+  }
+
+  /**
+   * Obter capacidades do usuário para um recurso
+   */
+  protected getUserCapabilities(authContext: AuthContext, resource: string) {
+    return authorizationService.getUserCapabilities(authContext, resource);
   }
 
   /**
