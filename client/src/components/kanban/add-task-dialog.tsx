@@ -252,9 +252,8 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                         <FormControl>
                           <Input
                             {...field}
-                            value={field.value || ""}
-                            className="text-xl font-semibold border-2 border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 bg-white px-3 py-2 rounded-md transition-colors"
                             placeholder="Digite o título da tarefa"
+                            className="text-xl font-semibold bg-transparent border-0 focus:ring-0 shadow-none p-2"
                             data-testid="input-header-title"
                           />
                         </FormControl>
