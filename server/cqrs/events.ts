@@ -160,7 +160,11 @@ class EventHandlers {
     const { board } = event.data;
 
     // Board criado no PostgreSQL - evento processado
-    console.log(`📊 [SYNC] Board ${board.name} processado com sucesso`);
+    if (board && board.name) {
+      console.log(`📊 [SYNC] Board ${board.name} processado com sucesso`);
+    } else {
+      console.log('📊 [SYNC] Board processado com sucesso (dados incompletos no evento)');
+    }
   }
 
   // 📝 Handler: Task Criada
