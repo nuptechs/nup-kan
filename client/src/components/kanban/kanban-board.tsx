@@ -343,7 +343,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
       if (task.title?.toLowerCase().includes(query)) return true;
       
       // Search in legacy assignee name field
-      if (task.assigneeName?.toLowerCase().includes(query)) return true;
+      // Buscar por assignee através dos assignees
       
       // Search in new assignees structure
       const taskAssignees = allAssignees[task.id] || [];

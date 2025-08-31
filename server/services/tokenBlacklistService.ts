@@ -29,8 +29,24 @@ export class TokenBlacklistService {
    */
   static async isTokenBlacklisted(token: string): Promise<boolean> {
     const key = `${this.BLACKLIST_PREFIX}${token}`;
+    const cleanKey = `${key}:clean`;
+    
+    // Primeiro verificar se já sabemos que o token não está na blacklist
+    const cleanResult = await cache.get(cleanKey);
+    if (cleanResult === 'not_blacklisted') {
+      return false; // Token confirmado como limpo
+    }
+    
+    // Verificar blacklist real
     const result = await cache.get(key);
-    return result !== null;
+    const isBlacklisted = result !== null;
+    
+    // Se não está na blacklist, cache por 60 segundos para evitar lookups futuros
+    if (!isBlacklisted) {
+      await cache.set(cleanKey, 'not_blacklisted', 60);
+    }
+    
+    return isBlacklisted;
   }
 
   /**

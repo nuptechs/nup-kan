@@ -60,11 +60,9 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
   const queryClient = useQueryClient();
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
 
-  // Buscar campos personalizados do board
-  const { data: customFields = [], isLoading: fieldsLoading } = useQuery<CustomField[]>({
-    queryKey: ["/api/custom-fields", boardId],
-    enabled: !!boardId,
-  });
+  // Custom fields - desabilitado temporariamente (rota não implementada)
+  const customFields: CustomField[] = [];
+  const fieldsLoading = false;
 
   // Buscar valores existentes da task
   const { data: existingValues = [], isLoading: valuesLoading } = useQuery<TaskCustomValue[]>({

@@ -240,7 +240,12 @@ export default function KanbanPage() {
 
       {/* Main Kanban Board */}
       <main className="flex-1 overflow-hidden" data-testid="main-content">
-        <KanbanBoard boardId={boardId} isReadOnly={isReadOnly} profileMode={mode} searchQuery={searchQuery} />
+        <KanbanBoard 
+          boardId={boardId} 
+          isReadOnly={isReadOnly} 
+          profileMode={mode === "loading" ? "read-only" : mode} 
+          searchQuery={searchQuery} 
+        />
       </main>
 
       {/* User Profile Indicator - Fixed Bottom Left */}

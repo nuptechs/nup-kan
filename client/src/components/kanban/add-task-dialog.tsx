@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertTaskSchema } from "@shared/schema";
-import type { TeamMember } from "@shared/schema";
+import type { User } from "@shared/schema";
 import { TagSelector } from "./tag-selector";
 import { MultiUserSelector } from "./multi-user-selector";
 import { z } from "zod";
@@ -60,7 +60,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: teamMembers = [] } = useQuery<TeamMember[]>({
+  const { data: teamMembers = [] } = useQuery<User[]>({
     queryKey: ["/api/team-members"],
   });
 
@@ -70,18 +70,8 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
     queryKey: [columnsEndpoint],
   });
 
-  // Get custom fields for this board
-  const { data: customFields = [] } = useQuery<any[]>({
-    queryKey: ["/api/custom-fields", boardId],
-    queryFn: async () => {
-      const response = await fetch(`/api/custom-fields?boardId=${boardId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch custom fields');
-      }
-      return response.json();
-    },
-    enabled: !!boardId,
-  });
+  // Custom fields - desabilitado temporariamente (rota não implementada)
+  const customFields: any[] = [];
 
   // Get the default status based on defaultColumnId or first column
   const getDefaultStatus = () => {
