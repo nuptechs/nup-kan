@@ -16,13 +16,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { updateTaskSchema } from "@shared/schema";
-import type { Task, TeamMember, Tag } from "@shared/schema";
+import type { Task, User, Tag } from "@shared/schema";
 import { TagSelector } from "./tag-selector";
 import { MultiUserSelector } from "./multi-user-selector";
 import { z } from "zod";
-import { Edit, Trash2, User, Calendar, Clock, Flag, X, ChevronDown, ChevronRight, History } from "lucide-react";
+import { Edit, Trash2, User as UserIcon, Calendar, Clock, Flag, X, ChevronDown, ChevronRight, History } from "lucide-react";
 import { TaskTimeline } from "./task-timeline";
 import TaskCustomFields from "./task-custom-fields";
+import { PermissionGuard } from "@/components/PermissionGuard";
 
 interface TaskDetailsDialogProps {
   task: Task | null;
@@ -89,7 +90,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: teamMembers = [] } = useQuery<TeamMember[]>({
+  const { data: teamMembers = [] } = useQuery<User[]>({
     queryKey: ["/api/team-members"],
   });
 
@@ -113,7 +114,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
       priority: task?.priority || "medium",
       assigneeId: task?.assigneeId || "",
       progress: task?.progress || 0,
-      tags: task?.tags || [],
+      tags: [],
       assigneeIds: [],
     },
   });
@@ -131,7 +132,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         priority: task.priority,
         assigneeId: task.assigneeId || "",
         progress: task.progress || 0,
-        tags: task.tags || [],
+        tags: [],
         assigneeIds: assigneeIds,
       });
       // Reset editing state when task changes
@@ -300,31 +301,35 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
             {/* Botões de ação organizados horizontalmente */}
             <div className="flex gap-1">
               {!isEditing && (
+                <PermissionGuard permission="Edit Tasks">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsEditing(true);
+                    }}
+                    className="w-8 h-8 p-0 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-all"
+                    data-testid="button-edit-task"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                </PermissionGuard>
+              )}
+              <PermissionGuard permission="Delete Tasks">
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="w-8 h-8 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
+                  data-testid="button-delete-task"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setIsEditing(true);
+                    setIsDeleteDialogOpen(true);
                   }}
-                  className="w-8 h-8 p-0 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-all"
-                  data-testid="button-edit-task"
                 >
-                  <Edit className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4" />
                 </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-8 h-8 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
-                data-testid="button-delete-task"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsDeleteDialogOpen(true);
-                }}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              </PermissionGuard>
               <Button
                 variant="ghost"
                 size="sm"
@@ -524,20 +529,13 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
                   </span>
                 </div>
 
-                {task.assigneeName && (
+                {task.assigneeId && (
                   <div className="flex items-center space-x-3 group hover:bg-gray-50 -mx-2 px-2 py-1 rounded-md transition-colors">
-                    <User className="w-4 h-4 text-gray-400 group-hover:text-gray-500 transition-colors" />
+                    <UserIcon className="w-4 h-4 text-gray-400 group-hover:text-gray-500 transition-colors" />
                     <span className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">Responsável:</span>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center group-hover:bg-indigo-600 transition-colors">
-                        <span className="text-white text-xs font-medium" data-testid="task-assignee-avatar">
-                          {task.assigneeAvatar}
-                        </span>
-                      </div>
-                      <span className="font-medium text-gray-900 group-hover:text-gray-950 transition-colors" data-testid="task-assignee-name">
-                        {task.assigneeName}
-                      </span>
-                    </div>
+                    <span className="font-medium text-gray-900 group-hover:text-gray-950 transition-colors" data-testid="task-assignee-id">
+                      {task.assigneeId}
+                    </span>
                   </div>
                 )}
               </div>
@@ -571,31 +569,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
               </div>
             </div>
 
-            {task.tags && task.tags.length > 0 && (
-              <>
-                <Separator />
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {allTags.filter(tag => task.tags?.includes(tag.name)).map((tag) => (
-                      <Badge 
-                        key={tag.id} 
-                        variant="secondary" 
-                        className="text-xs px-2 py-0.5 rounded-md font-medium"
-                        style={{
-                          backgroundColor: `${tag.color}20`,
-                          color: tag.color,
-                          borderColor: `${tag.color}40`,
-                        }}
-                        data-testid={`task-tag-${tag.name}`}
-                      >
-                        {tag.name}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
+            {/* Tags removidas do schema atual */}
 
             {/* Custom Fields Section */}
             {boardId && (

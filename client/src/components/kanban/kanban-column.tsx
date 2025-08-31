@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Plus, Settings, Edit2, Trash2, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Task, Column, TaskAssignee, User } from "@shared/schema";
+import { PermissionGuard } from "@/components/PermissionGuard";
 
 interface KanbanColumnProps {
   column: Column;
@@ -106,17 +107,19 @@ export function KanbanColumn({
                   {/* Botões de ação - aparecem no hover */}
                   <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     {/* Botão + para adicionar tarefa */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAddTask?.(column.id);
-                      }}
-                      className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-green-100 flex items-center justify-center transition-all duration-200"
-                      data-testid={`button-add-task-column-${column.id}`}
-                      title="Adicionar nova tarefa"
-                    >
-                      <Plus className="w-3 h-3 text-gray-400 hover:text-green-500" />
-                    </button>
+                    <PermissionGuard permission="Create Tasks">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAddTask?.(column.id);
+                        }}
+                        className="w-5 h-5 rounded-full bg-gray-100/50 hover:bg-green-100 flex items-center justify-center transition-all duration-200"
+                        data-testid={`button-add-task-column-${column.id}`}
+                        title="Adicionar nova tarefa"
+                      >
+                        <Plus className="w-3 h-3 text-gray-400 hover:text-green-500" />
+                      </button>
+                    </PermissionGuard>
                     
                     {/* Menu de três pontinhos */}
                     <DropdownMenu>
@@ -130,27 +133,31 @@ export function KanbanColumn({
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEditColumn?.(column);
-                          }}
-                          data-testid={`menu-edit-column-${column.id}`}
-                        >
-                          <Edit2 className="w-4 h-4 mr-2" />
-                          Editar coluna
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteColumn?.(column.id);
-                          }}
-                          className="text-red-600 focus:text-red-600"
-                          data-testid={`menu-delete-column-${column.id}`}
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Excluir coluna
-                        </DropdownMenuItem>
+                        <PermissionGuard permission="Edit Columns">
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEditColumn?.(column);
+                            }}
+                            data-testid={`menu-edit-column-${column.id}`}
+                          >
+                            <Edit2 className="w-4 h-4 mr-2" />
+                            Editar coluna
+                          </DropdownMenuItem>
+                        </PermissionGuard>
+                        <PermissionGuard permission="Delete Columns">
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteColumn?.(column.id);
+                            }}
+                            className="text-red-600 focus:text-red-600"
+                            data-testid={`menu-delete-column-${column.id}`}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Excluir coluna
+                          </DropdownMenuItem>
+                        </PermissionGuard>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

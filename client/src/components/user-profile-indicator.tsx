@@ -5,6 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { LogOut, Settings } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
+import { PermissionGuard } from "@/components/PermissionGuard";
 
 export function UserProfileIndicator() {
   const [, setLocation] = useLocation();
@@ -96,24 +97,26 @@ export function UserProfileIndicator() {
                 {currentUser?.email || 'email@exemplo.com'}
               </p>
               <p className="text-xs text-gray-400 group-hover:text-gray-500 transition-colors">
-                {currentUser?.role || 'Usuário'}
+                Usuário
               </p>
             </div>
           </div>
         </div>
         
         <div className="p-2">
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start text-sm hover:bg-gray-50 transition-colors group"
-            onClick={() => {
-              setLocation("/settings");
-            }}
-            data-testid="button-user-settings"
-          >
-            <Settings className="w-4 h-4 mr-2 group-hover:text-gray-600 transition-colors" />
-            <span className="group-hover:text-gray-900 transition-colors">Configurações</span>
-          </Button>
+          <PermissionGuard permissions={["Manage Permissions", "View Analytics"]} requireAll={false}>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-sm hover:bg-gray-50 transition-colors group"
+              onClick={() => {
+                setLocation("/settings");
+              }}
+              data-testid="button-user-settings"
+            >
+              <Settings className="w-4 h-4 mr-2 group-hover:text-gray-600 transition-colors" />
+              <span className="group-hover:text-gray-900 transition-colors">Configurações</span>
+            </Button>
+          </PermissionGuard>
           
           <div className="border-t my-2" />
           
