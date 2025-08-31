@@ -191,7 +191,6 @@ export default function BoardSelection() {
       // 🚀 FORÇAR REFETCH IMEDIATO dos boards
       await queryClient.refetchQueries({ queryKey: ["/api/boards"] });
       
-      console.log("🔄 [CACHE] Cache de boards invalidado e refeito");
       
       setIsDeleteOpen(false);
       setSelectedBoard(null);
@@ -212,10 +211,8 @@ export default function BoardSelection() {
   // Toggle board status mutation
   const toggleBoardStatusMutation = useMutation({
     mutationFn: async (boardId: string) => {
-      console.log("🚀 [DEBUG] Fazendo request para toggle-status...");
       const response = await apiRequest("PATCH", `/api/boards/${boardId}/toggle-status`);
       const data = await response.json();
-      console.log("🚀 [DEBUG] Resposta recebida:", data);
       return data;
     },
     onMutate: async (boardId: string) => {
@@ -248,8 +245,6 @@ export default function BoardSelection() {
       return { previousBoards };
     },
     onSuccess: async (updatedBoard) => {
-      console.log("🚀 [DEBUG] onSuccess chamado com:", updatedBoard);
-      console.log("🚀 [DEBUG] updatedBoard.isActive:", updatedBoard.isActive, typeof updatedBoard.isActive);
       
       // Update cache directly with server response instead of invalidating
       queryClient.setQueryData(["/api/boards"], (old: any) => {
@@ -274,7 +269,6 @@ export default function BoardSelection() {
       // Converter para string e comparar (resolve problema de conversão automática)
       const isActive = updatedBoard.isActive === true || updatedBoard.isActive === "true";
       const statusText = isActive ? "ativado" : "inativado";
-      console.log("🚀 [DEBUG] isActive final:", isActive, "statusText:", statusText);
       
       toast({
         title: `Board ${statusText}`,
@@ -282,7 +276,6 @@ export default function BoardSelection() {
       });
     },
     onError: (error, boardId, context) => {
-      console.log("❌ [DEBUG] Erro na mutation:", error);
       
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousBoards) {

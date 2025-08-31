@@ -10,14 +10,11 @@ export function useAuth() {
   
   // DEBUG: Identificador único para cada instância do hook
   const hookId = useMemo(() => Math.random().toString(36).substr(2, 9), []);
-  console.log(AUTH_LOGS.INSTANCE_CREATED(hookId));
   
   // Ouvir mudanças de autenticação
   useEffect(() => {
     const cleanup = AuthService.onAuthChange(() => {
-      console.log(AUTH_LOGS.JWT_AUTH_CHANGE(hookId, authVersion));
       setAuthVersion(prev => {
-        console.log(AUTH_LOGS.JWT_VERSION_CHANGE(prev, prev + 1));
         return prev + 1;
       });
     });
@@ -31,11 +28,9 @@ export function useAuth() {
 
   // 🔧 CALLBACK ESTÁVEL PARA QUERY FUNCTION
   const queryFn = useCallback(async () => {
-    console.log(AUTH_LOGS.JWT_REQUEST_STARTED(authVersion));
     
     // Se não tem token local, não fazer request
     if (!AuthService.getAccessToken()) {
-      console.log(AUTH_LOGS.JWT_NO_LOCAL_TOKEN());
       return { isAuthenticated: false, user: null };
     }
     

@@ -41,7 +41,6 @@ export default function ChangePasswordPage() {
 
   const changePasswordMutation = useMutation({
     mutationFn: async (data: ChangePasswordFormData) => {
-      console.log(CHANGE_PASSWORD_LOGS.STARTING());
       
       // Obter dados do usuário do localStorage
       const userData = AuthService.getUserData();
@@ -56,7 +55,6 @@ export default function ChangePasswordPage() {
       });
 
       const result = await response.json();
-      console.log(CHANGE_PASSWORD_LOGS.SUCCESS());
       return result;
     },
     onSuccess: () => {
@@ -71,7 +69,6 @@ export default function ChangePasswordPage() {
       }, 1000);
     },
     onError: (error: any) => {
-      console.error(CHANGE_PASSWORD_LOGS.ERROR(error));
       toast({
         title: "Erro ao alterar senha",
         description: error.message || "Falha ao alterar a senha. Verifique se a senha atual está correta.",

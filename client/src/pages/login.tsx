@@ -180,14 +180,11 @@ export default function LoginPage() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      console.log(LOGIN_LOGS.STARTING_LOGIN(data.email));
       const response = await apiRequest("POST", "/api/auth/login", data);
       const result = await response.json();
-      console.log(LOGIN_LOGS.LOGIN_SUCCESS(result));
       return result;
     },
     onSuccess: async (data) => {
-      console.log(LOGIN_LOGS.PROCESSING_RESPONSE());
       
       // 🚀 SALVAR TOKENS JWT E DADOS DO USUÁRIO
       const { AuthService } = await import('@/services/authService');
@@ -199,7 +196,6 @@ export default function LoginPage() {
           tokens: data.tokens,
           isAuthenticated: true
         });
-        console.log(LOGIN_LOGS.TOKENS_SAVED());
         
         toast({
           title: "Login realizado!",
@@ -211,7 +207,6 @@ export default function LoginPage() {
         
         // ✅ VERIFICAR SE PRECISA TROCAR SENHA (PRIMEIRO LOGIN)
         if (data.requiresPasswordChange || data.user.firstLogin) {
-          console.log(LOGIN_LOGS.FIRST_LOGIN_REDIRECT());
           setTimeout(() => {
             window.location.href = "/change-password";
           }, 500);

@@ -18,7 +18,6 @@ export function usePermissions() {
         errorInstance, 
         currentUser?.id || 'unknown'
       );
-      console.error(PERMISSION_LOGS.CRITICAL_ERROR(permissionError.toJSON()));
     }
   }, [userError, userLoading, currentUser?.id]);
 
@@ -40,17 +39,10 @@ export function usePermissions() {
 
     // 3. Validação de integridade
     if (!Array.isArray(permissionObjects)) {
-      console.error(PERMISSION_LOGS.DATA_CORRUPTED({
-        userId: currentUser?.id,
-        permissionObjects: typeof permissionObjects,
-        permissionStrings: typeof permissionStrings,
-        currentUser: !!currentUser
-      }));
       return [];
     }
 
     // 4. Log para auditoria
-    console.log(PERMISSION_LOGS.USER_PERMISSIONS(currentUser.id, permissionObjects.length));
 
     return permissionObjects; // Agora é array de strings
   }, [currentUser, userLoading, userError]);
@@ -107,13 +99,6 @@ export function usePermissions() {
   // Nova função para logs de segurança
   const logSecurityAttempt = (action: string, resource: string, success: boolean) => {
     if (!success) {
-      console.warn(PERMISSION_LOGS.ACCESS_DENIED({
-        user: currentUser?.name || 'Unknown',
-        userId: currentUser?.id || 'Unknown',
-        action,
-        resource,
-        timestamp: new Date().toISOString()
-      }));
     }
   };
 

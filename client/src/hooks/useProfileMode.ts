@@ -41,11 +41,9 @@ export function useProfileMode(): {
       }
       
       // 4. Log para auditoria
-      console.log(PROFILE_MODE_LOGS.USER_PERMISSIONS(permissions.length));
       
       // 5. Lógica de negócio (agora confiável)
       if (checkIsAdmin()) {
-        console.log(PROFILE_MODE_LOGS.MODE_ADMIN());
         return "admin";
       }
       
@@ -55,17 +53,14 @@ export function useProfileMode(): {
                                   hasPermission("Create Columns");
       
       if (hasCreatePermissions) {
-        console.log(PROFILE_MODE_LOGS.MODE_FULL_ACCESS());
         return "full-access";
       }
       
       // 6. Read-only é agora um estado válido, não fallback
-      console.log(PROFILE_MODE_LOGS.MODE_READ_ONLY());
       return "read-only";
       
     } catch (error) {
       // Erro crítico - propagar para error boundary
-      console.error(PROFILE_MODE_LOGS.CRITICAL_ERROR(error));
       throw error;
     }
   };
@@ -82,7 +77,6 @@ export function useProfileMode(): {
     
     // Validar entrada
     if (!resource || typeof resource !== 'string') {
-      console.warn(PROFILE_MODE_LOGS.INVALID_RESOURCE_CREATE(resource));
       return false;
     }
     
@@ -97,7 +91,6 @@ export function useProfileMode(): {
     if (isReadOnly) return false;
     
     if (!resource || typeof resource !== 'string') {
-      console.warn(PROFILE_MODE_LOGS.INVALID_RESOURCE_EDIT(resource));
       return false;
     }
     
@@ -109,7 +102,6 @@ export function useProfileMode(): {
     if (isReadOnly) return false;
     
     if (!resource || typeof resource !== 'string') {
-      console.warn(PROFILE_MODE_LOGS.INVALID_RESOURCE_DELETE(resource));
       return false;
     }
     
@@ -120,7 +112,6 @@ export function useProfileMode(): {
     if (mode === "loading") return false;
     
     if (!resource || typeof resource !== 'string') {
-      console.warn(PROFILE_MODE_LOGS.INVALID_RESOURCE_VIEW(resource));
       return false;
     }
     

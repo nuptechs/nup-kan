@@ -144,7 +144,6 @@ type Toast = Omit<ToasterToast, "id">
 function toast({ duration = 3000, ...props }: Toast) {
   const id = genId()
 
-  console.log(TOAST_LOGS.CREATING_TOAST(id, props, duration));
 
   const update = (props: ToasterToast) =>
     dispatch({
@@ -166,11 +165,9 @@ function toast({ duration = 3000, ...props }: Toast) {
     },
   })
 
-  console.log(TOAST_LOGS.TOAST_ADDED());
 
   // Auto-dismiss após o duration especificado
   setTimeout(() => {
-    console.log(TOAST_LOGS.AUTO_DISMISS(id));
     dismiss()
   }, duration)
 

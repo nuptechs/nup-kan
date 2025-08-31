@@ -12,12 +12,10 @@ import {
 export function Toaster() {
   const { toasts } = useToast()
 
-  console.log(TOAST_LOGS.TOASTER_RENDERING(toasts.length, toasts));
 
   return (
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, duration, ...props }) {
-        console.log(TOAST_LOGS.TOAST_INDIVIDUAL({ id, title, description, duration }));
         return (
           <Toast 
             key={id} 
