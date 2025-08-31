@@ -59,7 +59,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     queryKey: [columnsEndpoint],
     enabled: !!columnsEndpoint, // Only fetch if endpoint is defined
     staleTime: 0, // Always refetch
-    cacheTime: 0, // Don't cache
+    gcTime: 0, // Don't cache (replaces cacheTime in v5)
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     refetchInterval: false, // Disable automatic refetch
@@ -221,7 +221,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     
     if (!draggedColumn || isReadOnly) return;
     
-    const sortedColumns = [...columns].sort((a, b) => a.position - b.position);
+    const sortedColumns = ([...columns] as Column[]).sort((a: Column, b: Column) => a.position - b.position);
     const sourceIndex = sortedColumns.findIndex(col => col.id === draggedColumn.id);
     
     if (sourceIndex === targetIndex) {
@@ -273,7 +273,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     console.log("🔄 [DRAG] Dropping task", draggedTask.id, "into column", targetColumnId, "at index", targetTaskIndex);
     
     const sourceColumnId = draggedTask.status;
-    const targetColumn = columns.find(col => col.id === targetColumnId);
+    const targetColumn = columns.find((col: Column) => col.id === targetColumnId);
     
     if (!targetColumn) return;
     
@@ -427,7 +427,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
         {/* Kanban Board */}
         <div className="flex-1 overflow-x-auto scrollbar-hide" style={{ height: 'calc(100vh - 140px)' }}>
-          {columns.length === 0 ? (
+          {(columns as Column[]).length === 0 ? (
             /* Empty Board State */
             <div className="flex items-center justify-center min-h-96 p-8">
               <div className="text-center space-y-6 max-w-md">
@@ -460,9 +460,9 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
           ) : (
             /* Normal Board with Columns */
             <div className="flex gap-6 p-4 items-start min-w-max" style={{ minHeight: '100%' }}>
-              {columns
-                .sort((a, b) => a.position - b.position)
-                .map((column, index) => {
+              {(columns as Column[])
+                .sort((a: Column, b: Column) => a.position - b.position)
+                .map((column: Column, index: number) => {
                   const columnTasks = getTasksByColumn(column.id);
                   const isWipLimitExceeded = column.wipLimit && columnTasks.length > column.wipLimit;
                   const isDragOver = dragOverColumn === column.id;
