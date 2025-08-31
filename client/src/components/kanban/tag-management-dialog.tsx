@@ -55,7 +55,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
         color: "#3B82F6",
       });
     }
-  }, [isOpen, form]);
+  }, [isOpen]);
 
   const createTagMutation = useMutation({
     mutationFn: async (data: FormData) => {

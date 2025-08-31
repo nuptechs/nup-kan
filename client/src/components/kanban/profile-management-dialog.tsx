@@ -264,7 +264,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
       setIsCreatingProfile(false);
       profileForm.reset();
     }
-  }, [open, profileForm]);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
