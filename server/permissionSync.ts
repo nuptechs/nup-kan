@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { storage } from "./storage";
 import type { Permission, InsertPermission } from "@shared/schema";
+import { Logger } from './utils/logMessages';
 
 interface RoutePermission {
   id: string;
@@ -332,7 +333,7 @@ export class PermissionSyncService {
           if (error.message?.includes('Connection terminated') || 
               error.message?.includes('WebSocket was closed') ||
               error.message?.includes('connection timeout')) {
-            console.log(`⏳ [PERMISSION SYNC] Tentativa de conexão falhou, tentando novamente... (${3 - retries}/3)`);
+            Logger.auth.permissionSync(`Tentativa ${3 - retries}/3 de conexão com BD`);
             if (retries > 0) {
               // Wait before retry with exponential backoff
               await new Promise(resolve => setTimeout(resolve, (4 - retries) * 2000));
@@ -357,13 +358,13 @@ export class PermissionSyncService {
       // Se ainda não encontrou, usar o primeiro perfil como fallback
       if (!adminProfile && profiles.length > 0) {
         adminProfile = profiles[0];
-        console.log(`⚠️ [PERMISSION SYNC] Perfil administrador não encontrado, usando primeiro perfil: ${adminProfile.name}`);
+        Logger.auth.permissionSync(`Perfil admin não encontrado, usando: ${adminProfile.name}`);
       }
       
       return adminProfile;
     } catch (error) {
-      console.error('❌ [PERMISSION SYNC] Erro ao buscar perfil administrador:', error);
-      console.log('🔄 [PERMISSION SYNC] A sincronização será tentada novamente na próxima inicialização');
+      Logger.error.generic('PERMISSION-SYNC-ADMIN-PROFILE', error);
+      Logger.auth.permissionSync('Sincronização adiada para próxima inicialização');
       return null;
     }
   }
@@ -375,23 +376,23 @@ export class PermissionSyncService {
     try {
       // Sistema de sincronização de permissões ativo
       
-      console.log('🔄 [PERMISSION SYNC] Iniciando sincronização de permissões...');
+      Logger.auth.permissionSync('Iniciando sincronização de permissões');
       
       // 1. Detectar funcionalidades
       const detectedFunctions = this.analyzeRoutes(app);
-      console.log(`📊 [PERMISSION SYNC] ${detectedFunctions.length} categorias de funcionalidades detectadas`);
+      Logger.auth.permissionSync(`${detectedFunctions.length} categorias detectadas`);
       
       // 2. Gerar permissões
       const newPermissions = this.generatePermissions(detectedFunctions);
-      console.log(`🔑 [PERMISSION SYNC] ${newPermissions.length} permissões geradas`);
+      Logger.auth.permissionSync(`${newPermissions.length} permissões geradas`);
       
       // 3. Obter perfil administrador
       const adminProfile = await this.getAdminProfile();
       if (!adminProfile) {
-        console.error('❌ [PERMISSION SYNC] Não foi possível identificar o perfil administrador');
+        Logger.error.generic('PERMISSION-SYNC-NO-ADMIN', new Error('Perfil administrador não identificado'));
         return;
       }
-      console.log(`👤 [PERMISSION SYNC] Perfil administrador identificado: ${adminProfile.name} (${adminProfile.id})`);
+      Logger.auth.permissionSync(`Perfil admin: ${adminProfile.name}`);
       
       // 4. Obter permissões existentes
       const existingPermissions = await storage.getPermissions();
@@ -415,19 +416,19 @@ export class PermissionSyncService {
           // Criar a permissão e pegar o ID real gerado
           const createdPermission = await storage.createPermission(insertPermission);
           createdCount++;
-          console.log(`✅ [PERMISSION SYNC] Criada permissão: ${permission.name}`);
+          Logger.auth.permissionSync(`Permissão criada: ${permission.name}`);
           
           // Atribuir automaticamente ao perfil administrador usando o ID real
           try {
             await storage.addPermissionToProfile(adminProfile.id, createdPermission.id);
             assignedCount++;
-            console.log(`🔗 [PERMISSION SYNC] Permissão "${permission.name}" atribuída ao perfil "${adminProfile.name}"`);
+            Logger.auth.permissionSync(`Permissão ${permission.name} atribuída ao perfil`);
           } catch (assignError) {
-            console.error(`❌ [PERMISSION SYNC] Erro ao atribuir permissão ${createdPermission.id} ao perfil administrador:`, assignError);
+            Logger.error.generic('PERMISSION-SYNC-ASSIGN', assignError);
           }
           
         } catch (error) {
-          console.error(`❌ [PERMISSION SYNC] Erro ao criar permissão ${permission.id}:`, error);
+          Logger.error.generic('PERMISSION-SYNC-CREATE', error);
         }
       }
       
@@ -449,27 +450,26 @@ export class PermissionSyncService {
         !adminPermissionIds.has(p.id)
       );
       
-      console.log(`🔧 [PERMISSION SYNC] ${existingPermissionsToAssign.length} permissões existentes precisam ser atribuídas ao administrador`);
+      Logger.auth.permissionSync(`${existingPermissionsToAssign.length} permissões existentes para atribuir`);
       
       for (const permission of existingPermissionsToAssign) {
         try {
           await storage.addPermissionToProfile(adminProfile.id, permission.id);
           assignedCount++;
-          console.log(`🔗 [PERMISSION SYNC] Permissão existente "${permission.name}" atribuída ao perfil "${adminProfile.name}"`);
+          Logger.auth.permissionSync(`Permissão existente ${permission.name} atribuída`);
         } catch (assignError) {
-          console.error(`❌ [PERMISSION SYNC] Erro ao atribuir permissão existente ${permission.id} ao perfil administrador:`, assignError);
+          Logger.error.generic('PERMISSION-SYNC-ASSIGN-EXISTING', assignError);
         }
       }
       
       if (orphanPermissions.length > 0) {
-        console.log(`⚠️ [PERMISSION SYNC] ${orphanPermissions.length} permissões órfãs detectadas:`, 
-          orphanPermissions.map(p => p.name));
+        Logger.auth.permissionSync(`${orphanPermissions.length} permissões órfãs detectadas`);
       }
       
-      console.log(`✅ [PERMISSION SYNC] Sincronização concluída. ${createdCount} permissões criadas, ${assignedCount} atribuídas ao perfil administrador.`);
+      Logger.auth.permissionSync(`Sincronização concluída: ${createdCount} criadas, ${assignedCount} atribuídas`);
       
     } catch (error) {
-      console.error('❌ [PERMISSION SYNC] Erro durante sincronização:', error);
+      Logger.error.generic('PERMISSION-SYNC-GENERAL', error);
     }
   }
 

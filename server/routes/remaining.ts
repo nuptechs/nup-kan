@@ -8,6 +8,7 @@ import {
   tagService
 } from "../services";
 import { createAuthContextFromRequest } from "../utils/authUtils";
+import { Logger } from '../utils/logMessages';
 
 const router = Router();
 
@@ -82,7 +83,7 @@ router.get("/analytics", requireAuth, async (req: Request, res: Response) => {
     
     res.json(analytics);
   } catch (error) {
-    console.error("Error fetching analytics:", error);
+    Logger.error.generic('ANALYTICS-FETCH', error);
     res.status(500).json({ message: "Failed to fetch analytics" });
   }
 });
@@ -95,7 +96,7 @@ router.get("/boards/:boardId/columns", requireAuth, async (req: Request, res: Re
     const columns = await columnService.getBoardColumns(authContext, boardId);
     res.json(columns);
   } catch (error) {
-    console.error("Error fetching board columns:", error);
+    Logger.error.generic('BOARD-COLUMNS-FETCH', error);
     res.status(500).json({ message: "Failed to fetch board columns" });
   }
 });

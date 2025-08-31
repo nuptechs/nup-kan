@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { Request } from "express";
+import { Logger } from '../utils/logMessages';
 
 // 🔐 JWT Configuration
 const JWT_SECRET = process.env.JWT_SECRET || "nupkan-jwt-secret-2025-super-secure";
@@ -61,7 +62,7 @@ export class JWTService {
       // Verificar se token está na blacklist primeiro
       const isBlacklisted = await this.isTokenBlacklisted(token);
       if (isBlacklisted) {
-        console.log('🚫 [JWT] Token está na blacklist');
+        Logger.security.accessDenied('jwt-token', 'blacklisted');
         return null;
       }
 
@@ -73,11 +74,11 @@ export class JWTService {
       return decoded;
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
-        console.log('🔍 [JWT] Token expirado');
+        Logger.security.accessDenied('jwt-token', 'expired');
       } else if (error instanceof jwt.JsonWebTokenError) {
-        console.log('🔍 [JWT] Token inválido');
+        Logger.security.accessDenied('jwt-token', 'invalid');
       } else {
-        console.error('🔍 [JWT] Erro ao verificar token:', error);
+        Logger.error.generic('JWT-VERIFICATION', error);
       }
       return null;
     }

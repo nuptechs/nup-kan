@@ -17,6 +17,7 @@ import { eventBus } from "../cqrs/events";
 import { cache } from "../cache";
 import type { AuthContext } from "../auth/unifiedAuth";
 import { authorizationService } from "./authorizationService";
+import { Logger } from '../utils/logMessages';
 
 export abstract class BaseService {
   protected readonly storage = storage;
@@ -70,7 +71,7 @@ export abstract class BaseService {
    */
   protected async invalidateCache(patterns: string[]): Promise<void> {
     try {
-      console.log('🧹 [BASE-SERVICE] Invalidando cache com padrões:', patterns);
+      Logger.cache.invalidate(patterns.join(', '));
       await Promise.all(
         patterns.map(pattern => {
           if (pattern.includes('*')) {
@@ -81,7 +82,7 @@ export abstract class BaseService {
         })
       );
     } catch (error) {
-      console.error('⚠️ [CACHE] Erro na invalidação:', error);
+      Logger.error.generic('CACHE-INVALIDATION', error);
     }
   }
 
@@ -92,7 +93,7 @@ export abstract class BaseService {
     try {
       this.eventBus.emit(eventName, data);
     } catch (error) {
-      console.error('⚠️ [EVENT] Erro na emissão:', error);
+      Logger.error.generic('EVENT-EMISSION', error);
     }
   }
 
@@ -101,7 +102,7 @@ export abstract class BaseService {
    */
   protected log(service: string, operation: string, details?: any): void {
     const timestamp = new Date().toISOString();
-    console.log(`🔷 [${service.toUpperCase()}] ${operation}`, details || '');
+    Logger.service.operation(service, operation, details || '');
   }
 
   /**
@@ -109,7 +110,7 @@ export abstract class BaseService {
    */
   protected logError(service: string, operation: string, error: any): void {
     const timestamp = new Date().toISOString();
-    console.error(`❌ [${service.toUpperCase()}] Erro em ${operation}:`, error);
+    Logger.error.generic(`${service.toUpperCase()}-${operation}`, error);
   }
 }
 

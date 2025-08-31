@@ -98,8 +98,8 @@ export class TaskController {
   }
 
   static async reorderTasks(req: AuthRequest, res: Response) {
-    console.log("🔍 [REORDER] Request received at /api/tasks/reorder");
-    console.log("🔍 [REORDER] Method:", req.method);
+    Logger.service.operation('task-controller', 'reorder', 'Request received');
+    Logger.service.operation('task-controller', 'reorder', `Method: ${req.method}`);
     
     try {
       const authContext = createAuthContextFromRequest(req);
@@ -107,7 +107,7 @@ export class TaskController {
       
       res.json(result);
     } catch (error) {
-      console.error("Error reordering tasks:", error);
+      Logger.error.generic('TASK-REORDER', error);
       res.status(400).json({ message: "Failed to reorder tasks" });
     }
   }
@@ -118,7 +118,7 @@ export class TaskController {
       const tasks = await taskService.getBoardTasks(authContext, req.params.boardId);
       res.json(tasks);
     } catch (error) {
-      console.error("Error fetching board tasks:", error);
+      Logger.error.generic('BOARD-TASKS-FETCH', error);
       res.status(500).json({ message: "Failed to fetch board tasks" });
     }
   }
@@ -190,7 +190,7 @@ export class TaskController {
           const assignees = await taskService.getTaskAssignees(authContext, taskId);
           return { taskId, assignees };
         } catch (error) {
-          console.error(`Error fetching assignees for task ${taskId}:`, error);
+          Logger.error.generic(`TASK-ASSIGNEES-${taskId}`, error);
           return { taskId, assignees: [] };
         }
       });
@@ -205,7 +205,7 @@ export class TaskController {
 
       res.json(assigneesByTask);
     } catch (error) {
-      console.error("Error in bulk assignees fetch:", error);
+      Logger.error.generic('BULK-ASSIGNEES-FETCH', error);
       res.status(500).json({ error: "Failed to fetch assignees" });
     }
   }

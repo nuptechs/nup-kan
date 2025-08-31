@@ -6,6 +6,7 @@ import { teams, profiles, permissions, userTeams, teamProfiles, profilePermissio
 import { eq } from "drizzle-orm";
 import { teamService } from "../services/teamService";
 import { profileService } from "../services/profileService";
+import { Logger } from '../utils/logMessages';
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.get("/teams", async (req: Request, res: Response) => {
     const allTeams = await db.select().from(teams);
     res.json(allTeams);
   } catch (error) {
-    console.error("Error fetching teams:", error);
+    Logger.error.generic('TEAMS-FETCH', error);
     res.status(500).json({ message: "Failed to fetch teams" });
   }
 });
@@ -32,7 +33,7 @@ router.get("/teams/:id", async (req: Request, res: Response) => {
     }
     res.json(team);
   } catch (error) {
-    console.error("Error fetching team:", error);
+    Logger.error.generic('TEAM-FETCH', error);
     res.status(500).json({ message: "Failed to fetch team" });
   }
 });
@@ -43,7 +44,7 @@ router.get("/profiles", async (req: Request, res: Response) => {
     const allProfiles = await db.select().from(profiles);
     res.json(allProfiles);
   } catch (error) {
-    console.error("Error fetching profiles:", error);
+    Logger.error.generic('PROFILES-FETCH', error);
     res.status(500).json({ message: "Failed to fetch profiles" });
   }
 });
@@ -56,7 +57,7 @@ router.get("/profiles/:id", async (req: Request, res: Response) => {
     }
     res.json(profile);
   } catch (error) {
-    console.error("Error fetching profile:", error);
+    Logger.error.generic('PROFILE-FETCH', error);
     res.status(500).json({ message: "Failed to fetch profile" });
   }
 });
@@ -67,7 +68,7 @@ router.get("/permissions", async (req: Request, res: Response) => {
     const allPermissions = await db.select().from(permissions);
     res.json(allPermissions);
   } catch (error) {
-    console.error("Error fetching permissions:", error);
+    Logger.error.generic('PERMISSIONS-FETCH', error);
     res.status(500).json({ message: "Failed to fetch permissions" });
   }
 });
@@ -78,7 +79,7 @@ router.get("/user-teams", async (req: Request, res: Response) => {
     const allUserTeams = await db.select().from(userTeams);
     res.json(allUserTeams);
   } catch (error) {
-    console.error("Error fetching user-teams:", error);
+    Logger.error.generic('USER-TEAMS-FETCH', error);
     res.status(500).json({ message: "Failed to fetch user-teams" });
   }
 });
@@ -89,7 +90,7 @@ router.get("/team-profiles", async (req: Request, res: Response) => {
     const allTeamProfiles = await db.select().from(teamProfiles);
     res.json(allTeamProfiles);
   } catch (error) {
-    console.error("Error fetching team-profiles:", error);
+    Logger.error.generic('TEAM-PROFILES-FETCH', error);
     res.status(500).json({ message: "Failed to fetch team-profiles" });
   }
 });
@@ -100,7 +101,7 @@ router.get("/profile-permissions", async (req: Request, res: Response) => {
     const allProfilePermissions = await db.select().from(profilePermissions);
     res.json(allProfilePermissions);
   } catch (error) {
-    console.error("Error fetching profile-permissions:", error);
+    Logger.error.generic('PROFILE-PERMISSIONS-FETCH', error);
     res.status(500).json({ message: "Failed to fetch profile-permissions" });
   }
 });
@@ -116,7 +117,7 @@ router.post("/teams", async (req: AuthRequest, res: Response) => {
     const newTeam = await teamService.createTeam(authContext, req.body);
     res.status(201).json(newTeam);
   } catch (error) {
-    console.error("Error creating team:", error);
+    Logger.error.generic('TEAM-CREATE', error);
     if (error instanceof Error && error.message.includes("Permissão insuficiente")) {
       return res.status(403).json({ message: error.message });
     }

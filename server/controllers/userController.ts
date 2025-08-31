@@ -101,7 +101,7 @@ export class UserController {
         res.status(404).json({ message: "Current user not found" });
       }
     } catch (error) {
-      console.error("Error fetching current user:", error);
+      Logger.error.generic('CURRENT-USER-FETCH', error);
       res.status(500).json({ message: "Failed to fetch current user" });
     }
   }
@@ -131,7 +131,7 @@ export class UserController {
       
       res.status(201).json(newUser);
     } catch (error) {
-      console.error(`❌ [CREATE-USER] Erro:`, error);
+      Logger.error.generic('USER-CREATE', error);
       
       if (error instanceof Error) {
         if (error.message.includes('já existe')) {
@@ -165,7 +165,7 @@ export class UserController {
       const updatedUser = await userService.updateUser(authContext, req.params.id, bodyData);
       res.json(updatedUser);
     } catch (error) {
-      console.error("Error updating user:", error);
+      Logger.error.generic('USER-UPDATE', error);
       if (error instanceof Error && error.message.includes("not found")) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -197,11 +197,11 @@ export class UserController {
       if (bodyData.role === null) bodyData.role = undefined;
       if (bodyData.profileId === null) bodyData.profileId = undefined;
       
-      console.log(`🔍 [PATCH-USER] Dados processados:`, bodyData);
+      Logger.service.operation('user-controller', 'patch', 'Dados processados');
       
       const updatedUser = await userService.updateUser(authContext, req.params.id, bodyData);
       
-      console.log(`✅ [PATCH-USER] Usuário atualizado com sucesso:`, {
+      Logger.service.operationComplete('user-controller', 'patch', {
         updatedUserId: updatedUser.id,
         name: updatedUser.name,
         email: updatedUser.email

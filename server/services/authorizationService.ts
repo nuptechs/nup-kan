@@ -11,6 +11,7 @@
 import { PERMISSIONS, isValidPermission } from '../config/permissions';
 import type { AuthContext } from '../auth/unifiedAuth';
 import { cache } from '../cache';
+import { Logger } from '../utils/logMessages';
 
 export interface AuthorizationError extends Error {
   code: 'INSUFFICIENT_PERMISSIONS' | 'INVALID_PERMISSION' | 'UNAUTHORIZED';
@@ -28,7 +29,7 @@ export class AuthorizationService {
   hasPermission(authContext: AuthContext, permission: string): boolean {
     // Validar se a permissão existe
     if (!isValidPermission(permission)) {
-      console.warn(`⚠️ [AUTHORIZATION] Permissão inválida: ${permission}`);
+      Logger.security.accessDenied('system', `invalid-permission-${permission}`);
       return false;
     }
 
@@ -153,7 +154,7 @@ export class AuthorizationService {
    * Log de acesso negado
    */
   private logAccessDenied(userId: string, permission: string, action: string): void {
-    console.warn(`🚫 [ACCESS-DENIED] User ${userId} tentou ${action} sem permissão: ${permission}`);
+    Logger.security.accessDenied(userId, `${action}-${permission}`);
     
     // Aqui poderia salvar em audit log, enviar para monitoring, etc.
   }
