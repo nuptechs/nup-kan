@@ -124,6 +124,32 @@ export const taskTags = pgTable("task_tags", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// ✅ NOVA TABELA: Status customizados por board
+export const boardStatuses = pgTable("board_statuses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  boardId: varchar("board_id").notNull().references(() => boards.id, { onDelete: "cascade" }),
+  statusId: text("status_id").notNull(), // "backlog", "todo", etc.
+  name: text("name").notNull(), // "Backlog", "To Do", etc.
+  color: text("color").notNull().default("#64748b"),
+  description: text("description").default(""),
+  position: integer("position").notNull().default(0),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ✅ NOVA TABELA: Prioridades customizadas por board
+export const boardPriorities = pgTable("board_priorities", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  boardId: varchar("board_id").notNull().references(() => boards.id, { onDelete: "cascade" }),
+  priorityId: text("priority_id").notNull(), // "low", "medium", etc.
+  name: text("name").notNull(), // "Low", "Medium", etc.
+  level: integer("level").notNull(), // 1, 2, 3, 4
+  color: text("color").notNull().default("#64748b"),
+  description: text("description").default(""),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // ✅ CONSOLIDADO: Tabela unificada para configurações (substitui taskStatuses e taskPriorities)
 export const configValues = pgTable("config_values", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -452,6 +478,30 @@ export type UpdateConfigValue = z.infer<typeof updateConfigValueSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type UpdateNotification = z.infer<typeof updateNotificationSchema>;
+
+// Board Status & Priority schemas
+export const insertBoardStatusSchema = createInsertSchema(boardStatuses).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const updateBoardStatusSchema = insertBoardStatusSchema.partial();
+
+export const insertBoardPrioritySchema = createInsertSchema(boardPriorities).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const updateBoardPrioritySchema = insertBoardPrioritySchema.partial();
+
+// Board Status & Priority types
+export type BoardStatus = typeof boardStatuses.$inferSelect;
+export type InsertBoardStatus = z.infer<typeof insertBoardStatusSchema>;
+export type UpdateBoardStatus = z.infer<typeof updateBoardStatusSchema>;
+
+export type BoardPriority = typeof boardPriorities.$inferSelect;
+export type InsertBoardPriority = z.infer<typeof insertBoardPrioritySchema>;
+export type UpdateBoardPriority = z.infer<typeof updateBoardPrioritySchema>;
 
 // ✅ COMPATIBILIDADE: Aliases para facilitar migração
 // Nota: taskStatuses e taskPriorities ainda existem como tabelas legacy

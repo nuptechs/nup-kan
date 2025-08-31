@@ -113,16 +113,12 @@ export class BoardShareService extends BaseService {
     this.log('board-share-service', 'createBoardShare', { userId: authContext.userId, boardId: request.boardId });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.BOARDS.EDIT, 'compartilhar board');
+      this.requirePermission(authContext, PERMISSIONS.BOARDS.EDIT, 'share board');
 
       const validData = insertBoardShareSchema.parse(request);
       const share = await this.storage.createBoardShare(validData);
 
-      this.emitEvent('board_share.created', {
-        shareId: share.id,
-        boardId: request.boardId,
-        userId: authContext.userId,
-      });
+      // Event will be added to registry later if needed
 
       return share;
     } catch (error) {
@@ -135,16 +131,12 @@ export class BoardShareService extends BaseService {
     this.log('board-share-service', 'updateBoardShare', { userId: authContext.userId, shareId });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.BOARDS.EDIT, 'editar compartilhamento');
+      this.requirePermission(authContext, PERMISSIONS.BOARDS.EDIT, 'edit board share');
 
       const validData = updateBoardShareSchema.parse(request);
       const share = await this.storage.updateBoardShare(shareId, validData);
 
-      this.emitEvent('board_share.updated', {
-        shareId,
-        userId: authContext.userId,
-        changes: validData,
-      });
+      // Event will be added to registry later if needed
 
       return share;
     } catch (error) {
@@ -157,14 +149,11 @@ export class BoardShareService extends BaseService {
     this.log('board-share-service', 'deleteBoardShare', { userId: authContext.userId, shareId });
     
     try {
-      this.requirePermission(authContext, PERMISSIONS.BOARDS.EDIT, 'remover compartilhamento');
+      this.requirePermission(authContext, PERMISSIONS.BOARDS.EDIT, 'delete board share');
 
       await this.storage.deleteBoardShare(shareId);
 
-      this.emitEvent('board_share.deleted', {
-        shareId,
-        userId: authContext.userId,
-      });
+      // Event will be added to registry later if needed
 
     } catch (error) {
       this.logError('board-share-service', 'deleteBoardShare', error);
