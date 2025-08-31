@@ -45,6 +45,9 @@ export class UserController {
   static async getUsers(req: Request, res: Response) {
     try {
       const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      if (!authContext) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
       const users = await userService.getUsers(authContext);
       res.json(users);
     } catch (error) {
@@ -57,6 +60,9 @@ export class UserController {
   static async getUser(req: Request, res: Response) {
     try {
       const authContext = await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
+      if (!authContext) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
       const user = await userService.getUser(authContext, req.params.id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -297,7 +303,7 @@ export class UserController {
         });
       }
 
-      const result = await userService.changePassword(authContext, req.params.id, req.body);
+      const result = await userService.updatePassword(authContext, req.params.id, req.body.newPassword);
       res.json(result);
     } catch (error) {
       console.error("Error changing password:", error);
