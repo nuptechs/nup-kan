@@ -11,11 +11,11 @@ router.use(requireAuth); // Valida se está autenticado
 // Board CRUD operations
 router.get("/", BoardController.getBoards);
 router.get("/:id", BoardController.getBoard);
-router.post("/", requirePermission("Criar Boards"), BoardController.createBoard);
-router.patch("/:id", requirePermission("Editar Boards"), BoardController.updateBoard);
-router.delete("/:id", requirePermission("Excluir Boards"), BoardController.deleteBoard);
+router.post("/", requirePermission("Create Boards"), BoardController.createBoard);
+router.patch("/:id", requirePermission("Edit Boards"), BoardController.updateBoard);
+router.delete("/:id", requirePermission("Delete Boards"), BoardController.deleteBoard);
 
 // Board status management
-router.patch("/:id/toggle-status", requirePermission("Editar Boards"), BoardController.toggleBoardStatus);
+router.patch("/:id/toggle-status", requirePermission("Edit Boards"), BoardController.toggleBoardStatus);
 
 export default router;
