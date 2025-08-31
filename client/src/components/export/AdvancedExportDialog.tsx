@@ -76,7 +76,7 @@ export function AdvancedExportDialog({ open, onOpenChange, onExportComplete }: A
   // Fetch all available data
   const { data: tasks = [] } = useQuery<any[]>({ queryKey: ["/api/tasks"], enabled: open });
   const { data: columns = [] } = useQuery<any[]>({ queryKey: ["/api/columns"], enabled: open });
-  const { data: teamMembers = [] } = useQuery<any[]>({ queryKey: ["/api/team-members"], enabled: open });
+  const { data: teamMembers = [] } = useQuery<any[]>({ queryKey: ["/api/users"], enabled: open });
   const { data: tags = [] } = useQuery<any[]>({ queryKey: ["/api/tags"], enabled: open });
   const { data: analytics } = useQuery<any>({ queryKey: ["/api/analytics"], enabled: open });
   const { data: teams = [] } = useQuery<any[]>({ queryKey: ["/api/teams"], enabled: open });

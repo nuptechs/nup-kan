@@ -63,8 +63,27 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  // Get current user's teams to fetch team members
+  const { data: userTeams = [] } = useQuery<any[]>({
+    queryKey: ["/api/auth/current-user"],
+    select: (data: any) => data?.teams || []
+  });
+  
+  // Get team members from user's teams
   const { data: teamMembers = [] } = useQuery<User[]>({
-    queryKey: ["/api/team-members"],
+    queryKey: ["/api/users", userTeams.map((t: any) => t.id)],
+    enabled: userTeams.length > 0,
+    queryFn: async () => {
+      if (userTeams.length === 0) return [];
+      const response = await fetch('/api/users');
+      if (!response.ok) throw new Error('Failed to fetch users');
+      const users = await response.json();
+      return users.filter((user: any) => 
+        userTeams.some((team: any) => 
+          user.teams?.some((ut: any) => ut.teamId === team.id)
+        )
+      );
+    }
   });
 
   // Get columns for this board to set the default status

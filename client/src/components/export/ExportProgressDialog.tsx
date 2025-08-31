@@ -81,7 +81,7 @@ export function ExportProgressDialog({ open, onOpenChange, onExportComplete }: E
       const [tasks, columns, teamMembers, analytics] = await Promise.all([
         fetch('/api/tasks').then(r => r.json()),
         fetch('/api/columns').then(r => r.json()),
-        fetch('/api/team-members').then(r => r.json()),
+        fetch('/api/users').then(r => r.json()),
         fetch('/api/analytics').then(r => r.json())
       ]);
 

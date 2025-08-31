@@ -93,7 +93,7 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
   const { toast } = useToast();
 
   const { data: teamMembers = [] } = useQuery<User[]>({
-    queryKey: ["/api/team-members"],
+    queryKey: ["/api/users"],
   });
 
   // Fetch all tags to get colors
