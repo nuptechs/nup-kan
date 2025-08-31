@@ -15,6 +15,7 @@ export const CacheKeys = {
   USER_PERMISSIONS: (userId: string) => `user:permissions:${userId}`,
   USER_PROFILE: (userId: string) => `user:profile:${userId}`,
   BOARD_TASKS: (boardId: string) => `board:tasks:${boardId}`,
+  BOARD_COLUMNS: (boardId: string) => `board_columns:${boardId}`,
   TASK_DETAILS: (taskId: string) => `task:details:${taskId}`,
   TEAM_MEMBERS: (teamId: string) => `team:members:${teamId}`,
   USER_TEAMS: (userId: string) => `user:teams:${userId}`,
@@ -22,6 +23,8 @@ export const CacheKeys = {
   USER_NOTIFICATIONS: (userId: string) => `notifications:user:${userId}`,
   BOARD_SHARES: (boardId: string) => `board:shares:${boardId}`,
   HIERARCHY_DATA: (userId: string) => `hierarchy:${userId}`,
+  ANALYTICS: 'analytics:global',
+  ALL_BOARDS: 'boards:all',
 };
 
 // TTL constants em segundos
