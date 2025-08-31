@@ -74,7 +74,7 @@ export class UserController {
       // Create a system auth context to fetch users
       const systemAuthContext = { 
         userId: 'system', 
-        permissions: ['Listar Usuários'],
+        permissions: ['List Users'],
         userName: 'System',
         userEmail: 'system@system.com',
         permissionCategories: ['Users'],

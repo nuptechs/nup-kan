@@ -8,10 +8,11 @@
  */
 
 import { BaseService } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { TeamProfile, InsertTeamProfile } from "@shared/schema";
 import { insertTeamProfileSchema } from "@shared/schema";
 import { TTL } from "../cache";
+import { PERMISSIONS } from "../config/permissions";
 
 export interface TeamProfileRequest {
   teamId: string;
@@ -24,7 +25,7 @@ export class TeamProfileService extends BaseService {
     this.log('team-profile-service', 'getAllTeamProfiles', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Teams', 'listar perfis de equipes');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.LIST, 'listar perfis de equipes');
 
       const teamProfiles = await this.storage.getAllTeamProfiles();
       return teamProfiles;
@@ -38,7 +39,7 @@ export class TeamProfileService extends BaseService {
     this.log('team-profile-service', 'getTeamProfiles', { userId: authContext.userId, teamId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Teams', 'visualizar perfis da equipe');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.VIEW, 'visualizar perfis da equipe');
 
       const teamProfiles = await this.storage.getTeamProfiles(teamId);
       return teamProfiles;
@@ -52,7 +53,7 @@ export class TeamProfileService extends BaseService {
     this.log('team-profile-service', 'assignProfileToTeam', { userId: authContext.userId, teamId, profileId });
     
     try {
-      this.requirePermission(authContext, 'Editar Teams', 'atribuir perfil à equipe');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.EDIT, 'atribuir perfil à equipe');
 
       const teamProfile = await this.storage.assignProfileToTeam(teamId, profileId);
 
@@ -74,7 +75,7 @@ export class TeamProfileService extends BaseService {
     this.log('team-profile-service', 'deleteTeamProfile', { userId: authContext.userId, teamProfileId });
     
     try {
-      this.requirePermission(authContext, 'Editar Teams', 'remover perfil da equipe');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.EDIT, 'remover perfil da equipe');
 
       await this.storage.deleteTeamProfile(teamProfileId);
 
@@ -93,7 +94,7 @@ export class TeamProfileService extends BaseService {
     this.log('team-profile-service', 'removeProfileFromTeam', { userId: authContext.userId, teamId, profileId });
     
     try {
-      this.requirePermission(authContext, 'Editar Teams', 'remover perfil da equipe');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.EDIT, 'remover perfil da equipe');
 
       await this.storage.removeProfileFromTeam(teamId, profileId);
 

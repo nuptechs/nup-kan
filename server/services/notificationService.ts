@@ -11,10 +11,11 @@
  */
 
 import { BaseService, createSuccessResponse, createErrorResponse, PaginatedResponse, PaginationOptions } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { Notification, InsertNotification, UpdateNotification } from "@shared/schema";
 import { insertNotificationSchema, updateNotificationSchema } from "@shared/schema";
 import { TTL } from "../cache";
+import { PERMISSIONS } from "../config/permissions";
 
 export interface NotificationCreateRequest {
   userId: string;
@@ -249,7 +250,7 @@ export class NotificationService extends BaseService {
     this.log('notification-service', 'deleteExpiredNotifications', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Excluir System', 'limpar notificações expiradas');
+      this.requirePermission(authContext, PERMISSIONS.SYSTEM.DELETE, 'limpar notificações expiradas');
       
       const count = await this.storage.deleteExpiredNotifications();
       

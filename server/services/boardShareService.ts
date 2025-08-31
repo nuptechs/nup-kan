@@ -99,7 +99,7 @@ export class BoardShareService extends BaseService {
     this.log('board-share-service', 'getTeamSharedBoards', { userId: authContext.userId, teamId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Teams', 'visualizar boards da equipe');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.VIEW, 'visualizar boards da equipe');
 
       const shares = await this.storage.getTeamSharedBoards(teamId);
       return shares;
@@ -113,7 +113,7 @@ export class BoardShareService extends BaseService {
     this.log('board-share-service', 'createBoardShare', { userId: authContext.userId, boardId: request.boardId });
     
     try {
-      this.requirePermission(authContext, 'Editar Boards', 'compartilhar board');
+      this.requirePermission(authContext, PERMISSIONS.BOARDS.EDIT, 'compartilhar board');
 
       const validData = insertBoardShareSchema.parse(request);
       const share = await this.storage.createBoardShare(validData);
@@ -135,7 +135,7 @@ export class BoardShareService extends BaseService {
     this.log('board-share-service', 'updateBoardShare', { userId: authContext.userId, shareId });
     
     try {
-      this.requirePermission(authContext, 'Editar Boards', 'editar compartilhamento');
+      this.requirePermission(authContext, PERMISSIONS.BOARDS.EDIT, 'editar compartilhamento');
 
       const validData = updateBoardShareSchema.parse(request);
       const share = await this.storage.updateBoardShare(shareId, validData);
@@ -157,7 +157,7 @@ export class BoardShareService extends BaseService {
     this.log('board-share-service', 'deleteBoardShare', { userId: authContext.userId, shareId });
     
     try {
-      this.requirePermission(authContext, 'Editar Boards', 'remover compartilhamento');
+      this.requirePermission(authContext, PERMISSIONS.BOARDS.EDIT, 'remover compartilhamento');
 
       await this.storage.deleteBoardShare(shareId);
 
@@ -176,7 +176,7 @@ export class BoardShareService extends BaseService {
     this.log('board-share-service', 'getUserBoardPermission', { userId: authContext.userId, targetUserId: userId, boardId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Boards', 'verificar permissão do board');
+      this.requirePermission(authContext, PERMISSIONS.BOARDS.VIEW, 'verificar permissão do board');
 
       const permission = await this.storage.getUserBoardPermission(userId, boardId);
       return permission;

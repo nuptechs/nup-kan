@@ -9,9 +9,10 @@
  */
 
 import { BaseService } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { ExportHistory, InsertExportHistory } from "@shared/schema";
 import { TTL } from "../cache";
+import { PERMISSIONS } from "../config/permissions";
 
 export interface ExportCreateRequest {
   userId: string;
@@ -28,7 +29,7 @@ export class ExportService extends BaseService {
     this.log('export-service', 'getExportHistory', { userId: authContext.userId, targetUserId: userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Export', 'visualizar histórico de exportações');
+      this.requirePermission(authContext, PERMISSIONS.EXPORT.LIST, 'visualizar histórico de exportações');
 
       const cacheKey = `export_history:${userId}`;
       const cached = await this.cache.get<ExportHistory[]>(cacheKey);
@@ -50,7 +51,7 @@ export class ExportService extends BaseService {
     this.log('export-service', 'createExportHistory', { userId: authContext.userId, exportType: request.exportType });
     
     try {
-      this.requirePermission(authContext, 'Criar Export', 'criar exportação');
+      this.requirePermission(authContext, PERMISSIONS.EXPORT.CREATE, 'criar exportação');
 
       const validData = request as InsertExportHistory;
       const exportRecord = await this.storage.createExportHistory(validData);
@@ -74,7 +75,7 @@ export class ExportService extends BaseService {
     this.log('export-service', 'updateExportHistory', { userId: authContext.userId, exportId });
     
     try {
-      this.requirePermission(authContext, 'Editar Export', 'atualizar exportação');
+      this.requirePermission(authContext, PERMISSIONS.EXPORT.EDIT, 'atualizar exportação');
 
       const validData = request as Partial<InsertExportHistory>;
       const exportRecord = await this.storage.updateExportHistory(exportId, validData);

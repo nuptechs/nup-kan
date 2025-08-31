@@ -14,10 +14,11 @@
  */
 
 import { BaseService } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { TaskAssignee, InsertTaskAssignee, User } from "@shared/schema";
 import { insertTaskAssigneeSchema } from "@shared/schema";
 import { TTL } from "../cache";
+import { PERMISSIONS } from "../config/permissions";
 import { hierarchyService } from "./hierarchyService";
 
 export interface AssigneeRequest {
@@ -38,7 +39,7 @@ export class AssigneeService extends BaseService {
     this.log('assignee-service', 'getTaskAssignees', { userId: authContext.userId, taskId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Tarefas', 'visualizar assignees de task');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.VIEW, 'visualizar assignees de task');
 
       const cacheKey = `assignees:task:${taskId}`;
       const cached = await this.cache.get<AssigneeWithUser[]>(cacheKey);
@@ -63,7 +64,7 @@ export class AssigneeService extends BaseService {
     this.log('assignee-service', 'addTaskAssignee', { userId: authContext.userId, request });
     
     try {
-      this.requirePermission(authContext, 'Atribuir Membros', 'adicionar assignee');
+      this.requirePermission(authContext, PERMISSIONS.MEMBERS.ASSIGN, 'adicionar assignee');
 
       // Validar dados
       const validData = insertTaskAssigneeSchema.parse(request);
@@ -128,7 +129,7 @@ export class AssigneeService extends BaseService {
     this.log('assignee-service', 'removeTaskAssignee', { userId: authContext.userId, taskId, targetUserId: userId });
     
     try {
-      this.requirePermission(authContext, 'Atribuir Membros', 'remover assignee');
+      this.requirePermission(authContext, PERMISSIONS.MEMBERS.ASSIGN, 'remover assignee');
 
       // Verificar se assignee existe
       const existingAssignees = await this.storage.getTaskAssignees(taskId);
@@ -165,7 +166,7 @@ export class AssigneeService extends BaseService {
     this.log('assignee-service', 'getUserAssignments', { userId: authContext.userId, targetUserId: userId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Tarefas', 'visualizar assignments do usuário');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.VIEW, 'visualizar assignments do usuário');
 
       const cacheKey = `user:${userId}:assignments`;
       const cached = await this.cache.get<AssigneeWithUser[]>(cacheKey);
@@ -204,7 +205,7 @@ export class AssigneeService extends BaseService {
     });
     
     try {
-      this.requirePermission(authContext, 'Gerenciar Times', 'transferir assignments');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.MANAGE, 'transferir assignments');
 
       const userAssignments = await this.getUserAssignments(authContext, fromUserId);
       let transferredCount = 0;

@@ -260,7 +260,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'removeUserFromTeam', { requestingUser: authContext.userId, userId, teamId });
     
     try {
-      this.requirePermission(authContext, 'Atribuir Membros', 'remover membro do time');
+      this.requirePermission(authContext, PERMISSIONS.MEMBERS.ASSIGN, 'remover membro do time');
 
       // Verificar se o usuário tem permissão para gerenciar este time
       const hasTeamAccess = await this.hasTeamAdminAccess(authContext.userId, teamId);
@@ -295,7 +295,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'updateUserTeamRole', { requestingUser: authContext.userId, userId, teamId, newRole });
     
     try {
-      this.requirePermission(authContext, 'Atribuir Membros', 'alterar role do membro');
+      this.requirePermission(authContext, PERMISSIONS.MEMBERS.ASSIGN, 'alterar role do membro');
 
       // Verificar se o usuário tem permissão para gerenciar este time
       const hasTeamAccess = await this.hasTeamAdminAccess(authContext.userId, teamId);

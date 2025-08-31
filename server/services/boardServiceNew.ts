@@ -15,6 +15,7 @@ import type { AuthContext } from "../auth/unifiedAuth";
 import type { Board, InsertBoard, UpdateBoard } from "@shared/schema";
 import { insertBoardSchema, updateBoardSchema } from "@shared/schema";
 import { TTL } from "../cache";
+import { PERMISSIONS } from "../config/permissions";
 
 export interface BoardCreateRequest {
   name: string;
@@ -266,7 +267,7 @@ export class BoardService extends BaseService {
     this.log('board-service', 'createBoard', { userId: authContext.userId, name: request.name });
     
     try {
-      this.requirePermission(authContext, 'Criar Boards', 'criar boards');
+      this.requirePermission(authContext, PERMISSIONS.BOARDS.CREATE, 'criar boards');
 
       // Validar se já existe board com mesmo nome
       const nameExists = await this.checkBoardNameExists(authContext.userId, request.name);
@@ -320,7 +321,7 @@ export class BoardService extends BaseService {
     this.log('board-service', 'updateBoard', { userId: authContext.userId, boardId });
     
     try {
-      this.requirePermission(authContext, 'Editar Boards', 'editar boards');
+      this.requirePermission(authContext, PERMISSIONS.BOARDS.EDIT, 'editar boards');
 
       // Verificar se board existe e usuário tem acesso
       const existingBoard = await this.storage.getBoard(boardId);
@@ -380,7 +381,7 @@ export class BoardService extends BaseService {
     this.log('board-service', 'deleteBoard', { userId: authContext.userId, boardId });
     
     try {
-      this.requirePermission(authContext, 'Excluir Boards', 'excluir boards');
+      this.requirePermission(authContext, PERMISSIONS.BOARDS.DELETE, 'excluir boards');
 
       // Verificar se board existe
       const board = await this.storage.getBoard(boardId);

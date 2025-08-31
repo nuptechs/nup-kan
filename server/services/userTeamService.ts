@@ -8,10 +8,11 @@
  */
 
 import { BaseService } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { UserTeam, InsertUserTeam } from "@shared/schema";
 import { insertUserTeamSchema } from "@shared/schema";
 import { TTL } from "../cache";
+import { PERMISSIONS } from "../config/permissions";
 
 export interface UserTeamRequest {
   userId: string;
@@ -25,7 +26,7 @@ export class UserTeamService extends BaseService {
     this.log('user-team-service', 'getAllUserTeams', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Teams', 'listar relações usuário-time');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.LIST, 'listar relações usuário-time');
 
       const userTeams = await this.storage.getAllUserTeams();
       return userTeams;
@@ -39,7 +40,7 @@ export class UserTeamService extends BaseService {
     this.log('user-team-service', 'getUserTeams', { userId: authContext.userId, targetUserId: userId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Teams', 'visualizar times do usuário');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.VIEW, 'visualizar times do usuário');
 
       const userTeams = await this.storage.getUserTeams(userId);
       return userTeams;
@@ -53,7 +54,7 @@ export class UserTeamService extends BaseService {
     this.log('user-team-service', 'getTeamUsers', { userId: authContext.userId, teamId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Teams', 'visualizar usuários do time');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.VIEW, 'visualizar usuários do time');
 
       const teamUsers = await this.storage.getTeamUsers(teamId);
       return teamUsers;
@@ -67,7 +68,7 @@ export class UserTeamService extends BaseService {
     this.log('user-team-service', 'addUserToTeam', { userId: authContext.userId, request });
     
     try {
-      this.requirePermission(authContext, 'Editar Teams', 'adicionar usuário ao time');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.EDIT, 'adicionar usuário ao time');
 
       const validData = insertUserTeamSchema.parse(request);
       const userTeam = await this.storage.addUserToTeam(validData);
