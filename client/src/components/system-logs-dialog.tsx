@@ -96,7 +96,7 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Falha ao limpar os logs.",
+        description: ERROR_MESSAGES.SYSTEM_LOGS.LOAD_FAILED,
         variant: "destructive",
       });
     },

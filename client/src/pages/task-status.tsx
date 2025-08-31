@@ -88,7 +88,7 @@ export default function TaskStatusPage() {
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Erro ao criar status da tarefa.",
+        description: "Erro ao criar status da tarefa.", // TODO: Usar ERROR_MESSAGES.TASKS quando disponível
         variant: "destructive",
       });
     },
@@ -109,7 +109,7 @@ export default function TaskStatusPage() {
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Erro ao atualizar status da tarefa.",
+        description: "Erro ao atualizar status da tarefa.", // TODO: Usar ERROR_MESSAGES.TASKS quando disponível
         variant: "destructive",
       });
     },
@@ -127,7 +127,7 @@ export default function TaskStatusPage() {
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Erro ao excluir status da tarefa.",
+        description: "Erro ao excluir status da tarefa.", // TODO: Usar ERROR_MESSAGES.TASKS quando disponível
         variant: "destructive",
       });
     },

@@ -252,7 +252,7 @@ export default function LoginPage() {
     onError: (error: any) => {
       toast({
         title: "Erro no cadastro",
-        description: error.message || "Falha ao criar conta",
+        description: error.message || "Falha ao criar conta", // TODO: Usar ERROR_MESSAGES.AUTH quando disponível
         variant: "destructive",
       });
     },

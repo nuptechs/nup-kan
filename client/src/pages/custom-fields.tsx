@@ -84,7 +84,7 @@ export default function CustomFieldsPage() {
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Erro ao criar campo personalizado.",
+        description: ERROR_MESSAGES.CUSTOM_FIELDS.CREATE_FAILED,
         variant: "destructive",
       });
     },
@@ -105,7 +105,7 @@ export default function CustomFieldsPage() {
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Erro ao atualizar campo personalizado.",
+        description: ERROR_MESSAGES.CUSTOM_FIELDS.UPDATE_FAILED,
         variant: "destructive",
       });
     },
@@ -123,7 +123,7 @@ export default function CustomFieldsPage() {
     onError: () => {
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,
-        description: "Erro ao excluir campo personalizado.",
+        description: ERROR_MESSAGES.CUSTOM_FIELDS.DELETE_FAILED,
         variant: "destructive",
       });
     },

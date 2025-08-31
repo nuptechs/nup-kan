@@ -71,7 +71,7 @@ export default function ChangePasswordPage() {
     onError: (error: any) => {
       toast({
         title: "Erro ao alterar senha",
-        description: error.message || "Falha ao alterar a senha. Verifique se a senha atual está correta.",
+        description: error.message || "Falha ao alterar a senha. Verifique se a senha atual está correta.", // TODO: Usar ERROR_MESSAGES quando disponível
         variant: "destructive",
       });
       setIsSubmitting(false);

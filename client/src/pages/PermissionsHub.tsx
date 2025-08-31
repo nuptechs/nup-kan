@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { TeamManagementDialog } from "@/components/kanban/team-management-dialog";
 import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import type { User as UserType, Team, Profile, Permission, UserTeam, TeamProfile, ProfilePermission } from "@shared/schema";
 import { insertUserSchema, insertTeamSchema, insertProfileSchema } from "@shared/schema";
 
@@ -54,7 +55,7 @@ function PasswordChangeDialog({ userId, userName }: { userId: string; userName: 
     },
     onError: (error: any) => {
       toast({ 
-        description: error.message || "Erro ao alterar senha",
+        description: error.message || ERROR_MESSAGES.AUTH.PASSWORD_CHANGE_FAILED,
         variant: "destructive" 
       });
     },
@@ -65,7 +66,7 @@ function PasswordChangeDialog({ userId, userName }: { userId: string; userName: 
     
     if (!newPassword || newPassword.length < 6) {
       toast({ 
-        description: "A senha deve ter pelo menos 6 caracteres",
+        description: ERROR_MESSAGES.AUTH.PASSWORD_TOO_SHORT,
         variant: "destructive" 
       });
       return;
@@ -73,7 +74,7 @@ function PasswordChangeDialog({ userId, userName }: { userId: string; userName: 
 
     if (newPassword !== confirmPassword) {
       toast({ 
-        description: "As senhas não coincidem",
+        description: ERROR_MESSAGES.AUTH.PASSWORDS_DONT_MATCH,
         variant: "destructive" 
       });
       return;
