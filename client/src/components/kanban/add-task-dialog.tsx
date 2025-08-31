@@ -253,7 +253,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                           <Input
                             {...field}
                             placeholder="Digite o título da tarefa"
-                            className="text-xl font-semibold bg-transparent border-0 focus:ring-0 shadow-none p-2"
+                            className="text-xl font-semibold"
                             data-testid="input-header-title"
                           />
                         </FormControl>
@@ -290,8 +290,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                     <Textarea
                       placeholder="Descrição (opcional)"
                       {...field}
-                      value={field.value || ""}
-                      className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors resize-none"
+                      className="resize-none"
                       data-testid="input-description"
                     />
                   </FormControl>
@@ -309,10 +308,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                     <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">Prioridade</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger 
-                          className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
-                          data-testid="select-priority"
-                        >
+                        <SelectTrigger data-testid="select-priority">
                           <SelectValue placeholder="Prioridade" />
                         </SelectTrigger>
                       </FormControl>
@@ -335,10 +331,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                     <FormLabel className="text-sm font-medium text-slate-700 mb-1.5">Coluna</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger 
-                          className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
-                          data-testid="select-status"
-                        >
+                        <SelectTrigger data-testid="select-status">
                           <SelectValue placeholder="Coluna" />
                         </SelectTrigger>
                       </FormControl>
@@ -356,7 +349,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
               />
             </div>
 
-            <div className="p-3 border border-blue-200 rounded-lg bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+            <div className="p-3 border rounded-lg">
               <MultiUserSelector
                 selectedUserIds={form.watch("assigneeIds")}
                 onUserSelectionChange={(userIds) => {
@@ -365,7 +358,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
               />
             </div>
 
-            <div className="p-3 border border-blue-200 rounded-lg bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+            <div className="p-3 border rounded-lg">
               <TagSelector
                 selectedTags={form.watch("tags")}
                 onTagsChange={(tags) => form.setValue("tags", tags)}
@@ -374,7 +367,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
 
             {/* Custom Fields */}
             {customFields.length > 0 && (
-              <div className="p-3 border border-blue-200 rounded-lg bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+              <div className="p-3 border rounded-lg">
                 <div className="space-y-4">
                   <h4 className="text-sm font-medium text-slate-700 mb-3">Campos Personalizados</h4>
                   <div className="space-y-3">
@@ -395,7 +388,6 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                                   <Input
                                     {...formField}
                                     placeholder={field.placeholder || field.label}
-                                    className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
                                     data-testid={`input-custom-${field.name}`}
                                   />
                                 )}
@@ -410,7 +402,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                                 {field.type === "select" && field.options && field.options.length > 0 && (
                                   <Select onValueChange={formField.onChange} value={formField.value || ""}>
                                     <SelectTrigger 
-                                      className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                                      
                                       data-testid={`select-custom-${field.name}`}
                                     >
                                       <SelectValue placeholder={field.placeholder || field.label} />
@@ -429,7 +421,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                                     {...formField}
                                     type="number"
                                     placeholder={field.placeholder || field.label}
-                                    className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                                    
                                     data-testid={`input-number-custom-${field.name}`}
                                   />
                                 )}
@@ -438,7 +430,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                                     {...formField}
                                     type="date"
                                     placeholder={field.placeholder || field.label}
-                                    className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                                    
                                     data-testid={`input-date-custom-${field.name}`}
                                   />
                                 )}
@@ -447,7 +439,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                                     {...formField}
                                     type="email"
                                     placeholder={field.placeholder || "email@exemplo.com"}
-                                    className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                                    
                                     data-testid={`input-email-custom-${field.name}`}
                                   />
                                 )}
@@ -456,7 +448,7 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
                                     {...formField}
                                     type="url"
                                     placeholder={field.placeholder || "https://..."}
-                                    className="border-blue-200 focus:border-blue-400 focus:ring-blue-100 bg-blue-50/30 hover:bg-blue-50/50 transition-colors"
+                                    
                                     data-testid={`input-url-custom-${field.name}`}
                                   />
                                 )}
