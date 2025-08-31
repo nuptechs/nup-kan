@@ -91,7 +91,8 @@ router.get("/analytics", requireAuth, async (req: Request, res: Response) => {
 router.get("/boards/:boardId/columns", requireAuth, async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
-    const columns = await columnService.getColumns(authContext);
+    const { boardId } = req.params;
+    const columns = await columnService.getBoardColumns(authContext, boardId);
     res.json(columns);
   } catch (error) {
     console.error("Error fetching board columns:", error);

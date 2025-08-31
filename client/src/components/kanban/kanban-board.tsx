@@ -71,6 +71,9 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   // Use board-specific endpoints if boardId is provided
   const tasksEndpoint = boardId ? `/api/boards/${boardId}/tasks` : "/api/tasks";
   const columnsEndpoint = boardId ? `/api/boards/${boardId}/columns` : "/api/columns";
+  
+  // Debug: log which endpoints are being used
+  console.log('🐛 [KANBAN-ENDPOINTS]', { boardId, tasksEndpoint, columnsEndpoint });
 
   const { data: tasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: [tasksEndpoint],
@@ -78,6 +81,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
 
   const { data: columns = [], isLoading: columnsLoading } = useQuery<Column[]>({
     queryKey: [columnsEndpoint],
+    enabled: !!columnsEndpoint, // Only fetch if endpoint is defined
   });
 
 
@@ -173,10 +177,8 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
       return await apiRequest("DELETE", `/api/columns/${columnId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
-      if (boardId) {
-        queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
-      }
+      // Only invalidate the correct endpoint
+      queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
     },
     onError: () => {
       toast({
