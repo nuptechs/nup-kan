@@ -63,13 +63,6 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
   // Buscar campos personalizados do board
   const { data: customFields = [], isLoading: fieldsLoading } = useQuery<CustomField[]>({
     queryKey: ["/api/custom-fields", boardId],
-    queryFn: async () => {
-      const response = await fetch(`/api/custom-fields?boardId=${boardId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch custom fields');
-      }
-      return response.json();
-    },
     enabled: !!boardId,
   });
 
