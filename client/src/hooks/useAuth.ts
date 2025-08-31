@@ -22,11 +22,9 @@ export function useAuth() {
 
   // 🔧 CALLBACK ESTÁVEL PARA QUERY FUNCTION
   const queryFn = useCallback(async () => {
-    console.log('🔍 [useAuth-JWT] Fazendo request para current-user...');
     
     // Se não tem token local, não fazer request
     if (!AuthService.getAccessToken()) {
-      console.log('🔍 [useAuth-JWT] Sem token local');
       return { isAuthenticated: false, user: null };
     }
     
@@ -40,22 +38,18 @@ export function useAuth() {
       }
     });
     
-    console.log('🔍 [useAuth-JWT] Response status:', response.status);
     
     // 🔧 401 significa token inválido ou expirado
     if (response.status === 401) {
-      console.log('🔍 [useAuth-JWT] Token inválido/expirado (401)');
       AuthService.logout(); // Limpar tokens inválidos
       return { isAuthenticated: false, user: null };
     }
     
     if (!response.ok) {
-      console.error('🔍 [useAuth-JWT] Erro na resposta:', response.status, response.statusText);
       throw new Error(`${response.status}: ${response.statusText}`);
     }
     
     const data = await response.json();
-    console.log('🔍 [useAuth-JWT] Dados recebidos:', data);
     
     // ✅ GARANTIR QUE AS PERMISSÕES SEJAM PASSADAS
     const result = {
@@ -76,9 +70,9 @@ export function useAuth() {
       if (error?.message?.includes('401')) return false;
       return failureCount < 1; // Apenas 1 tentativa para JWT
     },
-    staleTime: 0, // Sempre considerar stale para forçar re-fetch quando necessário
+    staleTime: 2 * 60 * 1000, // 2 minutos para evitar calls excessivos
     gcTime: 5 * 60 * 1000, // 5 minutos
-    refetchOnMount: true,
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     enabled: isLocallyAuthenticated, // Só fazer query se tem token
@@ -90,17 +84,15 @@ export function useAuth() {
 
     const checkTokenExpiration = () => {
       if (AuthService.isTokenExpiringSoon()) {
-        console.log('🔄 [useAuth-JWT] Token expirando, tentando renovar...');
         AuthService.refreshAccessToken().catch(() => {
-          console.log('❌ [useAuth-JWT] Falha ao renovar token');
           AuthService.logout();
           window.location.href = '/login';
         });
       }
     };
 
-    // Verificar a cada minuto
-    const interval = setInterval(checkTokenExpiration, 60 * 1000);
+    // Verificar a cada 5 minutos para reduzir overhead
+    const interval = setInterval(checkTokenExpiration, 5 * 60 * 1000);
     
     return () => clearInterval(interval);
   }, [isLocallyAuthenticated]);
@@ -159,14 +151,6 @@ export function useAuth() {
     return isLocallyAuthenticated && !!user;
   }, [user, isLocallyAuthenticated]);
 
-  console.log('🔍 [useAuth-JWT] Estado final:', {
-    hasResponse: !!authResponse,
-    hasUser: !!user,
-    isAuthenticated,
-    isLoading,
-    hasError: !!error,
-    hasLocalToken: !!AuthService.getAccessToken()
-  });
 
   return {
     user,

@@ -26,24 +26,15 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
     // Não fazer nada se ainda estiver carregando
     if (authState.isLoading) return;
 
-    // Debug do estado atual
-    console.log('🔍 [ProtectedRoute] Estado:', {
-      requireAuth,
-      hasUser: authState.hasUser,
-      isAuthenticated: authState.isAuthenticated,
-      currentPath: window.location.pathname
-    });
 
     // Se requer autenticação mas usuário não está autenticado
     if (authState.needsAuth && !authState.isAuthenticated) {
-      console.log('🔄 [ProtectedRoute] Redirecionando para login - usuário não autenticado');
       setLocation("/login");
       return;
     }
 
     // Se não requer autenticação mas usuário está autenticado (página de login)
     if (!authState.needsAuth && authState.isAuthenticated) {
-      console.log('🔄 [ProtectedRoute] Redirecionando para boards - usuário já autenticado');
       setLocation("/boards");
       return;
     }
