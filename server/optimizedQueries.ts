@@ -1,7 +1,8 @@
 import { db } from "./db";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { users, profiles, permissions, profilePermissions, boards, tasks, columns, teams, userTeams } from "@shared/schema";
-import { cache, CacheKeys, TTL } from "./cache";
+import { cache } from "../cache";
+import { CacheKeys, TTL } from "./cache";
 import { Logger } from './utils/logMessages';
 
 /**

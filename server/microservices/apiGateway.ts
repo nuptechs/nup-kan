@@ -5,7 +5,8 @@ import { Request, Response, NextFunction } from 'express';
 import { UnifiedAuthService } from '../auth/unifiedAuth';
 import { boardService } from '../services/boardServiceNew';
 import { taskService } from '../services/taskServiceNew';
-import { cache, TTL } from '../cache';
+import { cache } from '../../cache';
+import { TTL } from '../cache';
 import { eventBus } from '../events';
 
 export interface ServiceMetrics {
@@ -237,7 +238,7 @@ export class APIGateway {
   // 📊 Obter métricas completas do gateway
   static async getGatewayMetrics(): Promise<any> {
     const healthCheck = await APIGateway.healthCheck();
-    const cacheStats = await cache.getStats();
+    // Cache stats removido - não disponível no novo cache util
 
     return {
       version: '3.0.0',

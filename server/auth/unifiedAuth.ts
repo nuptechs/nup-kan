@@ -16,7 +16,8 @@ import bcrypt from 'bcryptjs';
 import { db } from '../db';
 import { users, profiles, permissions, profilePermissions, userTeams, teams } from '@shared/schema';
 import { eq, sql, and } from 'drizzle-orm';
-import { cache, TTL } from '../cache';
+import { cache } from '../../cache';
+import { TTL } from '../cache';
 import { JWTService, JWTPayload, TokenPair } from '../services/jwtService';
 import { TokenBlacklistService } from '../services/tokenBlacklistService';
 
@@ -271,7 +272,7 @@ export class UnifiedAuthService {
 
         // 3. Limpar cache do usuário
         const cachePattern = `unified_auth:${tokenPayload.userId}:*`;
-        await cache.invalidatePattern(cachePattern);
+        await cache.invalidate([cachePattern]);
 
         console.log('✅ [UNIFIED-AUTH] Logout realizado para:', tokenPayload.email);
       }
@@ -288,8 +289,10 @@ export class UnifiedAuthService {
       console.log('🚨 [UNIFIED-AUTH] Revogando todos os tokens para:', userId);
 
       // 1. Limpar todo cache relacionado ao usuário
-      await cache.invalidatePattern(`unified_auth:${userId}:*`);
-      await cache.invalidatePattern(`user_with_permissions:${userId}`);
+      await cache.invalidate([
+        `unified_auth:${userId}:*`,
+        `user_with_permissions:${userId}`
+      ]);
 
       console.log('✅ [UNIFIED-AUTH] Todos os tokens revogados para:', userId);
     } catch (error) {
@@ -398,10 +401,12 @@ export class UnifiedAuthService {
   static async invalidateUserCache(userId: string): Promise<void> {
     try {
       // ✅ Invalidar cache quando permissões mudam
-      await cache.invalidatePattern(`user_permissions:${userId}*`);
-      await cache.invalidatePattern(`unified_auth:${userId}*`);
-      await cache.invalidatePattern(`user_with_permissions:${userId}*`);
-      await cache.invalidatePattern(`user_with_profile:${userId}*`);
+      await cache.invalidate([
+        `user_permissions:${userId}*`,
+        `unified_auth:${userId}*`,
+        `user_with_permissions:${userId}*`,
+        `user_with_profile:${userId}*`
+      ]);
       
       console.log('🧹 [UNIFIED-AUTH] Cache invalidado para usuário:', userId);
     } catch (error) {
@@ -414,10 +419,12 @@ export class UnifiedAuthService {
    */
   static async invalidateAllUserCaches(): Promise<void> {
     try {
-      await cache.invalidatePattern('user_permissions:*');
-      await cache.invalidatePattern('unified_auth:*');
-      await cache.invalidatePattern('user_with_permissions:*');
-      await cache.invalidatePattern('user_with_profile:*');
+      await cache.invalidate([
+        'user_permissions:*',
+        'unified_auth:*',
+        'user_with_permissions:*',
+        'user_with_profile:*'
+      ]);
       
       console.log('🧹 [UNIFIED-AUTH] Cache invalidado para todos os usuários');
     } catch (error) {

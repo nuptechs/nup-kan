@@ -1411,8 +1411,10 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     // Invalidate user cache
-    await cache.del(`notifications:user:${notification.userId}`);
-    await cache.del(`notifications:unread:${notification.userId}`);
+    await cache.invalidate([
+      `notifications:user:${notification.userId}`,
+      `notifications:unread:${notification.userId}`
+    ]);
     
     return notification;
   }
@@ -1431,9 +1433,11 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Invalidate caches
-    await cache.del(`notification:${id}`);
-    await cache.del(`notifications:user:${notification.userId}`);
-    await cache.del(`notifications:unread:${notification.userId}`);
+    await cache.invalidate([
+      `notification:${id}`,
+      `notifications:user:${notification.userId}`,
+      `notifications:unread:${notification.userId}`
+    ]);
     
     return notification;
   }
@@ -1450,9 +1454,11 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Invalidate caches
-    await cache.del(`notification:${id}`);
-    await cache.del(`notifications:user:${notification.userId}`);
-    await cache.del(`notifications:unread:${notification.userId}`);
+    await cache.invalidate([
+      `notification:${id}`,
+      `notifications:user:${notification.userId}`,
+      `notifications:unread:${notification.userId}`
+    ]);
   }
 
   async markNotificationAsRead(id: string): Promise<Notification> {
@@ -1470,9 +1476,11 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Invalidate caches
-    await cache.del(`notification:${id}`);
-    await cache.del(`notifications:user:${notification.userId}`);
-    await cache.del(`notifications:unread:${notification.userId}`);
+    await cache.invalidate([
+      `notification:${id}`,
+      `notifications:user:${notification.userId}`,
+      `notifications:unread:${notification.userId}`
+    ]);
     
     return notification;
   }
@@ -1490,8 +1498,10 @@ export class DatabaseStorage implements IStorage {
       ));
 
     // Invalidate caches
-    await cache.del(`notifications:user:${userId}`);
-    await cache.del(`notifications:unread:${userId}`);
+    await cache.invalidate([
+      `notifications:user:${userId}`,
+      `notifications:unread:${userId}`
+    ]);
     
     return result.rowCount || 0;
   }

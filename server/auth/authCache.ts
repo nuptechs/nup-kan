@@ -10,7 +10,7 @@
  * PERFORMANCE TARGET: < 2ms para operações de cache
  */
 
-import { cache } from '../cache';
+import { cache } from '../../cache';
 import { UnifiedUser } from './unifiedAuth';
 
 /**
@@ -116,10 +116,8 @@ export class AuthCache {
         `auth:jwt:${userId}:*`
       ];
       
-      // Invalidar cada padrão
-      for (const pattern of patterns) {
-        await cache.invalidatePattern(pattern);
-      }
+      // Invalidar todos os padrões de uma vez
+      await cache.invalidate(patterns);
       
       console.log(`✅ [AUTH-CACHE] Cache invalidated for user: ${userId}`);
     } catch (error) {
@@ -152,7 +150,7 @@ export class AuthCache {
     permissionCacheSize: number;
   }> {
     // Implementação baseada no cache em memória
-    const stats = await cache.getStats();
+    // Stats não disponível no cache simplificado
     return {
       hitRate: stats.hits / (stats.hits + stats.misses) * 100 || 0,
       totalKeys: stats.size,

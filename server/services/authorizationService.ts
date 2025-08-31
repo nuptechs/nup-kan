@@ -10,7 +10,7 @@
 
 import { PERMISSIONS, isValidPermission } from '../config/permissions';
 import type { AuthContext } from '../auth/unifiedAuth';
-import { cache } from '../cache';
+import { cache } from '../../cache';
 import { Logger } from '../utils/logMessages';
 
 export interface AuthorizationError extends Error {

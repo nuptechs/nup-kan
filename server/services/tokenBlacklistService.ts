@@ -1,4 +1,5 @@
-import { cache, TTL } from '../cache';
+import { cache } from '../../cache';
+import { TTL } from '../cache';
 import { Logger } from '../utils/logMessages';
 
 /**
