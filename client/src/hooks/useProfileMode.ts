@@ -49,9 +49,9 @@ export function useProfileMode(): {
       }
       
       // Verificar se tem permissões de criação
-      const hasCreatePermissions = hasPermission("Criar Boards") || 
-                                  hasPermission("Criar Tarefas") ||
-                                  hasPermission("Criar Colunas");
+      const hasCreatePermissions = hasPermission("Create Boards") || 
+                                  hasPermission("Create Tasks") ||
+                                  hasPermission("Create Columns");
       
       if (hasCreatePermissions) {
         console.log(`🔐 [PROFILE-MODE] Modo determinado: full-access`);
@@ -86,10 +86,9 @@ export function useProfileMode(): {
     }
     
     // Verificar múltiplas variações de permissão para garantir compatibilidade
-    return hasPermission(`Criar ${resource}`) || 
-           hasPermission(`Create ${resource}`) ||
-           (resource === "Boards" && hasPermission("Criar Boards")) ||
-           (resource === "Tasks" && hasPermission("Criar Tarefas"));
+    return hasPermission(`Create ${resource}`) ||
+           (resource === "Boards" && hasPermission("Create Boards")) ||
+           (resource === "Tasks" && hasPermission("Create Tasks"));
   };
 
   const canEdit = (resource: string) => {
@@ -101,7 +100,7 @@ export function useProfileMode(): {
       return false;
     }
     
-    return hasPermission(`Editar ${resource}`);
+    return hasPermission(`Edit ${resource}`);
   };
 
   const canDelete = (resource: string) => {
@@ -113,7 +112,7 @@ export function useProfileMode(): {
       return false;
     }
     
-    return hasPermission(`Excluir ${resource}`);
+    return hasPermission(`Delete ${resource}`);
   };
 
   const canView = (resource: string) => {
@@ -124,7 +123,7 @@ export function useProfileMode(): {
       return false;
     }
     
-    return hasPermission(`Visualizar ${resource}`) || hasPermission(`Listar ${resource}`);
+    return hasPermission(`View ${resource}`) || hasPermission(`List ${resource}`);
   };
 
   return {

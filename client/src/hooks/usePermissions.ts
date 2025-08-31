@@ -96,10 +96,10 @@ export function usePermissions() {
     if (!currentUser) return false;
     // Verificar se tem permissões de administrador
     return hasAnyPermission([
-      "Gerenciar Permissões",
-      "Criar Usuários", 
-      "Excluir Usuários",
-      "Gerenciar Times"
+      "Manage Permissions",
+      "Create Users", 
+      "Delete Users",
+      "Manage Teams"
     ]);
   };
 
@@ -144,15 +144,15 @@ export function usePermissions() {
     }
     
     const result = {
-      canCreateTasks: hasPermission("Criar Tarefas"),
-      canEditTasks: hasPermission("Editar Tarefas"),
-      canDeleteTasks: hasPermission("Excluir Tarefas"),
-      canViewTasks: hasPermission("Visualizar Tarefas"),
-      canManageColumns: hasAnyPermission(["Criar Colunas", "Editar Colunas", "Excluir Colunas"]),
-      canManageTeams: hasPermission("Gerenciar Times"),
-      canManageUsers: hasAnyPermission(["Criar Usuários", "Editar Usuários", "Excluir Usuários"]),
-      canManageProfiles: hasAnyPermission(["Criar Perfis", "Editar Perfis", "Excluir Perfis", "Gerenciar Permissões"]),
-      canViewAnalytics: hasPermission("Visualizar Analytics"),
+      canCreateTasks: hasPermission("Create Tasks"),
+      canEditTasks: hasPermission("Edit Tasks"),
+      canDeleteTasks: hasPermission("Delete Tasks"),
+      canViewTasks: hasPermission("View Tasks"),
+      canManageColumns: hasAnyPermission(["Create Columns", "Edit Columns", "Delete Columns"]),
+      canManageTeams: hasPermission("Manage Teams"),
+      canManageUsers: hasAnyPermission(["Create Users", "Edit Users", "Delete Users"]),
+      canManageProfiles: hasAnyPermission(["Create Profiles", "Edit Profiles", "Delete Profiles", "Manage Permissions"]),
+      canViewAnalytics: hasPermission("View Analytics"),
       canExportData: hasPermission("Exportar Dados"),
     };
     
@@ -161,7 +161,8 @@ export function usePermissions() {
 
   // ✅ THROW ERROR PARA ESTADOS CRÍTICOS
   const throwCriticalError = (errorType: keyof typeof PermissionErrors) => {
-    const error = PermissionErrors[errorType](currentUser?.id || 'unknown');
+    const userId = currentUser?.id || 'unknown';
+    const error = PermissionErrors[errorType](userId);
     throw error;
   };
 
@@ -174,7 +175,7 @@ export function usePermissions() {
     }
     
     if (!isLoading && !currentUser) {
-      const permissionError = PermissionErrors.userDataMissing(currentUser?.id || 'unknown');
+      const permissionError = PermissionErrors.userDataMissing('unknown');
       throw permissionError;
     }
     
