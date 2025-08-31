@@ -76,7 +76,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
         color: "#3b82f6",
       });
     }
-  }, [externalEditingColumn, isOpen, form, boardId]);
+  }, [externalEditingColumn, isOpen, boardId]);
 
   const createColumnMutation = useMutation({
     mutationFn: async (data: FormData) => {
