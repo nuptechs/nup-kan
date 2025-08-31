@@ -231,7 +231,7 @@ export class AuthController {
       const { JWTService } = await import('../services/jwtService');
       
       // Invalidar o token
-      // await JWTService.invalidateToken(token); // TODO: Implementar invalidateToken
+      await JWTService.invalidateToken(token);
       
       console.log('✅ [LOGOUT-JWT] Token invalidado com sucesso');
       

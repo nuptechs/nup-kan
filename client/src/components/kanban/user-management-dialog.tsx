@@ -36,12 +36,10 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
   // SINGLE FORM: Reset clean when dialog closes
   useEffect(() => {
     if (!isOpen) {
-      console.log("🧹 [DIALOG-CLOSE] Limpando estado de edição e formulário");
       setEditingUser(null);
       form.reset({
         name: "",
         email: "",
-        role: "",
         avatar: "",
         status: "offline",
       });
@@ -57,7 +55,6 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
     defaultValues: {
       name: "",
       email: "",
-      role: "",
       avatar: "",
       status: "offline",
     },
@@ -71,13 +68,12 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       return response.json();
     },
     onSuccess: () => {
-      console.log("🟢 [USER-CREATE] Sucesso na criação");
       
       // 1. Reset create form to clean state
       form.reset({
         name: "",
         email: "",
-        role: "",
+
         avatar: "",
         status: "offline",
       });
@@ -94,7 +90,6 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
         description: "Usuário criado com sucesso!",
       });
       
-      console.log("✅ [USER-CREATE] Formulário resetado e modal fechado");
     },
     onError: (error: any) => {
       console.error("❌ [USER-CREATE] Erro na criação:", error);
@@ -144,7 +139,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
         form.reset({
           name: "",
           email: "",
-          role: "",
+  
           avatar: "",
           status: "offline",
         });
@@ -205,47 +200,32 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
   // SINGLE FORM: Um handler para criar E editar
   const handleSubmit = (data: FormData) => {
     if (editingUser) {
-      console.log("🔴 [SUBMIT] Atualizando usuário:", editingUser.name);
       updateUserMutation.mutate({ id: editingUser.id, data });
     } else {
-      console.log("🟢 [SUBMIT] Criando novo usuário");
       createUserMutation.mutate(data);
     }
   };
 
   const handleEdit = (user: User) => {
-    console.log("🔴 [EDIT] Iniciando edição para:", user.name);
-    
     setEditingUser(user);
     
-    // SINGLE FORM: Reset com dados do usuário
     form.reset({
       name: user.name,
       email: user.email,
-      role: user.role || "",
       avatar: user.avatar || "",
       status: user.status || "offline",
     });
-    
-    console.log("🔴 [EDIT] Formulário preenchido com dados do usuário");
   };
 
   const cancelEdit = () => {
-    console.log("🔴 [CANCEL] Cancelando edição para:", editingUser?.name || "null");
-    
-    // SINGLE FORM: Limpar estado de edição
     setEditingUser(null);
     
-    // Reset para estado limpo de criação
     form.reset({
       name: "",
       email: "",
-      role: "",
       avatar: "",
       status: "offline",
     });
-    
-    console.log("🔴 [CANCEL] Voltou para modo criação");
   };
 
   const handleDelete = (userId: string) => {
@@ -344,25 +324,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cargo/Função</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Cargo/Função"
-                            {...field}
-                            data-testid="input-user-role"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
+                <FormField
                     control={form.control}
                     name="status"
                     render={({ field }) => (
@@ -443,9 +405,6 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                             <span className="font-medium text-sm">{user.name}</span>
                             <span className="text-xs text-muted-foreground">{user.email}</span>
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            {user.role || "Sem cargo"}
-                          </div>
                           {getStatusIcon(user.status || "offline")}
                         </div>
 
@@ -454,10 +413,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                             variant="ghost"
                             size="sm"
                             className="h-8 w-8 p-0"
-                            onClick={() => {
-                              console.log("🟡 [BUTTON-CLICK] Editando usuário:", user.name);
-                              handleEdit(user);
-                            }}
+                            onClick={() => handleEdit(user)}
                             data-testid={`button-edit-user-${user.id}`}
                           >
                             <Edit className="w-4 h-4" />

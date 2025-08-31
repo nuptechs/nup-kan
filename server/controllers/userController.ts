@@ -115,14 +115,6 @@ export class UserController {
       const userId = authContext.userId;
       const userName = authContext.userName || 'Usuário desconhecido';
       
-      console.log(`🔍 [CREATE-USER] Tentativa de criação de usuário por: ${userName} (ID: ${userId})`);
-      console.log(`🔍 [CREATE-USER] Dados recebidos:`, {
-        name: req.body.name,
-        email: req.body.email,
-        hasRole: !!req.body.role,
-        hasTeams: !!req.body.teams
-      });
-      
       // Converter null para undefined para compatibilidade com schema
       const bodyData = { ...req.body };
       if (bodyData.role === null) bodyData.role = undefined;
@@ -130,17 +122,9 @@ export class UserController {
       
       const newUser = await userService.createUser(authContext, bodyData);
       
-      const endTime = Date.now();
-      console.log(`✅ [CREATE-USER] Usuário criado com sucesso em ${endTime - startTime}ms:`, {
-        newUserId: newUser.id,
-        name: newUser.name,
-        email: newUser.email
-      });
-      
       res.status(201).json(newUser);
     } catch (error) {
-      const endTime = Date.now();
-      console.error(`❌ [CREATE-USER] Erro após ${endTime - startTime}ms:`, error);
+      console.error(`❌ [CREATE-USER] Erro:`, error);
       
       if (error instanceof Error) {
         if (error.message.includes('já existe')) {
@@ -193,12 +177,9 @@ export class UserController {
         });
       }
       
-      console.log(`🔍 [PATCH-USER] Usuário ${authContext.userName} (${authContext.userId}) atualizando usuário ${req.params.id}`);
-      console.log(`🔍 [PATCH-USER] Dados para atualização:`, req.body);
       
       // Verificar se está tentando atualizar outro usuário
       if (req.params.id !== authContext.userId && !authContext.permissions.includes('Editar Usuários')) {
-        console.log(`❌ [PATCH-USER] Tentativa de editar outro usuário sem permissão`);
         return res.status(403).json({ 
           message: "Você não tem permissão para editar outros usuários" 
         });
