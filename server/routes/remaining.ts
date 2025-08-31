@@ -124,7 +124,7 @@ router.get("/columns/:id", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.post("/columns", requireAuth, requirePermission("Criar Colunas"), async (req: Request, res: Response) => {
+router.post("/columns", requireAuth, requirePermission("Create Columns"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const column = await columnService.createColumn(authContext, req.body);
@@ -134,7 +134,7 @@ router.post("/columns", requireAuth, requirePermission("Criar Colunas"), async (
   }
 });
 
-router.patch("/columns/:id", requireAuth, requirePermission("Editar Colunas"), async (req: Request, res: Response) => {
+router.patch("/columns/:id", requireAuth, requirePermission("Edit Columns"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const updatedColumn = await columnService.updateColumn(authContext, req.params.id, req.body);
@@ -147,7 +147,7 @@ router.patch("/columns/:id", requireAuth, requirePermission("Editar Colunas"), a
   }
 });
 
-router.delete("/columns/:id", requireAuth, requirePermission("Excluir Colunas"), async (req: Request, res: Response) => {
+router.delete("/columns/:id", requireAuth, requirePermission("Delete Columns"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     await columnService.deleteColumn(authContext, req.params.id);
@@ -160,7 +160,7 @@ router.delete("/columns/:id", requireAuth, requirePermission("Excluir Colunas"),
   }
 });
 
-router.post("/columns/reorder", requireAuth, requirePermission("Editar Colunas"), async (req: Request, res: Response) => {
+router.post("/columns/reorder", requireAuth, requirePermission("Edit Columns"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const result = await columnService.reorderColumns(authContext, req.body);
@@ -194,7 +194,7 @@ router.get("/tags/:id", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.post("/tags", requireAuth, requirePermission("Criar Tags"), async (req: Request, res: Response) => {
+router.post("/tags", requireAuth, requirePermission("Create Tags"), async (req: Request, res: Response) => {
   try {
     const authContext = createAuthContextFromRequest(req);
     const tag = await tagService.createTag(authContext, req.body);

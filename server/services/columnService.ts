@@ -121,7 +121,9 @@ export class ColumnService extends BaseService {
 
       this.emitEvent('column.created', {
         columnId: column.id,
+        columnTitle: column.title,
         boardId: request.boardId,
+        position: column.position,
         userId: authContext.userId,
       });
 
@@ -220,9 +222,10 @@ export class ColumnService extends BaseService {
         'board_columns:*'
       ]);
 
-      this.emitEvent('columns.reordered', {
+      this.emitEvent('column.reordered', {
+        boardId: 'unknown', // TODO: Get boardId from columns
+        columnIds: reorderedColumns.map(c => c.id),
         userId: authContext.userId,
-        columnsCount: reorderedColumns.length,
       });
 
     } catch (error) {

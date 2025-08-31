@@ -139,6 +139,25 @@ export interface ColumnCreatedEvent extends DomainEvent {
   };
 }
 
+export interface ColumnUpdatedEvent extends DomainEvent {
+  type: 'column.updated';
+  data: {
+    columnId: string;
+    boardId: string;
+    changes: any;
+    userId: string;
+  };
+}
+
+export interface ColumnDeletedEvent extends DomainEvent {
+  type: 'column.deleted';
+  data: {
+    columnId: string;
+    boardId: string;
+    userId: string;
+  };
+}
+
 export interface ColumnReorderedEvent extends DomainEvent {
   type: 'column.reordered';
   data: {
@@ -230,6 +249,8 @@ export type AllDomainEvents =
   | TagCreatedEvent
   | TagUpdatedEvent
   | ColumnCreatedEvent
+  | ColumnUpdatedEvent
+  | ColumnDeletedEvent
   | ColumnReorderedEvent
   | TeamCreatedEvent
   | TeamUpdatedEvent
@@ -253,6 +274,8 @@ export type EventRegistry = {
   'tag.created': TagCreatedEvent;
   'tag.updated': TagUpdatedEvent;
   'column.created': ColumnCreatedEvent;
+  'column.updated': ColumnUpdatedEvent;
+  'column.deleted': ColumnDeletedEvent;
   'column.reordered': ColumnReorderedEvent;
   'team.created': TeamCreatedEvent;
   'team.updated': TeamUpdatedEvent;
