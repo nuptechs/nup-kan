@@ -301,8 +301,8 @@ export default function CustomFieldsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={field.required === "true" ? "destructive" : "secondary"}>
-                          {field.required === "true" ? "Sim" : "Não"}
+                        <Badge variant={field.required ? "destructive" : "secondary"}>
+                          {field.required ? "Sim" : "Não"}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -415,8 +415,8 @@ export default function CustomFieldsPage() {
                     
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">Obrigatório:</span>
-                      <Badge variant={field.required === "true" ? "destructive" : "secondary"}>
-                        {field.required === "true" ? "Sim" : "Não"}
+                      <Badge variant={field.required ? "destructive" : "secondary"}>
+                        {field.required ? "Sim" : "Não"}
                       </Badge>
                     </div>
                     
