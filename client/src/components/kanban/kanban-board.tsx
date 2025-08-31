@@ -72,17 +72,22 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   const tasksEndpoint = boardId ? `/api/boards/${boardId}/tasks` : "/api/tasks";
   const columnsEndpoint = boardId ? `/api/boards/${boardId}/columns` : "/api/columns";
   
-  // Debug: log which endpoints are being used
-  console.log('🐛 [KANBAN-ENDPOINTS]', { boardId, tasksEndpoint, columnsEndpoint });
-
   const { data: tasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: [tasksEndpoint],
   });
 
   const { data: columns = [], isLoading: columnsLoading } = useQuery<Column[]>({
-    queryKey: [columnsEndpoint],
+    queryKey: [columnsEndpoint, Date.now()], // Force new request with timestamp
     enabled: !!columnsEndpoint, // Only fetch if endpoint is defined
+    staleTime: 0, // Always refetch
+    cacheTime: 0, // Don't cache
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
+
+  // Debug: log which endpoints are being used
+  console.log('🐛 [KANBAN-ENDPOINTS]', { boardId, tasksEndpoint, columnsEndpoint });
+  console.log('🐛 [COLUMN-DATA]', { columnsLength: columns.length, isLoading: columnsLoading });
 
 
   // Fetch all assignees for all tasks to enable search

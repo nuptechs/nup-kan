@@ -1,0 +1,62 @@
+
+Console.js:61 🔧 [useAuth] Instância criada: mjqz4zw3c
+Console.js:61 🔧 [useAuth] Instância criada: 048lhy8tp
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: n4o97emhm
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔐 [PROFILE-MODE] Usuário tem 35 permissões
+Console.js:61 🔐 [PROFILE-MODE] Modo determinado: admin
+Console.js:61 🔧 [useAuth] Instância criada: 1px4n4f37
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🐛 [KANBAN-ENDPOINTS] 
+{boardId: 'dfe51807-ce34-4a40-8fbc-11b6b48a11ee', tasksEndpoint: '/api/boards/dfe51807-ce34-4a40-8fbc-11b6b48a11ee/tasks', columnsEndpoint: '/api/boards/dfe51807-ce34-4a40-8fbc-11b6b48a11ee/columns'}
+Console.js:61 🔧 [useAuth] Instância criada: 6mmpbhdkj
+Console.js:61 🔧 [useAuth] Instância criada: 75pzj79b0
+Console.js:61 🔧 [useAuth] Instância criada: o1lu83iz5
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: 1px4n4f37
+Console.js:61 🐛 [KANBAN-ENDPOINTS] 
+{boardId: 'dfe51807-ce34-4a40-8fbc-11b6b48a11ee', tasksEndpoint: '/api/boards/dfe51807-ce34-4a40-8fbc-11b6b48a11ee/tasks', columnsEndpoint: '/api/boards/dfe51807-ce34-4a40-8fbc-11b6b48a11ee/columns'}
+Console.js:61 🐛 [RENDER] Rendering columns: 
+{total: 22, titles: Array(22), backlogCount: 4, uniqueIds: 22}
+Console.js:61 🔧 [useAuth] Instância criada: sn53pq4lm
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: ltjlujs6i
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: yorcvlhfu
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: 6xao2qim1
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: nshc8a65b
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: tm2jkaw33
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: ssi8fmg01
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: ql6692xzc
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: v8jobh4ak
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: 0svy3sy9b
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: uu1t6xq1i
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: e8r696esk
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: 4b5iimg69
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: rcysaq80f
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: 166x8moba
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: 248ddw1q4
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: 3z22qdh5n
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: 990xgh97k
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: ls2015lld
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: qe297itlf
+Console.js:61 🔐 [PERMISSIONS] Usuário f12240f7-87df-4232-8805-15cf267eaf74 tem 35 permissões
+Console.js:61 🔧 [useAuth] Instância criada: ak3fa1hx3
