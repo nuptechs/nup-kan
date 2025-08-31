@@ -237,49 +237,49 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
           </DialogDescription>
         </DialogHeader>
 
-        {/* Cabeçalho fixo com título e botões */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 pr-4">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-slate-700">Título</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        value={field.value || ""}
-                        className="text-xl font-semibold border-none p-0 focus:ring-0 focus:border-none shadow-none bg-blue-50/40 hover:bg-blue-50/60 rounded-md px-2 transition-colors"
-                        placeholder="Digite o título da tarefa"
-                        data-testid="input-header-title"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
+            {/* Cabeçalho fixo com título e botões */}
+            <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 pr-4">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-slate-700">Título</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value || ""}
+                            className="text-xl font-semibold border-none p-0 focus:ring-0 focus:border-none shadow-none bg-blue-50/40 hover:bg-blue-50/60 rounded-md px-2 transition-colors"
+                            placeholder="Digite o título da tarefa"
+                            data-testid="input-header-title"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onClose}
+                    className="w-8 h-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+                    data-testid="button-close-task"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
-            
-            <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="w-8 h-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
-                data-testid="button-close-task"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
 
-        {/* Conteúdo principal com overflow */}
-        <div className="flex-1 overflow-y-auto p-6 pt-4" style={{ maxHeight: 'calc(80vh - 4rem)' }}>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Conteúdo principal com overflow */}
+            <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-4" style={{ maxHeight: 'calc(80vh - 4rem)' }}>
 
             <FormField
               control={form.control}
@@ -473,28 +473,28 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
               </div>
             )}
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-colors"
-                data-testid="button-cancel"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={createTaskMutation.isPending}
-                className="bg-indigo-500 hover:bg-indigo-600 shadow-md hover:shadow-lg transition-all ring-2 ring-indigo-200"
-                data-testid="button-create-task"
-              >
-                {createTaskMutation.isPending ? "Criando..." : "Criar Tarefa"}
-              </Button>
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-colors"
+                  data-testid="button-cancel"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createTaskMutation.isPending}
+                  className="bg-indigo-500 hover:bg-indigo-600 shadow-md hover:shadow-lg transition-all ring-2 ring-indigo-200"
+                  data-testid="button-create-task"
+                >
+                  {createTaskMutation.isPending ? "Criando..." : "Criar Tarefa"}
+                </Button>
+              </div>
             </div>
-              </form>
-            </Form>
-        </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
