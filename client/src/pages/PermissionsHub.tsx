@@ -29,6 +29,7 @@ import {
   Key
 } from "lucide-react";
 import { TeamManagementDialog } from "@/components/kanban/team-management-dialog";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
 import type { User as UserType, Team, Profile, Permission, UserTeam, TeamProfile, ProfilePermission } from "@shared/schema";
 import { insertUserSchema, insertTeamSchema, insertProfileSchema } from "@shared/schema";
 
@@ -46,7 +47,7 @@ function PasswordChangeDialog({ userId, userName }: { userId: string; userName: 
       return apiRequest("PATCH", `/api/users/${userId}/password`, data);
     },
     onSuccess: () => {
-      toast({ description: "Senha alterada com sucesso!" });
+      toast({ description: SUCCESS_MESSAGES.AUTH.PASSWORD_CHANGED });
       setIsOpen(false);
       setNewPassword("");
       setConfirmPassword("");
@@ -251,7 +252,7 @@ export default function PermissionsHub() {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       setEditingId(null); // 🔥 CRÍTICO: Fecha modal
       userForm.reset({ name: "", email: "" });
-      toast({ title: "Usuário criado" });
+      toast({ title: SUCCESS_MESSAGES.AUTH.USER_CREATED });
     }
   });
 
@@ -265,7 +266,7 @@ export default function PermissionsHub() {
       setEditingId(null);
       userForm.reset();
       
-      toast({ title: "Usuário atualizado" });
+      toast({ title: SUCCESS_MESSAGES.AUTH.USER_UPDATED });
     }
   });
 
@@ -273,7 +274,7 @@ export default function PermissionsHub() {
     mutationFn: (id: string) => apiRequest("DELETE", `/api/users/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      toast({ title: "Usuário excluído" });
+      toast({ title: SUCCESS_MESSAGES.AUTH.USER_DELETED });
     }
   });
 
@@ -283,7 +284,7 @@ export default function PermissionsHub() {
       queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
       setEditingId(null); // 🔥 CRÍTICO: Fecha modal
       teamForm.reset();
-      toast({ title: "Time criado" });
+      toast({ title: SUCCESS_MESSAGES.TEAMS.CREATED });
     }
   });
 
@@ -297,7 +298,7 @@ export default function PermissionsHub() {
       setEditingId(null);
       teamForm.reset();
       
-      toast({ title: "Time atualizado" });
+      toast({ title: SUCCESS_MESSAGES.TEAMS.UPDATED });
     }
   });
 
@@ -305,7 +306,7 @@ export default function PermissionsHub() {
     mutationFn: (id: string) => apiRequest("DELETE", `/api/teams/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
-      toast({ title: "Time excluído" });
+      toast({ title: SUCCESS_MESSAGES.TEAMS.DELETED });
     }
   });
 
@@ -315,7 +316,7 @@ export default function PermissionsHub() {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
       setEditingId(null); // 🔥 CRÍTICO: Fecha modal
       profileForm.reset();
-      toast({ title: "Perfil criado" });
+      toast({ title: SUCCESS_MESSAGES.PROFILES.CREATED });
     }
   });
 
@@ -329,7 +330,7 @@ export default function PermissionsHub() {
       setEditingId(null);
       profileForm.reset();
       
-      toast({ title: "Perfil atualizado" });
+      toast({ title: SUCCESS_MESSAGES.PROFILES.UPDATED });
     }
   });
 
@@ -337,7 +338,7 @@ export default function PermissionsHub() {
     mutationFn: (id: string) => apiRequest("DELETE", `/api/profiles/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
-      toast({ title: "Perfil excluído" });
+      toast({ title: SUCCESS_MESSAGES.PROFILES.DELETED });
     }
   });
 
@@ -346,7 +347,7 @@ export default function PermissionsHub() {
       apiRequest("PATCH", `/api/users/${userId}`, { profileId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      toast({ title: "Usuário vinculado ao perfil" });
+      toast({ title: SUCCESS_MESSAGES.AUTH.USER_LINKED_TO_PROFILE });
     }
   });
 
@@ -355,7 +356,7 @@ export default function PermissionsHub() {
       apiRequest("PATCH", `/api/users/${userId}`, { profileId: null }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      toast({ title: "Vínculo removido" });
+      toast({ title: SUCCESS_MESSAGES.AUTH.USER_UNLINKED_FROM_PROFILE });
     }
   });
 
@@ -364,7 +365,7 @@ export default function PermissionsHub() {
       apiRequest("POST", "/api/team-profiles", { teamId, profileId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-profiles"] });
-      toast({ title: "Time vinculado ao perfil" });
+      toast({ title: SUCCESS_MESSAGES.TEAMS.LINKED_TO_PROFILE });
       setEditingTeamId(null);
     }
   });
@@ -374,7 +375,7 @@ export default function PermissionsHub() {
       apiRequest("DELETE", `/api/team-profiles/${linkId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-profiles"] });
-      toast({ title: "Vínculo removido" });
+      toast({ title: SUCCESS_MESSAGES.AUTH.USER_UNLINKED_FROM_PROFILE });
     }
   });
 
@@ -383,7 +384,7 @@ export default function PermissionsHub() {
       apiRequest("POST", `/api/users/${userId}/teams/${teamId}`, { role }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
-      toast({ title: "Usuário adicionado ao time" });
+      toast({ title: SUCCESS_MESSAGES.AUTH.USER_ADDED_TO_TEAM });
     }
   });
 
@@ -392,7 +393,7 @@ export default function PermissionsHub() {
       apiRequest("DELETE", `/api/users/${userId}/teams/${teamId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user-teams"] });
-      toast({ title: "Usuário removido do time" });
+      toast({ title: SUCCESS_MESSAGES.AUTH.USER_REMOVED_FROM_TEAM });
     }
   });
 
@@ -410,7 +411,7 @@ export default function PermissionsHub() {
       apiRequest("DELETE", `/api/profiles/${profileId}/permissions/${permissionId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profile-permissions"] });
-      toast({ title: "Permissão removida do perfil" });
+      toast({ title: SUCCESS_MESSAGES.PROFILES.PERMISSION_REMOVED });
     }
   });
 
@@ -1236,7 +1237,7 @@ export default function PermissionsHub() {
                     for (const permissionId of selectedPermissions) {
                       await linkPermissionToProfile.mutateAsync({ permissionId, profileId: profile.id });
                     }
-                    toast({ title: `Perfil criado com ${selectedPermissions.length} permiss${selectedPermissions.length > 1 ? 'ões' : 'ão'}` });
+                    toast({ title: `${SUCCESS_MESSAGES.PROFILES.CREATED} com ${selectedPermissions.length} ${SUCCESS_MESSAGES.PROFILES.PERMISSIONS_ADDED}` });
                   }
                   
                   setSelectedPermissions([]);
@@ -1376,7 +1377,7 @@ export default function PermissionsHub() {
                             for (const permissionId of selectedPermissions) {
                               await linkPermissionToProfile.mutateAsync({ permissionId, profileId: profile.id });
                             }
-                            toast({ title: `${selectedPermissions.length} permiss${selectedPermissions.length > 1 ? 'ões adicionadas' : 'ão adicionada'} ao perfil` });
+                            toast({ title: `${selectedPermissions.length} ${SUCCESS_MESSAGES.PROFILES.PERMISSIONS_ADDED}` });
                           }
                           
                           setSelectedPermissions([]);

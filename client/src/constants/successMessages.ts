@@ -7,7 +7,7 @@ export const SUCCESS_MESSAGES = {
   // Autenticação e Usuários
   AUTH: {
     PASSWORD_CHANGED: "Senha alterada com sucesso!",
-    USER_CREATED: "Usuário criado",
+    USER_CREATED: "Usuário criado com muito sucesso",
     USER_UPDATED: "Usuário atualizado", 
     USER_DELETED: "Usuário excluído",
     USER_LINKED_TO_PROFILE: "Usuário vinculado ao perfil",
