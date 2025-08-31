@@ -14,6 +14,7 @@ import { z } from "zod";
 import { insertUserSchema, type User } from "@shared/schema";
 import { SUCCESS_MESSAGES } from "@/constants/successMessages";
 import { ERROR_MESSAGES } from "@/constants/errorMessages";
+import { USER_LOGS, DEBUG_LOGS } from "@/constants/logMessages";
 
 interface UserManagementDialogProps {
   isOpen: boolean;
@@ -94,7 +95,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       
     },
     onError: (error: any) => {
-      console.error("❌ [USER-CREATE] Erro na criação:", error);
+      console.error(USER_LOGS.CREATE_ERROR(error));
       
       let errorMessage = "Falha ao criar usuário. Tente novamente.";
       
@@ -114,29 +115,29 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
 
   const updateUserMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: FormData }) => {
-      console.log("🔴 [TRACE-1] updateUserMutation.mutationFn INICIADO");
-      console.log("🔴 [TRACE-1] ID:", id);
-      console.log("🔴 [TRACE-1] Data:", data);
+      console.log(DEBUG_LOGS.TRACE_MUTATION_START());
+      console.log(DEBUG_LOGS.TRACE_ID(id));
+      console.log(DEBUG_LOGS.TRACE_DATA(data));
       
       try {
         const response = await apiRequest("PATCH", `/api/users/${id}`, data);
         
-        console.log("🔴 [TRACE-2] Response recebida - Status:", response.status);
+        console.log(DEBUG_LOGS.TRACE_RESPONSE_STATUS(response.status));
         const result = await response.json();
-        console.log("🔴 [TRACE-2] Response JSON:", result);
+        console.log(DEBUG_LOGS.TRACE_RESPONSE_JSON(result));
         
         return result;
       } catch (error) {
-        console.log("🔴 [TRACE-ERROR] Erro na mutationFn:", error);
+        console.log(DEBUG_LOGS.TRACE_ERROR(error));
         throw error;
       }
     },
     onSuccess: (data) => {
       try {
-        console.log("🔴 [UPDATE-SUCCESS] updateUserMutation.onSuccess INICIADO");
+        console.log(DEBUG_LOGS.UPDATE_SUCCESS_START());
         
         // SINGLE FORM: Reset após sucesso
-        console.log("🔴 [UPDATE-SUCCESS] Limpando formulário e fechando modal");
+        console.log(DEBUG_LOGS.UPDATE_SUCCESS_CLEAR());
         setEditingUser(null);
         form.reset({
           name: "",
@@ -159,11 +160,11 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
         });
         
       } catch (error) {
-        console.log("🔴 [TRACE-ERROR-SUCCESS] Erro no onSuccess:", error);
+        console.log(DEBUG_LOGS.TRACE_ERROR_SUCCESS(error));
       }
     },
     onError: (error) => {
-      console.log("🔴 [TRACE-ERROR-MUTATION] updateUserMutation.onError EXECUTADO");
+      console.log(DEBUG_LOGS.TRACE_ERROR_MUTATION());
       
       toast({
         title: ERROR_MESSAGES.GENERIC.ERROR,

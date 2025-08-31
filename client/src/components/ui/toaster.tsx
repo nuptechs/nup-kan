@@ -1,4 +1,5 @@
 import { useToast } from "@/hooks/use-toast"
+import { TOAST_LOGS } from "@/constants/logMessages"
 import {
   Toast,
   ToastClose,
@@ -11,12 +12,12 @@ import {
 export function Toaster() {
   const { toasts } = useToast()
 
-  console.log("🍞 [TOASTER] Renderizando com", toasts.length, "toasts:", toasts);
+  console.log(TOAST_LOGS.TOASTER_RENDERING(toasts.length, toasts));
 
   return (
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, duration, ...props }) {
-        console.log("🍞 [TOASTER] Renderizando toast individual:", { id, title, description, duration });
+        console.log(TOAST_LOGS.TOAST_INDIVIDUAL({ id, title, description, duration }));
         return (
           <Toast 
             key={id} 

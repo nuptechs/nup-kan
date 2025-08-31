@@ -3,6 +3,7 @@ import { useMemo, useEffect } from "react";
 import type { User, Permission } from "@shared/schema";
 import { useAuth } from "./useAuth"; // ✅ Usar hook centralizado
 import { PermissionSystemError, PermissionErrors } from "../errors/PermissionSystemError";
+import { PERMISSION_LOGS } from "@/constants/logMessages";
 
 export function usePermissions() {
   // ✅ USAR DADOS CENTRALIZADOS - Evita request duplicado
@@ -17,7 +18,7 @@ export function usePermissions() {
         errorInstance, 
         currentUser?.id || 'unknown'
       );
-      console.error('🚨 [PERMISSION-INTEGRITY] Erro crítico detectado:', permissionError.toJSON());
+      console.error(PERMISSION_LOGS.CRITICAL_ERROR(permissionError.toJSON()));
     }
   }, [userError, userLoading, currentUser?.id]);
 
@@ -39,17 +40,17 @@ export function usePermissions() {
 
     // 3. Validação de integridade
     if (!Array.isArray(permissionObjects)) {
-      console.error('🚨 [PERMISSION-INTEGRITY] Dados de permissões corrompidos:', {
+      console.error(PERMISSION_LOGS.DATA_CORRUPTED({
         userId: currentUser?.id,
         permissionObjects: typeof permissionObjects,
         permissionStrings: typeof permissionStrings,
         currentUser: !!currentUser
-      });
+      }));
       return [];
     }
 
     // 4. Log para auditoria
-    console.log(`🔐 [PERMISSIONS] Usuário ${currentUser.id} tem ${permissionObjects.length} permissões`);
+    console.log(PERMISSION_LOGS.USER_PERMISSIONS(currentUser.id, permissionObjects.length));
 
     return permissionObjects; // Agora é array de strings
   }, [currentUser, userLoading, userError]);

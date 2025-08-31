@@ -5,6 +5,7 @@
  * by cleaning up any Apollo-related cache entries and localStorage data that might
  * be causing the "ApolloError: Notification alert not found" error.
  */
+import { APOLLO_CLEANUP_LOGS } from "@/constants/logMessages";
 
 interface ApolloCleanupOptions {
   clearLocalStorage?: boolean;
@@ -53,7 +54,7 @@ export class ApolloCacheCleanup {
       clearServiceWorkers = true
     } = options;
 
-    console.log('🧹 [APOLLO-CLEANUP] Starting Apollo cache cleanup...');
+    console.log(APOLLO_CLEANUP_LOGS.STARTING());
 
     try {
       // Clear localStorage
@@ -79,7 +80,7 @@ export class ApolloCacheCleanup {
       // Clear any remaining Apollo-related browser cache
       await this.clearBrowserCache();
 
-      console.log('✅ [APOLLO-CLEANUP] Apollo cache cleanup completed successfully');
+      console.log(...APOLLO_CLEANUP_LOGS.success(APOLLO_CLEANUP_LOGS.COMPLETED_SUCCESS()));
     } catch (error) {
       console.error('❌ [APOLLO-CLEANUP] Error during cleanup:', error);
     }
@@ -113,7 +114,7 @@ export class ApolloCacheCleanup {
         console.log(`🗑️ [APOLLO-CLEANUP] Removed localStorage key: ${key}`);
       });
 
-      console.log(`🧹 [APOLLO-CLEANUP] Cleared ${keysToRemove.length} Apollo localStorage entries`);
+      console.log(APOLLO_CLEANUP_LOGS.CLEARED_LOCALSTORAGE(keysToRemove.length));
     } catch (error) {
       console.error('❌ [APOLLO-CLEANUP] Error clearing localStorage:', error);
     }
@@ -140,7 +141,7 @@ export class ApolloCacheCleanup {
         console.log(`🗑️ [APOLLO-CLEANUP] Removed sessionStorage key: ${key}`);
       });
 
-      console.log(`🧹 [APOLLO-CLEANUP] Cleared ${keysToRemove.length} Apollo sessionStorage entries`);
+      console.log(APOLLO_CLEANUP_LOGS.CLEARED_SESSIONSTORAGE(keysToRemove.length));
     } catch (error) {
       console.error('❌ [APOLLO-CLEANUP] Error clearing sessionStorage:', error);
     }

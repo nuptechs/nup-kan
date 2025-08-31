@@ -1,5 +1,6 @@
 import { usePermissions } from "./usePermissions";
 import { PermissionSystemError } from "../errors/PermissionSystemError";
+import { PROFILE_MODE_LOGS } from "@/constants/logMessages";
 
 export type ProfileMode = "read-only" | "full-access" | "admin" | "loading";
 
@@ -40,11 +41,11 @@ export function useProfileMode(): {
       }
       
       // 4. Log para auditoria
-      console.log(`🔐 [PROFILE-MODE] Usuário tem ${permissions.length} permissões`);
+      console.log(PROFILE_MODE_LOGS.USER_PERMISSIONS(permissions.length));
       
       // 5. Lógica de negócio (agora confiável)
       if (checkIsAdmin()) {
-        console.log(`🔐 [PROFILE-MODE] Modo determinado: admin`);
+        console.log(PROFILE_MODE_LOGS.MODE_ADMIN());
         return "admin";
       }
       
@@ -54,12 +55,12 @@ export function useProfileMode(): {
                                   hasPermission("Create Columns");
       
       if (hasCreatePermissions) {
-        console.log(`🔐 [PROFILE-MODE] Modo determinado: full-access`);
+        console.log(PROFILE_MODE_LOGS.MODE_FULL_ACCESS());
         return "full-access";
       }
       
       // 6. Read-only é agora um estado válido, não fallback
-      console.log(`🔐 [PROFILE-MODE] Modo determinado: read-only`);
+      console.log(PROFILE_MODE_LOGS.MODE_READ_ONLY());
       return "read-only";
       
     } catch (error) {

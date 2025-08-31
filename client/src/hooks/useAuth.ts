@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useEffect, useState } from "react";
 import type { User } from "@shared/schema";
 import { AuthService } from "@/services/authService";
+import { AUTH_LOGS } from "@/constants/logMessages";
 
 export function useAuth() {
   // 🚀 VERIFICAR AUTENTICAÇÃO LOCAL - REATIVO A MUDANÇAS
@@ -9,14 +10,14 @@ export function useAuth() {
   
   // DEBUG: Identificador único para cada instância do hook
   const hookId = useMemo(() => Math.random().toString(36).substr(2, 9), []);
-  console.log('🔧 [useAuth] Instância criada:', hookId);
+  console.log(AUTH_LOGS.INSTANCE_CREATED(hookId));
   
   // Ouvir mudanças de autenticação
   useEffect(() => {
     const cleanup = AuthService.onAuthChange(() => {
-      console.log('🔥 [useAuth-JWT] AuthService.onAuthChange DISPARADO! Hook:', hookId, 'authVersion:', authVersion);
+      console.log(AUTH_LOGS.JWT_AUTH_CHANGE(hookId, authVersion));
       setAuthVersion(prev => {
-        console.log('🔥 [useAuth-JWT] authVersion mudou de', prev, 'para', prev + 1);
+        console.log(AUTH_LOGS.JWT_VERSION_CHANGE(prev, prev + 1));
         return prev + 1;
       });
     });
@@ -30,11 +31,11 @@ export function useAuth() {
 
   // 🔧 CALLBACK ESTÁVEL PARA QUERY FUNCTION
   const queryFn = useCallback(async () => {
-    console.log('🔍 [useAuth-JWT] REQUISIÇÃO INICIADA - authVersion:', authVersion);
+    console.log(AUTH_LOGS.JWT_REQUEST_STARTED(authVersion));
     
     // Se não tem token local, não fazer request
     if (!AuthService.getAccessToken()) {
-      console.log('🔍 [useAuth-JWT] Sem token local');
+      console.log(AUTH_LOGS.JWT_NO_LOCAL_TOKEN());
       return { isAuthenticated: false, user: null };
     }
     
