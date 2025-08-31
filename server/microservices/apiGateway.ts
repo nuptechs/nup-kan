@@ -1,5 +1,5 @@
 // API Gateway for microservices routing
-// 🚨 SIMPLIFIED VERSION - MongoDB references removed
+// ✅ PostgreSQL-only architecture with unified authentication
 
 import { Request, Response, NextFunction } from 'express';
 import { UnifiedAuthService } from '../auth/unifiedAuth';
@@ -286,7 +286,7 @@ export class RouteHandlers {
     currentUser: async (req: Request, res: Response) => {
       try {
         const authContext = await APIGateway.executeWithCircuitBreaker('auth', async () => {
-          return await AuthService.verifyAuth(req);
+          return await UnifiedAuthService.validateToken(req.headers.authorization?.replace('Bearer ', '') || '');
         });
 
         if (!authContext) {
@@ -366,7 +366,7 @@ export class RouteHandlers {
         const boardId = req.params.id;
 
         const board = await APIGateway.executeWithCircuitBreaker('board', async () => {
-          return await boardService.getBoardById(authContext, boardId);
+          return await boardService.getBoard(authContext, boardId);
         });
 
         res.json(board);
@@ -393,7 +393,7 @@ export class RouteHandlers {
         const offset = parseInt(req.query.offset as string) || 0;
 
         const tasks = await APIGateway.executeWithCircuitBreaker('task', async () => {
-          return await taskService.getBoardTasks(authContext, boardId, { limit, offset });
+          return await taskService.getBoardTasks(authContext, boardId, { limit });
         });
 
         res.json(tasks);

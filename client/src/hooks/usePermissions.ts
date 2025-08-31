@@ -162,6 +162,7 @@ export function usePermissions() {
   // ✅ THROW ERROR PARA ESTADOS CRÍTICOS
   const throwCriticalError = (errorType: keyof typeof PermissionErrors) => {
     const userId = currentUser?.id || 'unknown';
+    // @ts-ignore - Dynamic error creation
     const error = PermissionErrors[errorType](userId);
     throw error;
   };
