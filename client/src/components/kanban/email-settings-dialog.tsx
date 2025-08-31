@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { Mail, Key, CheckCircle, AlertCircle, Settings } from "lucide-react";
 
 interface EmailSettingsDialogProps {
@@ -33,15 +35,15 @@ export function EmailSettingsDialog({ children, open: isOpen, onOpenChange }: Em
     },
     onSuccess: () => {
       toast({
-        title: "Sucesso",
-        description: "Chave API do SendGrid atualizada com sucesso!",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
+        description: SUCCESS_MESSAGES.SETTINGS.EMAIL_UPDATED,
       });
       setApiKey("");
     },
     onError: () => {
       toast({
-        title: "Erro",
-        description: "Falha ao atualizar chave API. Verifique se a chave está correta.",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
+        description: ERROR_MESSAGES.SETTINGS.EMAIL_UPDATE_FAILED,
         variant: "destructive",
       });
     },
@@ -54,13 +56,13 @@ export function EmailSettingsDialog({ children, open: isOpen, onOpenChange }: Em
     },
     onSuccess: () => {
       toast({
-        title: "Email de teste enviado",
+        title: SUCCESS_MESSAGES.SETTINGS.EMAIL_TEST_SENT,
         description: "Verifique sua caixa de entrada para confirmar que o email foi recebido.",
       });
     },
     onError: () => {
       toast({
-        title: "Erro no teste",
+        title: ERROR_MESSAGES.SETTINGS.EMAIL_TEST_FAILED,
         description: "Falha ao enviar email de teste. Verifique a configuração.",
         variant: "destructive",
       });
@@ -70,7 +72,7 @@ export function EmailSettingsDialog({ children, open: isOpen, onOpenChange }: Em
   const handleUpdateApiKey = () => {
     if (!apiKey.trim()) {
       toast({
-        title: "Campo obrigatório",
+        title: ERROR_MESSAGES.SETTINGS.FIELD_REQUIRED,
         description: "Por favor, insira a chave API do SendGrid.",
         variant: "destructive",
       });
@@ -79,7 +81,7 @@ export function EmailSettingsDialog({ children, open: isOpen, onOpenChange }: Em
 
     if (!apiKey.startsWith('SG.')) {
       toast({
-        title: "Formato inválido",
+        title: ERROR_MESSAGES.SETTINGS.INVALID_FORMAT,
         description: "A chave API do SendGrid deve começar com 'SG.'",
         variant: "destructive",
       });
@@ -92,7 +94,7 @@ export function EmailSettingsDialog({ children, open: isOpen, onOpenChange }: Em
   const handleTestEmail = () => {
     if (!testEmail.trim()) {
       toast({
-        title: "Campo obrigatório",
+        title: ERROR_MESSAGES.SETTINGS.FIELD_REQUIRED,
         description: "Por favor, insira um email para teste.",
         variant: "destructive",
       });

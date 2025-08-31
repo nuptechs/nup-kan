@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, Search, X, Columns } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import type { Task, Column, TaskAssignee, User } from "@shared/schema";
@@ -97,7 +99,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     onError: (error) => {
       console.error("❌ [FRONTEND] Task update failed:", error);
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao atualizar tarefa. Tente novamente.",
         variant: "destructive",
       });
@@ -116,7 +118,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     onError: (error) => {
       console.error("❌ [FRONTEND] Task reorder failed:", error);
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao reordenar tarefas. Tente novamente.",
         variant: "destructive",
       });
@@ -135,7 +137,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     onError: (error) => {
       console.error("❌ [FRONTEND] Column reorder failed:", error);
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao reordenar colunas. Tente novamente.",
         variant: "destructive",
       });
@@ -154,7 +156,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao excluir coluna. Tente novamente.",
         variant: "destructive",
       });

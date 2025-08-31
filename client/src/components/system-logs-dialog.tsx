@@ -17,6 +17,8 @@ import { Separator } from "@/components/ui/separator";
 import { RefreshCw, Trash2, Filter, Clock, FileText, Search } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface SystemLog {
   id: string;
@@ -93,7 +95,7 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao limpar os logs.",
         variant: "destructive",
       });

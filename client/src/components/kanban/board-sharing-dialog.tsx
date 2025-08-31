@@ -17,6 +17,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Share2, Users2, User, Trash2, Edit, Eye, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { apiRequest } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -100,7 +102,7 @@ export function BoardSharingDialog({ board, open, onOpenChange }: BoardSharingDi
     },
     onError: (error: any) => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao compartilhar board. Tente novamente.",
         variant: "destructive",
       });
@@ -122,7 +124,7 @@ export function BoardSharingDialog({ board, open, onOpenChange }: BoardSharingDi
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao remover compartilhamento.",
         variant: "destructive",
       });
@@ -144,7 +146,7 @@ export function BoardSharingDialog({ board, open, onOpenChange }: BoardSharingDi
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao atualizar permissão.",
         variant: "destructive",
       });

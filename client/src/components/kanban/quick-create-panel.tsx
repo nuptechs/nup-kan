@@ -13,6 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Plus, User, Users, Shield, Mail, Edit, Trash2, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { apiRequest } from "@/lib/queryClient";
 import type { Profile, Permission, Team, User as UserType } from "@shared/schema";
 
@@ -73,14 +75,14 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Usuário criado com sucesso!",
       });
       setUserForm({ name: "", email: "", role: "", profileId: "" });
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao criar usuário. Tente novamente.",
         variant: "destructive",
       });
@@ -95,14 +97,14 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Time criado com sucesso!",
       });
       setTeamForm({ name: "", description: "" });
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao criar time. Tente novamente.",
         variant: "destructive",
       });
@@ -133,14 +135,14 @@ export function QuickCreatePanel({ isOpen, onClose }: QuickCreatePanelProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
       queryClient.invalidateQueries({ queryKey: ["/api/permissions"] });
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Perfil criado com permissões atribuídas!",
       });
       setProfileForm({ name: "", description: "", color: "#3b82f6", selectedPermissions: [] });
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao criar perfil. Tente novamente.",
         variant: "destructive",
       });

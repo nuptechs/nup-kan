@@ -13,6 +13,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { apiRequest } from "@/lib/queryClient";
 import { Shield, Users, User, Search, Settings2, Eye, FileText, Columns, UserCheck, Settings, RefreshCw, Activity, Tags, Grid, Download, Key, Database } from "lucide-react";
 import type { Permission, Profile, User as UserType, Team, UserTeam, TeamProfile, ProfilePermission } from "@shared/schema";
@@ -119,7 +121,7 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao atualizar permissões.",
         variant: "destructive",
       });
@@ -147,7 +149,7 @@ export function PermissionsManager({ targetType, targetId }: PermissionsManagerP
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao atribuir perfil.",
         variant: "destructive",
       });

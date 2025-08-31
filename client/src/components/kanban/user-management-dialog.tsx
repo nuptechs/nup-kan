@@ -166,7 +166,7 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       console.log("🔴 [TRACE-ERROR-MUTATION] updateUserMutation.onError EXECUTADO");
       
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao atualizar usuário. Tente novamente.",
         variant: "destructive",
       });

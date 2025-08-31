@@ -10,6 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { Download, X, Columns, Users, Tags, Users2, UserCog, Mail, Shield, History, Grid, Database, FileText } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { ColumnManagementDialog } from "./column-management-dialog";
 import { TagManagementDialog } from "./tag-management-dialog";
 import { EmailSettingsDialog } from "./email-settings-dialog";
@@ -74,13 +76,13 @@ export function SettingsPanel({ isOpen, onClose, boardId }: SettingsPanelProps) 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Limite WIP atualizado com sucesso!",
       });
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao atualizar limite WIP. Tente novamente.",
         variant: "destructive",
       });

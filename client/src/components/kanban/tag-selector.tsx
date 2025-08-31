@@ -9,6 +9,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "
 import { Plus, X, Tag as TagIcon, Settings } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { TagManagementDialog } from "./tag-management-dialog";
 import type { Tag } from "@shared/schema";
 
@@ -44,14 +46,14 @@ export function TagSelector({ selectedTags, onTagsChange }: TagSelectorProps) {
       setNewTagColor("#3b82f6");
       setIsCreating(false);
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Tag criada com sucesso!",
         duration: 2500,
       });
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao criar tag. Tente novamente.",
         variant: "destructive",
       });

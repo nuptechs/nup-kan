@@ -15,6 +15,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { apiRequest } from "@/lib/queryClient";
 
 interface CustomField {
@@ -105,7 +107,7 @@ export default function TaskCustomFields({ taskId, boardId }: TaskCustomFieldsPr
     onError: (error) => {
       console.error('Error saving custom field value:', error);
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao salvar valor do campo personalizado",
         variant: "destructive",
       });

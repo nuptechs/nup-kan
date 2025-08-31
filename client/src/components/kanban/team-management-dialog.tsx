@@ -19,6 +19,8 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Users2, Edit, Trash2, Plus, Minus, UserMinus, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { apiRequest } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -143,7 +145,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
       ]);
       
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: `Time criado com ${selectedUsers.length} membros!`,
       });
       form.reset();
@@ -152,7 +154,7 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao criar time. Tente novamente.",
         variant: "destructive",
       });
@@ -176,13 +178,13 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
       onOpenChange(false);
       
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Time atualizado com sucesso!",
       });
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao atualizar time. Tente novamente.",
         variant: "destructive",
       });
@@ -196,13 +198,13 @@ export function TeamManagementDialog({ open, onOpenChange }: TeamManagementDialo
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/teams"] });
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Time excluído com sucesso!",
       });
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao excluir time. Tente novamente.",
         variant: "destructive",
       });

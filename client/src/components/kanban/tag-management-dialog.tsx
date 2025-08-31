@@ -10,6 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { insertTagSchema, type Tag } from "@shared/schema";
 import { Plus, Edit2, Trash2, Check, X } from "lucide-react";
 import { z } from "zod";
@@ -63,7 +65,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tags"] });
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Tag criada com sucesso!",
         duration: 2500,
       });
@@ -73,7 +75,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao criar tag. Tente novamente.",
         variant: "destructive",
       });
@@ -88,7 +90,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tags"] });
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Tag atualizada com sucesso!",
         duration: 2500,
       });
@@ -98,7 +100,7 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao atualizar tag. Tente novamente.",
         variant: "destructive",
       });
@@ -113,13 +115,13 @@ export function TagManagementDialog({ isOpen, onClose }: TagManagementDialogProp
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tags"] });
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Tag excluída com sucesso!",
       });
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao excluir tag. Tente novamente.",
         variant: "destructive",
       });

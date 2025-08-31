@@ -67,6 +67,7 @@ export const SUCCESS_MESSAGES = {
   SETTINGS: {
     UPDATED: "Configurações atualizadas com sucesso!",
     EMAIL_UPDATED: "Configurações de email atualizadas com sucesso!",
+    EMAIL_TEST_SENT: "Email de teste enviado",
   },
 
   // Notifications (Notificações)

@@ -11,6 +11,8 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, User, Mail, Shield, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { apiRequest } from "@/lib/queryClient";
 import { PermissionsManagerCard } from "@/components/admin/PermissionsManagerCard";
 import type { User as UserType } from "@shared/schema";
@@ -37,13 +39,13 @@ export default function UserSettingsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       setIsEditing(false);
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Informações atualizadas com sucesso!",
       });
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao atualizar informações. Tente novamente.",
         variant: "destructive",
       });

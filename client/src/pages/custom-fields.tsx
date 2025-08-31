@@ -13,6 +13,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Edit, Trash, Type, Hash, Calendar, List, ToggleLeft, Link, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { apiRequest } from "@/lib/queryClient";
 import type { CustomField } from "@shared/schema";
 
@@ -81,7 +83,7 @@ export default function CustomFieldsPage() {
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao criar campo personalizado.",
         variant: "destructive",
       });
@@ -102,7 +104,7 @@ export default function CustomFieldsPage() {
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao atualizar campo personalizado.",
         variant: "destructive",
       });
@@ -120,7 +122,7 @@ export default function CustomFieldsPage() {
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao excluir campo personalizado.",
         variant: "destructive",
       });

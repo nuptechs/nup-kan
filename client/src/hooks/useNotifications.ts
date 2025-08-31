@@ -3,6 +3,8 @@ import { useMemo, useCallback } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "./useAuth";
 import { useToast } from "./use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 export interface Notification {
   id: string;
@@ -114,16 +116,16 @@ export function useNotifications() {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       toast({
-        title: "Sucesso",
-        description: "Notificação criada com sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
+        description: SUCCESS_MESSAGES.NOTIFICATIONS.CREATED,
         variant: "default",
       });
     },
     onError: (error) => {
       console.error("Error creating notification:", error);
       toast({
-        title: "Erro",
-        description: "Falha ao criar notificação",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
+        description: ERROR_MESSAGES.NOTIFICATIONS.CREATE_FAILED,
         variant: "destructive",
       });
     },
@@ -142,8 +144,8 @@ export function useNotifications() {
     onError: (error) => {
       console.error("Error marking notification as read:", error);
       toast({
-        title: "Erro",
-        description: "Falha ao marcar notificação como lida",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
+        description: ERROR_MESSAGES.NOTIFICATIONS.MARK_READ_FAILED,
         variant: "destructive",
       });
     },
@@ -162,8 +164,8 @@ export function useNotifications() {
       const updatedCount = data?.updatedCount || 0;
       if (updatedCount > 0) {
         toast({
-          title: "Sucesso",
-          description: `${updatedCount} notificações marcadas como lidas`,
+          title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
+          description: `${updatedCount} ${SUCCESS_MESSAGES.NOTIFICATIONS.MARKED_AS_READ}`,
           variant: "default",
         });
       }
@@ -171,8 +173,8 @@ export function useNotifications() {
     onError: (error) => {
       console.error("Error marking all notifications as read:", error);
       toast({
-        title: "Erro",
-        description: "Falha ao marcar todas as notificações como lidas",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
+        description: ERROR_MESSAGES.NOTIFICATIONS.MARK_READ_FAILED,
         variant: "destructive",
       });
     },
@@ -187,16 +189,16 @@ export function useNotifications() {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       toast({
-        title: "Sucesso",
-        description: "Notificação excluída com sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
+        description: SUCCESS_MESSAGES.NOTIFICATIONS.DELETED,
         variant: "default",
       });
     },
     onError: (error) => {
       console.error("Error deleting notification:", error);
       toast({
-        title: "Erro",
-        description: "Falha ao excluir notificação",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
+        description: ERROR_MESSAGES.NOTIFICATIONS.DELETE_FAILED,
         variant: "destructive",
       });
     },

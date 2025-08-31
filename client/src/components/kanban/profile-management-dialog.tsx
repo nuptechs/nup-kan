@@ -31,6 +31,8 @@ import { Settings, Plus, Trash2, UserCog, Shield, Users, CheckCircle, XCircle } 
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 type InsertProfile = z.infer<typeof insertProfileSchema>;
 type InsertPermission = z.infer<typeof insertPermissionSchema>;
@@ -86,7 +88,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
         queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] })
       ]).then(() => {
         toast({
-          title: "Sucesso",
+          title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
           description: "Perfil criado com sucesso!",
         });
         setIsCreatingProfile(false);
@@ -96,7 +98,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao criar perfil. Tente novamente.",
         variant: "destructive",
       });
@@ -115,7 +117,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
         queryClient.invalidateQueries({ queryKey: ["/api/permissions-data"] })
       ]).then(() => {
         toast({
-          title: "Sucesso",
+          title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
           description: "Perfil atualizado com sucesso!",
         });
         setEditingProfile(null);
@@ -124,7 +126,7 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao atualizar perfil. Tente novamente.",
         variant: "destructive",
       });
@@ -140,13 +142,13 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
       setSelectedProfile(null);
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Perfil excluído com sucesso!",
       });
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao excluir perfil. Tente novamente.",
         variant: "destructive",
       });
@@ -161,13 +163,13 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles", selectedProfile?.id, "permissions"] });
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Permissão adicionada ao perfil!",
       });
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao adicionar permissão. Tente novamente.",
         variant: "destructive",
       });
@@ -182,13 +184,13 @@ export function ProfileManagementDialog({ children }: ProfileManagementDialogPro
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles", selectedProfile?.id, "permissions"] });
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Permissão removida do perfil!",
       });
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao remover permissão. Tente novamente.",
         variant: "destructive",
       });

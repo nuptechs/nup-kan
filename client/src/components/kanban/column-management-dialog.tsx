@@ -10,6 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { insertColumnSchema, type Column } from "@shared/schema";
 import { Plus, Edit2, Trash2, Check, X, Columns, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
 import { z } from "zod";
@@ -89,7 +91,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
       queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Coluna criada com sucesso!",
         duration: 2500,
       });
@@ -98,7 +100,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao criar coluna. Tente novamente.",
         variant: "destructive",
         duration: 3000,
@@ -114,7 +116,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
       queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
       queryClient.invalidateQueries({ queryKey: ["/api/columns"] });
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Coluna atualizada com sucesso!",
         duration: 3000,
       });
@@ -124,7 +126,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao atualizar coluna. Tente novamente.",
         variant: "destructive",
       });
@@ -146,7 +148,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
       queryClient.invalidateQueries({ queryKey: ["/api/analytics"] });
       
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Coluna excluída com sucesso junto com suas tarefas!",
         duration: 3000,
       });
@@ -160,7 +162,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
       }
       
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: errorMessage,
         variant: "destructive",
       });
@@ -177,7 +179,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao reordenar colunas. Tente novamente.",
         variant: "destructive",
       });
@@ -223,7 +225,7 @@ export function ColumnManagementDialog({ isOpen, onClose, boardId, editingColumn
     const columnExists = columns.find(c => c.id === columnId);
     if (!columnExists) {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Esta coluna já foi excluída.",
         variant: "destructive",
       });

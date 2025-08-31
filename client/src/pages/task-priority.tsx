@@ -24,6 +24,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Flag, Edit, Plus, Trash, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { Switch } from "@/components/ui/switch";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -83,7 +85,7 @@ export default function TaskPriorityPage() {
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao criar prioridade da tarefa.",
         variant: "destructive",
       });
@@ -104,7 +106,7 @@ export default function TaskPriorityPage() {
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao atualizar prioridade da tarefa.",
         variant: "destructive",
       });
@@ -122,7 +124,7 @@ export default function TaskPriorityPage() {
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Erro ao excluir prioridade da tarefa.",
         variant: "destructive",
       });

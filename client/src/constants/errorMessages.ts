@@ -75,6 +75,9 @@ export const ERROR_MESSAGES = {
     UPDATE_FAILED: "Erro ao atualizar configurações. Tente novamente.",
     EMAIL_UPDATE_FAILED: "Erro ao atualizar configurações de email. Tente novamente.",
     LOAD_FAILED: "Erro ao carregar configurações. Tente novamente.",
+    EMAIL_TEST_FAILED: "Erro no teste",
+    INVALID_FORMAT: "Formato inválido",
+    FIELD_REQUIRED: "Campo obrigatório",
   },
 
   // Custom Fields (Campos Personalizados)

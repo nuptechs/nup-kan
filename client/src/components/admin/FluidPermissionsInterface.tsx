@@ -8,6 +8,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { apiRequest } from "@/lib/queryClient";
 import { 
   Shield, Users, User, Search, Settings2, Eye, FileText, 
@@ -68,7 +70,7 @@ export function FluidPermissionsInterface({ targetType, targetId, targetName }: 
     },
     onError: () => {
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao atribuir perfil.",
         variant: "destructive",
       });
@@ -95,14 +97,14 @@ export function FluidPermissionsInterface({ targetType, targetId, targetName }: 
         queryKey: targetType === "user" ? ["/api/users", targetId, "permissions"] : ["/api/teams", targetId, "permissions"]
       });
       toast({
-        title: "Sucesso",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
         description: "Permissão atualizada com sucesso.",
       });
     },
     onError: (error: any) => {
       console.error("Permission toggle error:", error);
       toast({
-        title: "Erro",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
         description: "Falha ao atualizar permissão. Tente novamente.",
         variant: "destructive",
       });
