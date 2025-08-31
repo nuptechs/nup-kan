@@ -353,8 +353,6 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
                       </FormItem>
                     )}
                   />
-                </div>
-
                 <Button
                   type="submit"
                   className="w-full"

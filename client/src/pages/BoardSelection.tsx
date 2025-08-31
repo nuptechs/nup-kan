@@ -36,7 +36,7 @@ type BoardFormData = z.infer<typeof boardSchema>;
 
 export default function BoardSelection() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const { hasPermission, userPermissions, isLoading: permissionsLoading } = usePermissions();
+  const { hasPermission, isLoading: permissionsLoading } = usePermissions();
   const { mode, isReadOnly, canCreate, canEdit, canDelete } = useProfileMode();
 
 
