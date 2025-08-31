@@ -228,12 +228,11 @@ export class TaskService extends BaseService {
         'analytics:*'
       ]);
 
-      // Emitir evento
-      this.emitEvent('task.created', {
-        taskId: task.id,
+      // Emitir evento tipado
+      await this.emitEvent('task.created', {
+        task,
         boardId: request.boardId,
         userId: authContext.userId,
-        taskTitle: task.title,
       });
 
       this.log('task-service', 'task created successfully', { taskId: task.id });
@@ -279,12 +278,12 @@ export class TaskService extends BaseService {
         'analytics:*'
       ]);
 
-      // Emitir evento
-      this.emitEvent('task.updated', {
+      // Emitir evento tipado
+      await this.emitEvent('task.updated', {
         taskId,
-        boardId: existingTask.boardId,
-        userId: authContext.userId,
+        task: updatedTask,
         changes: validData,
+        userId: authContext.userId,
       });
 
       this.log('task-service', 'task updated successfully', { taskId });
@@ -327,12 +326,12 @@ export class TaskService extends BaseService {
         'analytics:*'
       ]);
 
-      // Emitir evento
-      this.emitEvent('task.deleted', {
+      // Emitir evento tipado
+      await this.emitEvent('task.deleted', {
         taskId,
+        task,
         boardId: task.boardId,
         userId: authContext.userId,
-        taskTitle: task.title,
       });
 
       this.log('task-service', 'task deleted successfully', { taskId });

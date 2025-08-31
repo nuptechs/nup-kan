@@ -13,7 +13,8 @@
  */
 
 import { storage } from "../storage";
-import { eventBus } from "../cqrs/events";
+import { eventBus, emit } from "../events";
+import type { EventType, EventData } from "../events/types";
 import { cache } from "../cache";
 import type { AuthContext } from "../auth/unifiedAuth";
 import { authorizationService } from "./authorizationService";
@@ -87,13 +88,21 @@ export abstract class BaseService {
   }
 
   /**
-   * Emitir evento de domínio
+   * 🎪 Emitir evento de domínio tipado
    */
-  protected emitEvent(eventName: string, data: any): void {
+  protected async emitEvent<T extends EventType>(
+    eventType: T, 
+    data: EventData<T>,
+    metadata?: { source?: string; version?: number }
+  ): Promise<void> {
     try {
-      this.eventBus.emit(eventName, data);
+      await emit(eventType, data, {
+        userId: (data as any).userId || 'system',
+        source: 'service-layer',
+        ...metadata
+      });
     } catch (error) {
-      Logger.error.generic('EVENT-EMISSION', error);
+      Logger.error.generic(`EVENT-EMIT-${eventType.toUpperCase()}`, error);
     }
   }
 

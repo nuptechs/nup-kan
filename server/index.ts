@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { registerRoutes } from "./routes/main";
 import { setupVite, serveStatic, log } from "./vite";
+import { registerDomainEventHandlers } from "./events/handlers";
+import { eventBus } from "./events";
 
 const app = express();
 
@@ -61,6 +63,9 @@ app.use((req, res, next) => {
 
   next();
 });
+
+// 🎪 Inicializar sistema de eventos centralizado
+registerDomainEventHandlers(eventBus);
 
 (async () => {
   const server = await registerRoutes(app);
