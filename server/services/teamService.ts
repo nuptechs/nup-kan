@@ -127,7 +127,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'createTeam', { userId: authContext.userId, teamName: request.name });
     
     try {
-      this.requirePermission(authContext, 'Criar Teams', 'criar time');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.CREATE, 'criar time');
 
       // Validar dados
       const validatedData = insertTeamSchema.parse({
@@ -172,7 +172,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'updateTeam', { userId: authContext.userId, teamId });
     
     try {
-      this.requirePermission(authContext, 'Editar Teams', 'editar time');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.EDIT, 'editar time');
 
       const existingTeam = await this.storage.getTeam(teamId);
       if (!existingTeam) {
@@ -217,7 +217,7 @@ export class TeamService extends BaseService {
     this.log('team-service', 'deleteTeam', { userId: authContext.userId, teamId });
     
     try {
-      this.requirePermission(authContext, 'Excluir Teams', 'excluir time');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.DELETE, 'excluir time');
 
       const team = await this.storage.getTeam(teamId);
       if (!team) {

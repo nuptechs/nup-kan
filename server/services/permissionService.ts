@@ -11,10 +11,11 @@
  */
 
 import { BaseService, createSuccessResponse, createErrorResponse, PaginatedResponse, PaginationOptions } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { Permission, InsertPermission } from "@shared/schema";
 import { insertPermissionSchema } from "@shared/schema";
 import { TTL } from "../cache";
+import { PERMISSIONS } from "../config/permissions";
 
 export interface PermissionCreateRequest {
   name: string;
@@ -37,7 +38,7 @@ export class PermissionService extends BaseService {
     this.log('permission-service', 'getPermissions', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Permissões', 'listar permissões');
+      this.requirePermission(authContext, PERMISSIONS.PERMISSIONS.LIST, 'listar permissões');
 
       const cacheKey = 'permissions:all';
       const cached = await this.cache.get<Permission[]>(cacheKey);
@@ -62,7 +63,7 @@ export class PermissionService extends BaseService {
     this.log('permission-service', 'getPermission', { userId: authContext.userId, permissionId });
     
     try {
-      this.requirePermission(authContext, 'Listar Permissions', 'visualizar permissão');
+      this.requirePermission(authContext, PERMISSIONS.PERMISSIONS.LIST, 'visualizar permissão');
 
       const permission = await this.storage.getPermission(permissionId);
       return permission || null;
@@ -79,7 +80,7 @@ export class PermissionService extends BaseService {
     this.log('permission-service', 'createPermission', { userId: authContext.userId, name: request.name });
     
     try {
-      this.requirePermission(authContext, 'Criar Permissões', 'criar permissões');
+      this.requirePermission(authContext, PERMISSIONS.PERMISSIONS.CREATE, 'criar permissões');
 
       const validData = insertPermissionSchema.parse(request);
       const permission = await this.storage.createPermission(validData);
@@ -109,7 +110,7 @@ export class PermissionService extends BaseService {
     this.log('permission-service', 'updatePermission', { userId: authContext.userId, permissionId });
     
     try {
-      this.requirePermission(authContext, 'Editar Permissões', 'editar permissões');
+      this.requirePermission(authContext, PERMISSIONS.PERMISSIONS.EDIT, 'editar permissões');
 
       const existingPermission = await this.storage.getPermission(permissionId);
       if (!existingPermission) {
@@ -143,7 +144,7 @@ export class PermissionService extends BaseService {
     this.log('permission-service', 'deletePermission', { userId: authContext.userId, permissionId });
     
     try {
-      this.requirePermission(authContext, 'Excluir Permissões', 'excluir permissões');
+      this.requirePermission(authContext, PERMISSIONS.PERMISSIONS.DELETE, 'excluir permissões');
 
       const permission = await this.storage.getPermission(permissionId);
       if (!permission) {
@@ -176,7 +177,7 @@ export class PermissionService extends BaseService {
     this.log('permission-service', 'getAllProfilePermissions', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Permissions', 'listar permissões de perfil');
+      this.requirePermission(authContext, PERMISSIONS.PERMISSIONS.LIST, 'listar permissões de perfil');
 
       const profilePermissions = await this.storage.getAllProfilePermissions();
       return profilePermissions;
@@ -193,7 +194,7 @@ export class PermissionService extends BaseService {
     this.log('permission-service', 'addPermissionToUser', { userId: authContext.userId, targetUserId: userId, permissionId });
     
     try {
-      this.requirePermission(authContext, 'Editar Permissions', 'adicionar permissão ao usuário');
+      this.requirePermission(authContext, PERMISSIONS.PERMISSIONS.EDIT, 'adicionar permissão ao usuário');
 
       const result = await this.storage.addPermissionToUser(userId, permissionId);
 
@@ -217,7 +218,7 @@ export class PermissionService extends BaseService {
     this.log('permission-service', 'removePermissionFromUser', { userId: authContext.userId, targetUserId: userId, permissionId });
     
     try {
-      this.requirePermission(authContext, 'Editar Permissions', 'remover permissão do usuário');
+      this.requirePermission(authContext, PERMISSIONS.PERMISSIONS.EDIT, 'remover permissão do usuário');
 
       await this.storage.removePermissionFromUser(userId, permissionId);
 
@@ -240,7 +241,7 @@ export class PermissionService extends BaseService {
     this.log('permission-service', 'getTeamPermissions', { userId: authContext.userId, teamId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Teams', 'visualizar permissões da equipe');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.VIEW, 'visualizar permissões da equipe');
 
       const permissions = await this.storage.getTeamPermissions(teamId);
       return permissions;
@@ -257,7 +258,7 @@ export class PermissionService extends BaseService {
     this.log('permission-service', 'addPermissionToTeam', { userId: authContext.userId, teamId, permissionId });
     
     try {
-      this.requirePermission(authContext, 'Editar Teams', 'adicionar permissão à equipe');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.EDIT, 'adicionar permissão à equipe');
 
       const result = await this.storage.addPermissionToTeam(teamId, permissionId);
 
@@ -281,7 +282,7 @@ export class PermissionService extends BaseService {
     this.log('permission-service', 'removePermissionFromTeam', { userId: authContext.userId, teamId, permissionId });
     
     try {
-      this.requirePermission(authContext, 'Editar Teams', 'remover permissão da equipe');
+      this.requirePermission(authContext, PERMISSIONS.TEAMS.EDIT, 'remover permissão da equipe');
 
       await this.storage.removePermissionFromTeam(teamId, permissionId);
 

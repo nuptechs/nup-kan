@@ -80,7 +80,7 @@ export class TagService extends BaseService {
     this.log('tag-service', 'createTag', { userId: authContext.userId, name: request.name });
     
     try {
-      this.requirePermission(authContext, 'Criar Tags', 'criar tags');
+      this.requirePermission(authContext, PERMISSIONS.TAGS.CREATE, 'criar tags');
 
       const validData = insertTagSchema.parse({
         ...request,
@@ -112,7 +112,7 @@ export class TagService extends BaseService {
     this.log('tag-service', 'updateTag', { userId: authContext.userId, tagId });
     
     try {
-      this.requirePermission(authContext, 'Editar Tags', 'editar tags');
+      this.requirePermission(authContext, PERMISSIONS.TAGS.EDIT, 'editar tags');
 
       const existingTag = await this.storage.getTag(tagId);
       if (!existingTag) {
@@ -144,7 +144,7 @@ export class TagService extends BaseService {
     this.log('tag-service', 'deleteTag', { userId: authContext.userId, tagId });
     
     try {
-      this.requirePermission(authContext, 'Excluir Tags', 'excluir tags');
+      this.requirePermission(authContext, PERMISSIONS.TAGS.DELETE, 'excluir tags');
 
       const tag = await this.storage.getTag(tagId);
       if (!tag) {

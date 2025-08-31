@@ -11,10 +11,11 @@
  */
 
 import { BaseService, createSuccessResponse, createErrorResponse, PaginatedResponse, PaginationOptions } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { Task, InsertTask, UpdateTask } from "@shared/schema";
 import { insertTaskSchema, updateTaskSchema } from "@shared/schema";
 import { TTL } from "../cache";
+import { PERMISSIONS } from "../config/permissions";
 
 export interface TaskCreateRequest {
   boardId: string;
@@ -66,7 +67,7 @@ export class TaskService extends BaseService {
     
     try {
       // Verificar permissões
-      this.requirePermission(authContext, 'Listar Tarefas', 'listar tasks');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.LIST, 'listar tasks');
 
       // Verificar acesso ao board
       const boardAccess = await this.checkBoardAccess(authContext.userId, boardId);
@@ -133,7 +134,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'getTask', { userId: authContext.userId, taskId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Tarefas', 'visualizar task');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.VIEW, 'visualizar task');
 
       // Tentar cache primeiro
       const cacheKey = `task:${taskId}:full`;
@@ -195,7 +196,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'createTask', { userId: authContext.userId, title: request.title });
     
     try {
-      this.requirePermission(authContext, 'Criar Tarefas', 'criar tasks');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.CREATE, 'criar tasks');
 
       // Verificar acesso ao board
       const boardAccess = await this.checkBoardAccess(authContext.userId, request.boardId);
@@ -250,7 +251,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'updateTask', { userId: authContext.userId, taskId });
     
     try {
-      this.requirePermission(authContext, 'Editar Tarefas', 'editar tasks');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.EDIT, 'editar tasks');
 
       // Verificar se task existe
       const existingTask = await this.storage.getTask(taskId);
@@ -301,7 +302,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'deleteTask', { userId: authContext.userId, taskId });
     
     try {
-      this.requirePermission(authContext, 'Excluir Tarefas', 'excluir tasks');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.DELETE, 'excluir tasks');
 
       // Verificar se task existe
       const task = await this.storage.getTask(taskId);
@@ -348,7 +349,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'updateTaskStatus', { userId: authContext.userId, taskId, newStatus });
     
     try {
-      this.requirePermission(authContext, 'Editar Tarefas', 'alterar status da task');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.EDIT, 'alterar status da task');
 
       return this.updateTask(authContext, taskId, { status: newStatus });
 
@@ -365,7 +366,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'getAllTasks', { userId: authContext.userId });
     
     try {
-      this.requirePermission(authContext, 'Listar Tarefas', 'listar tasks');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.LIST, 'listar tasks');
 
       // Buscar todas as tasks do DAO
       const tasks = await this.storage.getTasks();
@@ -404,7 +405,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'getTaskAssignees', { userId: authContext.userId, taskId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Tasks', 'visualizar assignees');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.VIEW, 'visualizar assignees');
       return await this.storage.getTaskAssignees(taskId);
     } catch (error) {
       this.logError('task-service', 'getTaskAssignees', error);
@@ -479,7 +480,7 @@ export class TaskService extends BaseService {
     this.log('task-service', 'assignTask', { userId: authContext.userId, taskId, assigneeId });
     
     try {
-      this.requirePermission(authContext, 'Atribuir Membros', 'atribuir tasks');
+      this.requirePermission(authContext, PERMISSIONS.MEMBERS.ASSIGN, 'atribuir tasks');
 
       return this.updateTask(authContext, taskId, { assigneeId });
 

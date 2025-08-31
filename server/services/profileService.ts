@@ -78,7 +78,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'createProfile', { userId: authContext.userId, name: request.name });
     
     try {
-      this.requirePermission(authContext, 'Criar Perfis', 'criar perfis');
+      this.requirePermission(authContext, PERMISSIONS.PROFILES.CREATE, 'criar perfis');
 
       const validData = insertProfileSchema.parse(request);
       const profile = await this.storage.createProfile(validData);
@@ -108,7 +108,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'updateProfile', { userId: authContext.userId, profileId });
     
     try {
-      this.requirePermission(authContext, 'Editar Perfis', 'editar perfis');
+      this.requirePermission(authContext, PERMISSIONS.PROFILES.EDIT, 'editar perfis');
 
       const existingProfile = await this.storage.getProfile(profileId);
       if (!existingProfile) {
@@ -143,7 +143,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'deleteProfile', { userId: authContext.userId, profileId });
     
     try {
-      this.requirePermission(authContext, 'Excluir Perfis', 'excluir perfis');
+      this.requirePermission(authContext, PERMISSIONS.PROFILES.DELETE, 'excluir perfis');
 
       const profile = await this.storage.getProfile(profileId);
       if (!profile) {
@@ -176,7 +176,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'getProfilePermissions', { userId: authContext.userId, profileId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Profiles', 'visualizar permissões do perfil');
+      this.requirePermission(authContext, PERMISSIONS.PROFILES.VIEW, 'visualizar permissões do perfil');
       return await this.storage.getProfilePermissions(profileId);
     } catch (error) {
       this.logError('profile-service', 'getProfilePermissions', error);
@@ -188,7 +188,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'addPermissionToProfile', { userId: authContext.userId, profileId, permissionId });
     
     try {
-      this.requirePermission(authContext, 'Gerenciar Permissões', 'adicionar permissão ao perfil');
+      this.requirePermission(authContext, PERMISSIONS.PERMISSIONS.EDIT, 'adicionar permissão ao perfil');
       const result = await this.storage.addPermissionToProfile(profileId, permissionId);
 
       // ✅ INVALIDAÇÃO COORDENADA: Perfis + contexto de usuário
@@ -207,7 +207,7 @@ export class ProfileService extends BaseService {
     this.log('profile-service', 'removePermissionFromProfile', { userId: authContext.userId, profileId, permissionId });
     
     try {
-      this.requirePermission(authContext, 'Gerenciar Permissões', 'remover permissão do perfil');
+      this.requirePermission(authContext, PERMISSIONS.PERMISSIONS.EDIT, 'remover permissão do perfil');
       await this.storage.removePermissionFromProfile(profileId, permissionId);
 
       // ✅ INVALIDAÇÃO COORDENADA: Perfis + contexto de usuário

@@ -91,7 +91,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'getColumn', { userId: authContext.userId, columnId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Columns', 'visualizar coluna');
+      this.requirePermission(authContext, PERMISSIONS.COLUMNS.VIEW, 'visualizar coluna');
 
       const column = await this.storage.getColumn(columnId);
       return column || null;
@@ -108,7 +108,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'createColumn', { userId: authContext.userId, title: request.title });
     
     try {
-      this.requirePermission(authContext, 'Criar Colunas', 'criar colunas');
+      this.requirePermission(authContext, PERMISSIONS.COLUMNS.CREATE, 'criar colunas');
 
       const validData = insertColumnSchema.parse(request);
       const column = await this.storage.createColumn(validData);
@@ -139,7 +139,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'updateColumn', { userId: authContext.userId, columnId });
     
     try {
-      this.requirePermission(authContext, 'Editar Colunas', 'editar colunas');
+      this.requirePermission(authContext, PERMISSIONS.COLUMNS.EDIT, 'editar colunas');
 
       const existingColumn = await this.storage.getColumn(columnId);
       if (!existingColumn) {
@@ -176,7 +176,7 @@ export class ColumnService extends BaseService {
     this.log('column-service', 'deleteColumn', { userId: authContext.userId, columnId });
     
     try {
-      this.requirePermission(authContext, 'Excluir Colunas', 'excluir colunas');
+      this.requirePermission(authContext, PERMISSIONS.COLUMNS.DELETE, 'excluir colunas');
 
       const column = await this.storage.getColumn(columnId);
       if (!column) {

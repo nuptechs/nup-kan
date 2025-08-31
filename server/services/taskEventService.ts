@@ -9,10 +9,11 @@
  */
 
 import { BaseService } from "./baseService";
-import type { AuthContext } from "../microservices/authService";
+import type { AuthContext } from "../auth/unifiedAuth";
 import type { TaskEvent, InsertTaskEvent } from "@shared/schema";
 import { insertTaskEventSchema } from "@shared/schema";
 import { TTL } from "../cache";
+import { PERMISSIONS } from "../config/permissions";
 
 export interface TaskEventCreateRequest {
   taskId: string;
@@ -30,7 +31,7 @@ export class TaskEventService extends BaseService {
     this.log('task-event-service', 'getTaskEvents', { userId: authContext.userId, taskId });
     
     try {
-      this.requirePermission(authContext, 'Visualizar Tarefas', 'visualizar histórico da task');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.VIEW, 'visualizar histórico da task');
 
       const cacheKey = `task_events:${taskId}`;
       const cached = await this.cache.get<TaskEvent[]>(cacheKey);
@@ -52,7 +53,7 @@ export class TaskEventService extends BaseService {
     this.log('task-event-service', 'createTaskEvent', { userId: authContext.userId, taskId: request.taskId });
     
     try {
-      this.requirePermission(authContext, 'Editar Tarefas', 'criar evento da task');
+      this.requirePermission(authContext, PERMISSIONS.TASKS.EDIT, 'criar evento da task');
 
       const validData = insertTaskEventSchema.parse(request);
       const event = await this.storage.createTaskEvent(validData);
