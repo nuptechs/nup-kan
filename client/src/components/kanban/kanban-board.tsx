@@ -1,4 +1,4 @@
-import { FRONTEND_LOGS } from "@/constants/logMessages";
+import { FRONTEND_LOGS, DEBUG_LOGS } from "@/constants/logMessages";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { KanbanColumn } from "./kanban-column";
@@ -44,6 +44,28 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  // Debug function to investigate column duplication
+  const debugColumnData = () => {
+    console.log('🐛 [KANBAN-DEBUG] Column investigation:', {
+      totalColumns: columns.length,
+      uniqueIds: new Set(columns.map(c => c.id)).size,
+      duplicateIds: columns.length - new Set(columns.map(c => c.id)).size,
+      columnDetails: columns.map(c => ({ id: c.id, title: c.title, position: c.position })),
+      boardId,
+      endpoint: columnsEndpoint
+    });
+  };
+
+  // Add global debug function
+  if (typeof window !== 'undefined') {
+    (window as any).debugKanbanColumns = debugColumnData;
+    (window as any).clearKanbanCache = () => {
+      queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
+      queryClient.invalidateQueries({ queryKey: [tasksEndpoint] });
+      console.log('🧹 Cache do Kanban limpo');
+    };
+  }
   const { canCreateTasks, canEditTasks, canManageColumns } = usePermissions();
 
   // Use board-specific endpoints if boardId is provided
@@ -57,6 +79,7 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   const { data: columns = [], isLoading: columnsLoading } = useQuery<Column[]>({
     queryKey: [columnsEndpoint],
   });
+
 
   // Fetch all assignees for all tasks to enable search
   const { data: allAssignees = {} } = useQuery<Record<string, (TaskAssignee & { user: User })[]>>({
@@ -453,6 +476,16 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
           ) : (
             /* Normal Board with Columns */
             <div className="flex gap-6 p-4 items-start min-w-max" style={{ minHeight: '100%' }}>
+              {/* Debug: log rendering details */}
+              {columns.length > 0 && (() => {
+                console.log('🐛 [RENDER] Rendering columns:', {
+                  total: columns.length,
+                  titles: columns.map(c => c.title),
+                  backlogCount: columns.filter(c => c.title === 'Backlog').length,
+                  uniqueIds: new Set(columns.map(c => c.id)).size
+                });
+                return null;
+              })()}
               {columns
                 .sort((a, b) => a.position - b.position)
                 .map((column, index) => {
