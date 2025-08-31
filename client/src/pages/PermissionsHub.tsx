@@ -203,16 +203,16 @@ export default function PermissionsHub() {
 
   // Para edição de times - obter membros atuais
   const getCurrentTeamMembers = (teamId: string) => {
-    return userTeams
+    return (userTeams || [])
       .filter(ut => ut.teamId === teamId)
-      .map(ut => users.find(u => u.id === ut.userId))
+      .map(ut => (users || []).find(u => u.id === ut.userId))
       .filter(Boolean) as UserType[];
   };
 
   const getAvailableUsers = (teamId?: string) => {
-    if (!teamId) return users; // Para criação de novo time
+    if (!teamId) return users || []; // Para criação de novo time
     const currentMemberIds = getCurrentTeamMembers(teamId).map(u => u.id);
-    return users.filter(u => !currentMemberIds.includes(u.id));
+    return (users || []).filter(u => !currentMemberIds.includes(u.id));
   };
 
   // Helper function para garantir exibição de pelo menos 20 caracteres
@@ -530,7 +530,7 @@ export default function PermissionsHub() {
                   <Users className="w-5 h-5 text-blue-500" />
                   <span>Usuários</span>
                 </div>
-                <Badge variant="secondary">{users.length}</Badge>
+                <Badge variant="secondary">{users?.length || 0}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -547,7 +547,7 @@ export default function PermissionsHub() {
                   <Users2 className="w-5 h-5 text-green-500" />
                   <span>Times</span>
                 </div>
-                <Badge variant="secondary">{teams.length}</Badge>
+                <Badge variant="secondary">{teams?.length || 0}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -564,7 +564,7 @@ export default function PermissionsHub() {
                   <Shield className="w-5 h-5 text-purple-500" />
                   <span>Perfis</span>
                 </div>
-                <Badge variant="secondary">{profiles.length}</Badge>
+                <Badge variant="secondary">{profiles?.length || 0}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -678,7 +678,7 @@ export default function PermissionsHub() {
         </div>
 
         <div className="space-y-3">
-          {users.map((user) => (
+          {(users || []).map((user) => (
             <Card key={user.id}>
               <CardContent className="flex items-center justify-between p-4">
                 <div className="flex items-center space-x-3">
@@ -885,7 +885,7 @@ export default function PermissionsHub() {
                           if (selectedUsers.length === users.length) {
                             setSelectedUsers([]);
                           } else {
-                            setSelectedUsers(users.map(u => u.id));
+                            setSelectedUsers((users || []).map(u => u.id));
                           }
                         }}
                       >
@@ -906,7 +906,7 @@ export default function PermissionsHub() {
                               Nenhum membro selecionado
                             </p>
                           ) : (
-                            users.filter(u => selectedUsers.includes(u.id)).map((user) => (
+                            (users || []).filter(u => selectedUsers.includes(u.id)).map((user) => (
                               <div key={user.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
                                 <div className="flex items-center space-x-2 flex-1">
                                   <div className="w-2 h-2 rounded-full bg-green-500"></div>
@@ -933,15 +933,15 @@ export default function PermissionsHub() {
                       <div className="space-y-2">
                         <Label className="text-blue-600 font-semibold flex items-center justify-between">
                           Membros Disponíveis
-                          <Badge variant="secondary">{users.filter(u => !selectedUsers.includes(u.id)).length}</Badge>
+                          <Badge variant="secondary">{(users || []).filter(u => !selectedUsers.includes(u.id)).length}</Badge>
                         </Label>
                         <div className="border rounded-md p-3 max-h-48 overflow-y-auto min-h-[120px]">
-                          {users.filter(u => !selectedUsers.includes(u.id)).length === 0 ? (
+                          {(users || []).filter(u => !selectedUsers.includes(u.id)).length === 0 ? (
                             <p className="text-center text-muted-foreground py-4 text-sm">
                               Todos os usuários selecionados
                             </p>
                           ) : (
-                            users.filter(u => !selectedUsers.includes(u.id)).map((user) => (
+                            (users || []).filter(u => !selectedUsers.includes(u.id)).map((user) => (
                               <div key={user.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
                                 <div className="flex items-center space-x-2 flex-1">
                                   <div className="w-2 h-2 rounded-full bg-blue-500"></div>
@@ -978,7 +978,7 @@ export default function PermissionsHub() {
         </div>
 
         <div className="space-y-3">
-          {teams.map((team) => (
+          {(teams || []).map((team) => (
             <Card key={team.id}>
               <CardContent className="flex items-center justify-between p-4">
                 <div className="flex items-center space-x-3">
@@ -1103,7 +1103,7 @@ export default function PermissionsHub() {
                                       Nenhum membro no time
                                     </p>
                                   ) : (
-                                    users.filter(u => selectedUsers.includes(u.id)).map((user) => (
+                                    (users || []).filter(u => selectedUsers.includes(u.id)).map((user) => (
                                       <div key={user.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
                                         <div className="flex items-center space-x-2 flex-1">
                                           <div className="w-2 h-2 rounded-full bg-green-500"></div>
@@ -1130,15 +1130,15 @@ export default function PermissionsHub() {
                               <div className="space-y-2">
                                 <Label className="text-blue-600 font-semibold flex items-center justify-between">
                                   Usuários Disponíveis
-                                  <Badge variant="secondary">{users.filter(u => !selectedUsers.includes(u.id)).length}</Badge>
+                                  <Badge variant="secondary">{(users || []).filter(u => !selectedUsers.includes(u.id)).length}</Badge>
                                 </Label>
                                 <div className="border rounded-md p-3 max-h-48 overflow-y-auto min-h-[120px]">
-                                  {users.filter(u => !selectedUsers.includes(u.id)).length === 0 ? (
+                                  {(users || []).filter(u => !selectedUsers.includes(u.id)).length === 0 ? (
                                     <p className="text-center text-muted-foreground py-4 text-sm">
                                       Todos os usuários estão no time
                                     </p>
                                   ) : (
-                                    users.filter(u => !selectedUsers.includes(u.id)).map((user) => (
+                                    (users || []).filter(u => !selectedUsers.includes(u.id)).map((user) => (
                                       <div key={user.id} className="flex items-center justify-between p-2 hover:bg-muted/50 rounded">
                                         <div className="flex items-center space-x-2 flex-1">
                                           <div className="w-2 h-2 rounded-full bg-blue-500"></div>
@@ -1281,7 +1281,7 @@ export default function PermissionsHub() {
                           if (selectedPermissions.length === permissions.length) {
                             setSelectedPermissions([]);
                           } else {
-                            setSelectedPermissions(permissions.map(p => p.id));
+                            setSelectedPermissions((permissions || []).map(p => p.id));
                           }
                         }}
                       >
@@ -1289,7 +1289,7 @@ export default function PermissionsHub() {
                       </Button>
                     </div>
                     <div className="border rounded-md p-2 h-48 overflow-y-auto">
-                      {permissions.map((permission) => (
+                      {(permissions || []).map((permission) => (
                         <div key={permission.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded">
                           <Checkbox
                             checked={selectedPermissions.includes(permission.id)}
@@ -1334,7 +1334,7 @@ export default function PermissionsHub() {
         </div>
 
         <div className="space-y-3">
-          {profiles.map((profile) => (
+          {(profiles || []).map((profile) => (
             <Card key={profile.id}>
               <CardContent className="flex items-center justify-between p-4">
                 <div className="flex items-center space-x-3">
@@ -1411,7 +1411,7 @@ export default function PermissionsHub() {
                           
                           {(() => {
                             const currentPermissions = profilePermissions
-                              .filter((pp: ProfilePermission) => pp.profileId === profile.id)
+                              .filter((pp: ProfilePermission | null) => pp && pp.profileId === profile.id)
                               .map((pp: ProfilePermission) => permissions.find((p: Permission) => p.id === pp.permissionId))
                               .filter(Boolean) as Permission[];
                             
@@ -1554,15 +1554,15 @@ export default function PermissionsHub() {
   }
 
   // Seção de Vínculos  
-  const usersWithProfiles = users.filter(user => user.profileId);
-  const usersWithoutProfiles = users.filter(user => !user.profileId);
-  const teamsWithProfiles = teamProfiles.map(tp => ({
+  const usersWithProfiles = (users || []).filter(user => user.profileId);
+  const usersWithoutProfiles = (users || []).filter(user => !user.profileId);
+  const teamsWithProfiles = (teamProfiles || []).map(tp => ({
     ...tp,
     team: teams.find(t => t.id === tp.teamId),
     profile: profiles.find(p => p.id === tp.profileId)
   })).filter(item => item.team && item.profile);
-  const teamsWithoutProfiles = teams.filter(team => 
-    !teamProfiles.some(tp => tp.teamId === team.id)
+  const teamsWithoutProfiles = (teams || []).filter(team => 
+    !(teamProfiles || []).some(tp => tp.teamId === team.id)
   );
 
   return (
@@ -1797,7 +1797,7 @@ export default function PermissionsHub() {
                       <DialogDescription>Selecione um perfil para {user.name}</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-3">
-                      {profiles.map((profile) => (
+                      {(profiles || []).map((profile) => (
                         <Button
                           key={profile.id}
                           variant="outline"
@@ -1858,7 +1858,7 @@ export default function PermissionsHub() {
                       <DialogDescription>Selecione um perfil para {team.name}</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-3">
-                      {profiles.map((profile) => (
+                      {(profiles || []).map((profile) => (
                         <Button
                           key={profile.id}
                           variant="outline"

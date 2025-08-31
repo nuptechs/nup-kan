@@ -1,14 +1,18 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { requireAuth } from "../auth/unifiedAuth";
+import { auth, requireAuth } from "../auth/unifiedAuth";
 import { db } from "../db";
 import { teams, profiles, permissions, userTeams, teamProfiles, profilePermissions } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
 const router = Router();
 
+// Apply authentication middleware to all routes
+router.use(auth); // Popula authContext com dados do JWT
+router.use(requireAuth); // Valida se está autenticado
+
 // Teams routes
-router.get("/teams", requireAuth, async (req: Request, res: Response) => {
+router.get("/teams", async (req: Request, res: Response) => {
   try {
     const allTeams = await db.select().from(teams);
     res.json(allTeams);
@@ -18,7 +22,7 @@ router.get("/teams", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.get("/teams/:id", requireAuth, async (req: Request, res: Response) => {
+router.get("/teams/:id", async (req: Request, res: Response) => {
   try {
     const [team] = await db.select().from(teams).where(eq(teams.id, req.params.id));
     if (!team) {
@@ -32,7 +36,7 @@ router.get("/teams/:id", requireAuth, async (req: Request, res: Response) => {
 });
 
 // Profiles routes
-router.get("/profiles", requireAuth, async (req: Request, res: Response) => {
+router.get("/profiles", async (req: Request, res: Response) => {
   try {
     const allProfiles = await db.select().from(profiles);
     res.json(allProfiles);
@@ -42,7 +46,7 @@ router.get("/profiles", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.get("/profiles/:id", requireAuth, async (req: Request, res: Response) => {
+router.get("/profiles/:id", async (req: Request, res: Response) => {
   try {
     const [profile] = await db.select().from(profiles).where(eq(profiles.id, req.params.id));
     if (!profile) {
@@ -56,7 +60,7 @@ router.get("/profiles/:id", requireAuth, async (req: Request, res: Response) => 
 });
 
 // Permissions routes
-router.get("/permissions", requireAuth, async (req: Request, res: Response) => {
+router.get("/permissions", async (req: Request, res: Response) => {
   try {
     const allPermissions = await db.select().from(permissions);
     res.json(allPermissions);
@@ -67,7 +71,7 @@ router.get("/permissions", requireAuth, async (req: Request, res: Response) => {
 });
 
 // User-Teams relationship routes
-router.get("/user-teams", requireAuth, async (req: Request, res: Response) => {
+router.get("/user-teams", async (req: Request, res: Response) => {
   try {
     const allUserTeams = await db.select().from(userTeams);
     res.json(allUserTeams);
@@ -78,7 +82,7 @@ router.get("/user-teams", requireAuth, async (req: Request, res: Response) => {
 });
 
 // Team-Profiles relationship routes
-router.get("/team-profiles", requireAuth, async (req: Request, res: Response) => {
+router.get("/team-profiles", async (req: Request, res: Response) => {
   try {
     const allTeamProfiles = await db.select().from(teamProfiles);
     res.json(allTeamProfiles);
@@ -89,7 +93,7 @@ router.get("/team-profiles", requireAuth, async (req: Request, res: Response) =>
 });
 
 // Profile-Permissions relationship routes
-router.get("/profile-permissions", requireAuth, async (req: Request, res: Response) => {
+router.get("/profile-permissions", async (req: Request, res: Response) => {
   try {
     const allProfilePermissions = await db.select().from(profilePermissions);
     res.json(allProfilePermissions);
