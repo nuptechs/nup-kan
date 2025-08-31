@@ -45,27 +45,6 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Debug function to investigate column duplication
-  const debugColumnData = () => {
-    console.log('🐛 [KANBAN-DEBUG] Column investigation:', {
-      totalColumns: columns.length,
-      uniqueIds: new Set(columns.map(c => c.id)).size,
-      duplicateIds: columns.length - new Set(columns.map(c => c.id)).size,
-      columnDetails: columns.map(c => ({ id: c.id, title: c.title, position: c.position })),
-      boardId,
-      endpoint: columnsEndpoint
-    });
-  };
-
-  // Add global debug function
-  if (typeof window !== 'undefined') {
-    (window as any).debugKanbanColumns = debugColumnData;
-    (window as any).clearKanbanCache = () => {
-      queryClient.invalidateQueries({ queryKey: [columnsEndpoint] });
-      queryClient.invalidateQueries({ queryKey: [tasksEndpoint] });
-      console.log('🧹 Cache do Kanban limpo');
-    };
-  }
   const { canCreateTasks, canEditTasks, canManageColumns } = usePermissions();
 
   // Use board-specific endpoints if boardId is provided
@@ -77,17 +56,15 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
   });
 
   const { data: columns = [], isLoading: columnsLoading } = useQuery<Column[]>({
-    queryKey: [columnsEndpoint, Date.now()], // Force new request with timestamp
+    queryKey: [columnsEndpoint],
     enabled: !!columnsEndpoint, // Only fetch if endpoint is defined
     staleTime: 0, // Always refetch
     cacheTime: 0, // Don't cache
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    refetchInterval: false, // Disable automatic refetch
   });
 
-  // Debug: log which endpoints are being used
-  console.log('🐛 [KANBAN-ENDPOINTS]', { boardId, tasksEndpoint, columnsEndpoint });
-  console.log('🐛 [COLUMN-DATA]', { columnsLength: columns.length, isLoading: columnsLoading });
 
 
   // Fetch all assignees for all tasks to enable search
@@ -483,16 +460,6 @@ export function KanbanBoard({ boardId, isReadOnly = false, profileMode = "full-a
           ) : (
             /* Normal Board with Columns */
             <div className="flex gap-6 p-4 items-start min-w-max" style={{ minHeight: '100%' }}>
-              {/* Debug: log rendering details */}
-              {columns.length > 0 && (() => {
-                console.log('🐛 [RENDER] Rendering columns:', {
-                  total: columns.length,
-                  titles: columns.map(c => c.title),
-                  backlogCount: columns.filter(c => c.title === 'Backlog').length,
-                  uniqueIds: new Set(columns.map(c => c.id)).size
-                });
-                return null;
-              })()}
               {columns
                 .sort((a, b) => a.position - b.position)
                 .map((column, index) => {
