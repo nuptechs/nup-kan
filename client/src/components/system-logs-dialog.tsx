@@ -76,7 +76,8 @@ export function SystemLogsDialog({ open, onOpenChange }: SystemLogsDialogProps) 
       }
       return response.json();
     },
-    refetchInterval: autoRefresh ? 10000 : false, // Auto-refresh a cada 10 segundos
+    enabled: open, // Só fazer query quando dialog está aberto
+    refetchInterval: autoRefresh ? 30000 : false, // Reduzido: 30s em vez de 10s
   });
 
   const clearLogsMutation = useMutation({

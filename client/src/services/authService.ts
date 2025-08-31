@@ -178,6 +178,9 @@ export class AuthService {
       localStorage.setItem(this.TOKEN_KEY, newTokens.accessToken);
       localStorage.setItem(this.REFRESH_TOKEN_KEY, newTokens.refreshToken);
       
+      // ⚠️ NÃO notificar auth change aqui para evitar loops!
+      // this.notifyAuthChange(); // REMOVIDO para evitar re-queries desnecessários
+      
       return true;
     } catch (error) {
       console.error('Erro ao renovar token:', error);

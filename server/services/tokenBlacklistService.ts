@@ -41,9 +41,9 @@ export class TokenBlacklistService {
     const result = await cache.get(key);
     const isBlacklisted = result !== null;
     
-    // Se não está na blacklist, cache por 60 segundos para evitar lookups futuros
+    // Se não está na blacklist, cache por 10 minutos para evitar lookups futuros
     if (!isBlacklisted) {
-      await cache.set(cleanKey, 'not_blacklisted', 60);
+      await cache.set(cleanKey, 'not_blacklisted', 10 * 60);
     }
     
     return isBlacklisted;

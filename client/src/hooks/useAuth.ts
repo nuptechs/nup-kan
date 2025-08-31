@@ -7,10 +7,18 @@ export function useAuth() {
   // 🚀 VERIFICAR AUTENTICAÇÃO LOCAL - REATIVO A MUDANÇAS
   const [authVersion, setAuthVersion] = useState(0);
   
+  // DEBUG: Identificador único para cada instância do hook
+  const hookId = useMemo(() => Math.random().toString(36).substr(2, 9), []);
+  console.log('🔧 [useAuth] Instância criada:', hookId);
+  
   // Ouvir mudanças de autenticação
   useEffect(() => {
     const cleanup = AuthService.onAuthChange(() => {
-      setAuthVersion(prev => prev + 1);
+      console.log('🔥 [useAuth-JWT] AuthService.onAuthChange DISPARADO! Hook:', hookId, 'authVersion:', authVersion);
+      setAuthVersion(prev => {
+        console.log('🔥 [useAuth-JWT] authVersion mudou de', prev, 'para', prev + 1);
+        return prev + 1;
+      });
     });
     
     return cleanup;
@@ -22,9 +30,11 @@ export function useAuth() {
 
   // 🔧 CALLBACK ESTÁVEL PARA QUERY FUNCTION
   const queryFn = useCallback(async () => {
+    console.log('🔍 [useAuth-JWT] REQUISIÇÃO INICIADA - authVersion:', authVersion);
     
     // Se não tem token local, não fazer request
     if (!AuthService.getAccessToken()) {
+      console.log('🔍 [useAuth-JWT] Sem token local');
       return { isAuthenticated: false, user: null };
     }
     
@@ -63,7 +73,7 @@ export function useAuth() {
   }, []);
 
   const { data: authResponse, isLoading, error } = useQuery<any>({
-    queryKey: ["/api/auth/current-user", authVersion], // Usar authVersion na chave
+    queryKey: ["/api/auth/current-user"], // Remover authVersion para evitar invalidações constantes
     queryFn,
     retry: (failureCount, error) => {
       // Não tentar novamente para erros 401

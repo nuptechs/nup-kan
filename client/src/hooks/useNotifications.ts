@@ -66,10 +66,10 @@ export function useNotifications() {
   } = useQuery<NotificationsResponse>({
     queryKey: ["/api/notifications"],
     enabled: isAuthenticated && !!user?.id,
-    staleTime: 30000, // Cache for 30 seconds
-    gcTime: 60000, // Garbage collect after 1 minute
-    refetchInterval: 60000, // Auto-refresh every minute
-    refetchOnWindowFocus: true,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes (was 30s)
+    gcTime: 10 * 60 * 1000, // Garbage collect after 10 minutes (was 1min)
+    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes (was 1min)
+    refetchOnWindowFocus: false, // Disable aggressive refetch
   });
 
   // Fetch unread count
@@ -80,9 +80,9 @@ export function useNotifications() {
   } = useQuery<UnreadCountResponse>({
     queryKey: ["/api/notifications/unread-count"],
     enabled: isAuthenticated && !!user?.id,
-    staleTime: 15000, // Cache for 15 seconds
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
-    refetchOnWindowFocus: true,
+    staleTime: 3 * 60 * 1000, // Cache for 3 minutes (was 15s)
+    refetchInterval: 3 * 60 * 1000, // Auto-refresh every 3 minutes (was 30s)
+    refetchOnWindowFocus: false, // Disable aggressive refetch
   });
 
   const notifications = useMemo(() => {
