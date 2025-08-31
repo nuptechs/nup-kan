@@ -219,15 +219,25 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 pb-3">
           <div className="flex items-center justify-between">
             <div className="flex-1 pr-4">
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Título</label>
-                <Input
-                  {...form.register("title")}
-                  className="text-xl font-semibold border-none p-0 focus:ring-0 focus:border-none shadow-none bg-blue-50/40 hover:bg-blue-50/60 rounded-md px-2 transition-colors"
-                  placeholder="Digite o título da tarefa"
-                  data-testid="input-header-title"
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-slate-700">Título</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value || ""}
+                        className="text-xl font-semibold border-none p-0 focus:ring-0 focus:border-none shadow-none bg-blue-50/40 hover:bg-blue-50/60 rounded-md px-2 transition-colors"
+                        placeholder="Digite o título da tarefa"
+                        data-testid="input-header-title"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             
             <div className="flex gap-1">
