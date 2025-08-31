@@ -18,7 +18,7 @@ export const ERROR_MESSAGES = {
 
   // Boards
   BOARDS: {
-    CREATE_FAILED: "Erro ao criar board. Tente novamente.",
+    CREATE_FAILED: "Erro ao criar board viu. Tente novamente.",
     UPDATE_FAILED: "Erro ao atualizar board. Tente novamente.",
     DELETE_FAILED: "Erro ao excluir board. Tente novamente.",
     STATUS_CHANGE_FAILED: "Erro ao alterar status do board. Tente novamente.",
@@ -73,7 +73,8 @@ export const ERROR_MESSAGES = {
   // Settings (Configurações)
   SETTINGS: {
     UPDATE_FAILED: "Erro ao atualizar configurações. Tente novamente.",
-    EMAIL_UPDATE_FAILED: "Erro ao atualizar configurações de email. Tente novamente.",
+    EMAIL_UPDATE_FAILED:
+      "Erro ao atualizar configurações de email. Tente novamente.",
     LOAD_FAILED: "Erro ao carregar configurações. Tente novamente.",
     EMAIL_TEST_FAILED: "Erro no teste",
     INVALID_FORMAT: "Formato inválido",
@@ -92,13 +93,15 @@ export const ERROR_MESSAGES = {
   SHARING: {
     SHARE_FAILED: "Erro ao compartilhar board. Tente novamente.",
     UNSHARE_FAILED: "Erro ao remover compartilhamento. Tente novamente.",
-    PERMISSION_CHANGE_FAILED: "Erro ao alterar permissões de compartilhamento. Tente novamente.",
+    PERMISSION_CHANGE_FAILED:
+      "Erro ao alterar permissões de compartilhamento. Tente novamente.",
   },
 
   // Notifications (Notificações)
   NOTIFICATIONS: {
     CREATE_FAILED: "Erro ao criar notificação. Tente novamente.",
-    MARK_READ_FAILED: "Erro ao marcar notificações como lidas. Tente novamente.",
+    MARK_READ_FAILED:
+      "Erro ao marcar notificações como lidas. Tente novamente.",
     DELETE_FAILED: "Erro ao excluir notificação. Tente novamente.",
     LOAD_FAILED: "Erro ao carregar notificações. Tente novamente.",
   },
@@ -116,5 +119,5 @@ export const ERROR_MESSAGES = {
     PERMISSION_DENIED: "Você não tem permissão para realizar esta ação.",
     VALIDATION_ERROR: "Dados inválidos. Verifique os campos.",
     SERVER_ERROR: "Erro interno do servidor. Tente novamente.",
-  }
+  },
 } as const;
