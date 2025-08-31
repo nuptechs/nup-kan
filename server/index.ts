@@ -13,7 +13,9 @@ const PostgreSqlStore = connectPgSimple(session);
 
 // Session configuration - MELHORADA para persistir corretamente
 app.use(session({
-  secret: 'nupkan-secret-key-2025',
+  secret: process.env.SESSION_SECRET || (() => {
+    throw new Error('SESSION_SECRET environment variable is required for secure sessions');
+  })(),
   resave: false,
   saveUninitialized: false,
   name: 'connect.sid',

@@ -3,7 +3,13 @@ import { Request } from "express";
 import { Logger } from '../utils/logMessages';
 
 // 🔐 JWT Configuration
-const JWT_SECRET = process.env.JWT_SECRET || "nupkan-jwt-secret-2025-super-secure";
+const JWT_SECRET = (() => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required for secure token signing');
+  }
+  return secret;
+})();
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h";
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || "7d";
 
