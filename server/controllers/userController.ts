@@ -179,7 +179,7 @@ export class UserController {
       
       
       // Verificar se está tentando atualizar outro usuário
-      if (req.params.id !== authContext.userId && !authContext.permissions.includes('Editar Usuários')) {
+      if (req.params.id !== authContext.userId && !authContext.permissions.includes('Edit Users')) {
         return res.status(403).json({ 
           message: "Você não tem permissão para editar outros usuários" 
         });

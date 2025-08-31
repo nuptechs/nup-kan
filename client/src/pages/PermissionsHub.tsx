@@ -231,7 +231,7 @@ export default function PermissionsHub() {
   // Forms
   const userForm = useForm({
     resolver: zodResolver(insertUserSchema),
-    defaultValues: { name: "", email: "", role: "" }
+    defaultValues: { name: "", email: "" }
   });
 
   const teamForm = useForm({
@@ -250,7 +250,7 @@ export default function PermissionsHub() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       setEditingId(null); // 🔥 CRÍTICO: Fecha modal
-      userForm.reset({ name: "", email: "", role: "" });
+      userForm.reset({ name: "", email: "" });
       toast({ title: "Usuário criado" });
     }
   });
@@ -418,7 +418,7 @@ export default function PermissionsHub() {
   const handleEdit = (type: string, item: any) => {
     setEditingId(item.id);
     if (type === 'user') {
-      userForm.reset({ name: item.name, email: item.email, role: item.role || "" });
+      userForm.reset({ name: item.name, email: item.email });
     } else if (type === 'team') {
       teamForm.reset({ name: item.name, description: item.description || "", color: item.color });
     } else if (type === 'profile') {
@@ -707,7 +707,6 @@ export default function PermissionsHub() {
                       ) : null;
                     })()}
                   </div>
-                  {user.role && <Badge variant="outline">{user.role}</Badge>}
                 </div>
                 <div className="flex space-x-2">
                   <Dialog open={editingId === user.id} onOpenChange={(open) => !open && setEditingId(null)}>
