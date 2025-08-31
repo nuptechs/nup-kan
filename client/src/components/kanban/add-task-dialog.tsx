@@ -13,6 +13,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertTaskSchema } from "@shared/schema";
 import type { User } from "@shared/schema";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { TagSelector } from "./tag-selector";
 import { MultiUserSelector } from "./multi-user-selector";
 import { z } from "zod";
@@ -184,8 +186,8 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
       console.log("🔄 [CACHE] Cache invalidado para:", { tasksEndpoint, columnsEndpoint });
       
       toast({
-        title: "Sucesso",
-        description: "Tarefa criada com sucesso!",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
+        description: SUCCESS_MESSAGES.TASKS.CREATED,
         duration: 2500,
       });
       form.reset();
@@ -193,8 +195,8 @@ export function AddTaskDialog({ isOpen, onClose, boardId, defaultColumnId }: Add
     },
     onError: () => {
       toast({
-        title: "Erro",
-        description: "Falha ao criar tarefa. Tente novamente.",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
+        description: ERROR_MESSAGES.TASKS.CREATE_FAILED,
         variant: "destructive",
         duration: 2500,
       });

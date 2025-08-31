@@ -3,6 +3,8 @@ import { Plus, Grid, Edit, Trash2, MoreVertical, User, Eye, Power, PowerOff } fr
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -112,7 +114,7 @@ export default function BoardSelection() {
       
       toast({
         title: "Board criado",
-        description: "Novo board Kanban criado com sucesso!",
+        description: SUCCESS_MESSAGES.BOARDS.CREATED,
       });
     },
     onError: (error: any) => {
@@ -159,13 +161,13 @@ export default function BoardSelection() {
       editForm.reset();
       toast({
         title: "Board atualizado",
-        description: "As informações do board foram atualizadas com sucesso!",
+        description: SUCCESS_MESSAGES.BOARDS.UPDATED,
       });
     },
     onError: () => {
       toast({
-        title: "Erro",
-        description: "Erro ao atualizar board. Tente novamente.",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
+        description: ERROR_MESSAGES.BOARDS.UPDATE_FAILED,
         variant: "destructive",
       });
     },
@@ -195,13 +197,13 @@ export default function BoardSelection() {
       setSelectedBoard(null);
       toast({
         title: "Board excluído",
-        description: "O board foi excluído com sucesso!",
+        description: SUCCESS_MESSAGES.BOARDS.DELETED,
       });
     },
     onError: () => {
       toast({
-        title: "Erro",
-        description: "Erro ao excluir board. Tente novamente.",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
+        description: ERROR_MESSAGES.BOARDS.DELETE_FAILED,
         variant: "destructive",
       });
     },
@@ -276,7 +278,7 @@ export default function BoardSelection() {
       
       toast({
         title: `Board ${statusText}`,
-        description: `O board "${updatedBoard.name}" foi ${statusText} com sucesso!`,
+        description: `O board "${updatedBoard.name}" ${SUCCESS_MESSAGES.BOARDS.STATUS_CHANGED}`,
       });
     },
     onError: (error, boardId, context) => {
@@ -288,8 +290,8 @@ export default function BoardSelection() {
       }
       
       toast({
-        title: "Erro",
-        description: "Erro ao alterar status do board. Tente novamente.",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
+        description: ERROR_MESSAGES.BOARDS.STATUS_CHANGE_FAILED,
         variant: "destructive",
       });
     },

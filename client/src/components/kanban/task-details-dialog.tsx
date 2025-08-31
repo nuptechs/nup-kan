@@ -24,6 +24,8 @@ import { Edit, Trash2, User as UserIcon, Calendar, Clock, Flag, X, ChevronDown, 
 import { TaskTimeline } from "./task-timeline";
 import TaskCustomFields from "./task-custom-fields";
 import { PermissionGuard } from "@/components/PermissionGuard";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface TaskDetailsDialogProps {
   task: Task | null;
@@ -170,16 +172,16 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
       }
       toast({
-        title: "Sucesso",
-        description: "Tarefa atualizada com sucesso!",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
+        description: SUCCESS_MESSAGES.TASKS.UPDATED,
       });
       setIsEditing(false);
       onClose(); // Fecha o modal automaticamente após edição
     },
     onError: () => {
       toast({
-        title: "Erro",
-        description: "Falha ao atualizar tarefa. Tente novamente.",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
+        description: ERROR_MESSAGES.TASKS.UPDATE_FAILED,
         variant: "destructive",
       });
     },
@@ -204,15 +206,15 @@ export function TaskDetailsDialog({ task, isOpen, onClose, boardId, isReadOnly =
         queryClient.invalidateQueries({ queryKey: [`/api/boards/${boardId}/columns`] });
       }
       toast({
-        title: "Sucesso",
-        description: "Tarefa excluída com sucesso!",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
+        description: SUCCESS_MESSAGES.TASKS.DELETED,
       });
       onClose();
     },
     onError: () => {
       toast({
-        title: "Erro",
-        description: "Falha ao excluir tarefa. Tente novamente.",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
+        description: ERROR_MESSAGES.TASKS.DELETE_FAILED,
         variant: "destructive",
       });
     },

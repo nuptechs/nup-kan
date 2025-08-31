@@ -12,6 +12,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { insertUserSchema, type User } from "@shared/schema";
+import { SUCCESS_MESSAGES } from "@/constants/successMessages";
+import { ERROR_MESSAGES } from "@/constants/errorMessages";
 
 interface UserManagementDialogProps {
   isOpen: boolean;
@@ -86,8 +88,8 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       
       // 4. Success message
       toast({
-        title: "Sucesso",
-        description: "Usuário criado com sucesso!",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
+        description: SUCCESS_MESSAGES.AUTH.USER_CREATED,
       });
       
     },
@@ -152,8 +154,8 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
         
         // 4. Toast de sucesso
         toast({
-          title: "Sucesso",
-          description: "Usuário atualizado com sucesso!",
+          title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
+          description: SUCCESS_MESSAGES.AUTH.USER_UPDATED,
         });
         
       } catch (error) {
@@ -184,14 +186,14 @@ export function UserManagementDialog({ isOpen, onClose }: UserManagementDialogPr
       ]);
       
       toast({
-        title: "Sucesso",
-        description: "Usuário excluído com sucesso!",
+        title: SUCCESS_MESSAGES.GENERIC.SUCCESS,
+        description: SUCCESS_MESSAGES.AUTH.USER_DELETED,
       });
     },
     onError: () => {
       toast({
-        title: "Erro",
-        description: "Falha ao excluir usuário. Tente novamente.",
+        title: ERROR_MESSAGES.GENERIC.ERROR,
+        description: ERROR_MESSAGES.AUTH.USER_DELETE_FAILED,
         variant: "destructive",
       });
     },
