@@ -1,0 +1,9 @@
+?? client-eslint-fix.log
+?? client-prettier.log
+?? client-tsc.log
+?? repo-eslint-fix.log
+?? repo-git-status.txt
+?? repo-prettier.log
+?? server-eslint-fix.log
+?? server-prettier.log
+?? server-tsc.log
