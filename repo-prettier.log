@@ -1,0 +1,5 @@
+Need to install the following packages:
+prettier@3.6.2
+Ok to proceed? (y) npm ERR! canceled
+
+npm ERR! A complete log of this run can be found in: /home/codespace/.npm/_logs/2025-09-01T12_42_04_960Z-debug-0.log
